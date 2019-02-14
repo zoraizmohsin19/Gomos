@@ -1,0 +1,88 @@
+.heading {
+    background: linear-gradient(to bottom, #0099cc 0%, #66ffcc 100%);
+  }
+  .reports {
+    margin: auto;
+    font-family: "Courier New", Courier, monospace;
+    font-size: 7vh;
+    color: black;
+    font-weight: bold;
+    letter-spacing: 5px;
+    text-transform: uppercase;
+  }
+.pad {
+    display: block;
+   
+    padding: inherit;
+}
+
+
+.colhblac
+{
+  color:black !important;
+}
+.navbar,
+.navbar-default {
+  background-image: linear-gradient(to bottom,#ffffff 0,#ffffff 100%) !important; 
+border-color: #ffffff !important;
+
+}
+.navbar-inverse .navbar-nav>li>a>a {
+  color:  #41503e !important;
+  font-weight: 600;
+  font-size: 16px !important;
+  
+}
+.navbar-nav>li>a>a:hover,
+.navbar-nav>li>a>a:active,
+.navbar-nav>li>a>a:focus {
+  color: rgb(34, 169, 63) !important;
+}
+.navbar-inverse .navbar-toggle .icon-bar {
+  background-color: rgb(34, 169, 63);
+}
+.navbar-inverse .navbar-toggle {
+  border-color: rgb(34, 169, 63);
+}
+.navbar-inverse .navbar-toggle:focus, .navbar-inverse .navbar-toggle:hover {
+  background: rgb(6, 43, 14);
+}
+.navbar-inverse .navbar-collapse, .navbar-inverse .navbar-form {
+  border-color: rgb(34, 169, 63) !important;
+}
+.navbar-login
+{
+    width: 305px ;
+    padding: 10px;
+    padding-bottom: 0px;
+}
+
+.navbar-login-session
+{
+    padding: 10px;
+    padding-bottom: 0px;
+    padding-top: 0px;
+}
+
+.icon-size
+{
+    font-size: 87px;
+}
+.navbar-inverse .navbar-nav>li>a {
+  color: #41503e ;
+  font-weight: 600;
+  font-size: 16px !important;
+}
+.navbar-inverse .navbar-nav>li>a:hover,
+.navbar-inverse .navbar-nav>li>a:focus,
+.navbar-inverse .navbar-nav>li>a:active
+ {
+   background: #ffffff !important;
+     color: rgb(34, 169, 63) !important;
+     text-decoration: underline !important;
+}
+.navbar-inverse .navbar-nav>.open>a, .navbar-inverse .navbar-nav>.open>a:focus, .navbar-inverse .navbar-nav>.open>a:hover {
+  background: #ffffff !important;
+  color: rgb(34, 169, 63) !important;
+
+}

@@ -1,0 +1,136 @@
+
+.tableactuter {
+    
+    margin: 20px 0px;
+    height: 184px;
+    
+}
+
+.dropdown.btn-group.btn-group-primary {
+    margin: 20px 30px;
+}
+/* .ActvieBtn {
+    margin: 10px;
+    /* padding: 3px 40px; */
+    /* font-size: 24px;
+    padding-left: 40px;
+    padding-right: 40px;
+    padding-top: 9px;
+    padding-bottom: 38px;
+} */ */
+
+
+.ActiveSensorsRow {
+    overflow: auto;
+
+}
+
+.small-boxDActive {
+    width: 99px;
+    background: white;
+    border: 1px solid gainsboro;
+}
+.ActiveSheading{
+    font-size: 20px;
+   
+    text-align: center;
+}
+.channelStatus{
+    position: relative;
+    min-height: 1px;
+    padding-right: 15px;
+    padding-left: 15px;
+}
+.rowSensors {
+    overflow: auto;
+}
+
+
+#wrapper {
+    width: 150%;
+    height: 90px;
+}
+
+#containersimg {
+    width: 636px;
+    height: 90px;
+    overflow-y: hidden !important;
+    margin-top: 7px;
+
+}
+
+.square {
+ 
+   float: left;
+   height: 90px;
+   width: 90px;
+   margin: 10px;
+}
+.widthActive {
+    width: 50% !important;
+}
+
+.ActivePclass {
+  
+    font-size: 10.6px;
+    text-align: center;
+}
+.ActiveP {
+    background: #62D27B;
+    color: white;
+    padding-left: 10px;
+    margin-bottom: 0px;
+}
+.ActiveTableH {
+    max-height: 230px;
+    overflow-y: scroll;
+  
+}
+
+.ActiveSelection {
+    width: 20%;
+    display: inline;
+  } 
+  .pagerActive {
+    /* padding-left: 0; */
+    /* margin: 20px 0; */
+    text-align: center;
+    list-style: none;
+    display: -webkit-inline-box;
+    border: 1px solid #ddd;
+    padding-left: 17px;
+    padding-top: 2px;
+    padding-bottom: 2px;
+    border-radius: 20px;
+    padding-right: 17px;
+    margin-left: 10px;
+}
+  .pagerActive li>a, .pagerActive li>span {
+    display: inline-block;
+    padding: 5px 14px;
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 15px;
+    color: #337ab7;
+    text-decoration: none;
+    
+}
+li.ActiveList {
+    color: #337ab7;
+    margin-top: 6px;
+    margin-left: 4px;
+    margin-right: 4px;
+}
+.collapse.in {
+    display: block
+  }
+  .collapse {
+    display: none
+  }
+
+  .line3 {
+      margin-top: 6px;
+    padding-left: 30px;
+    padding-right: 30px;
+    border: 1px #62D27B solid;
+}
