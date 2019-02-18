@@ -13,7 +13,7 @@ var dateTime = require("node-datetime");
 // Mailing Details
 var mailFrom = '"Vidzai IOT"<vidzai.iot@gmail.com>';
 var mailTo = 'takreem96@gmail.com';
-
+var  gomos = require("../../commanFunction/routes/commanFunction");
 var transporter = nodemailer.createTransport({
   service: 'gmail',
   pool: true,
@@ -35,7 +35,7 @@ function getServiceConfig() {
     { useNewUrlParser: true },
     function (err, connection) {
       if (err) {
-        errorCustmHandler("getServiceConfig",err);  
+        gomos.errorCustmHandler("getServiceConfig",err);  
         process.hasUncaughtExceptionCaptureCallback();
       }
       var db = connection.db(dbName);
@@ -43,7 +43,7 @@ function getServiceConfig() {
         .find()
         .toArray(function (err, result) {
           if (err) {
-        errorCustmHandler("getServiceConfig",err);  
+        gomos.errorCustmHandler("getServiceConfig",err);  
             process.hasUncaughtExceptionCaptureCallback();
           }
           if (result.length > 0) {
@@ -55,7 +55,7 @@ function getServiceConfig() {
               }
             }
             catch(err){
-              errorCustmHandler("getServiceConfig",err);
+              gomos.errorCustmHandler("getServiceConfig",err);
             }
            
           }
@@ -82,7 +82,7 @@ function getServiceConfig() {
 //     ])
 //     .toArray(function (err, result) {
 //       if (err) {
-//         errorCustmHandler("getDevices",err);
+//         gomos.errorCustmHandler("getDevices",err);
 //         process.hasUncaughtExceptionCaptureCallback();
 //       }
 //       if (result.length > 0) {
@@ -108,7 +108,7 @@ function getServiceConfig() {
 //     ])
 //     .toArray(function (err, result) {
 //       if (err) {
-//         errorCustmHandler("getAssets",err);
+//         gomos.errorCustmHandler("getAssets",err);
 //         process.hasUncaughtExceptionCaptureCallback();
 //       }
 //       if (result.length > 0) {
@@ -134,7 +134,7 @@ function getServiceConfig() {
 //     ])
 //     .toArray(function (err, result) {
 //       if (err) {
-//         errorCustmHandler("getSubCustomers",err);
+//         gomos.errorCustmHandler("getSubCustomers",err);
 //         process.hasUncaughtExceptionCaptureCallback();
 //       }
 //       if (result.length > 0) {
@@ -155,7 +155,7 @@ function getServiceConfig() {
 //     ])
 //     .toArray(function (err, result) {
 //       if (err) {
-//         errorCustmHandler("getCustomer",err);
+//         gomos.errorCustmHandler("getCustomer",err);
 //         process.hasUncaughtExceptionCaptureCallback();
 //       }
 //       if (result.length > 0) {
@@ -206,7 +206,7 @@ function processAlerts() {
   }
   else {
     console.log("Scheduling issues, Can not proceed : It can only support Seconds, Minutes up to 59");
-    errorCustmHandler("processAlerts","Scheduling issues, Can not proceed : It can only support Seconds, Minutes up to 59");  
+    gomos.errorCustmHandler("processAlerts","Scheduling issues, Can not proceed : It can only support Seconds, Minutes up to 59");  
     process.exit(0);
   }
   var schPattern = sec + min + "* * * *";
@@ -219,7 +219,7 @@ function processAlerts() {
       { useNewUrlParser: true },
       function (err, connection) {
         if (err) {
-          errorCustmHandler("processAlerts",err);
+          gomos.errorCustmHandler("processAlerts",err);
           process.hasUncaughtExceptionCaptureCallback();
         }
         var db = connection.db(dbName);
@@ -227,7 +227,7 @@ function processAlerts() {
           .find({ processed: "N", type: "level1" })
           .toArray(function (err, result) {
             if (err) {
-              errorCustmHandler("processAlerts",err);
+              gomos.errorCustmHandler("processAlerts",err);
               process.hasUncaughtExceptionCaptureCallback();
             }
             try {
@@ -238,7 +238,7 @@ function processAlerts() {
                 // processAlertToDevice( db, result[i].mac,result[i].alertText);
               }
             } catch (err) {
-             errorCustmHandler("processAlerts",err);           
+             gomos.errorCustmHandler("processAlerts",err);           
             }
             
           });
@@ -254,7 +254,7 @@ function updateAlerts(objId, db) {
     { $set: { processed: "Y" } },
     function (err, result) {
       if (err) {
-        errorCustmHandler("updateAlerts",err); 
+        gomos.errorCustmHandler("updateAlerts",err); 
         process.hasUncaughtExceptionCaptureCallback();
       }
     }
@@ -278,7 +278,7 @@ function sendAlertMail(DeviceName, strText, level, custCode, objId, db, business
     // send mail with defined transport object
     transprter.sendMail(mailOptions, (err, info) => {
       if (err) {
-        errorCustmHandler("sendAlertMail",err); 
+        gomos.errorCustmHandler("sendAlertMail",err); 
         return console.log(err);
       }
       console.log("Message Sent : " + info.messageId)
@@ -286,41 +286,41 @@ function sendAlertMail(DeviceName, strText, level, custCode, objId, db, business
       updateAlerts(objId, db);
     }); 
   } catch (err) {
-    errorCustmHandler("sendAlertMail",err); 
+    gomos.errorCustmHandler("sendAlertMail",err); 
   }
 
 }
 
-var dt = dateTime.create();
-var formattedDate = dt.format("Y-m-d");
-function errorCustmHandler(functionName,typeofError){
-  // console.log(typeofError);
-    let writeStream = fs.createWriteStream("../commanError-" + formattedDate + ".log", { flags: "a" });
-    var dateTime = new Date().toISOString();
-  // write some data with a base64 encoding
-  // var errors = typeofError.toS
-  var errorobj ={
-    DateTime : dateTime,
-    serviceName: "AlertService",
-    functionName : functionName,
-    ErrorCode :typeofError.statusCode,
-     Error : typeofError.toString(),
-     typeofErrorstack: typeofError.stack
+// var dt = dateTime.create();
+// var formattedDate = dt.format("Y-m-d");
+// function gomos.errorCustmHandler(functionName,typeofError){
+//   // console.log(typeofError);
+//     let writeStream = fs.createWriteStream("../commanError-" + formattedDate + ".log", { flags: "a" });
+//     var dateTime = new Date().toISOString();
+//   // write some data with a base64 encoding
+//   // var errors = typeofError.toS
+//   var errorobj ={
+//     DateTime : dateTime,
+//     serviceName: "AlertService",
+//     functionName : functionName,
+//     ErrorCode :typeofError.statusCode,
+//      Error : typeofError.toString(),
+//      typeofErrorstack: typeofError.stack
 
-  }
-  var strObj = JSON.stringify(errorobj)
-// console.log(typeofError);
-  writeStream.write(
-    strObj+"\n"
-    );
+//   }
+//   var strObj = JSON.stringify(errorobj)
+// // console.log(typeofError);
+//   writeStream.write(
+//     strObj+"\n"
+//     );
   
-  // the finish event is emitted when all data has been flushed from the stream
-  writeStream.on('finish', () => {  
-      console.log('wrote all data to file');
-  });
-  // close the stream
-  writeStream.end(); 
-  }
+//   // the finish event is emitted when all data has been flushed from the stream
+//   writeStream.on('finish', () => {  
+//       console.log('wrote all data to file');
+//   });
+//   // close the stream
+//   writeStream.end(); 
+//   }
 
 
 var alertSrvc = null;

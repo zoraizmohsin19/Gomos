@@ -45,7 +45,7 @@ fetch(){
     // .then(response => response.json())
     // .then(json =>  {
         var me = this;
-        axios.post('http://13.127.10.197:3992/getRegisterSP', {
+        axios.post('http://18.203.28.35:3992/getRegisterSP', {
             body: this.state.filter
            })
            .then(function (result) {
@@ -68,7 +68,7 @@ changePage(page){
 onDeleteClick(_id){
     var me = this;
     // delete('http://13.127.10.197:3992/delRegisterSPbyId?id='+ _id
-    axios.delete('http://13.127.10.197:3992/delRegisterSPbyId?id='+ _id, {
+    axios.delete('http://18.203.28.35:3992/delRegisterSPbyId?id='+ _id, {
        
        })
        .then(function (response) {

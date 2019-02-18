@@ -57,7 +57,7 @@ import Spinner from '../layout/Spinner';
             var userdata ={email,
                 password};
                 me.setState({ 'Spinnerdata': false});
-        axios.post('http://52.212.188.65:3992/authenticate', {body: userdata
+        axios.post('http://localhost:3992/authenticate', {body: userdata
            
           })
           .then(function (response) {

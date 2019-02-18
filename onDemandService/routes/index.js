@@ -5,13 +5,16 @@ const url = require("url");
 var requiredDateTime = require("node-datetime");
 const mongoose = require("mongoose");
 var ObjectId = require('mongodb').ObjectID;
+const uuidv4 = require('uuid/v4');
+
 const Schema = mongoose.Schema;
 const  TRACE_PROD = 1
 const TRACE_STAGE = 2;
 const TRACE_TEST  = 3;
 const TRACE_DEV   = 4;
 const TRACE_DEBUG = 5;
-var  gomos = require("../../commanFunction");
+var  gomos = require("../../commanFunction/routes/commanFunction");
+var midllelayer = require("../../EndPointMiddlelayer/routes/middlelayer");
 var urlConn, dbName;
 
 /* GET home page. */
@@ -94,9 +97,6 @@ router.post("/dummy1", function (req, res, next){
           console.log(result);
           
         });
-
-
-
 });
 });
 //checks whether given userId and password is valid or not if valid pass the user details
@@ -408,8 +408,7 @@ router.put("/UpdateRegisterSPbyId", function (req, res, next) {
   var SubTopic  = body.SubTopic;
   var PubTopic  = body.PubTopic;
 
-  objOfsp = {
-    name,
+  objOfsp = { 
      spCd,
      address,
      phone,
@@ -746,7 +745,6 @@ var query={
       );
      
     });   
- 
 
     router.get("/getAssetsBySpCstSubCst", function (req, res, next) {
       var query = url.parse(req.url, true).query;
@@ -831,7 +829,498 @@ router.get("/getSensorNames", function (req, res, next) {
     }
   );
 });
+router.post("/getActiveDashBoardDevice", function (req, res, next) {
+  accessPermission(res);
+  MongoClient.connect(
+    urlConn,
+    { useNewUrlParser: true },
+    function (err, connection) {
+      if (err) {
+        next(err);
+      }
+      var db = connection.db(dbName);
+      var query = url.parse(req.url, true).query;
 
+      gomos.gomosLog(TRACE_DEBUG,"This is called in Alert"); 
+      
+
+        //query to get the last dateTime the collection was modified.This dateTime is used only in excel report.
+        db.collection("DeviceState")
+        .find({ mac: "5ccf7f0015bc"})
+        .toArray(function (err, result) {
+          if (err) {
+        gomos.gomosLog(TRACE_DEBUG,"this err",err);  
+          }
+          var deviceStateKey = Object.keys(result[0]);
+          var keysToRemove2 = ["_id", "mac", "DeviceName","updatedTime","createdTime"];
+          gomos.gomosLog(TRACE_DEV,"This Is key of identifire 1 Place",deviceStateKey);  
+          for (var l = 0; l < keysToRemove2.length; l++) {
+            if (deviceStateKey.includes(keysToRemove2[l])) {
+              deviceStateKey.splice(deviceStateKey.indexOf(keysToRemove2[l]), 1);
+            }
+          }
+        var json = {}
+        for(var k =0; k < deviceStateKey.length; k++){
+          var name = deviceStateKey[k]
+          var keyofCode = Object.keys(result[0][deviceStateKey[k]]);
+         gomos.gomosLog(TRACE_DEBUG,"This is SensorsKey",keyofCode);
+        var sensorsArray= [];
+        for(var i = 0; i< keyofCode.length; i++){
+          var ActiveIdentifier = {};
+         ActiveIdentifier['type'] = keyofCode[i];
+         var devicebusinessNM = Object.keys(result[0][deviceStateKey[k]][keyofCode[i]]);
+         gomos.gomosLog(TRACE_DEBUG,"this devicebusinessNM",devicebusinessNM);  
+             devicebusinessNM.splice(devicebusinessNM.indexOf("dateTime"), 1);
+             ActiveIdentifier["devicebusinessNM"] = devicebusinessNM[0];
+             ActiveIdentifier["Value"]    =  result[0][deviceStateKey[k]][keyofCode[i]][devicebusinessNM[0]];
+             ActiveIdentifier["dateTime"] =  result[0][deviceStateKey[k]][keyofCode[i]]["dateTime"];
+             sensorsArray.push(ActiveIdentifier);
+        }
+        json[name] = sensorsArray;
+      }
+
+      // db.collection("DeviceInstruction").find({ mac: "5ccf7f0015bc"}).toArray(function (err, result) {
+      //   if (err) {
+      //     gomos.errorCustmHandler("DeviceInstruction",err);
+      //     gomos.gomosLog(TRACE_PROD,"This is error",err);
+      //     process.hasUncaughtExceptionCaptureCallback();
+      //   }
+      //   // res.json(result)
+      //   if(result.length !=0){
+      //     var ActiveJobs = [];
+      //     var DeviceInstructionArray = [];
+      //       for(var i =0; i< result.length ; i++){
+      //         if(result[i].type == "SentInstruction"){
+      //           var sentcommand= {};
+      //           var channelName =result[i].sourceMsg.Channel;
+      //           var ActionType =result[i].sourceMsg.ActionType;
+      //           var createdTime =result[i].createdTime;
+      //           sentcommand["Channel"] = channelName;
+      //           sentcommand["ActionType"] = ActionType;
+      //           sentcommand["createdTime"] = createdTime;
+      //           sentcommand["sourceMsg"]= {};
+      //           var keysofJson = Object.keys(result[i].sourceMsg);
+      //           var keysNeedToRemove = ["Channel","Token","ActionType","isDailyJob"];
+      //           for(var j =0; j< keysNeedToRemove.length; j++){
+      //             if(keysofJson.includes(keysNeedToRemove[j])){
+      //             keysofJson.splice(keysofJson.indexOf(keysNeedToRemove[j]), 1); 
+      //             }
+      //           }
+      //           for(var k =0; k< keysofJson.length; k++){
+      //             sentcommand["sourceMsg"][keysofJson[k]]  =   result[i].sourceMsg[keysofJson[k]];
+      //           }
+      //           DeviceInstructionArray.push(sentcommand);
+      //           json["DeviceInstruction"] = DeviceInstructionArray
+      //         }
+      //         if(result[i].type == "ActiveJob"){
+      //             var temObj ={};
+      //             temObj["Channel"] =result[i].sourceMsg.Channel;
+      //             temObj["isDailyJob"] = result[i].sourceMsg.isDailyJob;
+      //             temObj["ActionType"] = result[i].sourceMsg.ActionType;
+      //             temObj["ActionValues"]  =  compareDate(result[i].sourceMsg.ActionValues);
+      //             ActiveJobs.push(temObj);
+      //         }
+      //       }
+      //       ActiveJobs.sort(function(a, b) {
+      //         a = new Date(a.ActionValues);
+      //         b = new Date(b.ActionValues);
+      //         return a>b ? -1 : a<b ? 1 : 0;
+      //     });
+      //   json["ActiveJob"] = ActiveJobs;
+      //   }
+        res.json(json)
+      //   gomos.gomosLog(TRACE_PROD," insert  in DeleteDeviceState activeJob");
+      
+      // });
+        
+        });
+    
+    }
+  );
+});
+
+router.post("/InActiveJobs", function (req, res, next) {
+  accessPermission(res);
+  MongoClient.connect(
+    urlConn,
+    { useNewUrlParser: true },
+    function (err, connection) {
+      if (err) {
+        next(err);
+      }
+      var data = req.body;
+      var mac = data.mac;
+      var body = data.filter;
+ 
+        var page    =   1;
+        if(body['page'] != undefined && body['page'] != null && !isNaN(body['page'])){
+            page    =   parseInt(body['page']);
+        }
+        var page_size    =   15;
+        if(body['page_size'] != undefined && body['page_size'] != null && !isNaN(body['page_size'])){
+            page_size    =   parseInt(body['page_size']);
+        }
+        var options       = {};
+        var offset          =       (page - 1)*page_size ;
+        options['skip']   =   offset;
+        options['limit']   =   page_size;
+    
+
+
+      var criteria = {
+        mac: mac,
+        type: "InActiveJob"
+      }
+     
+      gomos.gomosLog(TRACE_DEBUG,"This is debug of InActiveJobs",criteria );
+      var db = connection.db(dbName);
+      var data_count = 0;
+      db.collection("DeviceInstruction")
+      .find(criteria).count()
+      .then(function (data) {
+        data_count = data
+
+      })
+
+      db.collection("DeviceInstruction").find(criteria,options).toArray(function (err, result) {
+        if (err) {
+          gomos.errorCustmHandler("DeviceInstruction",err);
+          gomos.gomosLog(TRACE_PROD,"This is error",err);
+          process.hasUncaughtExceptionCaptureCallback();
+        }
+        var InActiveJobs = [];
+        var json = {};
+        gomos.gomosLog(TRACE_DEBUG,"This is DeviceInstruction", result);
+        if(result.length !=0){
+            for(var i =0; i< result.length ; i++){
+                  var temObj ={};
+                  temObj["Channel"] =    result[i].sourceMsg.Channel;
+                  temObj["isDailyJob"] = result[i].sourceMsg.isDailyJob;
+                  temObj["ActionType"] = result[i].sourceMsg.ActionType;
+                  if(result[i].sourceMsg.isDailyJob == true){
+                    temObj["ActionTime"]  =  compareDate(result[i].sourceMsg.ActionValues);
+                    
+                  }else{
+                    temObj["ActionTime"]  =  result[i].sourceMsg.ActionTime;
+                  }
+                  InActiveJobs.push(temObj);
+              }
+        json["InActiveJob"] = InActiveJobs;
+        json["count"] = data_count;
+        json["page"] = page;
+        json["page_size"] = page_size;
+        res.json(json)
+        }
+        else
+        { 
+          json["InActiveJob"] = InActiveJobs;
+          res.json(json)
+        }
+      });
+    });
+  });
+
+router.post("/ActiveJobs", function (req, res, next) {
+  accessPermission(res);
+ 
+  MongoClient.connect(
+    urlConn,
+    { useNewUrlParser: true },
+    function (err, connection) {
+      if (err) {
+        next(err);
+      }
+      var body = req.body;
+      var startDate = body.startDate;
+      // var startDate = "2019-02-13T08:13:28.393Z";
+      var endDate = body.endDate;
+      var mac = body.mac;
+      var criteria = {
+        mac: mac,
+        type: "ActiveJob"
+      }
+      criteria["$or"]= [ {"sourceMsg.isDailyJob": true},{
+        "sourceMsg.ActionTime": {
+          $gte: new Date(startDate),
+          $lte: new Date(endDate)  
+      }}];
+    
+      // criteria["sourceMsg.ActionTime"] = {
+       
+      //   $gte: new Date(startDate),
+      //   $lte: new Date(endDate)
+     
+      // }
+      gomos.gomosLog(TRACE_DEBUG,"This is debug of ActiveJobs",criteria );
+      var db = connection.db(dbName);
+      db.collection("DeviceInstruction").find(criteria).toArray(function (err, result) {
+        if (err) {
+          gomos.errorCustmHandler("DeviceInstruction",err);
+          gomos.gomosLog(TRACE_PROD,"This is error",err);
+          process.hasUncaughtExceptionCaptureCallback();
+        }
+        // res.json(result)
+        var ActiveJobs = [];
+        var json = {};
+        gomos.gomosLog(TRACE_DEBUG,"This is DeviceInstruction", result);
+        if(result.length !=0){
+         
+            for(var i =0; i< result.length ; i++){
+       
+              // if(result[i].type == "ActiveJob"){
+                  var temObj ={};
+                  temObj["Channel"] =result[i].sourceMsg.Channel;
+                  temObj["isDailyJob"] = result[i].sourceMsg.isDailyJob;
+                  temObj["ActionType"] = result[i].sourceMsg.ActionType;
+                  if(result[i].sourceMsg.isDailyJob == true){
+                    temObj["ActionTime"]  =  compareDate(result[i].sourceMsg.ActionValues);
+                    
+                  }else{
+                    temObj["ActionTime"]  =  result[i].sourceMsg.ActionTime;
+                  }
+                 
+                  ActiveJobs.push(temObj);
+              }
+            // }
+           
+        json["ActiveJob"] = ActiveJobs;
+        // json["count"] = result.length;
+        res.json(json)
+        }
+        else
+        { 
+          json["ActiveJob"] = ActiveJobs;
+          res.json(json)
+        }
+        
+        // gomos.gomosLog(TRACE_PROD," insert  in DeleteDeviceState activeJob");
+      
+      });
+
+
+    });
+  });
+  router.post("/Deviceinstruction", function (req, res, next) {
+    accessPermission(res);
+    MongoClient.connect(
+      urlConn,
+      { useNewUrlParser: true },
+      function (err, connection) {
+        if (err) {
+          next(err);
+        }
+        var body = req.body;
+        var startDate = "2019-02-11T13:17:05.787Z";
+        var endDate = "2019-02-12T13:17:05.787Z";
+        var mac = "5ccf7f0015bc";
+        var criteria = {
+          mac: mac,
+          // ActionValues: {
+          //   $gte:startDate,
+          //   $lte: endDate
+          // }
+        }
+        var db = connection.db(dbName);
+        db.collection("DeviceInstruction").find({ mac : "5ccf7f0015bc", type: "SentInstruction"}).toArray(function (err, result) {
+          if (err) {
+            gomos.errorCustmHandler("DeviceInstruction",err);
+            gomos.gomosLog(TRACE_PROD,"This is error",err);
+            process.hasUncaughtExceptionCaptureCallback();
+          }
+          // res.json(result)
+          if(result.length !=0){
+      
+            var json = {}
+            var DeviceInstructionArray = [];
+              for(var i =0; i< result.length ; i++){
+                if(result[i].type == "SentInstruction"){
+                  var sentcommand= {};
+                  var channelName =result[i].sourceMsg.Channel;
+                  var ActionType =result[i].sourceMsg.ActionType;
+                  var createdTime =result[i].createdTime;
+                  sentcommand["Channel"] = channelName;
+                  sentcommand["ActionType"] = ActionType;
+                  sentcommand["createdTime"] = createdTime;
+                  sentcommand["sourceMsg"]= {};
+                  var keysofJson = Object.keys(result[i].sourceMsg);
+                  var keysNeedToRemove = ["Channel","Token","ActionType","isDailyJob"];
+                  for(var j =0; j< keysNeedToRemove.length; j++){
+                    if(keysofJson.includes(keysNeedToRemove[j])){
+                    keysofJson.splice(keysofJson.indexOf(keysNeedToRemove[j]), 1); 
+                    }
+                  }
+                  for(var k =0; k< keysofJson.length; k++){
+                    sentcommand["sourceMsg"][keysofJson[k]]  =   result[i].sourceMsg[keysofJson[k]];
+                  }
+                  DeviceInstructionArray.push(sentcommand);
+                  json["DeviceInstruction"] = DeviceInstructionArray
+                }
+            
+      
+          }
+          res.json(json)
+          gomos.gomosLog(TRACE_PROD," insert  in DeleteDeviceState activeJob");
+        
+        }
+  
+  
+      });
+    });
+  });
+  
+
+
+
+function compareDate(str1){
+  gomos.gomosLog(TRACE_PROD,"this what coming Date", str1)
+  var arraydate = str1.split(":")
+
+  var yr1
+  var mon1
+  var dt1
+  if(arraydate[3]=="*" && arraydate[3]=="*" && arraydate[3]=="*" ){
+   var dataTime = new Date();
+   yr1 = dataTime.getFullYear();
+   mon1 = dataTime.getMonth();
+   dt1 = dataTime.getDate();
+  var date1 = new Date(yr1, mon1, dt1,arraydate[2], arraydate[1], arraydate[0]);
+
+  }else{
+    yr1 =  arraydate[5];
+    mon1 =  arraydate[4];
+    dt1 = arraydate[3];
+  var date1 = new Date("20"+yr1, mon1 - 1, dt1,arraydate[2], arraydate[1], arraydate[0]);
+
+  }
+  
+  gomos.gomosLog(TRACE_PROD,"this what coming Date",arraydate[5]+"," +arraydate[4]+","+ arraydate[3]+","+arraydate[2]+","+ arraydate[1]+","+ arraydate[0])
+  return date1;
+  }
+router.post("/ActiveActionTypeCall", function (req, res, next) {
+  accessPermission(res);
+  var body1 = req.body;
+  var deviceName = body1.deviceName;
+gomos.gomosLog(TRACE_DEV,"THis is body", req.body);
+  MongoClient.connect(
+    urlConn,
+    { useNewUrlParser: true },
+    function (err, connection) {
+      if (err) {
+        next(err);
+      }
+      var db = connection.db(dbName);
+      gomos.gomosLog(TRACE_DEBUG,"This is called in Alert"); 
+      // var temp = "sensors.Channel."+ value
+      var  vari = { mac: deviceName};
+        // vari[temp] = { "$exists": true };
+        vari["originatedFrom"] = "gomos";
+       // query to get the last dateTime the collection was modified.This dateTime is used only in excel report.
+        db.collection("Payloads")
+        // .find(vari, {projection: { "payloadId": 1} })
+        .find(vari )
+        .toArray(function (err, result) {
+          if (err) {
+        gomos.gomosLog(TRACE_DEBUG,"this err",err);  
+          }
+        gomos.gomosLog(TRACE_DEV,"this result",result);  
+            res.json(result)
+        
+        });
+      
+    
+    }
+  );
+});
+router.post("/getActiveDAction", function (req, res, next) {
+  accessPermission(res);
+  MongoClient.connect(
+    urlConn,
+    { useNewUrlParser: true },
+    function (err, connection) {
+      if (err) {
+        next(err);
+      }
+      var db = connection.db(dbName);
+      gomos.gomosLog(TRACE_DEBUG,"This is called in Alert"); 
+        db.collection("Devices")
+        .find({ mac: "5ccf7f0015bc"})
+        .toArray(function (err, result) {
+          if (err) {
+        gomos.gomosLog(TRACE_DEBUG,"this err",err);  
+          }
+          var keyOfChannel = Object.keys(result[0].channel);
+          var  arrayofChennel = []; 
+      for(var i =0; i< keyOfChannel.length; i++){
+        var json = {}
+          json["businessName"] =  result[0].channel[keyOfChannel[i]].businessName;
+          json["configName"] =  result[0].channel[keyOfChannel[i]].configName;
+          arrayofChennel.push(json);
+        }
+        gomos.gomosLog(TRACE_DEV,"this result",result);  
+            res.json(arrayofChennel)
+        
+        });
+    
+    }
+  );
+});
+router.post("/ActiveDAction", function (req,res, next){
+  accessPermission(res);
+  var body = req.body;
+  var message =body.dataBody; 
+  var payloadId = body.Type;
+  var isDaillyJob = body.isDaillyJob;
+  var ChannelName = body.ChannelName;
+var messageValue = message;
+gomos.gomosLog(TRACE_DEBUG,"this is message Value", message);
+MongoClient.connect(
+  urlConn,
+  { useNewUrlParser: true },
+  function (err, connection) {
+    if (err) {
+      next(err);
+    }
+    var db = connection.db(dbName);
+var dateTime = new Date()
+    gomos.gomosLog(TRACE_DEBUG,"This is called in Alert"); 
+    var dataTime =  new Date().toISOString();
+      var Token = uuidv4();
+      var temobj={"Channel":ChannelName}
+      for (let [key, value] of Object.entries(message)) {  
+        temobj[key]= value;
+      }
+       var object = {
+        "mac": "5ccf7f0015bc",
+        "type": "SentInstruction",
+        "sourceMsg": temobj,
+        "createdTime": dataTime,
+        "updatedTime": dataTime
+       } ;
+       object["sourceMsg"]["Token"]  = Token;
+       object["sourceMsg"]["ActionType"]  = payloadId;
+       object["sourceMsg"]["isDailyJob"] = isDaillyJob;
+       gomos.gomosLog(TRACE_DEBUG,"This is log for data submit Data",object );
+      db.collection("DeviceInstruction")
+      .insertOne( object
+      ,function (err, result) {
+        if (err) {
+      gomos.gomosLog(TRACE_DEBUG,"this err",err);  
+        }
+  gomos.gomosLog(TRACE_DEBUG,"this is message Value 2", message);
+if(ChannelName !=0 || ChannelName != ""){
+  message[ChannelName] = 1
+}
+      
+      midllelayer.endPointMiddelayerFn(urlConn,dbName,res,"DevCub","001","PilotGH_002T",payloadId,"01/02/2019",message,Token);
+      
+      })
+    
+
+    
+  // gomos.gomosLog(TRACE_DEV,"this is data of",body);
+// console.log(body.custCd,body.subCustCd,body.DeviceName,body.payloadId,body.Date,body.message)
+  });
+});
 //get the operations based on serviceProviderCode,CustomerCode,SubCustomerCode and SensorName.
 router.get("/getOperations", function (req, res, next) {
   var query = url.parse(req.url, true).query;
@@ -1014,7 +1503,7 @@ router.post("/getAlertFlag", function (req, res, next) {
 //             //     },
 //             //   function (err, result) {
 //             //     if (err) {
-//             //       errorCustmHandler("updateAlertsForError",err);     
+//             //       gomos.errorCustmHandler("updateAlertsForError",err);     
 //             //       process.hasUncaughtExceptionCaptureCallback();
 //             //     }
               
@@ -1095,7 +1584,8 @@ router.get("/getAlertDevices", function (req, res, next) {
 });
 
 
-router.get("/getAlert", function (req, res, next) {
+
+router.post("/getAlert", function (req, res, next) {
   accessPermission(res);
   MongoClient.connect(
     urlConn,
@@ -1106,27 +1596,28 @@ router.get("/getAlert", function (req, res, next) {
       }
       var db = connection.db(dbName);
       var query = url.parse(req.url, true).query;
+      var body = req.body
       var startDate, endDate,level,assets;
-
-      assets = query.assets;
-      startDate = query.startDate;
-      endDate = query.endDate;
-      level = query.level;
+      console.log(body)
+      assets = body.selectedAssetsValue;
+      startDate = body.dateTime1;
+      endDate = body.dateTime2;
+      level = body.selectedlevelValue;
 
       var criteria;
-      var ServiceProvidersIds = query.spCode.split(",");
-      var CustomersIds = query.custCd.split(",");
-      var arSubCustomerIDs = query.subCustCd.split(",");
+      // var ServiceProvidersIds = body.spToSend.split(",");
+      var CustomersIds = body.custToSend;
+      var arSubCustomerIDs = body.subCustToSend;
 
       // This criteria is built without sensor names for now, however a better way to filter based on sensornames
       // rather than getting everything and removing the unwanted data of other sensrors.
       criteria = {
         custCd: { $in: CustomersIds },
         subCustCd: { $in: arSubCustomerIDs },
-        "assetId": assets,
-        "type": level,
+        assetId: assets,
+        type: level,
         createdTime: {
-          $gte: startDate,
+          $gte:startDate,
           $lte: endDate
         }
       };
@@ -1136,23 +1627,6 @@ router.get("/getAlert", function (req, res, next) {
         db.collection("Alerts")
         .aggregate([
           { $match: criteria },
-          // {
-          //         $group: {
-          //           _id: { processed: "$processed"},
-                    
-          //           "DeviceName": {"DeviceName": "$DeviceName"},
-          //           "processed": { "$sum": 1 } 
-          //         }
-          //       },
-          //       { "$group": {
-          //         "_id":"$_id.processed",
-          //         "processed": { 
-          //             "$push": { 
-          //                 "processed": "$_id.processed",
-          //             },
-          //         },
-          //         "count": { "$sum": "$processed" }
-          //     }},
           { "$group": {
             "_id": {
                 "DeviceName": "$DeviceName",
@@ -1170,7 +1644,6 @@ router.get("/getAlert", function (req, res, next) {
             },
             "totalCount": { "$sum": "$DeviceCount" }
         }},
-
           {
             $limit: 2,
           
@@ -1188,10 +1661,10 @@ router.get("/getAlert", function (req, res, next) {
           console.log("hello this is response");
           console.log(result);
           var arrayOfObject = [];
-          if (result.length > 0) {
+          // if (result.length > 0) {
             console.log(result);
             res.json(result)
-          }
+          // }
         });
     
     }
@@ -1372,58 +1845,57 @@ gomos.gomosLog(TRACE_DEBUG,"this is debuging in starting",sensorsBSN+"|"+mac+"|"
 )
 }
 );
-
 router.post("/getdashbordlastalert",function(req,res,next){
 
- var body = req.body;
- var custCd = body.custCd;
- var subCustCd = body.subCustCd;
- var mac = body.mac;
-var criteria = {
-  custCd,subCustCd,mac
-}
-gomos.gomosLog(TRACE_DEBUG,"this is result of getdashbordlastalert criteria",criteria);
-
-  accessPermission(res);
-  MongoClient.connect(
-    urlConn,
-    { useNewUrlParser: true },
-    function (err, connection) {
-      if (err) {
-        next(err);
-      }
-      var db = connection.db(dbName);
-      db.collection("Alerts").find(criteria,{ limit: 1 } ).sort({ createdTime : -1 }).toArray(function (err, result) {
-        if (err) {
-          process.hasUncaughtExceptionCaptureCallback();
-        }
-        if(result.length !=0){
-          var alertObj ={};
-          alertObj["sensorNm"] = result[0].sensorNm;
-          alertObj["businessNm"] = result[0].businessNm;
-          alertObj["shortName"] = result[0].shortName;
-          alertObj["businessNmValues"] = result[0].businessNmValues;
-          alertObj["criteria"] = result[0].criteria;
-          alertObj["createdTime"] = result[0].createdTime;
-          alertObj["alertText"] = result[0].alertText;
-       
-      gomos.gomosLog(TRACE_DEBUG,"this is result of getdashbordlastalert",result);
-       
-          res.json(alertObj)
-        
-        }
-        else{
-          res.json(0);
-        }
-      
-       
-    
-    })
-    }
-  )
-
-})
+  var body = req.body;
+  var custCd = body.custCd;
+  var subCustCd = body.subCustCd;
+  var mac = body.mac;
+ var criteria = {
+   custCd,subCustCd,mac
+ }
+ gomos.gomosLog(TRACE_DEBUG,"this is result of getdashbordlastalert criteria",criteria);
  
+   accessPermission(res);
+   MongoClient.connect(
+     urlConn,
+     { useNewUrlParser: true },
+     function (err, connection) {
+       if (err) {
+         next(err);
+       }
+       var db = connection.db(dbName);
+       db.collection("Alerts").find(criteria,{ limit: 1 } ).sort({ createdTime : -1 }).toArray(function (err, result) {
+         if (err) {
+           process.hasUncaughtExceptionCaptureCallback();
+         }
+         if(result.length !=0){
+           var alertObj ={};
+           alertObj["sensorNm"] = result[0].sensorNm;
+           alertObj["businessNm"] = result[0].businessNm;
+           alertObj["shortName"] = result[0].shortName;
+           alertObj["businessNmValues"] = result[0].businessNmValues;
+           alertObj["criteria"] = result[0].criteria;
+           alertObj["createdTime"] = result[0].createdTime;
+           alertObj["alertText"] = result[0].alertText;
+        
+       gomos.gomosLog(TRACE_DEBUG,"this is result of getdashbordlastalert",result);
+        
+           res.json(alertObj)
+         
+         }
+         else{
+           res.json(0);
+         }
+       
+        
+     
+     })
+     }
+   )
+ 
+ })
+  
 
 //get the reporting details of perticular Sensor based on given data
 router.get("/getFacts", function (req, res, next) {

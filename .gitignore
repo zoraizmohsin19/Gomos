@@ -7,3 +7,6 @@
 /GomosEndPoint/node_modules
 /onDemandService/node_modules
 /onreport/node_modules
+/soketForOnreport/.vscode
+/soketForOnreport/node_modules
+/onreport/build

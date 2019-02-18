@@ -1,25 +1,20 @@
 
 .tableactuter {
-    
+
     margin: 20px 0px;
-    height: 184px;
+    max-height: 132px;
+    overflow-y: scroll;
     
 }
 
 .dropdown.btn-group.btn-group-primary {
     margin: 20px 30px;
 }
-/* .ActvieBtn {
-    margin: 10px;
-    /* padding: 3px 40px; */
-    /* font-size: 24px;
-    padding-left: 40px;
-    padding-right: 40px;
-    padding-top: 9px;
-    padding-bottom: 38px;
-} */ */
 
 
+.red-border{
+    border: 1px solid red;
+}
 .ActiveSensorsRow {
     overflow: auto;
 
@@ -53,7 +48,7 @@
 
 #containersimg {
     width: 636px;
-    height: 90px;
+    height: 97px;
     overflow-y: hidden !important;
     margin-top: 7px;
 
@@ -82,14 +77,17 @@
     margin-bottom: 0px;
 }
 .ActiveTableH {
-    max-height: 230px;
+    max-height: 275px;
     overflow-y: scroll;
+    margin-bottom: 10px;
   
 }
 
 .ActiveSelection {
-    width: 20%;
+    width: 17%;
     display: inline;
+    padding: 4px 9px;
+    font-size: 12px;
   } 
   .pagerActive {
     /* padding-left: 0; */
@@ -104,6 +102,8 @@
     border-radius: 20px;
     padding-right: 17px;
     margin-left: 10px;
+    font-size: 12px;
+    float: right;
 }
   .pagerActive li>a, .pagerActive li>span {
     display: inline-block;
@@ -114,6 +114,9 @@
     color: #337ab7;
     text-decoration: none;
     
+}
+.Acustmborder{
+    border: 1px solid red !important;
 }
 li.ActiveList {
     color: #337ab7;
@@ -133,4 +136,134 @@ li.ActiveList {
     padding-left: 30px;
     padding-right: 30px;
     border: 1px #62D27B solid;
+}
+@media (max-width: 768px) {
+    #containersimg {
+        width: 327px ;
+    }
+    #wrapper {
+        width: 207%;
+    }
+  }
+  label.ActiveLabel {
+    margin-top: 30px !important;
+    margin-left: 8px;
+}
+.ActivedateTime {
+    font-size: 10px;
+    text-align: center;
+    margin-top: -7px;
+}
+/* this is slider */
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 60px;
+    height: 34px;
+  }
+  
+  .switch input { 
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+  
+  .slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    -webkit-transition: .4s;
+    transition: .4s;
+  }
+  
+  .slider:before {
+    position: absolute;
+    content: "";
+    height: 26px;
+    width: 26px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    -webkit-transition: .4s;
+    transition: .4s;
+  }
+  
+  input:checked + .slider {
+    background-color: #62D27B;
+  }
+  
+  input:focus + .slider {
+    box-shadow: 0 0 1px #62D27B;
+  }
+  
+  input:checked + .slider:before {
+    -webkit-transform: translateX(26px);
+    -ms-transform: translateX(26px);
+    transform: translateX(26px);
+  }
+  
+  /* Rounded sliders */
+  .slider.round {
+    border-radius: 34px;
+  }
+  
+  .slider.round:before {
+    border-radius: 50%;
+  }
+  /* this is end slider */
+  span.Aidate {
+    display: inline-block;
+}
+input.houremin {
+    display: inline-block;
+    width: 45px;
+    padding: 3px;
+    margin-left: 7px;
+    font-size: 11px;
+}
+
+
+span.Acolon {
+    margin-left: 3px;
+    font-size: 18px;
+}
+.Acustmtd {
+    text-align: center;
+    margin: 0px;
+    padding: 0px;
+    font-size: 12px;
+}
+textarea.ActivetestArea {
+    margin: 0px;
+    width: 100%;
+    height: 135px;
+    margin-top: 20px;
+    font-size: 11px;
+}
+.Acustmtd {
+    padding: 0px !important;
+}
+.Activefilterdiv {
+    margin-bottom: 4px;
+    /* margin-top: -2px; */
+}
+.ActiveSinput {
+    margin-left: 44px;
+}
+.ActiveTableinput {
+    padding: 0px !important;
+    text-align: center;
+}
+.Acustmfloat {
+    float: right;
+    margin-right: -175px;
+}
+
+.Apadh{
+    padding-left: 40px !important;
+    padding-right: 40px !important;
 }

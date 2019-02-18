@@ -3,6 +3,7 @@ import "./socketdashbord.css"
 import Sensors from "../layout/widgetofSensors/sensorsCantainer";
 import Chartcom from "../layout/widgetofSensors/chartCom";
 import {Table} from 'react-bootstrap';
+import socketIOClient from "socket.io-client";
 
 import axios from "axios";
 import SelectionInput from '../layout/SelectionInput';
@@ -16,6 +17,8 @@ class socketdashbord extends Component {
 constructor(){
   super();
   this.state={
+    endpoint: "http://localhost:4001",
+    socket1: {},
     arrData: [],
     arrLabels:[],
     yaxisName:'',
@@ -83,7 +86,7 @@ clickAsset(assetId){
   var Sensors = [];
   // alert("this is clicked"+ assetId);
   // this.getDevices(assetId)
-  fetch("http://52.212.188.65:3992/getDevice?assetId=" + assetId )
+  fetch("http://localhost:3992/getDevice?assetId=" + assetId )
   .then(response => response.json())
   .then(json =>  {
   // var sensorType =  json.map( x =>  { return  x  });
@@ -91,7 +94,7 @@ clickAsset(assetId){
    var page_size = 10;
     var page = 1
    this.setState({mac: Devices[0].mac, Devices : json,page_size:page_size, page: page})
-   fetch("http://52.212.188.65:3992/getSensors?mac=" + Devices[0].mac)
+   fetch("http://localhost:3992/getSensors?mac=" + Devices[0].mac)
    .then(response => response.json())
    .then(json =>  {
   
@@ -107,7 +110,7 @@ clickAsset(assetId){
 }
 clickDevices(mac){
  
-   fetch("http://52.212.188.65:3992/getSensors?mac=" + mac)
+   fetch("http://localhost:3992/getSensors?mac=" + mac)
   .then(response => response.json())
   .then(json =>  {
   var page_size = 10;
@@ -132,7 +135,6 @@ handler(selectedSensorsType1,selectedSensorsName){
 
 }
 componentDidMount(){
-
    var mainData = JSON.parse(sessionStorage.getItem("userDetails"));
    var sessionData = mainData[0].serviceProviders.split(",");
    var ActiveData = JSON.parse(sessionStorage.getItem("dashboardConfigobj"));
@@ -147,7 +149,7 @@ componentDidMount(){
     
    if (sessionData.length == 1 && sessionData[0] == "ALL") {
      
-  fetch('http://52.212.188.65:3992/getRegisterSP')
+  fetch('http://localhost:3992/getRegisterSP')
   .then(response => response.json())
   .then(json =>  {
   var spCd =  json.map( x =>  { return  x.spCd  });
@@ -173,7 +175,7 @@ componentDidMount(){
 var customers = mainData[0].customers.split(",");
  var custCd = [];
 if (customers.length == 1 && customers[0] == "ALL") {
-  fetch("http://52.212.188.65:3992/getCustomers?spCode=" + AspCd)
+  fetch("http://localhost:3992/getCustomers?spCode=" + AspCd)
 .then(response => response.json())
 .then(json =>  {
 var custCd =  json.map( x =>  { return  x._id  });
@@ -194,7 +196,7 @@ this.setState({custCd: custCd});
 var subCustomers = mainData[0].subCustomers.split(",");
 var subCustCd= [];
 if (subCustomers.length == 1 && subCustomers[0] == "ALL") {
-fetch("http://52.212.188.65:2992/getSubCustomers?spCode=" + AspCd +
+fetch("http://localhost:2992/getSubCustomers?spCode=" + AspCd +
 "&&custCd=" + AcustCd )
 .then(response => response.json())
 .then(json =>  {
@@ -261,19 +263,19 @@ else{
    var Assets = [];
    var Devices = [];
 
-   fetch("http://52.212.188.65:3992/getAssets?subCustCd=" + subCustCd)
+   fetch("http://localhost:3992/getAssets?subCustCd=" + subCustCd)
   .then(response => response.json())
   .then(json =>  {
    Assets = json 
    this.setState({selectedAssets: Assets[0], Assets : json})
-   fetch("http://52.212.188.65:3992/getDevice?assetId=" + Assets[0])
+   fetch("http://localhost:3992/getDevice?assetId=" + Assets[0])
    .then(response => response.json())
    .then(json =>  {
     this.setState({Devices : json});
     Devices = json;
     this.setState({Devices : json , mac : Devices[0].mac});
     // alert(Devices[0].mac)
-    fetch("http://52.212.188.65:3992/getSensors?mac=" + Devices[0].mac)
+    fetch("http://localhost:3992/getSensors?mac=" + Devices[0].mac)
     .then(response => response.json())
     .then(json =>  {
       if(json.length!=0){
@@ -323,7 +325,7 @@ else{
     var sessionData = mainData[0].customers.split(",");
      var custCd = [];
     if (sessionData.length == 1 && sessionData[0] == "ALL") {
-      fetch("http://52.212.188.65:3992/getCustomers?spCode=" + SendForSp)
+      fetch("http://localhost:3992/getCustomers?spCode=" + SendForSp)
     .then(response => response.json())
     .then(json =>  {
     var custCd =  json.map( x =>  { return  x._id  });
@@ -346,7 +348,7 @@ else{
     var sessionData = mainData[0].subCustomers.split(",");
     var subCustCd= [];
     if (sessionData.length == 1 && sessionData[0] == "ALL") {
-    fetch("http://52.212.188.65:3992/getSubCustomers?spCode=" + SendForSp +
+    fetch("http://localhost:3992/getSubCustomers?spCode=" + SendForSp +
     "&&custCd=" + SendFroCustCD )
     .then(response => response.json())
     .then(json =>  {
@@ -365,7 +367,7 @@ else{
 }
 
 getAssets(SendForSbCd){
-  fetch("http://52.212.188.65:3992/getAssets?subCustCd=" + SendForSbCd)
+  fetch("http://localhost:3992/getAssets?subCustCd=" + SendForSbCd)
   .then(response => response.json())
   .then(json =>  {
   // var sensorType =  json.map( x =>  { return  x  });
@@ -374,7 +376,7 @@ getAssets(SendForSbCd){
   });
 }
 getDevices(assetId){
-  fetch("http://52.212.188.65:3992/getDevice?assetId=" + assetId)
+  fetch("http://localhost:3992/getDevice?assetId=" + assetId)
   .then(response => response.json())
   .then(json =>  {
   // var sensorType =  json.map( x =>  { return  x  });
@@ -445,13 +447,11 @@ DisplayChart(result, valueSensoor ){
     var sensor3 = arrayOfsensors[0];
     var obj = [];
     for(var i =0; i< arrayOfsensors.length; i++){
-var temobj ={};
-temobj["sesnorsType"]= "sensorType"+i;
-temobj["sensorsName"]= "sensor"+i;
-temobj["sensorsValues"]= 0.0;
-
-obj.push(temobj);
-
+        var temobj ={};
+        temobj["sesnorsType"]= "sensorType"+i;
+        temobj["sensorsName"]= "sensor"+i;
+        temobj["sensorsValues"]= 0.0;
+        obj.push(temobj);
     }
   //  var obj = [
   //   {"sesnorsType": "sensorType1",
@@ -476,12 +476,14 @@ obj.push(temobj);
       page : page,
       page_size:page_size
     }
+  
 // console.log(body);
+this.callToSocket(body);
 this.callForlastAlert(selectedCustValue,selectedSubCustValue, mac);
    this.setState({in_prog:true, Spinnerdata: false});
    var FdataArray =[];
    var dataArray =[];
-    axios.post("http://52.212.188.65:3992/getdashboard",body)
+    axios.post("http://localhost:3992/getdashboard",body)
    
     .then(json =>  {
       // console.log(json);
@@ -528,6 +530,8 @@ this.callForlastAlert(selectedCustValue,selectedSubCustValue, mac);
    
       me.DisplayChart(FdataArray, selectedSensorsName);
       me.firstTimeRender(lastUpdatedTime,json["data"]["lastdataObj"])
+
+
 //  console.log(FdataArray+"data new");
 //  console.log(FdataArray);
       }
@@ -536,11 +540,48 @@ this.callForlastAlert(selectedCustValue,selectedSubCustValue, mac);
       this.DisplayChart(FdataArray, selectedSensorsName);
       this.setState({ DataArray:[], in_prog:false, selectedSensorsName: selectedSensorsType1,total_count:0, Spinnerdata: true});
   })
+
+
+}
+
+callToSocket(body){
+  const { endpoint, socket1} = this.state;
+  var me = this;
+  if(Object.entries(socket1).length !== 0 && socket1.constructor !== Object){
+    socket1.emit("end");
+    console.log(socket1);
+  }
+ 
+  const socket = socketIOClient(endpoint+"/onViewDashboard");
+  // socket1.close();
+  console.log("This is log of socket");
+  console.log(socket)
+  me.setState({socket1: socket});
+  var dashboardData = JSON.parse(sessionStorage.getItem("dashboardConfigobj"));
+  var arrayOfsensors= dashboardData.Sensors;
+  var arrayofbgClass = dashboardData.SensorsBgC;
+  socket.emit('lastUpdatedValue',body);  
+  socket.on("onViewDashboard", data =>{
+    console.log("This is socket ");
+    console.log(data);
+    var array = [];
+    // var lastUpdatedTime = dateFormat(data.lastCreatedTime , "dd-mmm-yy HH:MM:ss");
+    for (var i = 0 ; i < data.lastdataObj.length ; i++ ){ 
+      array.push({ "sensorsNM": data.lastdataObj[i].sesnorsType, 
+      "bgClass": arrayofbgClass[i],
+       nameofbsnm : data.lastdataObj[i].sensorsName,
+       valuseS:data.lastdataObj[i].sensorsValues , 
+       lastUpdatedTime:  dateFormat(data.lastCreatedTime , "dd-mmm-yy HH:MM:ss")});
+     }
+     this.setState({Sensors : array});
+    // me.setState({lastupdatedData:data.lastdataObj ,
+    // lastUpdatedTime :lastUpdatedTime});
+  });
 }
 callForlastAlert(custCd,subCustCd, mac){
   var me = this;
  var body = {custCd,subCustCd,mac}
-  axios.post("http://52.212.188.65:3992/getdashbordlastalert", body)
+  axios.post("http://localhost:3992/getdashbordlastalert", body)
   .then(json =>  {
     // alert(json["data"]);
     // console.log(json["data"]);
@@ -555,13 +596,6 @@ firstTimeRender(lastupdatedTime, obj){
     var dashboardData = JSON.parse(sessionStorage.getItem("dashboardConfigobj"));
     var arrayOfsensors= dashboardData.Sensors;
     var arrayofbgClass = dashboardData.SensorsBgC;
-    // console.log("this is data ");
-    // console.log(obj);
-    // alert(obj);
-    // var keysofBsnm = Object.keys(obj);
-    // var values = Object.values(obj);
-  //  console.log(keysofBsnm);
-    
     for (var i = 0; i <obj.length; i++ ){ 
        data.push({ "sensorsNM": obj[i].sesnorsType, "bgClass": arrayofbgClass[i],
         nameofbsnm : obj[i].sensorsName, valuseS:obj[i].sensorsValues ,  lastUpdatedTime: lastupdatedTime});
@@ -569,6 +603,7 @@ firstTimeRender(lastupdatedTime, obj){
       me.setState({Sensors : data})
   }
 }
+
 
 //THIS IS HANDER FOR EXCEL DOWNLOAD
 downloadToExcel() {

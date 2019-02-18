@@ -42,7 +42,7 @@ import axios from "axios";
     }
     getSPApibyID(id){
         var me = this
-        axios.get('http://18.203.28.35:3300/getRegisterSPbyId?id='+ id)
+        axios.get('http://localhost:3992/getRegisterSPbyId?id='+ id)
           .then(function (response) {
             // alert(response);
             console.log(response.data[0]);
@@ -95,7 +95,6 @@ import axios from "axios";
         const {title} = this.props.match.params
         this.decideType(id,title);
       
-
         setTimeout(function(){
             document.getElementById('SpName').focus();
         },100);
@@ -175,7 +174,7 @@ import axios from "axios";
 
         const {id} = this.props.match.params;
         console.log(id +"this is id")
-        axios.put('http://18.203.28.35:3300/UpdateRegisterSPbyId?id='+ id, {
+        axios.put('http://localhost:3992/UpdateRegisterSPbyId?id='+ id, {
            body:arrayOfdata
           })
           .then(function (response) {
