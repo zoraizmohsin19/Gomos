@@ -1,0 +1,78 @@
+var createError = require('http-errors');
+var express = require('express');
+var path = require('path');
+var cookieParser = require('cookie-parser');
+var logger = require('morgan');
+var fs = require("fs");
+
+var indexRouter = require('./routes/index');
+var usersRouter = require('./routes/users');
+var userViewDashboard = require('./routes/viewDashSocket');
+var app = express();
+
+// view engine setup
+app.set('views', path.join(__dirname, 'views'));
+app.set('view engine', 'jade');
+
+var appConfig = JSON.parse(
+  fs.readFileSync(process.cwd() + "/appConfig.json", "utf8")
+);
+var urlConn, dbName;
+app.use(logger('dev'));
+app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
+app.use(cookieParser());
+app.use(express.static(path.join(__dirname, 'public')));
+
+
+if (process.argv[2] == "dev") {
+  urlConn = appConfig.devURL; dbName = appConfig.devDB;
+  console.log("Environment set to : Development");
+} 
+else if (process.argv[2] == "test") {
+  urlConn = appConfig.testURL; dbName = appConfig.testDB;
+  console.log("Environment set to : Testing");
+} 
+else if (process.argv[2] == "stage") {
+  urlConn = appConfig.stageURL; dbName = appConfig.stageDB;
+  console.log("Environment set to : Staging");
+}
+else if (process.argv[2] == "prod") {
+  urlConn = appConfig.prodURL; dbName = appConfig.prodDB;
+  console.log("Environment set to : Production");
+}
+else {
+  console.log("Not a proper command to start the server!!");
+  process.exit();
+}
+
+//set app level local vars
+app.locals.urlConn = urlConn;
+app.locals.dbName = dbName;
+
+indexRouter(app);
+userViewDashboard(app);
+app.use('/', indexRouter);
+app.use('/viewDashSocket',userViewDashboard);
+app.use('/users', usersRouter);
+
+// catch 404 and forward to error handler
+app.use(function(req, res, next) {
+  next(createError(404));
+});
+//Checks whether the service is running in production mode or development mode and sets the enviroment
+//accordingly.
+
+
+// error handler
+app.use(function(err, req, res, next) {
+  // set locals, only providing error in development
+  res.locals.message = err.message;
+  res.locals.error = req.app.get('env') === 'development' ? err : {};
+
+  // render the error page
+  res.status(err.status || 500);
+  res.render('error');
+});
+
+module.exports = app;
