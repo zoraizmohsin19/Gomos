@@ -31,7 +31,7 @@ class App extends Component {
         <Header/>
           <Switch>
               <Route exact path="/" component={Login} />
-              {/* <Route exact path="/menu" component={Menu} /> */}
+              <Route exact path="/menu" component={Menu} />
               <Route exact path="/AlertReport" component={AlertReport} />
               <Route exact path="/alertSetup" component={alertSetup} />
               <Route exact path="/activeDashbord" component={activeDashbord} />

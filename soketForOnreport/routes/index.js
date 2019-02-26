@@ -15,7 +15,7 @@ socket.on('onDeviceinstructionClientEvent', function(data) {
   setInterval(
     () =>
     DeviceinstructionEmiter(socket,data),
-    6000
+    4000
   );
 });
   socket.on("disconnect", () => console.log("Client disconnected on onDeviceinstruction")); 
@@ -84,7 +84,7 @@ function onConnection(socket) {
     setInterval(
       () =>
      getApiAndEmit(socket,data),
-      6000
+     4000
     );
  });
 //  socket.on("takreem", function(data){console.log("This takreem");console.log(data)})
@@ -101,46 +101,54 @@ function onConnection(socket) {
         // gomos.gomosLog(TRACE_DEBUG,"This is called in Alert"); 
         
          var mac = data.mac
-         console.log(dbo);
+        //  console.log(dbo);
+        //  const collection1    = dbo.collection("DeviceState");
+        //  const changeStream = collection1.watch([{"$match":{mac: mac}}]);
           //query to get the last dateTime the collection was modified.This dateTime is used only in excel report.
-          const collection1    = dbo.collection("DeviceState");
-          const changeStream = collection1.watch([{"$match":{mac: mac}}]);
-        //   .find({ mac: mac})
-        //   .toArray(function (err, result) {
-        //     if (err) {
-        //   // gomos.gomosLog(TRACE_DEBUG,"this err",err);  
-        //     }
-        //     var deviceStateKey = Object.keys(result[0]);
-        //     var keysToRemove2 = ["_id", "mac", "DeviceName","updatedTime","createdTime"];
-        //     // gomos.gomosLog(TRACE_DEV,"This Is key of identifire 1 Place",deviceStateKey);  
-        //     for (var l = 0; l < keysToRemove2.length; l++) {
-        //       if (deviceStateKey.includes(keysToRemove2[l])) {
-        //         deviceStateKey.splice(deviceStateKey.indexOf(keysToRemove2[l]), 1);
-        //       }
-        //     }
-        //   var json = {}
-        //   for(var k =0; k < deviceStateKey.length; k++){
-        //     var name = deviceStateKey[k]
-        //     var keyofCode = Object.keys(result[0][deviceStateKey[k]]);
-        //   //  gomos.gomosLog(TRACE_DEBUG,"This is SensorsKey",keyofCode);
-        //   var sensorsArray= [];
-        //   for(var i = 0; i< keyofCode.length; i++){
-        //     var ActiveIdentifier = {};
-        //    ActiveIdentifier['type'] = keyofCode[i];
-        //    var devicebusinessNM = Object.keys(result[0][deviceStateKey[k]][keyofCode[i]]);
-        //   //  gomos.gomosLog(TRACE_DEBUG,"this devicebusinessNM",devicebusinessNM);  
-        //        devicebusinessNM.splice(devicebusinessNM.indexOf("dateTime"), 1);
-        //        ActiveIdentifier["devicebusinessNM"] = devicebusinessNM[0];
-        //        ActiveIdentifier["Value"]    =  result[0][deviceStateKey[k]][keyofCode[i]][devicebusinessNM[0]];
-        //        ActiveIdentifier["dateTime"] =  result[0][deviceStateKey[k]][keyofCode[i]]["dateTime"];
-        //        sensorsArray.push(ActiveIdentifier);
-        //   }
-        //   json[name] = sensorsArray;
-        // }
-        changeStream.on('change', next => {
-          // process next document
-          console.log(next);
-        socket.emit("FromAPI", next);
+          dbo.collection("DeviceState")
+          .find({ mac: mac})
+          .toArray(function (err, result) {
+            if (err) {
+          // gomos.gomosLog(TRACE_DEBUG,"this err",err);  
+            }
+            var deviceStateKey = Object.keys(result[0]);
+            var keysToRemove2 = ["_id", "mac", "DeviceName","updatedTime","createdTime"];
+            // gomos.gomosLog(TRACE_DEV,"This Is key of identifire 1 Place",deviceStateKey);  
+            for (var l = 0; l < keysToRemove2.length; l++) {
+              if (deviceStateKey.includes(keysToRemove2[l])) {
+                deviceStateKey.splice(deviceStateKey.indexOf(keysToRemove2[l]), 1);
+              }
+            }
+          var json = {}
+          for(var k =0; k < deviceStateKey.length; k++){
+            var name = deviceStateKey[k]
+            var keyofCode = Object.keys(result[0][deviceStateKey[k]]);
+          //  gomos.gomosLog(TRACE_DEBUG,"This is SensorsKey",keyofCode);
+          var sensorsArray= [];
+          for(var i = 0; i< keyofCode.length; i++){
+            var ActiveIdentifier = {};
+           ActiveIdentifier['type'] = keyofCode[i];
+           var devicebusinessNM = Object.keys(result[0][deviceStateKey[k]][keyofCode[i]]);
+          //  gomos.gomosLog(TRACE_DEBUG,"this devicebusinessNM",devicebusinessNM); 
+          var keysToRemove3 = ["sortName","displayPosition","dateTime"];
+          for (var l = 0; l < keysToRemove3.length; l++) {
+            if (deviceStateKey.includes(keysToRemove2[l])) {
+              devicebusinessNM.splice(devicebusinessNM.indexOf(keysToRemove3[l]), 1);
+            }
+          } 
+               ActiveIdentifier["devicebusinessNM"] = devicebusinessNM[0];
+               ActiveIdentifier["Value"]    =  result[0][deviceStateKey[k]][keyofCode[i]][devicebusinessNM[0]];
+               ActiveIdentifier["sortName"]    =  result[0][deviceStateKey[k]][keyofCode[i]]["sortName"];
+               ActiveIdentifier["position"]    =  result[0][deviceStateKey[k]][keyofCode[i]]["displayPosition"];
+               ActiveIdentifier["dateTime"] =  result[0][deviceStateKey[k]][keyofCode[i]]["dateTime"];
+               sensorsArray.push(ActiveIdentifier);
+          }
+          json[name] = sensorsArray;
+        }
+        // changeStream.on('change', next => {
+        //   // process next document
+        //   console.log(next);
+        socket.emit("FromAPI", json);
       }
     );
   }
@@ -168,7 +176,7 @@ module.exports = function (app) {
       io.on('connection', onConnection);
       var nsp = io.of('/onDeviceinstruction');
       nsp.on('connection',onDeviceinstruction);
-      console.log(dbo);
+      // console.log(dbo);
       mBoxApp = app;
   }, 6000);
   // console.log(io)

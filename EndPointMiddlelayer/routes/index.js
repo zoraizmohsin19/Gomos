@@ -181,7 +181,7 @@ router.post("/sendto", function (req, res, next) {
       }
 }
 function successUpdate(DeviceName,payloadId,subCustCd, custCd,DateTime, message, finalSensors,res,db,responseTosend,mac,assetId){
-  var nowDateTime = new Date().toISOString()
+  var nowDateTime = new Date(new Date().toISOString())
   var dataToStore ={
     DeviceName: DeviceName,
     mac: mac,
@@ -217,7 +217,7 @@ function successUpdate(DeviceName,payloadId,subCustCd, custCd,DateTime, message,
 
 
  function errorUpdate(DeviceName,payloadId ,subCustCd, custCd, DateTime, message, db,res,responseTosend){
-  var nowDateTime = new Date().toISOString()
+  var nowDateTime =  new Date(new Date().toISOString())
               var dataToStore ={
                 DeviceName: DeviceName,
                 payloadId: payloadId,

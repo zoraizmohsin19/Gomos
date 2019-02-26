@@ -230,7 +230,7 @@ function processStartEvent() {
               try {
                 var id = result[i]._id;
                 var resultTime =  result[i].updatedTime;
-                 var currentTime= new Date().toISOString();
+                 var currentTime= new Date(new Date().toISOString());
                  var mac = result[i].mac;
              db.collection("Alerts")
              .findOneAndUpdate(
@@ -529,9 +529,9 @@ function updateAlertsForError(objId, db,processedValue, lasterrorString) {
        db.collection("Alerts").updateOne(
         { _id: objId },
         { $set: { processed: processedValue,
-          updatedTime:  new Date().toISOString(),
+          updatedTime:  new Date(new Date().toISOString()),
           lasterrorString: lasterrorString,
-          lasterrorTime:  new Date().toISOString()  
+          lasterrorTime:   new Date(new Date().toISOString()) 
             },
             $inc: { numberOfAttempt: 1 } 
           },
@@ -554,7 +554,7 @@ function updateAlerts(objId, db) {
   db.collection("Alerts").updateOne(
     { _id: objId },
     { $set: { processed: "Y" ,
-    updatedTime: new Date().toISOString()},
+    updatedTime:  new Date(new Date().toISOString())},
     $inc: { numberOfAttempt: 1 } 
    },
     function (err, result) {
@@ -570,7 +570,7 @@ function updateForTranslated(objId, db, translatedMsg, DeviceName) {
   db.collection("Alerts").updateOne(
     { _id: objId },
     { $set: { translatedMsg: translatedMsg,DeviceName: DeviceName,
-    updatedTime: new Date().toISOString()
+    updatedTime:  new Date(new Date().toISOString())
     } },
     function (err, result) {
       if (err) {

@@ -67,7 +67,7 @@ class Menu extends Component {
   }
 //ON PAGE LOAD DATA FETCH FROM SERVER FOR ALL SERVICE PROVIDER
 componentDidMount() {
-    fetch('http://13.127.10.197:3992/getRegisterSP')
+    fetch('http://localhost:3992/getRegisterSP')
     .then(response => response.json())
     .then(json =>  {
     var spCd =  json.map( x =>  { return  x.spCd  });
@@ -124,7 +124,7 @@ onSubmit = (e) => {
     }
 //THIS METHOD FOR GET CUSTOMER CODE
     getCustomerApi(SendForSp){
-      fetch("http://13.127.10.197:3992/getCustomers?spCode=" + SendForSp)
+      fetch("http://localhost:3992/getCustomers?spCode=" + SendForSp)
       .then(response => response.json())
       .then(json =>  {
       var custCd =  json.map( x =>  { return  x._id  });
@@ -150,7 +150,7 @@ onSubmit = (e) => {
   }
   //THIS IS  API FOR GET SUBCUSTOMER BASED ON SERVICE PROVIDER AND CUSTOMER CODE
   getSubCustomerApi(SendForSp,SendFroCustCD){
-      fetch("http://13.127.10.197:3992/getSubCustomers?spCode=" + SendForSp +
+      fetch("http://localhost:3992/getSubCustomers?spCode=" + SendForSp +
       "&&custCd=" + SendFroCustCD )
       .then(response => response.json())
       .then(json =>  {
@@ -184,7 +184,7 @@ onSubmit = (e) => {
 }
 //THIS API FOR GET SENSOR  BASED ON SERVICE PROVIDER , CUSTOMER CODE, SUBCUSTOMER CODE
 getSensorApi(SendForSp,SendFroCustCD,SendForSbCd){
-  fetch("http://13.127.10.197:3992/getSensorNames?spCode=" +SendForSp +
+  fetch("http://localhost:3992/getSensorNames?spCode=" +SendForSp +
          "&&custCd=" + SendFroCustCD + "&&subCustCd=" + SendForSbCd)
        .then(response => response.json())
        .then(json =>  {
@@ -232,7 +232,7 @@ getSensorApi(SendForSp,SendFroCustCD,SendForSbCd){
   }
   //THIS IS API FOR OPERTION SELECTION BASED ON SERVICE PROVIDER , CUSTOMER CODE, SUBCUSTOMER AND SELECTED SENSORE CODE
   opertionApi(SendForSp,SendFroCustCD,SendForSbCd,SendForSensor){
-    fetch("http://13.127.10.197:3992/getOperations?spCode=" + SendForSp + "&&custCd=" +
+    fetch("http://localhost:3992/getOperations?spCode=" + SendForSp + "&&custCd=" +
     SendFroCustCD + "&&subCustCd=" + SendForSbCd + "&&sensorNm=" + SendForSensor)
      .then(response => response.json())
      .then(json =>  {
@@ -335,7 +335,7 @@ getAllDetails(){
 //THIS IS API METHOD FOR FETCH ALL DATA FROM SERVER BASED ON SELECTED CRITERIA.
 getAllDataApi(SendForSp,SendFroCustCD,SendForSbCd,SendForSensor,SendForStartDate,
   SendForEndDate,SendForOperation,SendForEqual,SendForStartRange,SendforEndRange){
-    fetch("http://13.127.10.197:3992/getFacts?spCode=" + SendForSp + "&&custCd=" +
+    fetch("http://localhost:3992/getFacts?spCode=" + SendForSp + "&&custCd=" +
     SendFroCustCD + "&&subCustCd=" + SendForSbCd + "&&sensorNm=" + SendForSensor +
   "&&startDate=" + SendForStartDate + "&&endDate=" + SendForEndDate + 
   "&&operation=" + SendForOperation + "&&equalsFacts=" +
@@ -349,15 +349,18 @@ getAllDataApi(SendForSp,SendFroCustCD,SendForSbCd,SendForSensor,SendForStartDate
         json.pop();
       //MAKING A ARRAY FOR STRUCTURE DATA ARRAY FOR CHART AND EXCEL 
         var FdataArray =[];
+   
         for (var i = 0; i < json.length - 1; i++) {
-          FdataArray.push({
-                  column1: json[i][0],
-                  column2: json[i][1],
-                  column3: json[i][2],
-                  column4: json[i][3].toFixed(2),
-                  column5: json[i][4]
-     
-        })}
+          var tempobj ={
+            Mac: json[i][0],
+            Device_Name: json[i][1],  
+            CreatedTime: json[i][3]
+          }
+          var  keysofbussinessName = Object.keys(json[i][2]);
+          for(var j = 0; j< keysofbussinessName.length; j++){
+            tempobj[keysofbussinessName[j]] = json[i][2][keysofbussinessName[j]].toFixed(2);
+          }
+          FdataArray.push(tempobj)}
         // console.log("this json data");
          console.log(json);
         alert(json)
@@ -378,10 +381,17 @@ getAllDataApi(SendForSp,SendFroCustCD,SendForSbCd,SendForSensor,SendForStartDate
   var dataToSend1 = [];
   var dataToSend2 = [];
   for (var i = 0; i < result.length; i++) {
-    dataToSend1.push(result[i]["column4"]);
-    dataToSend2.push(
-      result[i]["column5"] 
-    );
+    dataToSend1.push(result[i]["CreatedTime"]);
+    var kyetoRemove = ["CreateTime","CreatedTime","Mac"];
+    var keypr = Object.keys(result[i]);
+  for(var j =0; j< kyetoRemove.length;j++){
+    keypr.splice(kyetoRemove.indexOf(kyetoRemove[j]),1);
+  }
+  var temp ={}
+  for(var k =0; k< keypr.length; k++){
+    temp[keypr] =result[i][keypr[k]]; 
+  }
+    dataToSend2.push(temp);
   }
   var yaxisName = selectedSensorValue;
   var formDate = new Date(startDate).toLocaleString();
@@ -401,17 +411,16 @@ getAllDataApi(SendForSp,SendFroCustCD,SendForSbCd,SendForSensor,SendForStartDate
    const {result} = this.state;
    //HERE PUTING RESULT DATA WHICH STORED IN STATE VARIABLE AND ASSIGN TO LOCAL VARIABLE dataForExcel
   var dataForExcel = result;
+  alert("This is Cliked ");
   if (dataForExcel) {
+    alert("This is Cliked data  is here ");
 //THIS  HEADER OF COLUMN FOR EXCEL DATASHEET
-    var arColumns = [
-      "Device",
-      "Device Name",
-      "Bussiness Name",
-      this.state.selectedSensorValue,
-      "QueueDateTime"
-    ];
-    var arKeys = ["column1", "column2", "column3", "column4","column5"];
-    var arWidths = [35, 35, 35, 35, 35];
+    var arColumns = Object.keys(result[0])
+    var arKeys = Object.keys(result[0]);
+    var arWidths = [];
+    for(var i =0; i< arKeys.length ; i++){
+    arWidths.push(35)
+    }
     var reportName = this.state.selectedSensorValue + " Report";
     var dataSet = dataForExcel;
     this.exportToExcel(arColumns, arKeys, arWidths, reportName, dataSet);
@@ -654,7 +663,18 @@ getAllDataApi(SendForSp,SendFroCustCD,SendForSbCd,SendForSensor,SendForStartDate
        if(dynInput ==="AVG"){
         Disabledsubmit=null;
        }
-       
+       var table = null;
+       var table = null;
+       if(this.state.tableDataToSend !=0){
+          table = <div className="row bg">
+               <div className= "custNav btn-group">
+               <button className="btn btn-sm btn-secondary" onClick={this.displayChart.bind(this)}><i class="far fa-chart-bar iconfont"></i></button>
+               <button  className="btn btn-sm btn-secondary" onClick={this.downloadToExcel.bind(this)}><i class="far fa-file-excel iconfont"></i></button>
+              </div>
+              </div>;
+          }
+
+
        //THIS VARIABLE FOR DYNAMIC TABLE WHICH APPEAR IN PRESENTS OF DATA .
       //  var table = null;
       //  if(this.state.tableDataToSend !=0){
@@ -872,7 +892,7 @@ getAllDataApi(SendForSp,SendFroCustCD,SendForSbCd,SendForSensor,SendForStartDate
                   </div>
              </div>
            <div className="cmrgin">
-          {/* {table} */}
+          {table}
           </div>
           </div>
           );

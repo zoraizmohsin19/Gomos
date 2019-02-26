@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import "./activeDashbord.css"
-import {Table,DropdownButton,MenuItem,Button,Modal} from 'react-bootstrap';
+import {Table,DropdownButton,MenuItem,Button,Modal,NavItem ,Nav} from 'react-bootstrap';
 import SensorsActive from "../layout/widgetofSensors/sensorsForActive";
 import axios from "axios";
 import moment from 'moment';
@@ -8,6 +8,7 @@ import DatePicker from 'react-datepicker';
 import dateFormat  from  "dateformat";
 import socketIOClient from "socket.io-client";
 import CPagination from "../layout/Pagination";
+import swal from 'sweetalert';
 class activeDashbord extends Component {
     constructor(){
       super();
@@ -40,22 +41,39 @@ class activeDashbord extends Component {
         configkeyInput: [],
         configkeyInputKeyValue: {},
         rowclickedData :{},
+        tilesPayloaddata: {},
         'total_count':0,
         'filter':{
+          "TypeOfJobs": "",
+            'Fchannel': '',
+             'Fdate':'',
+            'Action': '',
             'page':1,
-            'page_size':10,
+            'page_size':15,
         },
-        'in_prog':false
+        'in_prog':false,
+        submitDataObj:{
+         subCustCd: "001",
+         CustCd: "DevCub",
+         DeviceName : "PilotGH_002T",
+         payloadId: "",
+         dataBody: {},
+         isDaillyJob: "",
+         ChannelName: "",
+        },
       }
 
       this.fetch  =   this.fetch.bind(this);
       this.changePage     =   this.changePage.bind(this);
-
+      this.FselectAction = this.FselectAction.bind(this);
       this.handleChange = this.handleChange.bind(this);
       this.handleChange1 = this.handleChange1.bind(this);
-      this.handleShow = this.handleShow.bind(this);
+      this.handleShowExecuted = this.handleShowExecuted.bind(this);
+      this.handleShowPending = this.handleShowPending.bind(this);
       this.handleClose = this.handleClose.bind(this);
       this.Submit = this.Submit.bind(this);
+      this.MdateFilter = this.MdateFilter.bind(this);
+      this.filterByChExe = this.filterByChExe.bind(this);
       // this.rowClicked = this.rowClicked.bind(this)
       // this. handleChange3 =this.handleChange3.bind(this);
     }
@@ -160,22 +178,24 @@ for(var key =0; key < configkeyInput.length; key++) {
       }
       alert(this.state.channelName)
       console.log(this.state.channelName)
-if(this.state.channelName.length != 0){
-  if(this.state.selectedChannelB == ""){
-alert("please Select Channel Name");
-return;
-  }
+      if(this.state.channelName.length != 0){
+        if(this.state.selectedChannelB == ""){
+        alert("please Select Channel Name");
+        return;
+           }
 
 }
-      me.callApiForAction(selectedAtionType,dataToSendApi,configkeyInputKeyValue["toggle"],selectedChannelB);
+    me.state.submitDataObj.payloadId   = selectedAtionType;
+    me.state.submitDataObj.dataBody    = dataToSendApi;
+    me.state.submitDataObj.isDaillyJob =  configkeyInputKeyValue["toggle"];
+    me.state.submitDataObj.ChannelName = selectedChannelB;
+    me.setState({submitDataObj :me.state.submitDataObj});
+    me.callApiForAction();
 }
-    callApiForAction(Type,dataBody,isDaillyJob,ChannelName){
-     var body = {Type,dataBody,isDaillyJob,ChannelName}
-      axios.post("http://localhost:3992/ActiveDAction",body)
-
+    callApiForAction(){
+    var me = this;
+      axios.post("http://localhost:3992/ActiveDAction",me.state.submitDataObj)
       .then(json =>  {
-        // this.setState({sensorsArray:json["data"].sensorsArray,
-        //   channelArray:json["data"].channelArray })
         alert(json)
   
       });
@@ -184,11 +204,41 @@ return;
     handleClose() {
         this.setState({ show: false });
       }
-      handleShow() {
-        this.setState({ show: true });
+      handleShowExecuted() {
+     var me = this;
+     this.state.filter.TypeOfJobs = "ExecutedJob"
+     me.setState({filter :this.state.filter  , show: true });
+     me.fetch();
+      }
+      handleShowPending(){
+        var me = this;
+        this.state.filter.TypeOfJobs = "PendingJob"
+        me.setState({filter :this.state.filter  , show: true });
+        this.fetch();
+      }
+      MdateFilter(value){
+        this.state.filter.Fdate= value;
+
+        this.setState({filter: this.state.filter});
+        // alert(value);
       }
     handleChange(selectedAtionType){
       alert(selectedAtionType);
+      var me = this;
+      if(selectedAtionType == "SentCommand" || 
+          selectedAtionType == "ActiveCommand" ||
+          selectedAtionType == "ExecutedJobs"||
+          selectedAtionType == "PendingJobs"){
+        me.setState({formStructure: selectedAtionType ,selectedAtionType: selectedAtionType});
+        if(selectedAtionType == "ExecutedJobs"){
+          this.setState({formStructure: "ActiveAndPending"});
+          this.handleShowExecuted()
+        }
+        if(selectedAtionType == "PendingJobs"){
+          this.setState({formStructure: "ActiveAndPending"});
+          this.handleShowPending()
+        }
+      }else{
       var index = this.state.actionTypes.findIndex(element => element.payloadId == selectedAtionType);
       var objectpayload = this.state.actionTypes[index];
       var formStructure = objectpayload.formStructure;
@@ -226,11 +276,9 @@ return;
                 configkeyInputKeyValue[value+"date"] =  ""; 
                 configkeyInputKeyValue[value+"houre"] = "";
                 configkeyInputKeyValue[value+"min"] = "";
-                // configkeyInputKeyValue[key+"Meridiem"] ="";
                 configkeyInputKeyValue[value+"date"+"error"] =  ""; 
                 configkeyInputKeyValue[value+"houre"+"error"] = "";
                 configkeyInputKeyValue[value+"min"+"error"] = "";
-                // configkeyInputKeyValue[key+"Meridiem"+"error"] ="";
               }
             this.setState({ selectedAtionType: selectedAtionType,
                channelName: arrayOfChannel,
@@ -251,11 +299,7 @@ return;
           var configkeyInputKeyValue = {};
          
           var  keysofObj = Object.keys(objectpayload.sensors)
-          // for (let [key, value] of Object.entries(objectpayload.sensors[keysofObj[0]])) {  
-          //   arrayOfChannel.push({"configName":key, "businessName": value}); 
-          // }
           var  allConfigName = Object.values(objectpayload.sensors[keysofObj[0]]);
-
             for (let [key, value] of Object.entries(objectpayload.sensors[keysofObj[0]])) {  
               configkeyInputKeyValue[value] =  ""; 
               configkeyInputKeyValue[value+"error"] =  ""; 
@@ -266,23 +310,10 @@ return;
              configkeyInput:allConfigName,configkeyInputKeyValue:configkeyInputKeyValue});
         }
         alert("this else "+ selectedAtionType);
-      }
-              
+      }  
+    }     
          console.log(arrayOfChannel);
-   // this.setState({ selectedChannelB: businessName,selectedChannelCn:value});
-     
     }
-    // handleChange3(value){
-    //   const {configkeyInputKeyValue,configkeyInput} =this.state
-    //  var temp = value.split(",")
-    //   // alert(temp[0]);
-    //   // alert(temp[1]);
-
-    
-    //   configkeyInputKeyValue[temp[0]+"Meridiem"] = temp[1]
-    //   this.setState({ configkeyInputKeyValue : configkeyInputKeyValue});
-      
-    // }
     handleChange1(value){
         alert(value);
         var index = this.state.channelName.findIndex(element => element.configName == value);
@@ -332,9 +363,31 @@ return;
     const socket = socketIOClient(endpoint);
     socket.emit('clientEvent', {mac: "5ccf7f0015bc"});
     socket.on("FromAPI", data =>{
-    this.setState({ sensorsArray: data.sensors , channelArray: data.channel});
+      var tempArrayFC = [];
+      for(var i = 0;i< data.channel.length;i++){
+        if(this.state.channelArray[i] != undefined && this.state.channelArray[i] !=null ){
+         
+        if(this.state.channelArray[i].Value != this.state.channelArray[i].ActionCond){   
+            data.channel[i]["ActionCond"] =  this.state.channelArray[i].ActionCond;
+          }
+        else{
+          data.channel[i]["ActionCond"] = data.channel[i].Value;
+        }
+
+        data.channel[i]["OldValue"] =  this.state.channelArray[i].Value;
+        tempArrayFC.push(data.channel[i]);
+      }
+    else{
+      data.channel[i]["ActionCond"] =  data.channel[i].Value;
+      data.channel[i]["OldValue"] = data.channel[i].Value;
+      tempArrayFC.push(data.channel[i]);
+    }
+  }
+    
+    this.setState({ sensorsArray: data.sensors , channelArray: tempArrayFC});
     console.log(data);
-});
+      
+      });
 
 
 var onDeviceinstruction = socketIOClient(endpoint+"/onDeviceinstruction");
@@ -348,111 +401,168 @@ onDeviceinstruction.on('DeviceInstruction',function(data) {
     var dataTime =  new Date().toISOString();
     var startDate = dataTime;
    var endDate = new Date(dataTime).addDay(1).toISOString();
-    this.setState({startDatelimit: startDate, endDatelimit: endDate })
-  var ActiveBody = {
-    mac: "5ccf7f0015bc",
-    startDate : startDate,
-    endDate: endDate,
-  }
-    axios.post("http://localhost:3992/ActiveJobs",ActiveBody)
-
-    .then(json =>  {
-     
-        ActiveJobsArray = json["data"]["ActiveJob"];
-        if(json["data"]["ActiveJob"].length != 0){
-        me.setState({
-          // sentCommandArray: json["data"]["DeviceInstruction"],
-        mainActiveJobsArray :  json["data"]["ActiveJob"],
-        // ActiveJobsArray :  json["data"]["ActiveJob"]
-      }
-        );
-        console.log("This is data ");
-        console.log(ActiveJobsArray);
-
-        me.firstrender( ActiveJobsArray);
-      }
-      else{
-        me.setState({
-          // sentCommandArray: json["data"]["DeviceInstruction"],
-        mainActiveJobsArray :[],
-        // ActiveJobsArray :  json["data"]["ActiveJob"]
-      }
-        ); 
-      } 
-    });
-    this.fetch();
-
-//     var body = {
-//       mac: "5ccf7f0015bc" ,
-//       filter: this.state.filter
-     
-//   };
-
-//     axios.post("http://localhost:3992/InActiveJobs",body)
-
-//   .then(result =>  { 
-//     console.log("This is InActive log");
-//     var mainActiveJobdata  =   result.data;
-//     items   =   result.data.InActiveJob;
-//     me.setState({mainActiveJobsArray:items,'total_count':mainActiveJobdata.count,'in_prog':false});
-// console.log(json);
-//    }).catch(error =>{
-//     this.setState({mainActiveJobsArray:[],'in_prog':false});
-// }); 
-//     axios.post("http://localhost:3992/Deviceinstruction",{})
-
-//     .then(json =>  {
-//       if(json["data"]["DeviceInstruction"].length !=0){
-//       me.setState({sentCommandArray: json["data"]["DeviceInstruction"]
-//       // mainActiveJobsArray :  json["data"]["ActiveJob"],
-//       // ActiveJobsArray :  json["data"]["ActiveJob"]
-//     });
-//   }else{
-//     me.setState({sentCommandArray: []});
-
-//   }
-// });
-
-    var body = {deviceName: "5ccf7f0015bc"}
+    me.setState({startDatelimit: startDate, endDatelimit: endDate })
+    this.fetchActiveJob();
+    // this.fetch();
+   this.fetchPayload();
+   }
+   fetchPayload(){
+     var me = this;
+    var body = {mac: "5ccf7f0015bc"}
     axios.post("http://localhost:3992/ActiveActionTypeCall",body)
 
     .then(json =>  {
       if(json.length !=0){
       console.log(json["data"]);
-      me.setState({actionTypes:json["data"]})
+      var index  = json["data"].findIndex(item => item.formStructure ==  "manualOverride");
+      var containerdata = json["data"][index];
+      if(index != null && index != undefined){
+        json["data"].splice(index,1);
+      }
+
+      console.log(containerdata);
+      console.log("this is container data");
+      me.setState({actionTypes:json["data"],tilesPayloaddata:  containerdata})
       }
       else{
         me.setState({actionTypes:[]})
       }
     });
-    
-   
+    var dataTime = new Date().addDay(-1);
+    this.state.filter.Fdate= moment(dataTime);
+    this.setState({filter: this.state.filter})
    }
+   ActionOnChanel(data,index){
+          alert("this called");
+          var me = this;
+          const {channelArray,tilesPayloaddata} = this.state;
+          console.log(tilesPayloaddata);
+        console.log(data);
+        me.state.submitDataObj.payloadId   = tilesPayloaddata.payloadId;
+        me.state.submitDataObj.isDaillyJob = false;
+        me.state.submitDataObj.ChannelName = data.devicebusinessNM;
+        if( this.state.channelArray[index].ActionCond == this.state.channelArray[index].Value){
+        if(channelArray[index].ActionCond == 0){
+          swal({
+            title: "Action Being Taken ?",
+           text: `Channel Name: ${data.devicebusinessNM} Channel Action : ${ (channelArray[index].ActionCond == 1)?"ON":"OFF"} \n
+            Age of Status: 40 min  last UpdatedTime: ${dateFormat(data.dateTime, "dd-mmm HH:MM")}`,
+            // content: <p>Channel Name: {data.devicebusinessNM} <br/> Channel Action : { (channelArray[index].ActionCond == 1)?"ON":"OFF"}</p>,
+            // icon: "warning",
+            buttons: true,
+            dangerMode: true,
+          })
+          .then((send) => {
+            if (send) {
+              swal("Action Is Taken", {
+                icon: "success",
+              });
+              me.state.channelArray[index].ActionCond = 1; 
+              me.state.submitDataObj.dataBody[data.devicebusinessNM]    = 1 ;
+        me.setState({channelArray: me.state.channelArray}) 
 
+              me.callApiForAction();
+            } else {
+              swal("Your imaginary file is safe!");
+            }
+          });
+       
+          
+          }
+          else{
+          swal({
+            title: "Action Being Taken ?",
+            text: `Channel Name: ${data.devicebusinessNM} Channel Action : ${ (channelArray[index].ActionCond == 1)?"ON":"OFF"} \n
+            Age of Status: 40 min  last UpdatedTime: ${dateFormat(data.dateTime, "dd-mmm HH:MM")}`,
+            buttons: true,
+            dangerMode: true,
+          })
+          .then((send) => {
+            if (send) {
+              swal("Poof! Your imaginary file has been deleted!", {
+                icon: "success",
+              });
+              me.state.channelArray[index].ActionCond = 0; 
+              me.state.submitDataObj.dataBody[data.devicebusinessNM]    = 0 ;
+        me.setState({channelArray: me.state.channelArray}) 
+
+              me.callApiForAction();
+            } else {
+              swal("Your imaginary file is safe!");
+            }
+          });
+          }
+        }
+        else{
+          alert("This Already Click");
+        }
+        
+        console.log(index)
+   }
+fetchActiveJob(){
+  var me = this;
+  var ActiveBody = {
+    mac: "5ccf7f0015bc",
+    startDate : this.state.startDatelimit,
+    endDate: this.state.endDatelimit,
+  }
+    axios.post("http://localhost:3992/ActiveJobs",ActiveBody)
+    .then(json =>  {
+       var ActiveJobsArray = json["data"]["ActiveJob"];
+        if(json["data"]["ActiveJob"].length != 0){
+        me.setState({
+        mainActiveJobsArray :  json["data"]["ActiveJob"],
+      }
+        );
+        // console.log("This is data ");
+        // console.log(ActiveJobsArray);
+        me.firstrender(ActiveJobsArray);
+      }
+      else{
+        me.setState({
+        mainActiveJobsArray :[],
+      }
+        ); 
+      } 
+    });
+}
 
    fetch(){
+    var me = this;
     var items=[];
     this.setState({'in_prog':true});
-        var me = this;
-        var body = {
-            mac: "5ccf7f0015bc" ,
-            filter: this.state.filter
-           
-        };
-        axios.post("http://localhost:3992/InActiveJobs",body)
-           .then(function (result) {
-             var mainActiveJobdata  =   result.data;
-              items   =   result.data.InActiveJob;
+    var body = {
+      mac: "5ccf7f0015bc" ,
+      filter: this.state.filter 
+  };
+    if(this.state.filter.TypeOfJobs == "ExecutedJob"){
+     
+        axios.post("http://localhost:3992/executedJob",body)
+            .then(function (result) {
+              var mainActiveJobdata  =   result.data;
+              items   =   result.data.executedJob;
               me.setState({mAOfInactivejob:items,'total_count':mainActiveJobdata.count,'in_prog':false});
-   }
-    ).catch(error =>{
-        this.setState({mAOfInactivejob:[],'in_prog':false});
-    });
+      }).catch(error =>{
+        me.setState({mAOfInactivejob:[],'in_prog':false});
+      });
+    }else if(this.state.filter.TypeOfJobs == "PendingJob"){
+      axios.post("http://localhost:3992/PendingJob",body)
+      .then(function (result) {
+        var mainActiveJobdata  =   result.data;
+        items   =   result.data.PendingJob;
+        me.setState({mAOfInactivejob:items,'total_count':mainActiveJobdata.count,'in_prog':false});
+        }).catch(error =>{
+          me.setState({mAOfInactivejob:[],'in_prog':false});
+        });
+    }
+      
+     
 }
 changePage(page){
     this.state.filter.page  =   page;
+    // alert(page);
     this.setState({"filter":this.state.filter});
-    this.fetch();
+    // this.fetch();
     }
 
    firstrender(maindata){
@@ -478,86 +588,38 @@ changePage(page){
       var startDate = new Date(sStartdate).addHours(value).toISOString();
       var endDate= new Date(startDate).addHours(value).toISOString();
     
-      this.setState({startDate: startDate, endDate: endDate, ActionVF: 1});
+      me.setState({startDate: startDate, endDate: endDate, ActionVF: 1});
     if(this.state.endDatelimit < endDate){
-      var startDatelimit = new Date(this.state.startDatelimit).addDay(1).toISOString();
-      var endDatelimit = new Date(this.state.endDatelimit).addDay(1).toISOString();
-this.setState({startDatelimit: startDatelimit, endDatelimit:endDatelimit })
-      var ActiveBody = {
-        mac: "5ccf7f0015bc",
-        startDate : startDatelimit,
-        endDate: endDatelimit,
+      var startDatelimit = new Date(me.state.startDatelimit).addDay(1).toISOString();
+      var endDatelimit = new Date(me.state.endDatelimit).addDay(1).toISOString();
+      me.setState({startDatelimit: startDatelimit, endDatelimit:endDatelimit ,startDate: startDate, endDate: endDate,ActionVF: 1})
+      me.fetchActiveJob();
       }
-        axios.post("http://localhost:3992/ActiveJobs",ActiveBody)
-    
-        .then(json =>  {
-         
-           var ActiveJobsArray = json["data"]["ActiveJob"];
-            if(json["data"]["ActiveJob"].length != 0){
-            me.setState({
-            mainActiveJobsArray :  json["data"]["ActiveJob"],
-          });
-          alert("This is condition if called");
-          this.filterdata(ActiveJobsArray,startDate,endDate);
-    }
-  });
-}
     else{
         alert(startDate+"start date/"+"end Date"+ endDate )
-
-          this.filterdata(this.state.mainActiveJobsArray,startDate,endDate);
-          console.log("nevigation");
-          console.log(this.state.mainActiveJobsArray);
-        alert(startDate);
+        me.setState({startDate: startDate, endDate: endDate,ActionVF: 1});
+        me.filterdata(me.state.mainActiveJobsArray,startDate,endDate);
         }
     }
-    
      else{
       var startDate = new Date(sStartdate).addHours(value).toISOString();
       var endDate= sStartdate;
-      if(this.state.startDatelimit > startDate ){
-        var startDatelimit = new Date(this.state.startDatelimit).addDay(-1).toISOString();
-        var endDatelimit = new Date(this.state.endDatelimit).addDay(-1).toISOString();
-        this.setState({startDatelimit: startDatelimit, endDatelimit:endDatelimit })
-        var ActiveBody = {
-          mac: "5ccf7f0015bc",
-          startDate : startDatelimit,
-          endDate: endDatelimit,
-        }
-          axios.post("http://localhost:3992/ActiveJobs",ActiveBody)
-      
-          .then(json =>  {
-           
-           var ActiveJobsArray = json["data"]["ActiveJob"];
-              if(json["data"]["ActiveJob"].length != 0){
-              me.setState({
-              mainActiveJobsArray :  json["data"]["ActiveJob"],
-            });
-          alert("This is condition else called");
-
-            this.filterdata(ActiveJobsArray,startDate,endDate);
-      }
-    });
-  }
+      if(me.state.startDatelimit > startDate ){
+        var startDatelimit = new Date(me.state.startDatelimit).addDay(-1).toISOString();
+        var endDatelimit = new Date(me.state.endDatelimit).addDay(-1).toISOString();
+        me.setState({startDatelimit: startDatelimit, endDatelimit:endDatelimit,startDate: startDate, endDate: endDate,ActionVF: 1 })
+        me.fetchActiveJob();
+         }
       else{
-       
-          this.setState({startDate: startDate, endDate: endDate,ActionVF: 1});
-        
-        alert(startDate+"start date/"+"end Date"+ endDate )
-          this.filterdata(this.state.mainActiveJobsArray,startDate,endDate);
-          console.log("nevigation");
-          console.log(this.state.mainActiveJobsArray);
-
+          me.setState({startDate: startDate, endDate: endDate,ActionVF: 1});
+          alert(startDate+"start date/"+"end Date"+ endDate )
+          me.filterdata(me.state.mainActiveJobsArray,startDate,endDate);
         }
     }
    
    }
    filterdata(maindata,startDate,endDate){
-
-    // console.log("nevigation21 ");
     const {ActionVF} = this.state;
-    // if(maindata != 0){    // console.log(this.state.mainActiveJobsArray);
- 
       var resultdata = maindata.filter(item => item.ActionTime >= startDate && item.ActionTime <= endDate );
       alert("console is print");
       console.log("this is result data ");
@@ -576,12 +638,7 @@ this.setState({startDatelimit: startDatelimit, endDatelimit:endDatelimit })
           return a>b ? -1 : a<b ? 1 : 0;
         });
       }
-    
-  
-      this.setState({ActiveJobsArray: resultdata})
-    // }
-
-     
+      this.setState({ActiveJobsArray: resultdata}); 
    }
    selectedActioV(e){
      alert(e.target.value);
@@ -593,32 +650,49 @@ this.setState({startDatelimit: startDatelimit, endDatelimit:endDatelimit })
     console.log(e.target.value);
     this.setState({channelFil: e.target.value});
   }
+  FselectAction(value){
+    alert(value);
+    this.state.filter.Action = value;
+    this.setState({filter: this.state.filter});
+  }
+  filterByChExe(value){
+  // var me = this;
+    alert(value);
+    console.log(value);
+    this.state.filter.Fchannel = value; 
+    this.setState({filter: this.state.filter});
+  }
+  Mfiltrerbtn(){
+    const {filter} = this.state;
+    console.log(filter);
+    this.fetch();
+  }
   filtermethod(){
     const {channelFil, ActionVF,startDate,endDate} = this.state;
     var me = this;
     alert(channelFil+ " ://"+ ActionVF);
 
    var arrayofActive = this.state.mainActiveJobsArray.filter(item => item.Channel == channelFil );
-//    arrayofActive.sort(function(a, b) {
-//     a = new Date(a.ActionTime);
-//     b = new Date(b.ActionTime);
-//     return a>b ? ActionVF : a<b ? !ActionVF : 0;
-// });
-me.filterdata(arrayofActive,startDate,endDate);
-   
-// console.log("this filter method")
-// console.log(arrayofActive);
-// me.setState({ActiveJobsArray: arrayofActive})
+   me.filterdata(arrayofActive,startDate,endDate);
   }
    handleChechBox(){
     this.state.configkeyInputKeyValue["toggle"]=   !this.state.configkeyInputKeyValue["toggle"]
     this.setState({configkeyInputKeyValue:this.state.configkeyInputKeyValue });
    }
     render() {
+      
       const {selectedAtionType,formStructure,configkeyInputKeyValue,configkeyInput,sentCommandArray} = this.state;
+      var state   =   this.state;
+      var me          =   this;
+      var total_page  =   Math.ceil(this.state.total_count/this.state.filter.page_size);
+      const indexOfLastTodo = state.filter.page * state.filter.page_size;
+      const indexOfFirstTodo = indexOfLastTodo - state.filter.page_size;
+      const ExecutedJobs =  state.mAOfInactivejob.slice(indexOfFirstTodo, indexOfLastTodo)
+    
+      var page_start_index    =   ((state.filter.page-1)*state.filter.page_size);
+      // alert(this.state.filter.Fchannel)
     var  inputField = null;
     var className12 = {}
-    // console.log(this.state.sentCommandArray);
   if(formStructure == "2-input"){
     configkeyInput.forEach(function(key) {
       className12[key+"date"+"Classerror"]   =   "";
@@ -639,7 +713,19 @@ me.filterdata(arrayofActive,startDate,endDate);
       // }
      });
  
-   inputField = <div>
+   inputField =  <form class="form-horizontal" >
+    <div>
+       <span className="dropDown"> 
+        <label>Channel Setup :</label>
+               <DropdownButton  className = "AcDropS"  onSelect={this.handleChange1}
+               disabled = {this.state.channelName.length ==  0? true : null}
+                bsStyle={"primary"}
+                title={this.state.selectedChannelB || "Select Channel"}>
+                {this.state.channelName.map( (item) =>
+                <MenuItem eventKey={item.configName}>{item.businessName}</MenuItem>
+                )}
+                </DropdownButton>
+       </span>
      <div className= "divOFsingleinput">
      <label className = "AsingleInput">Daily Task:  </label>
      <label className="switch ActiveSinput">
@@ -680,19 +766,15 @@ me.filterdata(arrayofActive,startDate,endDate);
          {configkeyInputKeyValue[item+"houreerror"].length != 0 && <div className='text-danger Acfontsize'>{configkeyInputKeyValue[item+"houreerror"]}</div>}
          { configkeyInputKeyValue[item+"minerror"].length != 0 && <div className='text-danger Acfontsize'>{configkeyInputKeyValue[item+"minerror"]}</div>}
 
-            {/* <span className= "inhour">
-            <DropdownButton id= {item+"Meridiem"}  onSelect={this.handleChange3}
-                bsStyle={"primary"+className12[item+"Meridiem"+"Classerror"]}
-                title= {configkeyInputKeyValue[item+"Meridiem"]}
-                > 
-                 {["AM","PM"].map( (key) =>
-                <MenuItem   eventKey={item+","+key}>{key}</MenuItem>
-                )}
-            </DropdownButton>
-                  </span>   */}
      </div>
       </div>)}
-   </div>;
+      <div class="form-group"> 
+     <div class="col-sm-offset-2 col-sm-10">
+       <button type="button" class="btn btn-default" onClick = {this.Submit}>Submit</button>
+     </div>
+      </div>
+   </div>
+   </form>;
   }
   if(formStructure == "1-input"){
     configkeyInput.forEach(function(key) {
@@ -701,26 +783,11 @@ me.filterdata(arrayofActive,startDate,endDate);
        className12[key+"Classerror"] = "Acustmborder";
       }
      });
-    inputField = <div>
+    inputField =  <form class="form-horizontal" >
+     <div className="AcSetInterval">
     {this.state.configkeyInput.map(item =><div class="form-group">
       <label class="control-label col-sm-2" for="ON">Interval:</label>
       <div class="col-sm-10">
-      {/* <DatePicker  id = {item}
-                        selected={configkeyInputKeyValue[item]}
-                        onChange={e => {configkeyInputKeyValue[item] =e;
-                        this.setState({ configkeyInputKeyValue : configkeyInputKeyValue })}}
-                        showTimeSelect
-                        showMonthDropdown
-                        showYearDropdown
-                        timeFormat="HH:mm"
-                        timeIntervals={15}
-                        dateFormat="LLL"
-                        timeCaption="time"
-                        isClearable={true}
-                        // disabled={this.state.unabledatepiker}
-                        className=""
-                        placeholderText="Please Select Start Date"
-                         /> */}
                         <input type="number"
                         id = {item}
                         value= {configkeyInputKeyValue[item]}
@@ -734,11 +801,15 @@ me.filterdata(arrayofActive,startDate,endDate);
 
       </div>
     </div>)}
-    </div>;
+    <div class="form-group"> 
+     <div class="col-sm-offset-2 col-sm-10">
+       <button type="button" class="btn btn-default" onClick = {this.Submit}>Submit</button>
+     </div>
+      </div>
+    </div>
+    </form>;
    }
   if(formStructure == "table"){
-   
-   
      var tempArray = ["ON","OFF"];
      configkeyInput.forEach(function(key) {
      for(var i =0; i< 2;i++){
@@ -750,7 +821,21 @@ me.filterdata(arrayofActive,startDate,endDate);
      }
     })
   
-inputField = <div className = "ActiveTableH">
+inputField = 
+<form class="form-horizontal" >
+<div>
+   <span className="dropDown"> 
+        <label>Channel Setup :</label>
+               <DropdownButton  className = "AcDropS"  onSelect={this.handleChange1}
+               disabled = {this.state.channelName.length ==  0? true : null}
+                bsStyle={"primary"}
+                title={this.state.selectedChannelB}>
+                {this.state.channelName.map( (item) =>
+                <MenuItem eventKey={item.configName}>{item.businessName}</MenuItem>
+                )}
+                </DropdownButton>
+       </span>
+<div className = "ActiveTableH">
 <div  className="table-responsive">
     <Table  className="table table-hover table-sm table-bordered ">
     <thead className=''>
@@ -778,8 +863,6 @@ inputField = <div className = "ActiveTableH">
                         timeIntervals={15}
                         dateFormat="LLL"
                         timeCaption="time"
-                        // isClearable={true}
-                        // disabled={this.state.unabledatepiker}
                         className={className12["ON"+item+"Classerror"]}
                         placeholderText="Please Select Start Date"
                          /></td>
@@ -796,11 +879,8 @@ inputField = <div className = "ActiveTableH">
                         timeIntervals={15}
                         dateFormat="LLL"
                         timeCaption="time"
-                        // isClearable={true}
-                        // disabled={this.state.unabledatepiker}
                         className={className12["OFF"+item+"Classerror"]}
                         placeholderText="Please Select Start Date"
-                      
                          />
           </td>
          </tr>
@@ -809,248 +889,420 @@ inputField = <div className = "ActiveTableH">
     </tbody> 
     </Table>
 </div> 
-</div>;
+</div>
+<div class="form-group"> 
+     <div class="col-sm-offset-2 col-sm-10">
+       <button type="button" class="btn btn-default" onClick = {this.Submit}>Submit</button>
+     </div>
+      </div>
+</div>
+</form>;
   }
+  if(formStructure == "SentCommand"){
+    inputField = <div className= "col-lg-12">
+    <div className= "col-lg-6">
+      <div className ="tableactuter">
+      <p className ="ActiveP">Sent Command</p>
+          <div  className="table-responsive">
+              <Table  className="table table-hover table-sm table-bordered  cust">
+              <thead className='' style={{background: "gainsboro"}}>
+              <tr>
+              <th className='Acustmtd '> SI</th>
+              <th className='Acustmtd'>Action Type</th>
+              <th className='Acustmtd'>Channel</th>
+              <th className='Acustmtd'>Time</th>
+              <th className='Acustmtd'>Action</th>
+              </tr>
+              </thead>
+              <tbody>
+              {  this.state.sentCommandArray.map((item, i) =>
+              <tr onClick= {this.rowClicked.bind(this,item)}>
+              <td className='Acustmtd '>{1+i}</td>
+              <td className='Acustmtd '>{item.ActionType}</td>
+              <td className='Acustmtd '>{item.Channel}</td>
+              <td className='Acustmtd '>{dateFormat(item.createdTime, "dd-mmm HH:MM")}</td>
+              <td className=" btn-group">
+              <button  onClick={() =>{ 
+                   alert(i)   
+                }} 
+                 className="btn color1  btn-sm" > View</button>
+               <button  onClick={() =>{ 
+                     alert(i+"Edit");
+                }}   className="btn color2  btn-sm" > Edit</button>
+               <button  onClick={ ()=> {alert(i+ "Delete")}} className="btn color3  btn-sm" > Delete</button>
+               </td>
+              </tr>
+              )}
+              </tbody> 
+              </Table>
+          </div> 
+      </div>
+     </div> 
+     <div className= "col-lg-6">
+    <div className= "ActiveDivareainput">
+    <p className ="ActiveP textArea">Sent Command</p>
+    <textarea type="text" className ='ActivetestArea textareacust' value= {JSON.stringify( this.state.rowclickedData,undefined, 2) }/>
+    </div>
+     </div>
+     </div>;
+  }
+  if(formStructure == "ActiveCommand"){
+    inputField =   <div className ="col-lg-12">
+    <div className= "Activefilterdiv">
+    <select onChange={this.selectedChF.bind(this)}  className="form-control ActiveSelection">
+    {this.state.channelForfilter.map(item => 
+    <option className="selectcolor" value={item}>{item}</option> )}
+      </select>
+      <select    onChange={this.selectedActioV.bind(this)}  className="form-control ActiveSelection">
+       <option className="selectcolor"  value="1">Ascending </option>
+        <option className="selectcolor"value="-1" >descending</option>
+      </select>
+      <button type= "button" className= "ActivFilterBtn btn btn-sm " onClick= {this.filtermethod.bind(this)}>filter</button>
+      <ul class="pagerActive">
+       <li><a  onClick= {this.nevigation.bind(this,-4)}>Prev</a></li>
+       <li className='ActiveList'>4 hrs</li>
+       <li><a  onClick= {this.nevigation.bind(this,4)}>Next</a></li>
+       </ul>
+    </div>
+   <p className ="ActiveP">Active Command 
+   <span className= "Acustmfloat"> {dateFormat(this.state.startDate, "HH:MM dd-mmm")+" / "+ dateFormat(this.state.endDate, "HH:MM dd-mmm")}</span></p>
+       <div  className="table-responsive">
+               <Table  className="table table-hover table-sm table-bordered cust">
+               <thead className='' style={{background: "gainsboro"}}>
+               <tr>
+               <th className=' Acustmtd'> SI</th>
+               <th className='Acustmtd Apadh '>Channel</th>
+               <th className='Acustmtd '>Action</th>
+               <th className='Acustmtd'>Values</th>
+               <th className='Acustmtd '>isDailyJob</th>
+               </tr>
+               </thead>
+               <tbody>
+               { this.state.ActiveJobsArray.map((itme, i) =>
+           <tr>
+           <td className='Acustmtd '>{i+ 1}</td>
+           <td className='Acustmtd '>{itme.Channel}</td>
+           <td className='Acustmtd '>{itme.ActionType}</td>
+           <td className='Acustmtd '>{dateFormat(itme.ActionTime, "dd-mmm HH:MM")}</td>
+           <td className='Acustmtd '>{(itme.isDailyJob)?"Yes":"NO"}</td>
+           </tr>
+           )
+           }
+               </tbody> 
+               </Table>
+       </div> 
+   </div>;
+    }
+    if(formStructure == "ActiveAndPending"){
+      inputField =  <div className ="">
+      <div className= "Activefilterdiv">
+          {/* <div className= "col-lg-12">
+          </div> */}
+          <label className="OpdLable">Channel :</label>
+          <DropdownButton  className = ""  onSelect={this.filterByChExe}
+            bsStyle={"primary"}
+            title={this.state.filter.Fchannel}>
+             {this.state.channelForfilter.map( (item) =>
+            <MenuItem   eventKey={item}>{item}</MenuItem>
+            )}
+            </DropdownButton>
+            <label  className="OpdLable">Action :</label>
+               <DropdownButton  className = ""  onSelect={this.FselectAction}
+                bsStyle={"primary"}
+                title={this.state.filter.Action}>
+                <MenuItem   eventKey="OFFTime">OFFTime</MenuItem>
+                <MenuItem   eventKey="ONTime">ONTime</MenuItem>
+            </DropdownButton>
+            <label  className="OpdLable">From Date :</label>
+               <div className= "ExecutejobDate">
+              
+               <DatePicker  id = "Fromfilter"
+                    selected={this.state.filter.Fdate}
+                     onChange={this.MdateFilter}
+                     showTimeSelect
+                     showMonthDropdown
+                     showYearDropdown
+                     timeFormat="HH:mm"
+                     timeIntervals={15}
+                     dateFormat="LLL"
+                     timeCaption="time"
+                     isClearable={true}
+                    // isClearable={true}
+                    className="ExecutejobDatepiker"
+                    placeholderText="From Date"
+                     />
+                </div>
+               <button type= "button" className= "ActivFilterBtn btn btn-sm " onClick= {this.Mfiltrerbtn.bind(this)}>filter</button>
+             </div>
+            <p className ="ActiveP">Executed Jobs Command </p>
+                <div  className="table-responsive">
+                <Table  className="table table-hover table-sm table-bordered ">
+                        <thead className='' style={{background: "gainsboro"}}>
+                        <tr>
+                        <th className='Acustmtd'> SI</th>
+                        <th className='Acustmtd Apadh '>Channel</th>
+                        <th className=' Acustmtd'>Action</th>
+                        <th className='Acustmtd'>Values</th>
+                        <th className='Acustmtd'>isDailyJob</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        { state.in_prog && <tr><td colSpan={8} className='text-center'><i className='fa fa-refresh fa-spin'></i> Loading..</td></tr>}
+  { !state.in_prog && ExecutedJobs.length == 0 && <tr><td colSpan={8} className='text-center'> No Data </td></tr>}
+    { !state.in_prog && ExecutedJobs.map( (item,i) => 
+                    
+                    <tr key ={i}>
+                    <td className='Acustmtd'>{page_start_index+i + 1}</td>
+                    <td className='Acustmtd'>{item.Channel}</td>
+                    <td className='Acustmtd'>{item.ActionType}</td>
+                    <td className='Acustmtd'>{dateFormat(item.ActionTime, "dd-mmm HH:MM")}</td>
+                    <td className='Acustmtd'>{(item.isDailyJob)?"Yes":"NO"}</td>
+                    </tr>
+                    )}
+                        </tbody> 
+                        { "Pages: " +total_page }
+                        </Table>
+                </div>
+                <div className='align-right'>
+{ total_page > 1 && <CPagination  page={state.filter.page} totalpages={total_page} onPageChange={this.changePage}/>}
+    </div> 
+            </div>
 
-  var state   =   this.state;
-  var me          =   this;
-  var total_page  =   Math.ceil(this.state.total_count/this.state.filter.page_size);
+    }
 
-  var page_start_index    =   ((state.filter.page-1)*state.filter.page_size);
+
         return(
 <div className ="container-fluid ">
    <div className="row">
-   <div className= "col-lg-12">
- <button className= ''  onClick={this.toggle.bind(this)}><i className= { (this.state.open ? "fas fa-caret-up": "fas fa-caret-down")}></i></button>
+   <div className= "col-lg-10">
+ <button className= ' toggleButton'  onClick={this.toggle.bind(this)}><i className= { (this.state.open ? "fas fa-caret-up": "fas fa-caret-down")}></i></button>
 
        <div className ={"ActiveSensorsRow collapse" + (this.state.open ? ' in' : '')}>
-       {/* <div className="col-lg-1 col-xs-1 "></div> */}
-        { this.state.sensorsArray.map(item =><div className="col-lg-1 col-xs-4 "> 
+       <div className="col-lg-12">
+       <div className="SensorsWrapper">
+         <div className="SensorsOuter">
+        { this.state.sensorsArray.map(item =><div className="sensorsDive"> 
          <SensorsActive key ={item._id}
              bgclass="small-boxDActive "
-            label= {item.devicebusinessNM} 
+            label= {item.sortName} 
             takenClass= "ActivedateTime"
             P_name_class= "ActivePclass" 
             heading_class_name=" ActiveSheading"
             message={item.Value}
             dateTime = {dateFormat(item.dateTime, "dd-mmm HH:MM")}
-
            />
          </div>
          )}
-           {/* <div className="col-lg-1 col-xs-1 "></div> */}
-        </div>
-        </div>
-
- <div className = 'col-lg-12 col-sm-12'>
- 
- <div className= "line3"></div></div>
-      <div className="col-lg-6">
-        <div className= ""  id="containersimg">
-        <div className =""  id="wrapper">
-        { this.state.channelArray.map(item =>  <span className="square "> 
+      
+          </div>
+          <div className="SensorsOuter">
+          { this.state.channelArray.map((item,i) =>  <div onClick= {this.ActionOnChanel.bind(this,item,i)} className="sensorsDive"> 
          <SensorsActive key ={item._id}
-             bgclass="small-boxDActive"
-            label= {item.devicebusinessNM} 
+             bgclass= {  (item.OldValue != item.Value) ? " small-boxDActive ChannelBGColortransition":(item.ActionCond != item.Value)?"small-boxDActive  ChannelBGColorYellow ": "small-boxDActive" &&
+             (item.Value == 1)? " small-boxDActive onbackground":"small-boxDActive "}
+            label= {item.sortName} 
             takenClass= "ActivedateTime"
             P_name_class= "ActivePclass" 
             heading_class_name=" ActiveSheading"
             message={(item.Value == 1)? "ON":"OFF" }
             dateTime = {dateFormat(item.dateTime, "dd-mmm HH:MM")}
          />
-         </span>
+         </div>
          )}
-        </div>
-        </div>
-        <div className= "col-lg-12 col-sm-12"> 
-        <div className= "">
-        <span className="dropDown">
-       <label>Action Type :</label>
-               <DropdownButton  className = "AcDropS"  onSelect={this.handleChange}
-                bsStyle={"primary"}
-                title={this.state.selectedAtionType}>
-                 {this.state.actionTypes.map( (item) =>
-                <MenuItem   eventKey={item.payloadId}>{item.payloadId}</MenuItem>
-                )}
-                </DropdownButton>
-       </span>
-        <span className="dropDown"> 
-        <label>Channel Setup :</label>
-               <DropdownButton  className = "AcDropS"  onSelect={this.handleChange1}
-               disabled = {this.state.channelName.length ==  0? true : null}
-                bsStyle={"primary"}
-                title={this.state.selectedChannelB}>
-                {this.state.channelName.map( (item) =>
-                <MenuItem eventKey={item.configName}>{item.businessName}</MenuItem>
-                )}
-                </DropdownButton>
-       </span>
-    
-       <form class="form-horizontal" >
-      {inputField}
-
-      <div class="form-group"> 
-     <div class="col-sm-offset-2 col-sm-10">
-       <button type="button" class="btn btn-default" onClick = {this.Submit}>Submit</button>
-     </div>
-      </div>
-      </form>
-     </div>
-
-        </div>
+         </div>
+         </div>
+         </div>
         
         </div>
-    <div className="col-lg-6">
-            <div className= "col-lg-12">
-              <div className= "col-lg-6">
-                <div className ="tableactuter">
-                <p className ="ActiveP">Sent Command</p>
-                    <div  className="table-responsive">
-                        <Table  className="table table-hover table-sm table-bordered cust">
-                        <thead className='' style={{background: "gainsboro"}}>
-                        <tr>
-                        <th className='Acustmtd '> SI</th>
-                        <th className='Acustmtd'>Action Type</th>
-                        <th className='Acustmtd'>Channel</th>
-                        <th className='Acustmtd'>Time</th>
-                        {/* <th className='Acustmtd '>End Date Time</th> */}
-                        </tr>
-                        </thead>
-                        <tbody>
-                        {  this.state.sentCommandArray.map((item, i) =>
-                        <tr onClick= {this.rowClicked.bind(this,item)}>
-                        <td className='Acustmtd '>{1+i}</td>
-                        <td className='Acustmtd '>{item.ActionType}</td>
-                        <td className='Acustmtd '>{item.Channel}</td>
-                        <td className='Acustmtd '>{dateFormat(item.createdTime, "dd-mmm HH:MM")}</td>
-                        {/* <td className=' Acustmtd'><textarea type="text" className ='ActivetestArea' value= {JSON.stringify(item.sourceMsg,undefined, 2) }/></td> */}
-                        {/* <td className='text-center '>{item.startTime}</td> */}
-                        </tr>
-                        )
+        <div className = 'col-lg-12 col-sm-12'>
+ 
+ <div className= "line3"></div></div>
+ <div className= "col-lg-12">
+ <Nav bsStyle="pills" activeKey={this.state.selectedAtionType} onSelect={this.handleChange}>
+         { this.state.actionTypes.map(item =>  
+          <NavItem eventKey={item.payloadId} >
+           {item.payloadId}
+          </NavItem>
+         )}
+         <NavItem eventKey="SentCommand" >
+         SentCommand
+          </NavItem>
+          <NavItem eventKey="ActiveCommand" >
+          ActiveCommand
+          </NavItem>
+          <NavItem eventKey="ExecutedJobs" >
+          ExecutedJobs
+          </NavItem>
+          <NavItem eventKey="PendingJobs" >
+          PendingJobs
+          </NavItem>  
 
-                        }
-                       
-                        </tbody> 
-                        </Table>
-                    </div> 
+        </Nav> 
+        
+ </div>
+      <div className="col-lg-12">
+     
+    
+      <div className ="paddForm">
+      {inputField}
+      </div>
+      {/* <div className="col-lg-6">
+      <div className="col-xs-6">
+          <div className= "col-xs-7">
+          <label>Left Curtain 
+          </label>
+          </div>
+          <div className="col-xs-5">
+          <label className="switch ">
+                <input type="checkbox" value="Text" onChange = {()=> alert("Hello")}/>
+                <span className="slider round"></span>
+              </label>
                 </div>
-               </div> 
-               <div className= "col-lg-6">
-              <div className= "ActiveDivareainput"> 
-              <textarea type="text" className ='ActivetestArea textareacust' value= {JSON.stringify( this.state.rowclickedData,undefined, 2) }/>
-              </div>
-               </div>
-                <div className ="col-lg-12">
-                 <div className= "Activefilterdiv">
-                 <select onChange={this.selectedChF.bind(this)}  className="form-control ActiveSelection">
-                 {this.state.channelForfilter.map(item => 
-                 <option className="selectcolor" value={item}>{item}</option> )}
-                   
-                     {/* <option className="selectcolor" >NutrientPump</option>
-                     <option className="selectcolor" >BorePump</option> */}
-                   
-                   </select>
-                   <select    onChange={this.selectedActioV.bind(this)}  className="form-control ActiveSelection">
-                    <option className="selectcolor"  value="1">Ascending </option>
-                     <option className="selectcolor"value="-1" >descending</option>
-                     {/* <option className="selectcolor" >BorePump</option> */}
-                   
-                   </select>
-                   <button type= "button" className= "ActivFilterBtn btn btn-sm " onClick= {this.filtermethod.bind(this)}>filter</button>
-                   <ul class="pagerActive">
-                    <li><a  onClick= {this.nevigation.bind(this,-4)}>Prev</a></li>
-                    <li className='ActiveList'>4 hrs</li>
-                    <li><a  onClick= {this.nevigation.bind(this,4)}>Next</a></li>
-                    </ul>
-                 </div>
-                <p className ="ActiveP">Active Command 
-                <span className= "Acustmfloat"> {dateFormat(this.state.startDate, "HH:MM dd-mmm")+" / "+ dateFormat(this.state.endDate, "HH:MM dd-mmm")}</span></p>
-                    <div  className="table-responsive">
-                            <Table  className="table table-hover table-sm table-bordered cust">
-                            <thead className='' style={{background: "gainsboro"}}>
-                            <tr>
-                            <th className=' Acustmtd'> SI</th>
-                            <th className='Acustmtd Apadh '>Channel</th>
-                            <th className='Acustmtd '>Action</th>
-                            <th className='Acustmtd'>Values</th>
-                            <th className='Acustmtd '>isDailyJob</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            { this.state.ActiveJobsArray.map((itme, i) =>
-                        <tr>
-                        <td className='Acustmtd '>{i+ 1}</td>
-                        <td className='Acustmtd '>{itme.Channel}</td>
-                        <td className='Acustmtd '>{itme.ActionType}</td>
-                        <td className='Acustmtd '>{dateFormat(itme.ActionTime, "dd-mmm HH:MM")}</td>
-                        <td className='Acustmtd '>{(itme.isDailyJob)?"Yes":"NO"}</td>
-                        </tr>
-                        )
-
-                        }
-                            </tbody> 
-                            </Table>
-                    </div> 
+         </div>
+         <div className="col-xs-6">
+          <div className= "col-xs-7">
+          <label>Right Curtain 
+          </label>
+          </div>
+          <div className="col-xs-5">
+          <label className="switch ">
+                <input type="checkbox" value="Text" onChange = {()=> alert("Hello")}/>
+                <span className="slider round"></span>
+              </label>
                 </div>
-              <div className= "col-lg-12" align = "right"> 
-              <a  onClick={this.handleShow}>
-          Launch
-        </a></div>
-             
-        <Modal show={this.state.show} onHide={this.handleClose}>
-          <Modal.Header closeButton>
-            <Modal.Title></Modal.Title>
-          </Modal.Header>
-          <Modal.Body>
-          <div className ="">
-                <p className ="ActiveP">InActive Command </p>
-                    <div  className="table-responsive">
-                    <Table  className="table table-hover table-sm table-bordered ">
-                            <thead className='' style={{background: "gainsboro"}}>
-                            <tr>
-                            <th className=' text-center'> SI</th>
-                            <th className='text-center'>Channel</th>
-                            <th className='text-center '>Action</th>
-                            <th className='text-center'>Values</th>
-                            <th className='text-center '>isDailyJob</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            { state.in_prog && <tr><td colSpan={8} className='text-center'><i className='fa fa-refresh fa-spin'></i> Loading..</td></tr>}
-      { !state.in_prog && state.mAOfInactivejob.length == 0 && <tr><td colSpan={8} className='text-center'> No Data </td></tr>}
-        { !state.in_prog && this.state.mAOfInactivejob.map( (item,i) => 
-                            // { this.state.mAOfInactivejob.map((itme, i) =>
-                        <tr key ={i}>
-                        <td className='text-center '>{page_start_index+i + 1}</td>
-                        <td className=' text-center'>{item.Channel}</td>
-                        <td className='text-center'>{item.ActionType}</td>
-                        <td className='text-center'>{dateFormat(item.ActionTime, "dd-mmm HH:MM")}</td>
-                        <td className='text-center'>{(item.isDailyJob)?"Yes":"NO"}</td>
-                        </tr>
-                        )
-
-                        }
-                            </tbody> 
-                            { "Pages: " +total_page }
-                            </Table>
-                    </div>
-                    <div className='align-right'>
-{ total_page > 1 && <CPagination  page={state.filter.page} totalpages={total_page} onPageChange={this.changePage}/>}
-        </div> 
+         </div>
+         <div className="col-xs-6">
+          <div className= "col-xs-7">
+          <label>Top Curtain 
+          </label>
+          </div>
+          <div className="col-xs-5">
+          <label className="switch ">
+                <input type="checkbox" value="Text" onChange = {()=> alert("Hello")}/>
+                <span className="slider round"></span>
+              </label>
                 </div>
-
-
-          </Modal.Body>
-          <Modal.Footer>
-            {/* <Button onClick={this.handleClose}>Close</Button> */}
-          </Modal.Footer>
-        </Modal>
-            </div>
-                
-        </div>
+         </div>
+         <div className="col-xs-6">
+          <div className= "col-xs-7">
+          <label>Fan 
+          </label>
+          </div>
+          <div className="col-xs-5">
+          <label className="switch ">
+                <input type="checkbox" value="Text" onChange = {()=> alert("Hello")}/>
+                <span className="slider round"></span>
+              </label>
+                </div>
+         </div>
+         <div className="col-xs-6">
+          <div className= "col-xs-7">
+          <label>Pad 
+          </label>
+          </div>
+          <div className="col-xs-5">
+          <label className="switch ">
+                <input type="checkbox" value="Text" onChange = {()=> alert("Hello")}/>
+                <span className="slider round"></span>
+              </label>
+                </div>
+         </div>
+         <div className="col-xs-6">
+          <div className= "col-xs-7">
+          <label>CO2 Valve  
+          </label>
+          </div>
+          <div className="col-xs-5">
+          <label className="switch ">
+                <input type="checkbox" value="Text" onChange = {()=> alert("Hello")}/>
+                <span className="slider round"></span>
+              </label>
+                </div>
+         </div>
+         <div className="col-xs-6">
+          <div className= "col-xs-7">
+          <label>Fogger  
+          </label>
+          </div>
+          <div className="col-xs-5">
+          <label className="switch ">
+                <input type="checkbox" value="Text" onChange = {()=> alert("Hello")}/>
+                <span className="slider round"></span>
+              </label>
+                </div>
+         </div>
+         <div className="col-xs-6">
+          <div className= "col-xs-7">
+          <label>Irrg Pump
+          </label>
+          </div>
+          <div className="col-xs-5">
+          <label className="switch ">
+                <input type="checkbox" value="Text" onChange = {()=> alert("Hello")}/>
+                <span className="slider round"></span>
+              </label>
+                </div>
+         </div>
+         <div className="col-xs-6">
+          <div className= "col-xs-7">
+          <label>Irrg Valve1
+          </label>
+          </div>
+          <div className="col-xs-5">
+          <label className="switch ">
+                <input type="checkbox" value="Text" onChange = {()=> alert("Hello")}/>
+                <span className="slider round"></span>
+              </label>
+                </div>
+         </div>
+         <div className="col-xs-6">
+          <div className= "col-xs-7">
+          <label>Irrg Valve2  
+          </label>
+          </div>
+          <div className="col-xs-5">
+          <label className="switch ">
+                <input type="checkbox" value="Text" onChange = {()=> alert("Hello")}/>
+                <span className="slider round"></span>
+              </label>
+                </div>
+         </div>
+              
+    </div> */}
     </div>
+
 </div>
-    )
-}
+
+
+    <div className= "col-lg-2 ">
+              <div className= "ActiveCorner">
+                  <div className= "">
+                  <label>SensorNode :</label>
+                  <span>02-Feb 15:27</span>
+                  </div>
+                  <div className= "">
+                  <label>WaterSensor :</label>
+                  <span>02-Feb 15:27 </span>
+                  </div>
+                  <div className= "">
+                  <label>TDS :</label>
+                  <span>02-Feb 15:27 </span>
+                  </div>
+                {/* </div> */}
+                {/* <div className= "col-lg-12"> */}
+                <div className="col-lg-6">
+                <label>Age </label>
+                <p> 30 min</p>
+                </div>
+                <div className="col-lg-6">
+                <label>Pending </label>
+                <p> 5</p>
+                </div>
+                </div>
+         </div>
+ </div>
+</div>
+  
+)}
 }
 export default activeDashbord;

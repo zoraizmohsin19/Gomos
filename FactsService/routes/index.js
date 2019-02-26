@@ -224,7 +224,7 @@ function processFactMessages() {
 
                var id  = result[this.index]._id
                gomos.gomosLog(TRACE_DEBUG,"processFactMessages - going to process for index",this.index );
-              var currentTime= new Date().toISOString();
+              var currentTime = new Date(new Date().toISOString());
                 db.collection("MqttDump")
                 .findOneAndUpdate(
                    {
@@ -431,7 +431,7 @@ function activeDevice(db,dataToInsert,Token){
            process.hasUncaughtExceptionCaptureCallback();
               }
            try{
-            var currentTime = new Date().toISOString();
+            var currentTime = new Date(new Date().toISOString());
             db.collection("DeviceState").findOneAndUpdate({
               $and: [
                 {_id: result2[0]["_id"]},
@@ -452,12 +452,12 @@ function activeDevice(db,dataToInsert,Token){
                  .toArray(function (err, result1) {
                    if (err) {
                        gomos.errorCustmHandler("activeDevice",err);  
-                     process.hasUncaughtExceptionCaptureCallback();
+                       process.hasUncaughtExceptionCaptureCallback();
                         }
                      try{ 
                        var devicesStateKeyValue = result3.value;
                        var _id = result3.value._id;
-                       var dateTime = new Date().toISOString();
+                       var dateTime = new Date(new Date().toISOString());
                         gomos.gomosLog(TRACE_DEBUG,"this is data of DevicesSate : ",devicesStateKeyValue);
                          var deviceStateKey = Object.keys(devicesStateKeyValue);
                     
@@ -609,7 +609,7 @@ for(var i = 0 ; i< keyForRemove.length; i++){
       keysofBNm.splice(keysofBNm.indexOf(keyForRemove[i]), 1);
     }
   }
-  var dataTime = new Date().toISOString();
+  var dataTime = new Date(new Date().toISOString());
   gomos.gomosLog(TRACE_DEBUG,"this is key",keysofBNm);
   var data = {
     "mac": dataToInsert.mac,
@@ -737,7 +737,7 @@ function updatedDeviceinstruction(db,updatedData){
         gomos.errorCustmHandler("updateDeviceState",err);
         process.hasUncaughtExceptionCaptureCallback();
       }
-      gomos.gomosLog(TRACE_DEBUG,"updateDeviceState ", _id);
+      gomos.gomosLog(TRACE_DEBUG,"updateDeviceState ", id);
     }
   );
 }

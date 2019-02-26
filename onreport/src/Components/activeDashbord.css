@@ -2,15 +2,23 @@
 .tableactuter {
 
     margin: 20px 0px;
-    max-height: 132px;
-    overflow-y: scroll;
+    max-height: 320px;
+    overflow-y: auto;
     
 }
 
-.dropdown.btn-group.btn-group-primary {
+/* .dropdown.btn-group.btn-group-primary {
     margin: 20px 30px;
+} */
+.AcDropS {
+    color: black;
+    margin: 20px 30px;
+    background: white;
 }
-
+.AcDropS>.open>.dropdown-menu {
+    display: block;
+    margin-top: -20px;
+}
 
 .red-border{
     border: 1px solid red;
@@ -21,14 +29,15 @@
 }
 
 .small-boxDActive {
-    width: 99px;
+    width: 70px;
     background: white;
     border: 1px solid gainsboro;
+    margin: 4px;
 }
 .ActiveSheading{
     font-size: 20px;
-   
     text-align: center;
+    margin-bottom: 0px;
 }
 .channelStatus{
     position: relative;
@@ -152,7 +161,8 @@ li.ActiveList {
 .ActivedateTime {
     font-size: 10px;
     text-align: center;
-    margin-top: -7px;
+    margin-top: -9px;
+    margin-bottom: 2px;
 }
 /* this is slider */
 .switch {
@@ -240,16 +250,12 @@ span.Acolon {
 textarea.ActivetestArea {
     margin: 0px;
     width: 100%;
-    height: 135px;
+    height: 300px;
     margin-top: 20px;
-    font-size: 11px;
+    font-size: 14px;
 }
 .Acustmtd {
     padding: 0px !important;
-}
-.Activefilterdiv {
-    margin-bottom: 4px;
-    /* margin-top: -2px; */
 }
 .ActiveSinput {
     margin-left: 44px;
@@ -267,3 +273,102 @@ textarea.ActivetestArea {
     padding-left: 40px !important;
     padding-right: 40px !important;
 }
+.ExecutejobDate {
+    display: inline-block !important;
+}
+.ExecutejobDatepiker {
+    padding: 5px;
+    border-radius: 4px;
+    margin-left: 28px;
+}
+.modal-90w.modal-dialog {
+    width: 90%;
+}
+.OpdLable {
+    margin-right: -20px;
+}
+.toggleButton {
+    margin: 0px;
+    padding: 0px;
+    background: white;
+    border-radius: 10px;
+    border-style: none;
+}
+.AcSetInterval {
+    margin-top: 20px;
+}
+.sensorsDive {
+    display: inline-block;
+}
+.paddForm {
+    margin: 15px;
+}
+.SensorsOuter {
+    width: max-content;
+    /* overflow: hidden !important; */
+    /* overflow-x: auto; */
+}
+.SensorsWrapper {
+    overflow-x: auto;
+}
+
+.ActiveP.textArea {
+    margin-bottom: -21px;
+    margin-top: 21px;
+}
+.ActiveCorner {
+    background: rgba(185,249,174,.85);
+    height: 568px;
+    margin: -15px;
+    padding: 20px;
+}
+.ChannelBGColorYellow{
+    background: rgba(251, 255, 0, 0.87);
+    border: 1px solid #ffc800;
+    -webkit-animation-name: example1; /* Safari 4.0 - 8.0 */
+    -webkit-animation-duration: 4s; /* Safari 4.0 - 8.0 */
+    -webkit-animation-iteration-count: infinite; /* Safari 4.0 - 8.0 */
+    animation-name: example1;
+    animation-duration: 4s;
+    animation-iteration-count: infinite;
+}
+@-webkit-keyframes example1 {
+    
+    25%  {background-color:yellow;}
+    50%   {background-color:greenyellow;}
+  }
+  
+  /* Standard syntax */
+  @keyframes example1 {
+   
+    25%  {background-color:yellow; }
+    50%   {background-color:greenyellow;}
+   
+  } 
+.ChannelBGColortransition {
+    background: #04830499;
+    color: white;
+    border: 1px solid #0d2502;
+    -webkit-animation-name: example; /* Safari 4.0 - 8.0 */
+    -webkit-animation-duration: 4s; /* Safari 4.0 - 8.0 */
+    -webkit-animation-iteration-count: infinite; /* Safari 4.0 - 8.0 */
+    animation-name: example;
+    animation-duration: 4s;
+    animation-iteration-count: infinite;
+}
+
+/* Safari 4.0 - 8.0 */
+@-webkit-keyframes example {
+    50%  {background-color:green; }
+  }
+  
+  /* Standard syntax */
+  @keyframes example {   
+    50%  {background-color:green;}
+   
+  } 
+  .onbackground{
+      background: rgb(46, 207, 81);
+      border: 1px solid rgb(3, 148, 3);
+      color: white;
+  } 

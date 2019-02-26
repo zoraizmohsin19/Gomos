@@ -227,7 +227,7 @@ function handleMqttMessage(topic, message) {
            }
            if(result.length > 0 ){
             gomos.gomosLog(TRACE_PROD,"Entry in filter of Mqqt ",message.toString());
-            var dateTime = new Date().toISOString();
+            var dateTime = new Date(new Date().toISOString());
             for (var i = 0; i < messKeys.length; i++) {
               messValues[messKeys[i]] = JSON.parse(message)[messKeys[i]];
             }
@@ -304,7 +304,7 @@ function checkCriteria(db,passedAssetId, custId, subCustId,businessNmValues,  ma
       }
       if (result.length > 0) {
         for (var i = 0; i < result.length; i++) {
-         var nowDateTime = new Date().toISOString();
+         var nowDateTime = new Date(new Date().toISOString());
         if(result[i].assetId == passedAssetId){
           try{
             gomos.gomosLog(TRACE_DEBUG,"passedAssetId check for level3 passed",passedAssetId);        
