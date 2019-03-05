@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import "./activeDashbord.css"
-import {Table,DropdownButton,MenuItem,Button,Modal,NavItem ,Nav} from 'react-bootstrap';
+import {Table,DropdownButton,ButtonToolbar,MenuItem,Button,Modal,NavItem ,Nav} from 'react-bootstrap';
 import SensorsActive from "../layout/widgetofSensors/sensorsForActive";
 import axios from "axios";
 import moment from 'moment';
@@ -9,6 +9,7 @@ import dateFormat  from  "dateformat";
 import socketIOClient from "socket.io-client";
 import CPagination from "../layout/Pagination";
 import swal from 'sweetalert';
+// import QueryBuilder from 'react-querybuilder';
 class activeDashbord extends Component {
     constructor(){
       super();
@@ -31,8 +32,10 @@ class activeDashbord extends Component {
         endDatelimit: "",
         channelFil: "",
         ActionVF: 1,
+        sentCommandIndex: "",
         mAOfInactivejob: [],
         channelArray: [],
+        channelAlerrModel:{},
         sensorsArray: [],
         channelForfilter:[],        
         ActiveJobsArray: [],
@@ -42,6 +45,16 @@ class activeDashbord extends Component {
         configkeyInputKeyValue: {},
         rowclickedData :{},
         tilesPayloaddata: {},
+        climateSensor: [],
+        ClimateIndex: "",
+        SourceClimateData: [],
+        Climate:{
+          selectedfilter: "",
+        },
+        ArrayForClimateTable: [],
+        selectedClimateAction: [],
+        selectedExpression:{},
+        // selectedfilFSensor: "",
         'total_count':0,
         'filter':{
           "TypeOfJobs": "",
@@ -53,6 +66,7 @@ class activeDashbord extends Component {
         },
         'in_prog':false,
         submitDataObj:{
+          mac: "5ccf7f0015bc",
          subCustCd: "001",
          CustCd: "DevCub",
          DeviceName : "PilotGH_002T",
@@ -61,6 +75,15 @@ class activeDashbord extends Component {
          isDaillyJob: "",
          ChannelName: "",
         },
+        CriteriaForOP:{
+           spCd: "ASAGRISY",
+          subCustCd: "001",
+          CustCd: "DevCub",
+          DeviceName : "PilotGH_002T",
+           mac: "5ccf7f0015bc"
+        },
+        deviceAllData:{}
+  
       }
 
       this.fetch  =   this.fetch.bind(this);
@@ -74,6 +97,10 @@ class activeDashbord extends Component {
       this.Submit = this.Submit.bind(this);
       this.MdateFilter = this.MdateFilter.bind(this);
       this.filterByChExe = this.filterByChExe.bind(this);
+      this.handleSubmit = this.handleSubmit.bind(this)
+      this.SubmitForParameter = this.SubmitForParameter.bind(this);
+      // this.filterClimateFun = this.filterClimateFun.bind(this);
+      // this.handelMExpression = this.handelMExpression.bind(this);
       // this.rowClicked = this.rowClicked.bind(this)
       // this. handleChange3 =this.handleChange3.bind(this);
     }
@@ -135,7 +162,7 @@ for(var key =0; key < configkeyInput.length; key++) {
     if(formStructure == "2-input"){
       for(var key =0; key < configkeyInput.length; key++) {
         configkeyInputKeyValue[configkeyInput[key]+"date"+"error"] =  ""; 
-        configkeyInputKeyValue[configkeyInput[key]+"houre"+"error"] = "";
+        configkeyInputKeyValue[configkeyInput[key]+"hour"+"error"] = "";
         configkeyInputKeyValue[configkeyInput[key]+"min"+"error"] = "";
         // configkeyInputKeyValue[key+"Meridiem"+"error"] ="";
        me.setState({configkeyInputKeyValue: configkeyInputKeyValue})
@@ -149,10 +176,10 @@ for(var key =0; key < configkeyInput.length; key++) {
             // document.getElementById(key+"date").focus();
             return;
          }}
-        if(configkeyInputKeyValue[configkeyInput[key]+"houre"] == undefined  || configkeyInputKeyValue[configkeyInput[key]+"houre"]  == null || configkeyInputKeyValue[configkeyInput[key]+"houre"] == ''){
-          configkeyInputKeyValue[configkeyInput[key]+"houre"+"error"] = "Please provide : "+configkeyInput[key]+"houre"+" error";
+        if(configkeyInputKeyValue[configkeyInput[key]+"hour"] == undefined  || configkeyInputKeyValue[configkeyInput[key]+"hour"]  == null || configkeyInputKeyValue[configkeyInput[key]+"hour"] == ''){
+          configkeyInputKeyValue[configkeyInput[key]+"hour"+"error"] = "Please provide : "+configkeyInput[key]+"hour"+" error";
           me.setState({configkeyInputKeyValue: configkeyInputKeyValue})
-          document.getElementById(configkeyInput[key]+"houre").focus();
+          document.getElementById(configkeyInput[key]+"hour").focus();
           return;
        }
      
@@ -167,10 +194,10 @@ for(var key =0; key < configkeyInput.length; key++) {
 
  for(var key =0; key < configkeyInput.length; key++) {
         if(configkeyInputKeyValue["toggle"]==true){
-          dataToSendApi[configkeyInput[key]] = "00:"+configkeyInputKeyValue[configkeyInput[key]+"houre"]+":"+configkeyInputKeyValue[configkeyInput[key]+"min"]+":"+"*:*:*"; 
+          dataToSendApi[configkeyInput[key]] = "00:"+configkeyInputKeyValue[configkeyInput[key]+"hour"]+":"+configkeyInputKeyValue[configkeyInput[key]+"min"]+":"+"*:*:*"; 
         }
         else{
-          dataToSendApi[configkeyInput[key]] = "00:"+configkeyInputKeyValue[configkeyInput[key]+"houre"]+":"+configkeyInputKeyValue[configkeyInput[key]+"min"]+":"+dateFormat(configkeyInputKeyValue[configkeyInput[key]+"date"], "dd:mm:yy"); 
+          dataToSendApi[configkeyInput[key]] = "00:"+configkeyInputKeyValue[configkeyInput[key]+"hour"]+":"+configkeyInputKeyValue[configkeyInput[key]+"min"]+":"+dateFormat(configkeyInputKeyValue[configkeyInput[key]+"date"], "dd:mm:yy"); 
         }   
          } 
           // dataToSendApi[selectedChannelB] = 1; 
@@ -192,12 +219,36 @@ for(var key =0; key < configkeyInput.length; key++) {
     me.setState({submitDataObj :me.state.submitDataObj});
     me.callApiForAction();
 }
+SubmitForParameter(){
+  // var me = this;
+  alert("Hello Takreem ")
+  var dataToSendApi ={};
+var me = this;
+  const {selectedAtionType, configkeyInput, configkeyInputKeyValue} =this.state;
+  for(var key =0; key < configkeyInput.length; key++) {
+    dataToSendApi[configkeyInput[key]] = configkeyInputKeyValue[configkeyInput[key]];
+     } 
+    me.state.submitDataObj.payloadId   = selectedAtionType;
+    me.state.submitDataObj.dataBody    = dataToSendApi;
+    me.state.submitDataObj.isDaillyJob = "";
+    me.state.submitDataObj.ChannelName = "";
+    me.setState({submitDataObj :me.state.submitDataObj});
+
+  me.callApiForAction();
+}
     callApiForAction(){
     var me = this;
       axios.post("http://localhost:3992/ActiveDAction",me.state.submitDataObj)
       .then(json =>  {
-        alert(json)
-  
+      if(json["data"] == "success"){
+       
+        swal("Success!", "You Send Action!", "success");
+      }
+      else{
+        swal("Error!", "You Send Action!", "error");
+         
+      }
+      console.log(json)
       });
     }
   
@@ -207,13 +258,13 @@ for(var key =0; key < configkeyInput.length; key++) {
       handleShowExecuted() {
      var me = this;
      this.state.filter.TypeOfJobs = "ExecutedJob"
-     me.setState({filter :this.state.filter  , show: true });
+     me.setState({filter :this.state.filter   });
      me.fetch();
       }
       handleShowPending(){
         var me = this;
         this.state.filter.TypeOfJobs = "PendingJob"
-        me.setState({filter :this.state.filter  , show: true });
+        me.setState({filter :this.state.filter });
         this.fetch();
       }
       MdateFilter(value){
@@ -228,12 +279,20 @@ for(var key =0; key < configkeyInput.length; key++) {
       if(selectedAtionType == "SentCommand" || 
           selectedAtionType == "ActiveCommand" ||
           selectedAtionType == "ExecutedJobs"||
-          selectedAtionType == "PendingJobs"){
+          selectedAtionType == "PendingJobs"|| 
+          selectedAtionType == "ClimateParameter" ||
+          selectedAtionType ==  "ClimateControl"
+          ){
         me.setState({formStructure: selectedAtionType ,selectedAtionType: selectedAtionType});
         if(selectedAtionType == "ExecutedJobs"){
           this.setState({formStructure: "ActiveAndPending"});
           this.handleShowExecuted()
         }
+        me.setState({formStructure: selectedAtionType ,selectedAtionType: selectedAtionType});
+        // if(selectedAtionType == "ClimateParameter"){
+        //   this.setState({formStructure: "ClimateParameter"});
+      
+        // }
         if(selectedAtionType == "PendingJobs"){
           this.setState({formStructure: "ActiveAndPending"});
           this.handleShowPending()
@@ -253,8 +312,8 @@ for(var key =0; key < configkeyInput.length; key++) {
         if(keysofObj.length >= 2){
           keysofObj.splice(keysofObj.indexOf("Channel"), 1);
           console.log(objectpayload.sensors[keysofObj[0]]);
-          var  allConfigName = Object.values(objectpayload.sensors[keysofObj[0]]);
-          console.log(allConfigName);
+          var  allBusinessName = Object.values(objectpayload.sensors[keysofObj[0]]);
+          console.log(allBusinessName);
           if(formStructure == "table"){
             var configkeyInputKeyValue = {};
             var tempArray = ["ON","OFF"];
@@ -267,22 +326,22 @@ for(var key =0; key < configkeyInput.length; key++) {
             }
             this.setState({ selectedAtionType: selectedAtionType,
                channelName: arrayOfChannel,
-               configkeyInput:allConfigName,configkeyInputKeyValue:configkeyInputKeyValue});
+               configkeyInput:allBusinessName,configkeyInputKeyValue:configkeyInputKeyValue});
           }else if(formStructure == "2-input"){
             var configkeyInputKeyValue = {};
            alert("this else of 2-input");
            configkeyInputKeyValue["toggle"] = false;
               for (let [key, value] of Object.entries(objectpayload.sensors[keysofObj[0]])) {  
                 configkeyInputKeyValue[value+"date"] =  ""; 
-                configkeyInputKeyValue[value+"houre"] = "";
+                configkeyInputKeyValue[value+"hour"] = "";
                 configkeyInputKeyValue[value+"min"] = "";
                 configkeyInputKeyValue[value+"date"+"error"] =  ""; 
-                configkeyInputKeyValue[value+"houre"+"error"] = "";
+                configkeyInputKeyValue[value+"hour"+"error"] = "";
                 configkeyInputKeyValue[value+"min"+"error"] = "";
               }
             this.setState({ selectedAtionType: selectedAtionType,
                channelName: arrayOfChannel,
-               configkeyInput:allConfigName,configkeyInputKeyValue:configkeyInputKeyValue});
+               configkeyInput:allBusinessName,configkeyInputKeyValue:configkeyInputKeyValue});
           }
         
         }else{
@@ -299,7 +358,7 @@ for(var key =0; key < configkeyInput.length; key++) {
           var configkeyInputKeyValue = {};
          
           var  keysofObj = Object.keys(objectpayload.sensors)
-          var  allConfigName = Object.values(objectpayload.sensors[keysofObj[0]]);
+          var  allBusinessName = Object.values(objectpayload.sensors[keysofObj[0]]);
             for (let [key, value] of Object.entries(objectpayload.sensors[keysofObj[0]])) {  
               configkeyInputKeyValue[value] =  ""; 
               configkeyInputKeyValue[value+"error"] =  ""; 
@@ -307,12 +366,42 @@ for(var key =0; key < configkeyInput.length; key++) {
             }
           this.setState({ selectedAtionType: selectedAtionType,
              channelName: [],
-             configkeyInput:allConfigName,configkeyInputKeyValue:configkeyInputKeyValue});
+             configkeyInput:allBusinessName,configkeyInputKeyValue:configkeyInputKeyValue});
+        }
+        if(formStructure == "SetParameter"){
+          var configkeyInputKeyValue = {};
+          var  allBusinessName =[];
+          var  keysofObj = Object.keys(objectpayload.sensors)
+          var obj = this.getStrucOfClimateParam();
+            allBusinessName = obj.businessName;
+             for (var i =0; i< obj.businessName.length; i++) {  
+               configkeyInputKeyValue[obj.businessName[i]] =  ""; 
+               configkeyInputKeyValue[obj.businessName[i]+"max"] = obj.max[i];
+               configkeyInputKeyValue[obj.businessName[i]+"min"] =  obj.min[i];
+             }
+           
+            
+            console.log("This is Object of configkeyInputKeyValue")
+            console.log(configkeyInputKeyValue)
+           this.setState({ selectedAtionType: selectedAtionType,
+              // channelName: arrayOfChannel,
+              configkeyInput:allBusinessName,configkeyInputKeyValue:configkeyInputKeyValue});
+         }
         }
         alert("this else "+ selectedAtionType);
-      }  
+      
     }     
          console.log(arrayOfChannel);
+    }
+    getStrucOfClimateParam(){
+      var sensorsArray = this.state.deviceAllData["sensors"];
+      var data = sensorsArray.filter(item => item.climateControl.flag == "Y"); 
+      var allBusinessName =  data.map(item => item.configName);
+      var businessName  = data.map(item => item.businessName);
+      var max  = data.map(item => item.climateControl.max);
+      var min  = data.map(item => item.climateControl.min);
+      var json = {allBusinessName ,businessName,max,min }
+     return json;
     }
     handleChange1(value){
         alert(value);
@@ -323,10 +412,10 @@ for(var key =0; key < configkeyInput.length; key++) {
             }
        callForActionType(value,deviceName){
        }
-       rowClicked(data){
-            alert(data);
-            console.log(data);
-            this.setState({rowclickedData: data});
+       rowClicked(data,index){
+            // alert(data);
+            // console.log(data);
+            this.setState({rowclickedData: data, sentCommandIndex: index});
        }
       
     toggle() {
@@ -345,7 +434,7 @@ for(var key =0; key < configkeyInput.length; key++) {
     return this;
 }
      var ActiveJobsArray = [];
-    axios.post("http://localhost:3992/getActiveDashBoardDevice",{})
+    axios.post("http://localhost:3992/getActiveDashBoardDevice",{mac: this.state.CriteriaForOP.mac})
 
     .then(json =>  {
       console.log("this componentDidMount getActiveDashBoardDevice");
@@ -361,7 +450,7 @@ for(var key =0; key < configkeyInput.length; key++) {
     });
     const { endpoint } = this.state;
     const socket = socketIOClient(endpoint);
-    socket.emit('clientEvent', {mac: "5ccf7f0015bc"});
+    socket.emit('clientEvent', {mac: this.state.CriteriaForOP.mac});
     socket.on("FromAPI", data =>{
       var tempArrayFC = [];
       for(var i = 0;i< data.channel.length;i++){
@@ -388,10 +477,11 @@ for(var key =0; key < configkeyInput.length; key++) {
     console.log(data);
       
       });
-
-
+this.fetchForClimate();
+this.fetchClimateControlAllData();
+this.fetchClimateControlDevice();
 var onDeviceinstruction = socketIOClient(endpoint+"/onDeviceinstruction");
-onDeviceinstruction.emit('onDeviceinstructionClientEvent', { mac : "5ccf7f0015bc", type: "SentInstruction"});
+onDeviceinstruction.emit('onDeviceinstructionClientEvent', { mac : this.state.CriteriaForOP.mac, type: "SentInstruction"});
 onDeviceinstruction.on('DeviceInstruction',function(data) {
   // console.log("this is second")
     me.setState({sentCommandArray: data["DeviceInstruction"]});
@@ -408,7 +498,7 @@ onDeviceinstruction.on('DeviceInstruction',function(data) {
    }
    fetchPayload(){
      var me = this;
-    var body = {mac: "5ccf7f0015bc"}
+    var body = {mac: this.state.CriteriaForOP.mac}
     axios.post("http://localhost:3992/ActiveActionTypeCall",body)
 
     .then(json =>  {
@@ -432,66 +522,84 @@ onDeviceinstruction.on('DeviceInstruction',function(data) {
     this.state.filter.Fdate= moment(dataTime);
     this.setState({filter: this.state.filter})
    }
+   fetchClimateControlDevice(){
+    axios.post("http://localhost:3992/getActiveDAction",{mac:this.state.CriteriaForOP.mac})
+    .then(json =>  {
+     this.setState({deviceAllData: json["data"]})
+    })
+   }
+   fetchForClimate(){
+     var me =this;
+     alert("Hello This Working")
+     //  THIS IS GETING SENSORNAME BASED ON SPCD,CUSTCD,SUBCUSTCD
+     fetch("http://localhost:3992/getSensorNames?spCode=" +this.state.CriteriaForOP.spCd +
+     "&&custCd=" + this.state.CriteriaForOP.CustCd + "&&subCustCd=" + this.state.CriteriaForOP.subCustCd)
+        .then(response => response.json())
+        .then(json =>  {
+          alert(json)
+        var climateSensor =  json.map( x =>  { return  x  });
+        me.setState({climateSensor : climateSensor});
+   // console.log(json );
+ });
+   }
+timeDifference(date1, date2) {
+  var oneDay = 24 * 60 * 60; // hours*minutes*seconds
+  var oneHour = 60 * 60; // minutes*seconds
+  var oneMinute = 60; // 60 seconds
+  var firstDate = date1.getTime(); // convert to milliseconds
+  var secondDate = date2.getTime(); // convert to milliseconds
+  var seconds = Math.round(Math.abs(firstDate - secondDate) / 1000); //calculate the diffrence in seconds
+  // the difference object
+  var difference = {
+    "days": 0,
+    "hours": 0,
+    "minutes": 0,
+    "seconds": 0,
+  }
+  //calculate all the days and substract it from the total
+  while (seconds >= oneDay) {
+    difference.days++;
+    seconds -= oneDay;
+  }
+  //calculate all the remaining hours then substract it from the total
+  while (seconds >= oneHour) {
+    difference.hours++;
+    seconds -= oneHour;
+  }
+  //calculate all the remaining minutes then substract it from the total 
+  while (seconds >= oneMinute) {
+    difference.minutes++;
+    seconds -= oneMinute;
+  }
+  //the remaining seconds :
+  difference.seconds = seconds;
+  //return the difference object
+  return difference;
+}
    ActionOnChanel(data,index){
-          alert("this called");
+          // alert("this called");
           var me = this;
           const {channelArray,tilesPayloaddata} = this.state;
-          console.log(tilesPayloaddata);
-        console.log(data);
+        //   console.log(tilesPayloaddata);
+       var age = this.timeDifference(new Date(data.valueChangeAt),new Date(new Date().toISOString()))
+      //  console.log(age)
         me.state.submitDataObj.payloadId   = tilesPayloaddata.payloadId;
         me.state.submitDataObj.isDaillyJob = false;
         me.state.submitDataObj.ChannelName = data.devicebusinessNM;
         if( this.state.channelArray[index].ActionCond == this.state.channelArray[index].Value){
-        if(channelArray[index].ActionCond == 0){
-          swal({
-            title: "Action Being Taken ?",
-           text: `Channel Name: ${data.devicebusinessNM} Channel Action : ${ (channelArray[index].ActionCond == 1)?"ON":"OFF"} \n
-            Age of Status: 40 min  last UpdatedTime: ${dateFormat(data.dateTime, "dd-mmm HH:MM")}`,
-            // content: <p>Channel Name: {data.devicebusinessNM} <br/> Channel Action : { (channelArray[index].ActionCond == 1)?"ON":"OFF"}</p>,
-            // icon: "warning",
-            buttons: true,
-            dangerMode: true,
-          })
-          .then((send) => {
-            if (send) {
-              swal("Action Is Taken", {
-                icon: "success",
-              });
-              me.state.channelArray[index].ActionCond = 1; 
-              me.state.submitDataObj.dataBody[data.devicebusinessNM]    = 1 ;
-        me.setState({channelArray: me.state.channelArray}) 
 
-              me.callApiForAction();
-            } else {
-              swal("Your imaginary file is safe!");
-            }
-          });
-       
-          
-          }
-          else{
-          swal({
-            title: "Action Being Taken ?",
-            text: `Channel Name: ${data.devicebusinessNM} Channel Action : ${ (channelArray[index].ActionCond == 1)?"ON":"OFF"} \n
-            Age of Status: 40 min  last UpdatedTime: ${dateFormat(data.dateTime, "dd-mmm HH:MM")}`,
-            buttons: true,
-            dangerMode: true,
-          })
-          .then((send) => {
-            if (send) {
-              swal("Poof! Your imaginary file has been deleted!", {
-                icon: "success",
-              });
-              me.state.channelArray[index].ActionCond = 0; 
-              me.state.submitDataObj.dataBody[data.devicebusinessNM]    = 0 ;
-        me.setState({channelArray: me.state.channelArray}) 
-
-              me.callApiForAction();
-            } else {
-              swal("Your imaginary file is safe!");
-            }
-          });
-          }
+        // if(channelArray[index].ActionCond == 0){
+         var obj = {}
+         obj["channelName"] = data.devicebusinessNM;
+         obj["currentStatus"] = channelArray[index].ActionCond;
+         obj["age"]= age.hours+":"+ age.minutes;
+         obj["UpdatedTime"] = dateFormat(data.dateTime, "dd-mmm HH:MM");
+         obj["index"] = index;
+         me.state.channelAlerrModel = obj;
+       me.setState({show: true,
+         channelArray: me.state.channelArray,
+         channelAlerrModel:  this.state.channelAlerrModel,
+         submitDataObj:me.state.submitDataObj}) 
         }
         else{
           alert("This Already Click");
@@ -499,6 +607,87 @@ onDeviceinstruction.on('DeviceInstruction',function(data) {
         
         console.log(index)
    }
+   handleSubmit(){
+     var me = this;
+     const {channelAlerrModel,channelArray, submitDataObj} = this.state;
+     if(Object.keys(submitDataObj.dataBody).length !== 0){
+      submitDataObj.dataBody = {};
+     }
+     if(channelArray[channelAlerrModel["index"]].ActionCond  == 1){
+      //  alert(submitDataObj.dataBody[channelAlerrModel["channelName"]])
+      // console.log(submitDataObj)
+      channelArray[channelAlerrModel["index"]].ActionCond = 0; 
+      submitDataObj.dataBody[channelAlerrModel["channelName"]]    = 0 ;
+      me.setState({channelArray: channelArray, submitDataObj: submitDataObj ,show: false})
+      me.callApiForAction();
+     }
+     else{
+        // alert(  submitDataObj.dataBody[channelAlerrModel["channelName"]])
+      channelArray[channelAlerrModel["index"]].ActionCond = 1; 
+      submitDataObj.dataBody[channelAlerrModel["channelName"]]  = 1 ;
+      me.setState({channelArray: channelArray, submitDataObj: submitDataObj,show: false})
+      me.callApiForAction();
+     } 
+}
+
+fetchClimateControlAllData(){
+  function toString(o) {
+    function fromRules(r) {
+      return r.a.map(one=>`(${toString(one)})`).join(` ${r.c} `);
+    }
+    function fromField(f) {
+      return `${f.f} ${f.o} ${f.v}`;
+    }
+    return (o.a? fromRules(o): fromField(o));
+  }
+function tokeyValue(o){
+  var temp ="";
+  for(var j= 0; j< o.length; j++){
+    var key = Object.keys(o[j]);
+    for(var i = 0; i < key.length; i++){
+      temp += ` ${key[i]} : ${o[j][key[i]]}`; 
+    }
+    
+  }
+  return temp;
+}
+  axios.post("http://localhost:3992/getAllClimateControl",{subCustCd:this.state.CriteriaForOP.subCustCd,custCd:this.state.CriteriaForOP.CustCd})
+  .then(json =>  {
+    console.log("This fetchClimateControlAllData");
+var temp=[];
+    for(var i =0; i< json["data"].length; i++){
+        var tempObj ={};
+        tempObj["actionsOn"] = tokeyValue(json["data"][i].actionsOn);
+        tempObj["expression"] = toString(json["data"][i].expression);
+        tempObj["sensorsType"] = json["data"][i].sensorsType;
+        tempObj["process"] = json["data"][i].process;
+        tempObj["state"] = json["data"][i].state;
+        temp.push(tempObj);
+    }
+    this.setState({ArrayForClimateTable:temp,SourceClimateData: json["data"]
+  
+  });
+   console.log(json);
+  });
+}
+ClimateRow(index){
+  const {SourceClimateData}= this.state;
+  var selectedExpression =SourceClimateData[index].expression;
+  var selectedClimateAction =[];
+  for(var i =0; i< SourceClimateData[index].actionsOn.length;i++){
+ var key = Object.keys(SourceClimateData[index].actionsOn[i])
+ for(var j =0; j< key.length; j++){
+   var obj ={};
+   obj["key"] = key[j];
+   obj["value"] = SourceClimateData[index].actionsOn[i][key[j]];
+   selectedClimateAction.push(obj);
+ }
+  }
+  alert(index);
+// console.log(selectedExpression)
+console.log(selectedClimateAction)
+this.setState({selectedExpression,selectedClimateAction, ClimateIndex: index});
+}
 fetchActiveJob(){
   var me = this;
   var ActiveBody = {
@@ -662,6 +851,12 @@ changePage(page){
     this.state.filter.Fchannel = value; 
     this.setState({filter: this.state.filter});
   }
+  filterClimateFun(value){
+    var me = this;
+    alert(value)
+    this.state.Climate.selectedfilter = value;
+    this.setState({selectedfilFSensor: value })
+  }
   Mfiltrerbtn(){
     const {filter} = this.state;
     console.log(filter);
@@ -679,6 +874,10 @@ changePage(page){
     this.state.configkeyInputKeyValue["toggle"]=   !this.state.configkeyInputKeyValue["toggle"]
     this.setState({configkeyInputKeyValue:this.state.configkeyInputKeyValue });
    }
+   handelMExpression(){
+     this.setState({MExpression: false})
+   }
+ 
     render() {
       
       const {selectedAtionType,formStructure,configkeyInputKeyValue,configkeyInput,sentCommandArray} = this.state;
@@ -699,9 +898,9 @@ changePage(page){
       if(configkeyInputKeyValue[key+"date"+"error"].length != 0){
        className12[key+"date"+"Classerror"] = "Acustmborder";
       }
-      className12[key+"houre"+"Classerror"]   =   "";
-      if(configkeyInputKeyValue[key+"houre"+"error"].length != 0){
-       className12[key+"houre"+"Classerror"] = "Acustmborder";
+      className12[key+"hour"+"Classerror"]   =   "";
+      if(configkeyInputKeyValue[key+"hour"+"error"].length != 0){
+       className12[key+"hour"+"Classerror"] = "Acustmborder";
       }
       className12[key+"min"+"Classerror"]   =   "";
       if(configkeyInputKeyValue[key+"min"+"error"].length != 0){
@@ -715,17 +914,17 @@ changePage(page){
  
    inputField =  <form class="form-horizontal" >
     <div>
-       <span className="dropDown"> 
+    <div className="dropDown">
         <label>Channel Setup :</label>
                <DropdownButton  className = "AcDropS"  onSelect={this.handleChange1}
                disabled = {this.state.channelName.length ==  0? true : null}
-                bsStyle={"primary"}
+               bsStyle={"Awhite"}
                 title={this.state.selectedChannelB || "Select Channel"}>
                 {this.state.channelName.map( (item) =>
                 <MenuItem eventKey={item.configName}>{item.businessName}</MenuItem>
                 )}
                 </DropdownButton>
-       </span>
+       </div>
      <div className= "divOFsingleinput">
      <label className = "AsingleInput">Daily Task:  </label>
      <label className="switch ActiveSinput">
@@ -751,19 +950,19 @@ changePage(page){
                          </span>
 
                          <span className= "inhour">
-           <input type="number"   id= {item+"houre"} className={"houremin "+ className12[item+"houre"+"Classerror"]} name = {configkeyInputKeyValue[item+"houre"]} maxLength="2" value ={configkeyInputKeyValue[item+"houre"]}  
-          onChange = {e => {configkeyInputKeyValue[item+"houre"] =e.target.value ;
+           <input type="number"   id= {item+"hour"} className={"hourmin "+ className12[item+"hour"+"Classerror"]} name = {configkeyInputKeyValue[item+"hour"]} maxLength="2" value ={configkeyInputKeyValue[item+"hour"]}  
+          onChange = {e => {configkeyInputKeyValue[item+"hour"] =e.target.value ;
             this.setState({ configkeyInputKeyValue : configkeyInputKeyValue })}}  placeholder="HH"/> 
             </span>
 
            <span className= "Acolon"> :</span>
             <span className= "inhour">
-            <input type="number"  id= {item+"min"}  className={"houremin  "+ className12[item+"min"+"Classerror"]} name = {configkeyInputKeyValue[item+"min"]} maxLength="2" value ={configkeyInputKeyValue[item+"min"]}  
+            <input type="number"  id= {item+"min"}  className={"hourmin  "+ className12[item+"min"+"Classerror"]} name = {configkeyInputKeyValue[item+"min"]} maxLength="2" value ={configkeyInputKeyValue[item+"min"]}  
             onChange = {e => {configkeyInputKeyValue[item+"min"] =e.target.value ;
             this.setState({ configkeyInputKeyValue : configkeyInputKeyValue })}}  placeholder="MM"/>               
              </span> 
          {configkeyInputKeyValue[item+"dateerror"].length != 0 && <div className='text-danger Acfontsize'>{configkeyInputKeyValue[item+"dateerror"]}</div>}
-         {configkeyInputKeyValue[item+"houreerror"].length != 0 && <div className='text-danger Acfontsize'>{configkeyInputKeyValue[item+"houreerror"]}</div>}
+         {configkeyInputKeyValue[item+"hourerror"].length != 0 && <div className='text-danger Acfontsize'>{configkeyInputKeyValue[item+"hourerror"]}</div>}
          { configkeyInputKeyValue[item+"minerror"].length != 0 && <div className='text-danger Acfontsize'>{configkeyInputKeyValue[item+"minerror"]}</div>}
 
      </div>
@@ -776,6 +975,28 @@ changePage(page){
    </div>
    </form>;
   }
+  if(formStructure == "SetParameter"){
+    inputField =  <div className ="">
+    <div className="col-xs-12">
+    {this.state.configkeyInput.map(item =><div>
+    <div className= "col-xs-6">
+    <label> Set {item} :</label>
+    </div>
+    <div className= "col-xs-6">
+    <input type="range" name={configkeyInputKeyValue[item]} max = {configkeyInputKeyValue[item+"max"]}
+    min = {configkeyInputKeyValue[item+"min"]}
+    onChange={(e)=>{ configkeyInputKeyValue[item] =e.target.value
+     this.setState({configkeyInputKeyValue : configkeyInputKeyValue})}}/><span>{configkeyInputKeyValue[item]}</span>
+    </div>
+    </div>
+    )}
+    </div>
+    <div class="col-sm-offset-2 col-sm-10">
+       <button type="button" class="btn btn-default" onClick = {this.SubmitForParameter}>Submit</button>
+     </div>
+    </div>
+  }
+
   if(formStructure == "1-input"){
     configkeyInput.forEach(function(key) {
       className12[key+"Classerror"]   =   "";
@@ -824,17 +1045,17 @@ changePage(page){
 inputField = 
 <form class="form-horizontal" >
 <div>
-   <span className="dropDown"> 
+   <div className="dropDown"> 
         <label>Channel Setup :</label>
                <DropdownButton  className = "AcDropS"  onSelect={this.handleChange1}
                disabled = {this.state.channelName.length ==  0? true : null}
-                bsStyle={"primary"}
-                title={this.state.selectedChannelB}>
+               bsStyle={"Awhite"}
+                title={this.state.selectedChannelB || "Select Channel"}>
                 {this.state.channelName.map( (item) =>
                 <MenuItem eventKey={item.configName}>{item.businessName}</MenuItem>
                 )}
                 </DropdownButton>
-       </span>
+       </div>
 <div className = "ActiveTableH">
 <div  className="table-responsive">
     <Table  className="table table-hover table-sm table-bordered ">
@@ -916,15 +1137,13 @@ inputField =
               </thead>
               <tbody>
               {  this.state.sentCommandArray.map((item, i) =>
-              <tr onClick= {this.rowClicked.bind(this,item)}>
+              <tr>
               <td className='Acustmtd '>{1+i}</td>
               <td className='Acustmtd '>{item.ActionType}</td>
               <td className='Acustmtd '>{item.Channel}</td>
               <td className='Acustmtd '>{dateFormat(item.createdTime, "dd-mmm HH:MM")}</td>
               <td className=" btn-group">
-              <button  onClick={() =>{ 
-                   alert(i)   
-                }} 
+              <button   onClick= {this.rowClicked.bind(this,item,1+i)}
                  className="btn color1  btn-sm" > View</button>
                <button  onClick={() =>{ 
                      alert(i+"Edit");
@@ -940,7 +1159,7 @@ inputField =
      </div> 
      <div className= "col-lg-6">
     <div className= "ActiveDivareainput">
-    <p className ="ActiveP textArea">Sent Command</p>
+    <p className ="ActiveP textArea">Sent Command = {this.state.sentCommandIndex}</p>
     <textarea type="text" className ='ActivetestArea textareacust' value= {JSON.stringify( this.state.rowclickedData,undefined, 2) }/>
     </div>
      </div>
@@ -1000,15 +1219,15 @@ inputField =
           </div> */}
           <label className="OpdLable">Channel :</label>
           <DropdownButton  className = ""  onSelect={this.filterByChExe}
-            bsStyle={"primary"}
-            title={this.state.filter.Fchannel}>
+           bsStyle={"Awhite"}
+            title={this.state.filter.Fchannel || "Select Channel"}>
              {this.state.channelForfilter.map( (item) =>
             <MenuItem   eventKey={item}>{item}</MenuItem>
             )}
             </DropdownButton>
             <label  className="OpdLable">Action :</label>
                <DropdownButton  className = ""  onSelect={this.FselectAction}
-                bsStyle={"primary"}
+               bsStyle={"Awhite"}
                 title={this.state.filter.Action}>
                 <MenuItem   eventKey="OFFTime">OFFTime</MenuItem>
                 <MenuItem   eventKey="ONTime">ONTime</MenuItem>
@@ -1069,7 +1288,7 @@ inputField =
             </div>
 
     }
-
+  
 
         return(
 <div className ="container-fluid ">
@@ -1135,7 +1354,13 @@ inputField =
           </NavItem>
           <NavItem eventKey="PendingJobs" >
           PendingJobs
-          </NavItem>  
+          </NavItem> 
+          <NavItem eventKey="ClimateParameter" >
+          ClimateParameter
+          </NavItem>   
+          <NavItem eventKey="ClimateControl" >
+          ClimateControl
+          </NavItem>   
 
         </Nav> 
         
@@ -1145,7 +1370,108 @@ inputField =
     
       <div className ="paddForm">
       {inputField}
-      </div>
+      <table>
+      <tr>
+        <td>
+      <label>Select Template</label>
+        </td>
+        <td>
+      <DropdownButton  className = "" 
+            onSelect={this.filterClimateFun}
+           bsStyle={"Awhite"}
+            title={ "Select Template Type"}>
+             {/* {this.state.climateSensor.map( (item) =>
+            <MenuItem   eventKey={item}>{item}</MenuItem>
+             )}  */}
+            </DropdownButton>
+            </td>
+    
+            <td>
+      <label>Select Version</label>
+      </td>
+      <td>
+      <DropdownButton  className = "" 
+            onSelect={this.filterClimateFun}
+           bsStyle={"Awhite"}
+            title={ "Select Version"}>
+             {/* {this.state.climateSensor.map( (item) =>
+            <MenuItem   eventKey={item}>{item}</MenuItem>
+             )}  */}
+            </DropdownButton>
+            </td>
+
+      </tr>
+      </table>
+   </div>
+    <div className= "col-sm-12">
+    <div className ="col-sm-8">
+      <div className= "Activefilterdiv">
+          <label className="OpdLable">Sensor Type :</label>
+          <DropdownButton  className = "" 
+            onSelect={this.filterClimateFun}
+           bsStyle={"Awhite"}
+            title={this.state.selectedfilFSensor || "Select Sensor Type"}>
+             {this.state.climateSensor.map( (item) =>
+            <MenuItem   eventKey={item}>{item}</MenuItem>
+             )} 
+            </DropdownButton>
+          
+               <button type= "button" className= "ActivFilterBtn btn btn-sm ">filter</button>
+             </div>
+            <p className ="ActiveP" >Climate Control Table </p>
+                <div  className="table-responsive">
+                <Table  className="table table-hover table-sm table-bordered ">
+                        <thead className='' style={{background: "gainsboro"}}>
+                        <tr>
+                        <th className='Acustmtd'> SI</th>
+                        <th className='Acustmtd'>Sensor Type</th>
+                        <th className='Acustmtd'>Expression</th>
+                        <th className=' Acustmtd'>Action</th>
+                        <th className='Acustmtd'>Flag</th>
+                       
+                        </tr>
+                        </thead>
+                        <tbody>
+                
+     { this.state.ArrayForClimateTable.map( (item,i) => 
+                    
+                    <tr key ={i} onClick ={this.ClimateRow.bind(this,i)}>
+                    <td className='Acustmtd'>{i + 1}</td>
+                    <td className='Acustmtd'>{item.sensorsType}</td>
+                    <td className='Acustmtd'>{item.expression}</td>
+                    <td className='Acustmtd'>{item.actionsOn}</td>
+                    <td className='Acustmtd'>{item.process}</td>
+                    </tr>
+                    )}
+                        </tbody> 
+                        {/* { "Pages: " +total_page } */}
+                        </Table>
+                </div>
+                {/* <div className='align-right'>
+{ total_page > 1 && <CPagination  page={state.filter.page} totalpages={total_page} onPageChange={this.changePage}/>}
+    </div>  */}
+            </div>
+            <div className="col-sm-4">
+         <div className="">
+         <p className ="ActiveP " >Serial No. :{this.state.ClimateIndex} </p>
+    <textarea type="text" className ='ActivetestArea ClimateTExM textareacust' value= {JSON.stringify(this.state.selectedExpression,undefined, 2) }/>
+         
+         </div>
+         <table className="">
+         {this.state.selectedClimateAction.map((item, i)=>
+              <tr key= {i}>
+             <td> <label>{item.key}</label></td>
+            <td> <label className="switch ActiveSinput">
+              <input type="checkbox" checked= {(item.value ==1)? true: false} value="Text" onChange = {this.handleChechBox.bind(this)} disabled/>
+              <span className="slider round"></span>
+              </label>
+              </td>
+              </tr>
+         )}
+        
+         </table>
+            </div>
+    </div>
       {/* <div className="col-lg-6">
       <div className="col-xs-6">
           <div className= "col-xs-7">
@@ -1300,7 +1626,72 @@ inputField =
                 </div>
                 </div>
          </div>
+         
  </div>
+
+
+ {/* <Modal show={this.state.MExpression} onHide={this.handelMExpression}
+             dialogClassName=""
+             aria-labelledby="example-custom-modal-styling-title">
+          <Modal.Header closeButton>
+            <Modal.Title id="example-custom-modal-styling-title" ></Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+      <div className= "row">
+     
+    
+     
+      </div>
+
+
+      
+ </Modal.Body>
+          <Modal.Footer>
+            <label className="Mlabel">Action Requested: <u> Switch {(this.state.channelAlerrModel.currentStatus == 1)?"OFF":"ON"}</u>  &nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;Please Confirm ?</label>
+            <button className="btn btn-sm " onClick = {this.handleClose}>Cancel</button>
+            <button   className="btn btn-sm btn-success" onClick = {this.handleSubmit} >Submit</button>
+           
+           
+          </Modal.Footer>
+        </Modal> */}
+
+
+ <Modal show={this.state.show} onHide={this.handleClose}
+             dialogClassName=""
+             aria-labelledby="example-custom-modal-styling-title">
+          <Modal.Header closeButton>
+            <Modal.Title id="example-custom-modal-styling-title" ></Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+      <div className= "row">
+      <div className= "col-xs-12">
+      <label>Channel Name :</label> <span>{this.state.channelAlerrModel.channelName}</span>
+      </div>
+      <div className= "col-xs-5">
+      <label>Current Status :</label> <span>{(this.state.channelAlerrModel.currentStatus == 1)?"ON":"OFF"}</span>
+      </div>
+      <div className= "col-xs-7">
+      <label> Last Updated Time :</label> <span>{this.state.channelAlerrModel.UpdatedTime}</span>
+      </div>
+    
+      <div className= "col-xs-7">
+      <label>Channel is  {(this.state.channelAlerrModel.currentStatus == 1)?"ON":"OFF"} since :</label> <span>{this.state.channelAlerrModel.age} hrs.</span>
+      </div>
+    
+     
+      </div>
+
+
+      
+ </Modal.Body>
+          <Modal.Footer>
+            <label className="Mlabel">Action Requested: <u> Switch {(this.state.channelAlerrModel.currentStatus == 1)?"OFF":"ON"}</u>  &nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;Please Confirm ?</label>
+            <button className="btn btn-sm " onClick = {this.handleClose}>Cancel</button>
+            <button   className="btn btn-sm btn-success" onClick = {this.handleSubmit} >Submit</button>
+           
+           
+          </Modal.Footer>
+        </Modal>
 </div>
   
 )}

@@ -11,9 +11,9 @@ import 'react-datepicker/dist/react-datepicker.css';
 import * as FileSaver from "file-saver";
 import * as ExcelJs from "exceljs/dist/exceljs.min.js";
 import swal from 'sweetalert';
-
-
-
+import {DropdownButton,MenuItem} from 'react-bootstrap';
+import dateFormat  from  "dateformat";
+import ReactMultiSelectCheckboxes from 'react-multiselect-checkboxes';
 class Menu extends Component {
     constructor(){
         super();
@@ -24,6 +24,8 @@ class Menu extends Component {
             sensorNm:[],
             ArrayOfSPs: [],
             ArrayOfCusts: [],
+            ArrayofAsset: [],
+            ArrayofDevice: [],
             ArrayOfSubCusts:[],
             operations: [],
             tableDataToSend: [],
@@ -31,21 +33,30 @@ class Menu extends Component {
             selectedSPValue:'',
             selectedCustValue :'',
             selectedSubCustValue:'',
-            selectedSensorValue: '',
+            selectedAssetValue: '',
+            selectedDeviceValue: '',
+            selectedSensorValueArray: [],
             operationSelected: '',
             endRange: '',
             startRange: '',
             equalsValue: '',
             custDisable: true,
             subCustDisable:  true,
+            assetDisable: true,
+            deviceDisable: true,
             sensorDisable : true,
             parameterDisable : true,
             disableFromDt: true,
             disableToDt : true,
             unabledatepiker:true,
+            Disabledsubmit: true,
             DynamicInput: '',
             startDate: moment(),
-            endDate :  moment()
+            endDate :  moment(),
+            // options : [
+            //   { label: 'Thing 1', value: 1},
+            //   { label: 'Thing 2', value: 2},
+            // ]
         }
         this.handleOperation = this.handleOperation.bind(this);
         this.handleChange = this.handleChange.bind(this);
@@ -71,8 +82,8 @@ componentDidMount() {
     .then(response => response.json())
     .then(json =>  {
     var spCd =  json.map( x =>  { return  x.spCd  });
-    this.setState({ArrayOfSPs : spCd});
-    spCd.push("ALL");
+    // this.setState({ArrayOfSPs : spCd});
+    // spCd.push("ALL");
     this.setState({spCd : spCd});
    }
     );
@@ -84,43 +95,60 @@ onSubmit = (e) => {
   this.getAllDetails();
   }
   //This For handler for Service Provider
-  handleSp = (e) => {
-  this.setState({ selectedSPValue : e.target.value })
-  this.getCustomer(e.target.value)
+  handleSp = (value) => {
+  this.setState({ selectedSPValue : value })
+  this.getCustomer(value)
   this.setState({ custDisable : null})
  
   }
   //This IS FOR HANDLE CUSTOMER 
-  handleCutMr =(e) =>{
+  handleCutMr =(value) =>{
     const {selectedSPValue} = this.state;
-    // alert(e.target.value + "customer")
-    this.setState({ selectedCustValue : e.target.value })
-    this.getSubCustmer(selectedSPValue, e.target.value  );
+    // // // alert(e.target.value + "customer")
+    this.setState({ selectedCustValue :value })
+    this.getSubCustmer(selectedSPValue, value  );
     this.setState({  subCustDisable : null})
    }
    //THIS IS FOR HANDLE SUBCUSTOMER
-   handleSubCs =(e) =>{
-    const {selectedSPValue,selectedCustValue} = this.state;
-    // alert(e.target.value + "SubCustomer")
-    this.setState({ selectedSubCustValue : e.target.value })
-    this.getSensor(selectedSPValue,selectedCustValue, e.target.value )
+   handleSubCs =(value) =>{
+ 
+    // // // alert(e.target.value + "SubCustomer")
+    this.setState({ selectedSubCustValue : value })
+    this.getAsset(value)
+    this.setState({ assetDisable : null})
+   }
+   handleAsset =(value) =>{
+    // // // alert(e.target.value + "SubCustomer")
+    this.setState({ selectedAssetValue : value })
+    this.getDevice(value);
+    this.setState({ deviceDisable : null})
+   }
+   handleDevice =(value) =>{
+    const {selectedSPValue,selectedCustValue,selectedSubCustValue} = this.state;
+    // // // alert(e.target.value + "SubCustomer")
+    this.setState({ selectedDeviceValue : value.DeviceName, })
+    this.getSensor(selectedSPValue,selectedCustValue,selectedSubCustValue )
     this.setState({ sensorDisable : null})
    }
  //THIS IS FOR HANDLE  SENSOR  
-   handleSensorNm =(e) =>{
+   handleSensorNm(obj){
     const {selectedSPValue,selectedCustValue,selectedSubCustValue} = this.state;
-    // alert(e.target.value)
-    this.setState({ selectedSensorValue : e.target.value })
-    this.selectOpertion(selectedSPValue,selectedCustValue,selectedSubCustValue,e.target.value)
-    console.log(this.state.selectedSPValue , "hello sensorNm");
+    // // // alert(e.target.value)
+    var tempArray= []
+    for(var i =0; i< obj.length; i++){
+      tempArray.push(obj[i].label);
+    }
+    this.setState({ selectedSensorValueArray : tempArray,Disabledsubmit : null })
+    // this.selectOpertion(selectedSPValue,selectedCustValue,selectedSubCustValue,value)
+    // // console.log(this.state.selectedSPValue , "hello sensorNm");
     
-    this.setState({ parameterDisable : null})
+    this.setState({parameterDisable : null, unabledatepiker : null})
    }
    //THIS HANDER OF OPERATION SELECTION
-   handleOperation =(e) => {
+   handleOperation =(value) => {
      var me = this;
-     me.setState({ dynInput : e.target.value, operationSelected :  e.target.value,
-      unabledatepiker : null })
+     me.setState({ dynInput : value, operationSelected :  value,
+      })
     }
 //THIS METHOD FOR GET CUSTOMER CODE
     getCustomerApi(SendForSp){
@@ -128,25 +156,25 @@ onSubmit = (e) => {
       .then(response => response.json())
       .then(json =>  {
       var custCd =  json.map( x =>  { return  x._id  });
-      this.setState({ArrayOfCusts: custCd });
-      custCd.push("ALL");
-      console.log(custCd);
+      // this.setState({ArrayOfCusts: custCd });
+      // custCd.push("ALL");
+      // // console.log(custCd);
        this.setState({custCd : custCd});
      });
     }
   // THIS METHOD FOR SELECT CUSTOMER CODE BASED ON SERVICE PROVIDER
   getCustomer(selectedSPValue){
      
-    if (selectedSPValue == "ALL" ) {
+    // if (selectedSPValue == "ALL" ) {
     
-      this.getCustomerApi(this.state.ArrayOfSPs)
-    }
-    else {
+    //   this.getCustomerApi(this.state.ArrayOfSPs)
+    // }
+    // else {
 
       this.getCustomerApi(selectedSPValue)
     
 
-  }
+  // }
   }
   //THIS IS  API FOR GET SUBCUSTOMER BASED ON SERVICE PROVIDER AND CUSTOMER CODE
   getSubCustomerApi(SendForSp,SendFroCustCD){
@@ -155,32 +183,67 @@ onSubmit = (e) => {
       .then(response => response.json())
       .then(json =>  {
       var subCustCd =  json.map( x =>  { return  x._id  });
-      this.setState({ArrayOfSubCusts: subCustCd });
-      subCustCd.push("ALL");
-      console.log(subCustCd);
+      // this.setState({ArrayOfSubCusts: subCustCd });
+      // subCustCd.push("ALL");
+      // // console.log(subCustCd);
       this.setState({subCustCd : subCustCd});
-      console.log(json );
+      // // console.log(json );
       
 });
   }
   //THIS IS FOR SELECTION OF SUB-CUSTOMER BASED ON SERVICE PROVIDER AND CUSTOMER CODE
   getSubCustmer(selectedSPValue, selectedCustValue){
-    if (selectedSPValue == "ALL" &&  selectedCustValue == "ALL") {
-     this.getSubCustomerApi(this.state.ArrayOfSPs,this.state.ArrayOfCusts)
+    // if (selectedSPValue == "ALL" &&  selectedCustValue == "ALL") {
+    //  this.getSubCustomerApi(this.state.ArrayOfSPs,this.state.ArrayOfCusts)
     
-    }
-    else if (selectedCustValue == "ALL") {
-       this.getSubCustomerApi(selectedSPValue,this.state.ArrayOfCusts)
-      // alert("sp"+selectedSPValue + "csAll"+ selectedCustValue );
-    }
-    else if (selectedSPValue == "ALL") {
+    // }
+    // else if (selectedCustValue == "ALL") {
+    //    this.getSubCustomerApi(selectedSPValue,this.state.ArrayOfCusts)
+    //   // // // alert("sp"+selectedSPValue + "csAll"+ selectedCustValue );
+    // }
+    // else if (selectedSPValue == "ALL") {
       
-        this.getSubCustomerApi(this.state.ArrayOfSPs,selectedCustValue)
-      // alert("spAll"+selectedSPValue + "cs"+ selectedCustValue );
-    }
-    else {
+    //     this.getSubCustomerApi(this.state.ArrayOfSPs,selectedCustValue)
+    //   // // // alert("spAll"+selectedSPValue + "cs"+ selectedCustValue );
+    // }
+    // else {
       this.getSubCustomerApi(selectedSPValue,selectedCustValue)
-    }
+    // }
+}
+//THIS IS GET ASSET BASED CRITERIA
+getAsset(subCutomerValue){
+this.getAssetApi(subCutomerValue);
+}
+//THIS IS GET DEVICE 
+getDevice(Asset){
+  this.getDeviceApi(Asset);
+}
+//THIS API FOR GET ALL ASSET 
+getAssetApi(SubCustomer){
+  var me = this;
+  fetch("http://localhost:3992/getAssets?subCustCd="+SubCustomer )
+  .then(response => response.json())
+  .then(json =>  {
+    // // // alert(json)
+  // var Asset =  json[0];
+  me.setState({ArrayofAsset: json });
+  // // console.log(Asset)
+  // console.log(json );
+  
+});
+}
+
+getDeviceApi(Asset){
+  var me = this;
+  fetch("http://localhost:3992/getDevice?assetId="+Asset )
+  .then(response => response.json())
+  .then(json =>  {
+   
+  me.setState({ArrayofDevice: json });
+  // // console.log(Asset)
+  // console.log(json );
+  
+});
 }
 //THIS API FOR GET SENSOR  BASED ON SERVICE PROVIDER , CUSTOMER CODE, SUBCUSTOMER CODE
 getSensorApi(SendForSp,SendFroCustCD,SendForSbCd){
@@ -190,45 +253,45 @@ getSensorApi(SendForSp,SendFroCustCD,SendForSbCd){
        .then(json =>  {
        var sensorNm =  json.map( x =>  { return  x  });
        this.setState({sensorNm : sensorNm});
-       console.log(json );
+       // console.log(json );
      });
 }
 
 //THIS IS SELECTION OF SENSORE BASED ON SERVICE PROVIDER , CUSTOMER CODE, SUBCUSTOMER CODE
   getSensor( selectedSPValue,selectedCustValue, selectedSubCustValue){
-    if (selectedSPValue == "ALL" && selectedCustValue == "ALL" && selectedSubCustValue == "ALL") {
-     this.getSensorApi(this.state.ArrayOfSPs,this.state.ArrayOfCusts,this.state.ArrayOfSubCusts)
-      //  alert("AllSp"+ selectedSPValue +"AllCstCd"+selectedCustValue +"AllSubCst" +selectedSubCustValue )
-    }
-    else if (selectedSPValue == "ALL" && selectedSubCustValue == "ALL") {
-        this.getSensorApi(this.state.ArrayOfSPs,selectedCustValue,this.state.ArrayOfSubCusts)
-      // alert("AllSp"+ selectedSPValue +"CstCd"+selectedCustValue +"AllSubCst" +selectedSubCustValue )
-    }
-    else if (selectedSPValue == "ALL" && selectedCustValue == "ALL") {
-        this.getSensorApi(this.state.ArrayOfSPs, this.state.ArrayOfCusts,selectedSubCustValue)
-      // alert("AllSp"+ selectedSPValue +"AllCstCd"+selectedCustValue +"SubCst" +selectedSubCustValue )
-    }
-    else if (selectedSubCustValue === "ALL" && selectedCustValue === "ALL") {
-        this.getSensorApi(selectedSPValue, this.state.ArrayOfCusts,this.state.ArrayOfSubCusts)
-      // alert("Sp"+ selectedSPValue +"AllCstCd"+selectedCustValue +"SubCst" +selectedSubCustValue )
-    }
-    else if (selectedCustValue == "ALL") {
-        this.getSensorApi(selectedSPValue, this.state.ArrayOfCusts,selectedSubCustValue)
-      // alert("Sp"+ selectedSPValue +"AllCstCd"+selectedCustValue +"SubCst" +selectedSubCustValue )
-    }
-    else if (selectedSPValue == "ALL") {
-        this.getSensorApi(this.state.ArrayOfSPs, selectedCustValue,selectedSubCustValue)
-      // alert("AllSp"+ selectedSPValue +"CstCd"+selectedCustValue +"SubCst" +selectedSubCustValue )
-    }
-    else if (selectedSubCustValue == "ALL") {
-            this.getSensorApi(selectedSPValue, selectedCustValue,this.state.ArrayOfSubCusts)
-      // alert("Sp"+ selectedSPValue +"CstCd"+selectedCustValue +"AllSubCst" +selectedSubCustValue )
-    }
-    else {
+    // if (selectedSPValue == "ALL" && selectedCustValue == "ALL" && selectedSubCustValue == "ALL") {
+    //  this.getSensorApi(this.state.ArrayOfSPs,this.state.ArrayOfCusts,this.state.ArrayOfSubCusts)
+    //   //  // // alert("AllSp"+ selectedSPValue +"AllCstCd"+selectedCustValue +"AllSubCst" +selectedSubCustValue )
+    // }
+    // else if (selectedSPValue == "ALL" && selectedSubCustValue == "ALL") {
+    //     this.getSensorApi(this.state.ArrayOfSPs,selectedCustValue,this.state.ArrayOfSubCusts)
+    //   // // // alert("AllSp"+ selectedSPValue +"CstCd"+selectedCustValue +"AllSubCst" +selectedSubCustValue )
+    // }
+    // else if (selectedSPValue == "ALL" && selectedCustValue == "ALL") {
+    //     this.getSensorApi(this.state.ArrayOfSPs, this.state.ArrayOfCusts,selectedSubCustValue)
+    //   // // // alert("AllSp"+ selectedSPValue +"AllCstCd"+selectedCustValue +"SubCst" +selectedSubCustValue )
+    // }
+    // else if (selectedSubCustValue === "ALL" && selectedCustValue === "ALL") {
+    //     this.getSensorApi(selectedSPValue, this.state.ArrayOfCusts,this.state.ArrayOfSubCusts)
+    //   // // // alert("Sp"+ selectedSPValue +"AllCstCd"+selectedCustValue +"SubCst" +selectedSubCustValue )
+    // }
+    // else if (selectedCustValue == "ALL") {
+    //     this.getSensorApi(selectedSPValue, this.state.ArrayOfCusts,selectedSubCustValue)
+    //   // // // alert("Sp"+ selectedSPValue +"AllCstCd"+selectedCustValue +"SubCst" +selectedSubCustValue )
+    // }
+    // else if (selectedSPValue == "ALL") {
+    //     this.getSensorApi(this.state.ArrayOfSPs, selectedCustValue,selectedSubCustValue)
+    //   // // // alert("AllSp"+ selectedSPValue +"CstCd"+selectedCustValue +"SubCst" +selectedSubCustValue )
+    // }
+    // else if (selectedSubCustValue == "ALL") {
+    //         this.getSensorApi(selectedSPValue, selectedCustValue,this.state.ArrayOfSubCusts)
+    //   // // // alert("Sp"+ selectedSPValue +"CstCd"+selectedCustValue +"AllSubCst" +selectedSubCustValue )
+    // }
+    // else {
      
         this.getSensorApi(selectedSPValue, selectedCustValue,selectedSubCustValue)
-        // alert("Sp"+ selectedSPValue +"CstCd"+selectedCustValue +"SubCst" +selectedSubCustValue )
-    }
+        // // // alert("Sp"+ selectedSPValue +"CstCd"+selectedCustValue +"SubCst" +selectedSubCustValue )
+    // }
   }
   //THIS IS API FOR OPERTION SELECTION BASED ON SERVICE PROVIDER , CUSTOMER CODE, SUBCUSTOMER AND SELECTED SENSORE CODE
   opertionApi(SendForSp,SendFroCustCD,SendForSbCd,SendForSensor){
@@ -240,47 +303,47 @@ getSensorApi(SendForSp,SendFroCustCD,SendForSbCd){
        if(json[0] !== null && json[0]!== undefined ){
         operations = Object.values(json[0]);
         this.setState({operations : operations});
-        console.log(json[0]);
-        console.log(operations);
+        // console.log(json[0]);
+        // console.log(operations);
        }
       
    });  
   }
   //THIS METHOD FOR SELECTE OPERTION BASED ON SERVICE PROVIDER , CUSTOMER CODE, SUBCUSTOMER AND SELECTED SENSORE CODE
-  selectOpertion(selectedSPValue,selectedCustValue,selectedSubCustValue,selectedSensorValue){
-    if (selectedSPValue == "ALL" && selectedCustValue == "ALL" && selectedSubCustValue == "ALL") {
-          this.opertionApi(this.state.ArrayOfSPs,this.state.ArrayOfCusts,this.state.ArrayOfSubCusts,selectedSensorValue)  
-      //  alert("sensorNm"+"AllSp"+ selectedSPValue +"AllCstCd"+selectedCustValue +"AllSubCst" +selectedSubCustValue + selectedSensorValue) 
-    }
-    else if (selectedSPValue == "ALL" && selectedSubCustValue == "ALL") {
+  selectOpertion(selectedSPValue,selectedCustValue,selectedSubCustValue,selectedSensorValueArray){
+    // if (selectedSPValue == "ALL" && selectedCustValue == "ALL" && selectedSubCustValue == "ALL") {
+    //       this.opertionApi(this.state.ArrayOfSPs,this.state.ArrayOfCusts,this.state.ArrayOfSubCusts,selectedSensorValueArray)  
+    //   //  // // alert("sensorNm"+"AllSp"+ selectedSPValue +"AllCstCd"+selectedCustValue +"AllSubCst" +selectedSubCustValue + selectedSensorValueArray) 
+    // }
+    // else if (selectedSPValue == "ALL" && selectedSubCustValue == "ALL") {
        
-          this.opertionApi(this.state.ArrayOfSPs,selectedCustValue ,this.state.ArrayOfSubCusts,selectedSensorValue) 
-      // alert("sensorNm"+"AllSp"+ selectedSPValue +"CstCd"+selectedCustValue +"AllSubCst" +selectedSubCustValue + selectedSensorValue) 
-      }
-    else if (selectedSPValue == "ALL" && selectedCustValue == "ALL") { 
-    this.opertionApi(this.state.ArrayOfSPs, this.state.ArrayOfCusts ,selectedSubCustValue,selectedSensorValue)      
-      // alert("sensorNm"+"AllSp"+ selectedSPValue +"AllCstCd"+selectedCustValue +"SubCst" +selectedSubCustValue + selectedSensorValue) 
-    }
-    else if (selectedSubCustValue == "ALL" && selectedCustValue == "ALL") {
-     this.opertionApi(selectedSPValue, this.state.ArrayOfCusts ,this.state.ArrayOfSubCusts,selectedSensorValue) 
-      // alert("sensorNm"+"Sp"+ selectedSPValue +"AllCstCd"+selectedCustValue +"AllSubCst" +selectedSubCustValue + selectedSensorValue) 
-    }
-    else if (selectedCustValue == "ALL") {
-        this.opertionApi(selectedSPValue, this.state.ArrayOfCusts ,selectedSubCustValue,selectedSensorValue)     
-      // alert("sensorNm"+"Sp"+ selectedSPValue +"AllCstCd"+selectedCustValue +"SubCst" +selectedSubCustValue + selectedSensorValue) 
-    }
-    else if (selectedSPValue == "ALL") { 
-        this.opertionApi(this.state.ArrayOfSPs, selectedCustValue ,selectedSubCustValue,selectedSensorValue)  
-      // alert("sensorNm"+"AllSp"+ selectedSPValue +"CstCd"+selectedCustValue +"SubCst" +selectedSubCustValue + selectedSensorValue) 
-    }
-    else if (selectedSubCustValue == "ALL") {
-        this.opertionApi(selectedSPValue, selectedCustValue ,this.state.ArrayOfSubCusts,selectedSensorValue) 
-      // alert("sensorNm"+"Sp"+ selectedSPValue +"CstCd"+selectedCustValue +"AllSubCst" +selectedSubCustValue + selectedSensorValue) 
-    }
-    else {
-     this.opertionApi(selectedSPValue, selectedCustValue ,selectedSubCustValue,selectedSensorValue)   
-      // alert("sensorNm"+"Sp"+ selectedSPValue +"CstCd"+selectedCustValue +"SubCst" +selectedSubCustValue + selectedSensorValue) 
-    }   
+    //       this.opertionApi(this.state.ArrayOfSPs,selectedCustValue ,this.state.ArrayOfSubCusts,selectedSensorValueArray) 
+    //   // // // alert("sensorNm"+"AllSp"+ selectedSPValue +"CstCd"+selectedCustValue +"AllSubCst" +selectedSubCustValue + selectedSensorValueArray) 
+    //   }
+    // else if (selectedSPValue == "ALL" && selectedCustValue == "ALL") { 
+    // this.opertionApi(this.state.ArrayOfSPs, this.state.ArrayOfCusts ,selectedSubCustValue,selectedSensorValueArray)      
+    //   // // // alert("sensorNm"+"AllSp"+ selectedSPValue +"AllCstCd"+selectedCustValue +"SubCst" +selectedSubCustValue + selectedSensorValueArray) 
+    // }
+    // else if (selectedSubCustValue == "ALL" && selectedCustValue == "ALL") {
+    //  this.opertionApi(selectedSPValue, this.state.ArrayOfCusts ,this.state.ArrayOfSubCusts,selectedSensorValueArray) 
+    //   // // // alert("sensorNm"+"Sp"+ selectedSPValue +"AllCstCd"+selectedCustValue +"AllSubCst" +selectedSubCustValue + selectedSensorValueArray) 
+    // }
+    // else if (selectedCustValue == "ALL") {
+    //     this.opertionApi(selectedSPValue, this.state.ArrayOfCusts ,selectedSubCustValue,selectedSensorValueArray)     
+    //   // // // alert("sensorNm"+"Sp"+ selectedSPValue +"AllCstCd"+selectedCustValue +"SubCst" +selectedSubCustValue + selectedSensorValueArray) 
+    // }
+    // else if (selectedSPValue == "ALL") { 
+    //     this.opertionApi(this.state.ArrayOfSPs, selectedCustValue ,selectedSubCustValue,selectedSensorValueArray)  
+    //   // // // alert("sensorNm"+"AllSp"+ selectedSPValue +"CstCd"+selectedCustValue +"SubCst" +selectedSubCustValue + selectedSensorValueArray) 
+    // }
+    // else if (selectedSubCustValue == "ALL") {
+    //     this.opertionApi(selectedSPValue, selectedCustValue ,this.state.ArrayOfSubCusts,selectedSensorValueArray) 
+    //   // // // alert("sensorNm"+"Sp"+ selectedSPValue +"CstCd"+selectedCustValue +"AllSubCst" +selectedSubCustValue + selectedSensorValueArray) 
+    // }
+    // else {
+     this.opertionApi(selectedSPValue, selectedCustValue ,selectedSubCustValue,selectedSensorValueArray)   
+      // // // alert("sensorNm"+"Sp"+ selectedSPValue +"CstCd"+selectedCustValue +"SubCst" +selectedSubCustValue + selectedSensorValueArray) 
+    // }   
   }
 
 //THIS METHOD USE FOR FETCH ALL DATA FROM SERVER BASED ON SELECTED CRITERIA.
@@ -288,7 +351,7 @@ getAllDetails(){
   //THIS WAY OF GETTING DATA FROM STATE
   const {startDate,endDate,selectedSPValue,
     selectedCustValue,selectedSubCustValue,
-    selectedSensorValue,ArrayOfSPs,
+    selectedSensorValueArray,ArrayOfSPs,selectedAssetValue,selectedDeviceValue,
     ArrayOfCusts,ArrayOfSubCusts ,operationSelected ,equalsValue, startRange, endRange } =this.state;
     var dateTime1 = new Date(startDate).toISOString();
     var dateTime2 = new Date(endDate).toISOString();
@@ -297,49 +360,49 @@ getAllDetails(){
   custToSend.push(selectedCustValue);
   subCustToSend.push(selectedSubCustValue);
 
-  if (selectedSPValue == "ALL" && selectedCustValue == "ALL" && selectedSubCustValue == "ALL") {
-      this.getAllDataApi(ArrayOfSPs,ArrayOfCusts,ArrayOfSubCusts,selectedSensorValue,dateTime1,
-        dateTime2, operationSelected,equalsValue,startRange,endRange)
-  }
-  else if (selectedSPValue == "ALL" && selectedSubCustValue == "ALL") {
-      this.getAllDataApi(ArrayOfSPs,custToSend,ArrayOfSubCusts,selectedSensorValue,dateTime1,
-        dateTime2, operationSelected,equalsValue,startRange,endRange)
-  }
-  else if (selectedSPValue == "ALL" && selectedCustValue == "ALL") {
-      this.getAllDataApi(ArrayOfSPs,ArrayOfCusts,subCustToSend,selectedSensorValue,dateTime1,
-        dateTime2, operationSelected,equalsValue,startRange,endRange)
-}
-  else if (selectedSubCustValue == "ALL" && selectedCustValue == "ALL") {
+//   if (selectedSPValue == "ALL" && selectedCustValue == "ALL" && selectedSubCustValue == "ALL") {
+//       this.getAllDataApi(ArrayOfSPs,ArrayOfCusts,ArrayOfSubCusts,selectedSensorValueArray,dateTime1,
+//         dateTime2, operationSelected,equalsValue,startRange,endRange,selectedAssetValue,selectedDeviceValue)
+//   }
+//   else if (selectedSPValue == "ALL" && selectedSubCustValue == "ALL") {
+//       this.getAllDataApi(ArrayOfSPs,custToSend,ArrayOfSubCusts,selectedSensorValueArray,dateTime1,
+//         dateTime2, operationSelected,equalsValue,startRange,endRange,selectedAssetValue,selectedDeviceValue)
+//   }
+//   else if (selectedSPValue == "ALL" && selectedCustValue == "ALL") {
+//       this.getAllDataApi(ArrayOfSPs,ArrayOfCusts,subCustToSend,selectedSensorValueArray,dateTime1,
+//         dateTime2, operationSelected,equalsValue,startRange,endRange,selectedAssetValue,selectedDeviceValue)
+// }
+//   else if (selectedSubCustValue == "ALL" && selectedCustValue == "ALL") {
 
-      this.getAllDataApi(spToSend,ArrayOfCusts,ArrayOfSubCusts,selectedSensorValue,dateTime1,
-        dateTime2, operationSelected,equalsValue,startRange,endRange)
-}
+//       this.getAllDataApi(spToSend,ArrayOfCusts,ArrayOfSubCusts,selectedSensorValueArray,dateTime1,
+//         dateTime2, operationSelected,equalsValue,startRange,endRange,selectedAssetValue,selectedDeviceValue)
+// }
   
-  else if (selectedCustValue == "ALL") {
-      this.getAllDataApi(spToSend,ArrayOfCusts,subCustToSend,selectedSensorValue,dateTime1,
-        dateTime2, operationSelected,equalsValue,startRange,endRange)
-  }
-  else if (selectedSPValue == "ALL") {
-        this.getAllDataApi(ArrayOfSPs,custToSend,subCustToSend,selectedSensorValue,dateTime1,
-        dateTime2, operationSelected,equalsValue,startRange,endRange)
-  }
-  else if (selectedSubCustValue == "ALL") {
-          this.getAllDataApi(spToSend,custToSend,ArrayOfSubCusts,selectedSensorValue,dateTime1,
-          dateTime2, operationSelected,equalsValue,startRange,endRange)
-  }
-  else {
-      this.getAllDataApi(spToSend,custToSend,subCustToSend,selectedSensorValue,dateTime1,
-        dateTime2, operationSelected,equalsValue,startRange,endRange)
-  }
+//   else if (selectedCustValue == "ALL") {
+//       this.getAllDataApi(spToSend,ArrayOfCusts,subCustToSend,selectedSensorValueArray,dateTime1,
+//         dateTime2, operationSelected,equalsValue,startRange,endRange,selectedAssetValue,selectedDeviceValue)
+//   }
+//   else if (selectedSPValue == "ALL") {
+//         this.getAllDataApi(ArrayOfSPs,custToSend,subCustToSend,selectedSensorValueArray,dateTime1,
+//         dateTime2, operationSelected,equalsValue,startRange,endRange,selectedAssetValue,selectedDeviceValue)
+//   }
+//   else if (selectedSubCustValue == "ALL") {
+//           this.getAllDataApi(spToSend,custToSend,ArrayOfSubCusts,selectedSensorValueArray,dateTime1,
+//           dateTime2, operationSelected,equalsValue,startRange,endRange,selectedAssetValue,selectedDeviceValue)
+//   }
+//   else {
+      this.getAllDataApi(spToSend,custToSend,subCustToSend,selectedSensorValueArray,dateTime1,
+        dateTime2, operationSelected,equalsValue,startRange,endRange,selectedAssetValue,selectedDeviceValue)
+  // }
 }
 //THIS IS API METHOD FOR FETCH ALL DATA FROM SERVER BASED ON SELECTED CRITERIA.
 getAllDataApi(SendForSp,SendFroCustCD,SendForSbCd,SendForSensor,SendForStartDate,
-  SendForEndDate,SendForOperation,SendForEqual,SendForStartRange,SendforEndRange){
+  SendForEndDate,SendForOperation,SendForEqual,SendForStartRange,SendforEndRange,sendforAsset,sendforDevice){
     fetch("http://localhost:3992/getFacts?spCode=" + SendForSp + "&&custCd=" +
     SendFroCustCD + "&&subCustCd=" + SendForSbCd + "&&sensorNm=" + SendForSensor +
   "&&startDate=" + SendForStartDate + "&&endDate=" + SendForEndDate + 
   "&&operation=" + SendForOperation + "&&equalsFacts=" +
-  SendForEqual + "&&startFactValue=" + SendForStartRange + 
+  SendForEqual + "&&startFactValue=" + SendForStartRange + "&&Asset="+sendforAsset + "&&Device=" + sendforDevice +
   "&&endFactValue=" +  SendforEndRange)
     .then(response => response.json())
     .then(json =>  {
@@ -351,24 +414,21 @@ getAllDataApi(SendForSp,SendFroCustCD,SendForSbCd,SendForSensor,SendForStartDate
         var FdataArray =[];
    
         for (var i = 0; i < json.length - 1; i++) {
-          var tempobj ={
-            Mac: json[i][0],
-            Device_Name: json[i][1],  
-            CreatedTime: json[i][3]
-          }
+          var tempobj ={}
           var  keysofbussinessName = Object.keys(json[i][2]);
           for(var j = 0; j< keysofbussinessName.length; j++){
-            tempobj[keysofbussinessName[j]] = json[i][2][keysofbussinessName[j]].toFixed(2);
+            tempobj[keysofbussinessName[j]] = json[i][2][keysofbussinessName[j]];
           }
+          tempobj["CreatedTime"] =  json[i][3]
           FdataArray.push(tempobj)}
-        // console.log("this json data");
-         console.log(json);
-        alert(json)
-        // console.log("end json");
+        // // console.log("this json data");
+         // console.log(json);
+        // // alert(json)
+        // // console.log("end json");
         //HERE WE UPDATTING STATE FOR TABLE DATA FOR tableDataToSend AND RESUALT FOR CHART AND EXCEL
         this.setState({tableDataToSend : json ,result :FdataArray })
-      // console.log(json);
-      // alert(json)
+      // // console.log(json);
+      // // // alert(json)
         }else{
           swal("Sorry!", "No Data Available For This Range!", "error");
           this.setState({tableDataToSend : 0 ,result : 0 });
@@ -377,7 +437,7 @@ getAllDataApi(SendForSp,SendFroCustCD,SendForSbCd,SendForSensor,SendForStartDate
 }
  //THIS METHOD FOR HENDER FOR CHART WHICH NEVIGATE TO CHART COMPONENT AND SAVE DATA RO SESSION MEMORY
  displayChart() {
-  const {result,selectedSensorValue,startDate,endDate} = this.state;
+  const {result,selectedSensorValueArray,startDate,endDate} = this.state;
   var dataToSend1 = [];
   var dataToSend2 = [];
   for (var i = 0; i < result.length; i++) {
@@ -393,7 +453,7 @@ getAllDataApi(SendForSp,SendFroCustCD,SendForSbCd,SendForSensor,SendForStartDate
   }
     dataToSend2.push(temp);
   }
-  var yaxisName = selectedSensorValue;
+  var yaxisName = selectedSensorValueArray;
   var formDate = new Date(startDate).toLocaleString();
   var toDate = new Date(endDate).toLocaleString();
   //HERE SENDING DATA SESSION-STORAGE
@@ -411,9 +471,9 @@ getAllDataApi(SendForSp,SendFroCustCD,SendForSbCd,SendForSensor,SendForStartDate
    const {result} = this.state;
    //HERE PUTING RESULT DATA WHICH STORED IN STATE VARIABLE AND ASSIGN TO LOCAL VARIABLE dataForExcel
   var dataForExcel = result;
-  alert("This is Cliked ");
+  // // alert("This is Cliked ");
   if (dataForExcel) {
-    alert("This is Cliked data  is here ");
+    // // alert("This is Cliked data  is here ");
 //THIS  HEADER OF COLUMN FOR EXCEL DATASHEET
     var arColumns = Object.keys(result[0])
     var arKeys = Object.keys(result[0]);
@@ -421,7 +481,7 @@ getAllDataApi(SendForSp,SendFroCustCD,SendForSbCd,SendForSensor,SendForStartDate
     for(var i =0; i< arKeys.length ; i++){
     arWidths.push(35)
     }
-    var reportName = this.state.selectedSensorValue + " Report";
+    var reportName =   "Sensors Data Recording-"+this.state.selectedSubCustValue+"-"+this.state.selectedDeviceValue+ "Report";
     var dataSet = dataForExcel;
     this.exportToExcel(arColumns, arKeys, arWidths, reportName, dataSet);
   } else {
@@ -431,7 +491,7 @@ getAllDataApi(SendForSp,SendFroCustCD,SendForSbCd,SendForSensor,SendForStartDate
     //   background: '#fff',
     //   width: 400
     // });
-    alert("There is no data to export!!");
+    // // alert("There is no data to export!!");
   }
 }
   //export To Excel and Save it to server and add the Details to Collection
@@ -440,14 +500,25 @@ getAllDataApi(SendForSp,SendFroCustCD,SendForSbCd,SendForSensor,SendForStartDate
     workbook.created = new Date();
 
     // create a sheet with blue tab colour
-    var ws = workbook.addWorksheet(reportName, {
+    var ws = workbook.addWorksheet("DATA_RECORDING", {
       properties: { tabColor: { argb: "1E1E90FF" } }
     });
-
+  var sensorType = this.state.selectedSensorValueArray;
+// if(this.state.selectedDeviceValue !=0){
+// for(var i = 0; i< this.state.selectedDeviceValue.length; i++){
+//   sensorType = sensorType + this.state.selectedDeviceValue[i];
+// }
+// }
     // Add initial set of rows
     var titleRows = [
-      ["ReportName", this.state.selectedSensorValue + " Report"],
-      ["Report Generated On", Date().toLocaleString()]
+      ["ReportName", "Sensors Data Recording"],
+      ["Report Generated On", dateFormat("dd-mmm HH:MM")],
+      ["Customer Name", this.state.selectedCustValue],
+      ["Sub Customer Name", this.state.selectedSubCustValue],
+      ["Asset Name", this.state.selectedAssetValue],
+      ["Device Name", this.state.selectedDeviceValue],
+      ["Sensors Type", sensorType.join(",")],
+      ["Time Interval", dateFormat(this.state.startDate,"dd-mmm HH:MM")+","+dateFormat(this.state.endDate,"dd-mmm HH:MM")]
       // ["Class", this.std]
     ];
 
@@ -617,7 +688,7 @@ getAllDataApi(SendForSp,SendFroCustCD,SendForSbCd,SendForSensor,SendForStartDate
 
  
   render() {
-    const {spCd,custCd,subCustCd,sensorNm,operations,dynInput} = this.state;
+    const {Disabledsubmit,spCd,custCd,subCustCd,sensorNm,operations,dynInput,ArrayofAsset, ArrayofDevice} = this.state;
   //  var DynInput =null; 
   //THIS VARIABLE FOR DYNAMIC INPUT FIELD EFFECT OR CHANGING.
     var equalvaluedisabled = true;
@@ -625,7 +696,7 @@ getAllDataApi(SendForSp,SendFroCustCD,SendForSbCd,SendForSensor,SendForStartDate
     var dynamicvalue = this.state.startRange;
     var dynamPlaceholder = "Enter Start Values :";
     var dynamicname = "startRange";
-    var Disabledsubmit =true;
+    // var Disabledsubmit =true;
     if(dynInput =="EQUALS"){
       equalvaluedisabled = null;
       dynamicvalue = this.state.equalsValue;
@@ -633,12 +704,12 @@ getAllDataApi(SendForSp,SendFroCustCD,SendForSbCd,SendForSensor,SendForStartDate
       dynamicname = "equalsValue"
       startendvalue = true;
       //THIS FOR VALIDATION 
-      if(this.state.equalsValue != 0){
-        Disabledsubmit=null;
-      }
-      else{
-        Disabledsubmit=true;
-      }
+      // if(this.state.equalsValue != 0){
+      //   Disabledsubmit=null;
+      // }
+      // else{
+      //   Disabledsubmit=true;
+      // }
     } 
     else if (dynInput ==="RANGE"){
       equalvaluedisabled = true;
@@ -647,40 +718,49 @@ getAllDataApi(SendForSp,SendFroCustCD,SendForSbCd,SendForSensor,SendForStartDate
       dynamPlaceholder = "Enter Start Values :";
       dynamicname = "startRange";
       equalvaluedisabled = null;
-      if(this.state.startRange && this.state.endRange != 0){
-        Disabledsubmit=null;
-      }
-      else{
-        Disabledsubmit=true;
-      }
+      // if(this.state.startRange && this.state.endRange != 0){
+      //   Disabledsubmit=null;
+      // }
+      // else{
+      //   Disabledsubmit=true;
+      // }
     
       }  else {
         // DynInput = null;
-        Disabledsubmit=true;
+        // Disabledsubmit=true;
         equalvaluedisabled = true;
       startendvalue = true;
        }
        if(dynInput ==="AVG"){
-        Disabledsubmit=null;
+        // Disabledsubmit=null;
        }
        var table = null;
        var table = null;
        if(this.state.tableDataToSend !=0){
           table = <div className="row bg">
                <div className= "custNav btn-group">
-               <button className="btn btn-sm btn-secondary" onClick={this.displayChart.bind(this)}><i class="far fa-chart-bar iconfont"></i></button>
+               <button className="btn btn-sm btn-secondary" onClick={this.displayChart.bind(this)} disabled><i class="far fa-chart-bar iconfont"></i></button>
                <button  className="btn btn-sm btn-secondary" onClick={this.downloadToExcel.bind(this)}><i class="far fa-file-excel iconfont"></i></button>
               </div>
               </div>;
           }
-
-
+if(this.state.sensorNm.length != 0){
+  var sensorsObj = [];
+  this.state.sensorNm.map((item,i) => {
+    var obj = {
+      "label": item, "value": i
+    }
+    sensorsObj.push(obj);
+  })
+}
+    
+        
        //THIS VARIABLE FOR DYNAMIC TABLE WHICH APPEAR IN PRESENTS OF DATA .
       //  var table = null;
       //  if(this.state.tableDataToSend !=0){
-      //   console.log("this json data1");
-      //   console.log(this.state.tableDataToSend);
-      //   console.log("end json");
+      //   // console.log("this json data1");
+      //   // console.log(this.state.tableDataToSend);
+      //   // console.log("end json");
        
       //  table =  <div className= "custNav btn-group">
       //    <button className="btn btn-sm btn-secondary" onClick={this.displayChart.bind(this)}><i class="far fa-chart-bar iconfont"></i></button>
@@ -706,7 +786,7 @@ getAllDataApi(SendForSp,SendFroCustCD,SendForSbCd,SendForSensor,SendForStartDate
       tableStyle="table table-hover table-striped table-bordered table-borderless table-responsive"
       pages={true}
       pagination={true}
-      onRowClick={(row) => {alert(row); console.log(row)}} // if You Want Table Row Data OnClick then assign this {row => console.log(row)}
+      onRowClick={(row) => {// // alert(row); // console.log(row)}} // if You Want Table Row Data OnClick then assign this {row => // console.log(row)}
       page={true}
       errormsg="Error. . ."
       loadingmsg="Loading. . ."
@@ -720,7 +800,7 @@ getAllDataApi(SendForSp,SendFroCustCD,SendForSbCd,SendForSensor,SendForStartDate
           Device: "Device",
           Device_Name: "Device Name",
           Bibusiness_name : "Business Name",
-          SensorName: this.state.selectedSensorValue,
+          SensorName: this.state.selectedSensorValueArray,
           queue_date_time: "Queue Date Time",
         },
         data: this.state.tableDataToSend
@@ -744,53 +824,132 @@ getAllDataApi(SendForSp,SendFroCustCD,SendForSbCd,SendForSensor,SendForStartDate
                      <div className="row">
                    
                      <div className="col-sm-3">
-                     <SelectionInput 
+                    <div className= "divmanueDrop">
+                     <DropdownButton  className = ""  onSelect={this.handleSp}
+                      disabled = {null}
+                        bsStyle={"white"}
+                        title={this.state.selectedSPValue || "SERVICE PROVIDER"}>
+                        {spCd.map( (item) =>
+                        <MenuItem eventKey={item}>{item}</MenuItem>
+                        )}
+                        </DropdownButton>
+                        </div>
+                     {/* <SelectionInput 
                           label="SERVICE PROVIDER :"
                           namefor="SERVICE PROVIDER :"
                           names = {spCd}
                           defaultDisabled = {null}
                           Change = {this.handleSp}
                           
-                         />
+                         /> */}
                      </div>
                      <div className="col-sm-3">
-                     <SelectionInput 
+                     <div className= "divmanueDrop">
+                     <DropdownButton  className = ""  onSelect={this.handleCutMr}
+                      disabled = {this.state.custDisable}
+                        bsStyle={"white"}
+                        title={this.state.selectedCustValue || "CUSTOMER"}>
+                        {custCd.map( (item) =>
+                        <MenuItem eventKey={item}>{item}</MenuItem>
+                        )}
+                        </DropdownButton>
+                        </div>
+                     {/* <SelectionInput 
                               label="CUSTOMER :"
                               namefor="CUSTOMER :"
                               names = {custCd}
                               defaultDisabled = {this.state.custDisable}
                               Change = {this.handleCutMr}
-                              />
+                              /> */}
                      </div>
                      <div className="col-sm-3">
-                     <SelectionInput 
-                              label="SUBCUSTOMER :"
-                              namefor="SUBCUSTOMER :"
-                              names = {subCustCd}
-                              defaultDisabled = {this.state.subCustDisable}
-                              Change = {this.handleSubCs}
-                              />
+                     <div className= "divmanueDrop">
+                     <DropdownButton  className = ""  onSelect={this.handleSubCs}
+                      disabled = {this.state.subCustDisable}
+                        bsStyle={"white"}
+                        title={this.state.selectedSubCustValue || "SUBCUSTOMER"}>
+                        {subCustCd.map( (item) =>
+                        <MenuItem eventKey={item}>{item}</MenuItem>
+                        )}
+                        </DropdownButton>
+                        </div>
+               
                      </div>
                      <div className="col-sm-3">
-                     
-                     <SelectionInput 
+                     <div className= "divmanueDrop">
+                     <DropdownButton  className = ""  onSelect={this.handleAsset}
+                      disabled = {this.state.assetDisable}
+                        bsStyle={"white"}
+                        title={this.state.selectedAssetValue || "SELECT THE ASSET" }>
+                        {ArrayofAsset.map( (item) =>
+                        <MenuItem eventKey={item}>{item}</MenuItem>
+                        )}
+                        </DropdownButton>
+                        </div>
+                     </div>
+                     <div className="col-sm-3">
+                     <div className= "divmanueDrop">
+                     <DropdownButton  className = ""  onSelect={this.handleDevice}
+                      disabled = {this.state.deviceDisable}
+                        bsStyle={"white"}
+                        title={this.state.selectedDeviceValue || "SELECT THE DEVICE" }>
+                        {ArrayofDevice.map( (item) =>
+                        <MenuItem eventKey={item}>{item.DeviceName}</MenuItem>
+                        )}
+                        </DropdownButton>
+                        </div>
+                     </div>
+                     <div className="col-sm-3">
+                     <div className= "divmanueDrop">
+                     {/* <DropdownButton  className = ""  onSelect={this.handleSensorNm}
+                      disabled = {this.state.sensorDisable}
+                        bsStyle={"white"}
+                        title={this.state.selectedSensorValueArray || "SELECT THE SENSOR" }>
+                        {sensorNm.map( (item) =>
+                        <MenuItem eventKey={item}>{item}</MenuItem>
+                        )}
+                        </DropdownButton> */}
+                     <ReactMultiSelectCheckboxes placeholderButtonLabel= "SELECT THE SENSOR" disabled onChange= {this.handleSensorNm.bind(this)} options={sensorsObj} />
+
+                        </div>
+                     {/* <SelectionInput 
                           label="SELECT THE SENSOR :"
                           namefor="SELECT THE SENSOR :"
                           names = {sensorNm}
                           defaultDisabled = {this.state.sensorDisable}
                           Change = {this.handleSensorNm}
-                          />
+                          /> */}
+                     </div> 
+                     <div className="col-sm-6">
+                     <div className= "sensors">
+                     <div className= "senosrs">
+                   <span className= "senosrs">{(this.state.selectedSensorValueArray.length !=0)?"Selected Sensors :"+this.state.selectedSensorValueArray.join(" , ") :"" }</span>
                      </div>
-                     <div className="col-sm-3">
-                     <SelectionInput 
+                     </div>
+                     </div>
+                     {/* <div className="col-sm-3">
+                     <div className= "divmanueDrop">
+                     <DropdownButton  className = ""  onSelect={this.handleOperation}
+                      disabled = {this.state.parameterDisable}
+                        bsStyle={"white"}
+                        title={this.state.operationSelected || "SELECT THE OPERATION" }>
+                        {operations.map( (item) =>
+                        <MenuItem eventKey={item}>{item}</MenuItem>
+                        )}
+                        </DropdownButton>
+                        </div> */}
+                     {/* <SelectionInput 
                           label="SELECT THE OPERATION :"
                           namefor="SELECT THE OPERATION :"
                           names = {operations}
                           defaultDisabled = {this.state.parameterDisable}
                           Change = {this.handleOperation}
-                          />
+                          /> */}
+                     {/* </div> */}
                      </div>
+                     {/* <div className="row">
                      <div className="col-sm-3">
+                     <div className= "divmanueDrop">
                      <input
                           type="number"
                           name= {dynamicname}
@@ -800,8 +959,11 @@ getAllDataApi(SendForSp,SendFroCustCD,SendForSbCd,SendForSensor,SendForStartDate
                           disabled = {equalvaluedisabled}
                           onChange = {this.onChange}
                          />
+                         </div>
                      </div>
+                     
                      <div className="col-sm-3">
+                     <div className= "divmanueDrop">
                      <input
                           type="number"
                           name= "endRange"
@@ -814,6 +976,7 @@ getAllDataApi(SendForSp,SendFroCustCD,SendForSbCd,SendForSensor,SendForStartDate
                          />                    
                     </div>
                      </div>
+                     </div> */}
                      <div className="row">
                      <div className="col-sm-12 col-md-6">
                      <table>

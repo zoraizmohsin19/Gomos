@@ -41,7 +41,7 @@ td.pl2 {
   padding-left: 16px;
 }
 .iconfont {
-  font-size: 34px !important;
+  font-size: 28px !important;
   padding-left: 10px;
   padding-right: 10px;
 }
@@ -97,4 +97,31 @@ cursor: pointer;
 }
 .scondtdmrt {
   padding-top: 28px !important;
+}
+.btn-white {
+  background: white;
+  border: 1px solid #136f13cf;
+  width: 240px
+}
+.divmanueDrop {
+  margin: 10px;
+}
+
+
+
+
+button.css-48ayfv {
+  width: 100%;
+  border: 1px solid #097b09;
+}
+button.css-1r4vtzz {
+  width: 100%;
+  border: 1px solid #097b09;
+}
+.senosrs {
+  overflow-y: auto;
+  margin-top: 10px;
+}
+span.senosrs {
+  font-size: 11px;
 }

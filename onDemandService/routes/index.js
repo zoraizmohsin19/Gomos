@@ -831,6 +831,8 @@ router.get("/getSensorNames", function (req, res, next) {
 });
 router.post("/getActiveDashBoardDevice", function (req, res, next) {
   accessPermission(res);
+  var body = req.body;
+var mac = body.mac;
   MongoClient.connect(
     urlConn,
     { useNewUrlParser: true },
@@ -840,13 +842,11 @@ router.post("/getActiveDashBoardDevice", function (req, res, next) {
       }
       var db = connection.db(dbName);
       var query = url.parse(req.url, true).query;
-
       gomos.gomosLog(TRACE_DEBUG,"This is called in Alert"); 
       
 
-        //query to get the last dateTime the collection was modified.This dateTime is used only in excel report.
         db.collection("DeviceState")
-        .find({ mac: "5ccf7f0015bc"})
+        .find({ mac:mac })
         .toArray(function (err, result) {
           if (err) {
         gomos.gomosLog(TRACE_DEBUG,"this err",err);  
@@ -879,59 +879,71 @@ router.post("/getActiveDashBoardDevice", function (req, res, next) {
         json[name] = sensorsArray;
       }
 
-      // db.collection("DeviceInstruction").find({ mac: "5ccf7f0015bc"}).toArray(function (err, result) {
-      //   if (err) {
-      //     gomos.errorCustmHandler("DeviceInstruction",err);
-      //     gomos.gomosLog(TRACE_PROD,"This is error",err);
-      //     process.hasUncaughtExceptionCaptureCallback();
-      //   }
-      //   // res.json(result)
-      //   if(result.length !=0){
-      //     var ActiveJobs = [];
-      //     var DeviceInstructionArray = [];
-      //       for(var i =0; i< result.length ; i++){
-      //         if(result[i].type == "SentInstruction"){
-      //           var sentcommand= {};
-      //           var channelName =result[i].sourceMsg.Channel;
-      //           var ActionType =result[i].sourceMsg.ActionType;
-      //           var createdTime =result[i].createdTime;
-      //           sentcommand["Channel"] = channelName;
-      //           sentcommand["ActionType"] = ActionType;
-      //           sentcommand["createdTime"] = createdTime;
-      //           sentcommand["sourceMsg"]= {};
-      //           var keysofJson = Object.keys(result[i].sourceMsg);
-      //           var keysNeedToRemove = ["Channel","Token","ActionType","isDailyJob"];
-      //           for(var j =0; j< keysNeedToRemove.length; j++){
-      //             if(keysofJson.includes(keysNeedToRemove[j])){
-      //             keysofJson.splice(keysofJson.indexOf(keysNeedToRemove[j]), 1); 
-      //             }
-      //           }
-      //           for(var k =0; k< keysofJson.length; k++){
-      //             sentcommand["sourceMsg"][keysofJson[k]]  =   result[i].sourceMsg[keysofJson[k]];
-      //           }
-      //           DeviceInstructionArray.push(sentcommand);
-      //           json["DeviceInstruction"] = DeviceInstructionArray
-      //         }
-      //         if(result[i].type == "ActiveJob"){
-      //             var temObj ={};
-      //             temObj["Channel"] =result[i].sourceMsg.Channel;
-      //             temObj["isDailyJob"] = result[i].sourceMsg.isDailyJob;
-      //             temObj["ActionType"] = result[i].sourceMsg.ActionType;
-      //             temObj["ActionValues"]  =  compareDate(result[i].sourceMsg.ActionValues);
-      //             ActiveJobs.push(temObj);
-      //         }
-      //       }
-      //       ActiveJobs.sort(function(a, b) {
-      //         a = new Date(a.ActionValues);
-      //         b = new Date(b.ActionValues);
-      //         return a>b ? -1 : a<b ? 1 : 0;
-      //     });
-      //   json["ActiveJob"] = ActiveJobs;
-      //   }
-        res.json(json)
-      //   gomos.gomosLog(TRACE_PROD," insert  in DeleteDeviceState activeJob");
+        res.json(json);
+        
+        });
+    
+    }
+  );
+});
+router.post("/getAllSateData", function (req, res, next) {
+  accessPermission(res);
+  var body = req.body;
+var mac = body.mac;
+  MongoClient.connect(
+    urlConn,
+    { useNewUrlParser: true },
+    function (err, connection) {
+      if (err) {
+        next(err);
+      }
+      var db = connection.db(dbName);
+      var query = url.parse(req.url, true).query;
+      gomos.gomosLog(TRACE_DEBUG,"This is called in Alert"); 
       
-      // });
+
+        db.collection("Devices")
+        .find({ mac:mac })
+        .toArray(function (err, result) {
+          if (err) {
+        gomos.gomosLog(TRACE_DEBUG,"this err",err);  
+          }
+          var deviceStateKey = Object.keys(result[0]);
+          var keysToRemove2 = ["_id", "mac", "DeviceName","updatedTime","createdTime","assetId","deviceTemplate"];
+          gomos.gomosLog(TRACE_DEV,"This Is key of identifire 1 Place",deviceStateKey);  
+          for (var l = 0; l < keysToRemove2.length; l++) {
+            if (deviceStateKey.includes(keysToRemove2[l])) {
+              deviceStateKey.splice(deviceStateKey.indexOf(keysToRemove2[l]), 1);
+            }
+          }
+        var json = {}
+        for(var k =0; k < deviceStateKey.length; k++){
+          var name = deviceStateKey[k]
+          var keyofCode = Object.keys(result[0][deviceStateKey[k]]);
+         gomos.gomosLog(TRACE_DEBUG,"This is SensorsKey",keyofCode);
+        var sensorsArray= [];
+        for(var i = 0; i< keyofCode.length; i++){
+          var ActiveIdentifier = {};
+         ActiveIdentifier['type'] = keyofCode[i];
+         
+        //  var devicebusinessNM = Object.keys(result[0][deviceStateKey[k]][keyofCode[i]]);
+        //  var keysToRemove3 = ["sortName","displayPosition","valueChangeAt","dateTime","Type"];
+        //  for (var l = 0; l < keysToRemove3.length; l++) {
+        //    if (deviceStateKey.includes(keysToRemove2[l])) {
+        //      devicebusinessNM.splice(devicebusinessNM.indexOf(keysToRemove3[l]), 1);
+        //    }
+        //  } 
+        //  gomos.gomosLog(TRACE_DEBUG,"this devicebusinessNM",devicebusinessNM);  
+            //  devicebusinessNM.splice(devicebusinessNM.indexOf("dateTime"), 1);
+             ActiveIdentifier["devicebusinessNM"] = result[0][deviceStateKey[k]][keyofCode[i]]["businessName"];
+             ActiveIdentifier["configName"] = result[0][deviceStateKey[k]][keyofCode[i]]["configName"];
+             ActiveIdentifier["Type"] =  result[0][deviceStateKey[k]][keyofCode[i]]["Type"];
+             sensorsArray.push(ActiveIdentifier);
+        }
+        json[name] = sensorsArray;
+      }
+
+        res.json(json);
         
         });
     
@@ -1331,8 +1343,46 @@ gomos.gomosLog(TRACE_DEV,"THis is body", req.body);
     }
   );
 });
+
+router.post("/getAllClimateControl", function (req, res, next) {
+  accessPermission(res);
+  var body = req.body;
+  var subCustCd = body.subCustCd;
+  var custCd = body.custCd;
+// gomos.gomosLog(TRACE_DEV,"THis is body", req.body);
+  MongoClient.connect(
+    urlConn,
+    { useNewUrlParser: true },
+    function (err, connection) {
+      if (err) {
+        next(err);
+      }
+      var db = connection.db(dbName);
+        db.collection("ClimateControlRules")
+        .find({  "custCd": custCd,
+        "subCustCd": subCustCd} )
+        .toArray(function (err, result) {
+          if (err) {
+        gomos.gomosLog(TRACE_DEBUG,"this err",err);  
+          }
+        gomos.gomosLog(TRACE_DEV,"this result",result);  
+        var arr = [];
+        for(var i =0 ; i < result.length; i++){
+         arr.push(result[i].sourceMsg);
+        }
+            res.json(arr)
+        
+        });
+      
+    
+    }
+  );
+});
+
 router.post("/getActiveDAction", function (req, res, next) {
   accessPermission(res);
+  var body = req.body;
+  var mac = body.mac;
   MongoClient.connect(
     urlConn,
     { useNewUrlParser: true },
@@ -1343,22 +1393,35 @@ router.post("/getActiveDAction", function (req, res, next) {
       var db = connection.db(dbName);
       gomos.gomosLog(TRACE_DEBUG,"This is called in Alert"); 
         db.collection("Devices")
-        .find({ mac: "5ccf7f0015bc"})
+        .find({ mac: mac})
         .toArray(function (err, result) {
           if (err) {
         gomos.gomosLog(TRACE_DEBUG,"this err",err);  
           }
-          var keyOfChannel = Object.keys(result[0].channel);
-          var  arrayofChennel = []; 
-      for(var i =0; i< keyOfChannel.length; i++){
-        var json = {}
-          json["businessName"] =  result[0].channel[keyOfChannel[i]].businessName;
-          json["configName"] =  result[0].channel[keyOfChannel[i]].configName;
-          arrayofChennel.push(json);
-        }
-        gomos.gomosLog(TRACE_DEV,"this result",result);  
-            res.json(arrayofChennel)
-        
+          var keyofdata = Object.keys(result[0]);
+          keysToRemove = ["DeviceName","mac","assetId","deviceTemplate","_id"];
+          for(var k =0;k< keysToRemove.length; k++){
+            keyofdata.splice(keysToRemove[k],1);
+          }
+          var  arrayofChennel = {}; 
+          for(var j = 0; j < keyofdata.length; j++){
+            var keyOfChannel = Object.keys(result[0][keyofdata[j]]);
+           var temp =[];
+        for(var i =0; i< keyOfChannel.length; i++){
+          var json = {}
+            json["businessName"] =  result[0][keyofdata[j]][keyOfChannel[i]].businessName;
+            json["configName"] =    result[0][keyofdata[j]][keyOfChannel[i]].configName;
+            json["sortName"] =    result[0][keyofdata[j]][keyOfChannel[i]].sortName;
+            json["Type"] =    result[0][keyofdata[j]][keyOfChannel[i]].Type;
+            json["climateControl"] =    result[0][keyofdata[j]][keyOfChannel[i]].climateControl;
+            json["displayPosition"] =    result[0][keyofdata[j]][keyOfChannel[i]].displayPosition;
+            temp.push(json);
+          }
+          gomos.gomosLog(TRACE_DEV,"this result",result);  
+            arrayofChennel[keyofdata[j]] = temp;
+          }
+      
+          res.json(arrayofChennel)
         });
     
     }
@@ -1374,6 +1437,7 @@ router.post("/ActiveDAction", function (req,res, next){
   var CustCd      =   body.CustCd;
   var subCustCd   =   body.subCustCd; 
   var DeviceName  =   body.DeviceName;
+  var mac         =   body.mac;
 var messageValue = message;
 gomos.gomosLog(TRACE_DEBUG,"this is message Value", message);
 MongoClient.connect(
@@ -1388,20 +1452,31 @@ var dateTime = new Date()
     gomos.gomosLog(TRACE_DEBUG,"This is called in Alert"); 
     var dataTime = new Date(new Date().toISOString());
       var Token = uuidv4();
-      var temobj={"Channel":ChannelName}
+
+      var temobj={}
+      if(ChannelName  != '' && ChannelName != undefined && ChannelName != null){
+        temobj = {"Channel":ChannelName}
+      }
       for (let [key, value] of Object.entries(message)) {  
         temobj[key]= value;
       }
        var object = {
-        "mac": "5ccf7f0015bc",
+        "mac": mac,
         "type": "SentInstruction",
-        "sourceMsg": temobj,
+        "sourceMsg": {
+          "body":temobj 
+        },
         "createdTime": dataTime,
-        "updatedTime": dataTime
+        "updatedTime": dataTime,
+     
        } ;
+  
        object["sourceMsg"]["Token"]  = Token;
        object["sourceMsg"]["ActionType"]  = payloadId;
-       object["sourceMsg"]["isDailyJob"] = isDaillyJob;
+       if( isDaillyJob != "" && isDaillyJob !=undefined && isDaillyJob != null){
+        object["sourceMsg"]["body"]["isDailyJob"] = isDaillyJob;
+       }
+     
        gomos.gomosLog(TRACE_DEBUG,"This is log for data submit Data",object );
       db.collection("DeviceInstruction")
       .insertOne( object
@@ -1410,18 +1485,13 @@ var dateTime = new Date()
       gomos.gomosLog(TRACE_DEBUG,"this err",err);  
         }
   gomos.gomosLog(TRACE_DEBUG,"this is message Value 2", message);
-if(ChannelName !=0 || ChannelName != ""){
+if(ChannelName !=0 && ChannelName != ""  && ChannelName != undefined){
   message[ChannelName] = 1
 }
       
       midllelayer.endPointMiddelayerFn(urlConn,dbName,res,CustCd,subCustCd,DeviceName,payloadId,dataTime,message,Token);
       
       })
-    
-
-    
-  // gomos.gomosLog(TRACE_DEV,"this is data of",body);
-// console.log(body.custCd,body.subCustCd,body.DeviceName,body.payloadId,body.Date,body.message)
   });
 });
 //get the operations based on serviceProviderCode,CustomerCode,SubCustomerCode and SensorName.
@@ -2012,46 +2082,51 @@ router.get("/getFacts", function (req, res, next) {
       }
       var db = connection.db(dbName);
       var query = url.parse(req.url, true).query;
-      var startDate, endDate, startFactValue = 0, endFactValue = 0, operation, sensorNm, equalsFacts;
+      var startDate, endDate, startFactValue = 0, endFactValue = 0, operation, sensorNm, equalsFacts,assetId,deviceName ;
 
-      sensorNm = query.sensorNm;
+      sensorNm = query.sensorNm.split(",");
       startDate = query.startDate;
       endDate = query.endDate;
       operation = query.operation;
+      assetId = query.Asset;
+      deviceName = query.Device;
 
       var criteria;
-      var ServiceProvidersIds = query.spCode.split(",");
-      var CustomersIds = query.custCd.split(",");
-      var arSubCustomerIDs = query.subCustCd.split(",");
+      var ServiceProvidersIds = query.spCode;
+      var CustomersIds = query.custCd;
+      var arSubCustomerIDs = query.subCustCd;
 
       // This criteria is built without sensor names for now, however a better way to filter based on sensornames
       // rather than getting everything and removing the unwanted data of other sensrors.
       criteria = {
-        spCd: { $in: ServiceProvidersIds },
-        custCd: { $in: CustomersIds },
-        subCustCd: { $in: arSubCustomerIDs },
+        spCd:  ServiceProvidersIds ,
+        custCd:  CustomersIds ,
+        subCustCd: arSubCustomerIDs ,
+        DeviceName : deviceName, 
         createdTime: {
           $gte: startDate,
           $lte: endDate
         }
       };
+gomos.gomosLog(TRACE_DEBUG,"This is gomos get messageFact",  query.sensorNm);
+      // if (operation) {
+      //   if (query.equalsFacts) {
+      //     equalsFacts = parseFloat(query.equalsFacts);
+      //   }
+      //   if (query.startFactValue) {
+      //     startFactValue = parseFloat(query.startFactValue);
+      //   }
+      //   if (query.endFactValue) {
+      //     endFactValue = parseFloat(query.endFactValue);
+      //   }
 
-      if (sensorNm && operation) {
-        if (query.equalsFacts) {
-          equalsFacts = parseFloat(query.equalsFacts);
-        }
-        if (query.startFactValue) {
-          startFactValue = parseFloat(query.startFactValue);
-        }
-        if (query.endFactValue) {
-          endFactValue = parseFloat(query.endFactValue);
-        }
-
+      //   factsOperations(db, sensorNm, startFactValue, endFactValue, connection, next,
+      //     equalsFacts, operation, res, criteria);
+      // } else {
         factsOperations(db, sensorNm, startFactValue, endFactValue, connection, next,
           equalsFacts, operation, res, criteria);
-      } else {
-        res.json(0);
-      }
+        // res.json(0);
+      // }
     }
   );
 });
@@ -2074,138 +2149,196 @@ function factsOperations(db, sensorNm, startFactValue, endFactValue, connection,
     });
 
   //query to get the mac,sensors,dateTime of the given criteria
-  queryToExecute = [
-    {
-      $match: criteria
-    },
-    {
-      $group: {
-        _id: { _id: "$sensors." + sensorNm, mac: "$mac", createdTime: "$createdTime",DeviceName:"$DeviceName" }
-      }
-    },
-    { $sort: { '_id.mac': 1 } }
-  ];
+  // queryToExecute = [
+  //   {
+  //     $match: criteria
+  //   },
+  //   {
+  //     $group: {
+  //       _id: { _id: "$sensors." + sensorNm, mac: "$mac", createdTime: "$createdTime",DeviceName:"$DeviceName" }
+  //     }
+  //   },
+  //   { $sort: { '_id.mac': 1 } }
+  // // ];
+  // queryToExecute = [
+  //   {
+  //     $match: criteria
+  //   },
+  //   {
+  //     projection: { "sensors": 1,"mac":1,"DeviceName": 1,"createdTime":1} 
+  //   }
+  //   // { $sort: { '_id.mac': 1 } }
+  // ];
+
 
 
   db.collection("MsgFacts")
-    .aggregate(queryToExecute)
+    .find(criteria,{
+      projection: { "sensors": 1,"mac":1,"DeviceName": 1,"createdTime":1} 
+    }).sort({createdTime:-1})
     .toArray(function (err, result) {
       if (err) {
         next(err);
       }
       if (result.length > 0) {
-        var resultCopy = result;
-        result = [];
+        // var resultCopy = result;
+        // result = [];
+        // console.log(resultCopy);
         //copy all data from the copy of result to remove json with in json.
-        for (var i = 0; i < resultCopy.length; i++) {
-          var sensorNmKeys = Object.keys(resultCopy[i]._id);
-          // This is with an assumtion that "_id" always comes first, if not, change the code to 
-          // specifically look out for "_id".
-          if (sensorNmKeys[0]=="_id"){
-            result.push(resultCopy[i]._id);
-          }
-        }
-        
-        //Result is calculated based on the operation.It can be Average , Equals or Range
-        if (operation == "AVG") {
-          // for (var i = 0; i < result.length; i++) {
-          // var dt = requiredDateTime.create(result[i].createdTime);
-          // var formattedDate = dt.format("d-m-Y H:M:S");
-          // console.log(result);
-          for (var i = 0; i < result.length; i++) {
-            var dt = requiredDateTime.create(result[i].createdTime);
-            var formattedDate = dt.format("d-m-Y H:M:S");
-            var sensorNmKeys = Object.keys(result[i]._id);//business names of different sensors
-            for (var j = 0; j < sensorNmKeys.length; j++) {
-              finalResult.push([result[i].mac,result[i].name, sensorNmKeys[j], result[i]._id[sensorNmKeys[j]], formattedDate]);
-            }
-            // }
-          }
-          var removeArr = [], avg = 0, count = 0, resultToSend = [];
-          console.log(finalResult);
-          for (var j = 0; j <= finalResult.length; j++) {
-            avg = 0; count = 0; j = 0;
-            for (var i = 0; i < finalResult.length; i++) {
-              //comparing with the macId and businessNm of first row with all others mac and businessNm
-              //if matched hold the matched row in one array and also calculate the avg of businessNm values.
-              if (finalResult[i][0] == finalResult[0][0] && finalResult[i][1] == finalResult[0][1]) {
-                avg = avg + finalResult[i][3];
-                count++;
-                removeArr.push(i);
-              }
-            }
-
-            //avg is calculated with the sum of businessNm values and the count of matched rows
-            avg = avg / count;
-
-            resultToSend.push([finalResult[0][0], finalResult[0][1], finalResult[0][2], avg, finalResult[0][4]]);
-            //Remove the rows from the final result array for which already average is calculated.
-            //Always splice the data from an array in descending order of index
-            for (var k = removeArr.length - 1; k >= 0; k--) {
-              finalResult.splice(removeArr[k], 1);
-            }
-            removeArr = [];
-          }
-
-          if (resultToSend.length != 0) {
-            resultToSend.push([ltdttm, 0, 0]);
-            res.json(resultToSend);
-          }
-          else {
-            res.json(0);
-          }
-        }
-        else if (operation == "EQUALS") {
-          for (var i = 0; i < result.length; i++) {
-            var dt = requiredDateTime.create(result[i].createdTime);
-            var formattedDate = dt.format("d-m-Y H:M:S");
-            var sensorNmKeys = Object.keys(result[i]._id);
-            for (var j = 0; j < sensorNmKeys.length; j++) {
-              //comparing the businessNm(sensor's BusinessNm) values with the passed equal value in the query
-              if (result[i]._id[sensorNmKeys[j]] == equalsFacts)
-                finalResult.push([result[i].mac,result[i].name, sensorNmKeys[j], result[i]._id[sensorNmKeys[j]], formattedDate]);
-            }
-          }
-          if (finalResult.length != 0) {
-            finalResult.push([ltdttm, 0, 0]);
-            res.json(finalResult);
-          }
-          else {
-            res.json(0);
-          }
-        }
-        else {
+        // for (var i = 0; i < resultCopy.length; i++) {
+        //   var allkey = Object.keys(resultCopy[i]);
+        //   // This is with an assumtion that "_id" always comes first, if not, change the code to 
+        //   // specifically look out for "_id".
+        //   gomos.gomosLog(TRACE_DEBUG,"THis is Debug of getMessageFact for check result",sensorNmKeys[0]);
+        //   if (sensorNmKeys[0]=="_id"){
+        //     result.push(resultCopy[i]._id);
+        //   }
+        // }
+        if(operation != ""){
+          processOperation( startFactValue, endFactValue, connection, next, equalsFacts, operation, res ,finalResult,result,ltdttm)
+        }else{
+          console.log('This is else part')
           for (i = 0; i < result.length; i++) {
             var dt = requiredDateTime.create(result[i].createdTime);
             var formattedDate = dt.format("d-m-Y H:M:S");
-            var sensorNmKeys = Object.keys(result[i]._id);
+            var sensorNmKeys = Object.keys(result[i].sensors);
+            // console.log(sensorNmKeys);
             var temp ={}
-            for (var j = 0; j < sensorNmKeys.length; j++) {
+            for(var l = 0; l < sensorNm.length; l++){
+            if(sensorNmKeys.includes(sensorNm[l])){
+            // for (var j = 0; j < sensorNmKeys.length; j++) {
+            
               //comparing the businessNm values(sensor's BusinessNm) with the passed range of value
-              if (result[i]._id[sensorNmKeys[j]] >= startFactValue && result[i]._id[sensorNmKeys[j]] <= endFactValue) {
-                // gomos.gomosLog(TRACE_DEV,"This is Debug of Menu", result);
-                temp[sensorNmKeys[j]] = result[i]._id[sensorNmKeys[j]]
-                // finalResult.push([result[i].mac,result[i].name, sensorNmKeys[j], result[i]._id[sensorNmKeys[j]], formattedDate]);
+              var businessNameKey = Object.keys(result[i]["sensors"][sensorNm[l]]);
+              for(var k = 0; k < businessNameKey.length; k++){
+               
+                // if(businessNameKey.includes(sensorNm)){
+                  temp[businessNameKey[k]] = result[i]["sensors"][sensorNm[l]][businessNameKey[k]]
+                
+                }
+
+              // }
+              
               }
 
             }
             finalResult.push([result[i].mac,result[i].DeviceName, temp, formattedDate]);
-
+             
+                // finalResult.push([result[i].mac,result[i].name, sensorNmKeys[j], result[i]._id[sensorNmKeys[j]], formattedDate]);
+            }
+        
           }
           if (finalResult.length != 0) {
             finalResult.push([ltdttm, 0, 0]);
             res.json(finalResult);
-          } else {
-            res.json(0);
           }
-        }
-      } else {
-        res.json(0);
-        connection.close();
-      }
+          else {
+            res.json(0);
+         }
+          // }
+        } else {
+          res.json(0);
+          connection.close();
+        
+       }
+      
     });
 }
+function processOperation( startFactValue, endFactValue, connection, next,equalsFacts, operation, res ,finalResult,result,ltdttm){
+//Result is calculated based on the operation.It can be Average , Equals or Range
+if (operation == "AVG") {
+  // for (var i = 0; i < result.length; i++) {
+  // var dt = requiredDateTime.create(result[i].createdTime);
+  // var formattedDate = dt.format("d-m-Y H:M:S");
+  // console.log(result);
+  for (var i = 0; i < result.length; i++) {
+    var dt = requiredDateTime.create(result[i].createdTime);
+    var formattedDate = dt.format("d-m-Y H:M:S");
+    var sensorNmKeys = Object.keys(result[i]._id);//business names of different sensors
+    for (var j = 0; j < sensorNmKeys.length; j++) {
+      finalResult.push([result[i].mac,result[i].name, sensorNmKeys[j], result[i]._id[sensorNmKeys[j]], formattedDate]);
+    }
+    // }
+  }
+  var removeArr = [], avg = 0, count = 0, resultToSend = [];
+  console.log(finalResult);
+  for (var j = 0; j <= finalResult.length; j++) {
+    avg = 0; count = 0; j = 0;
+    for (var i = 0; i < finalResult.length; i++) {
+      //comparing with the macId and businessNm of first row with all others mac and businessNm
+      //if matched hold the matched row in one array and also calculate the avg of businessNm values.
+      if (finalResult[i][0] == finalResult[0][0] && finalResult[i][1] == finalResult[0][1]) {
+        avg = avg + finalResult[i][3];
+        count++;
+        removeArr.push(i);
+      }
+    }
 
+    //avg is calculated with the sum of businessNm values and the count of matched rows
+    avg = avg / count;
+
+    resultToSend.push([finalResult[0][0], finalResult[0][1], finalResult[0][2], avg, finalResult[0][4]]);
+    //Remove the rows from the final result array for which already average is calculated.
+    //Always splice the data from an array in descending order of index
+    for (var k = removeArr.length - 1; k >= 0; k--) {
+      finalResult.splice(removeArr[k], 1);
+    }
+    removeArr = [];
+  }
+
+  if (resultToSend.length != 0) {
+    resultToSend.push([ltdttm, 0, 0]);
+    res.json(resultToSend);
+  }
+  else {
+    res.json(0);
+  }
+}
+else if (operation == "EQUALS") {
+  for (var i = 0; i < result.length; i++) {
+    var dt = requiredDateTime.create(result[i].createdTime);
+    var formattedDate = dt.format("d-m-Y H:M:S");
+    var sensorNmKeys = Object.keys(result[i]._id);
+    for (var j = 0; j < sensorNmKeys.length; j++) {
+      //comparing the businessNm(sensor's BusinessNm) values with the passed equal value in the query
+      if (result[i]._id[sensorNmKeys[j]] == equalsFacts)
+        finalResult.push([result[i].mac,result[i].name, sensorNmKeys[j], result[i]._id[sensorNmKeys[j]], formattedDate]);
+    }
+  }
+  if (finalResult.length != 0) {
+    finalResult.push([ltdttm, 0, 0]);
+    res.json(finalResult);
+  }
+  else {
+    res.json(0);
+  }
+}
+else {
+  for (i = 0; i < result.length; i++) {
+    var dt = requiredDateTime.create(result[i].createdTime);
+    var formattedDate = dt.format("d-m-Y H:M:S");
+    var sensorNmKeys = Object.keys(result[i]._id);
+    var temp ={}
+    for (var j = 0; j < sensorNmKeys.length; j++) {
+      //comparing the businessNm values(sensor's BusinessNm) with the passed range of value
+      if (result[i]._id[sensorNmKeys[j]] >= startFactValue && result[i]._id[sensorNmKeys[j]] <= endFactValue) {
+        // gomos.gomosLog(TRACE_DEV,"This is Debug of Menu", result);
+        temp[sensorNmKeys[j]] = result[i]._id[sensorNmKeys[j]]
+        // finalResult.push([result[i].mac,result[i].name, sensorNmKeys[j], result[i]._id[sensorNmKeys[j]], formattedDate]);
+      }
+
+    }
+    finalResult.push([result[i].mac,result[i].DeviceName, temp, formattedDate]);
+
+  }
+  if (finalResult.length != 0) {
+    finalResult.push([ltdttm, 0, 0]);
+    res.json(finalResult);
+  } else {
+    res.json(0);
+  }
+}
+}
 //gets the customers for perticular ServiceProviders
 router.get("/getCustomers", function (req, res, next) {
   var query = url.parse(req.url, true).query;

@@ -483,7 +483,10 @@ function activeDevice(db,dataToInsert,Token){
                            for(var j = 0;  j < deviceStatecode.length; j++ ){
                                 
                               var devicebusinessNM = Object.keys(devicesStateKeyValue[deviceStateKey[i]][deviceStatecode[j]]);
-                              devicebusinessNM.splice(devicebusinessNM.indexOf("dateTime"), 1);
+                              var keyForRemove1 = ["sortName","displayPosition","valueChangeAt","dateTime"];
+                              for(var n =0; n <keyForRemove1.length; n++ ){
+                                devicebusinessNM.splice(devicebusinessNM.indexOf(keyForRemove1[n]), 1);
+                              }
                               gomos.gomosLog(TRACE_DEBUG,"this is  deviceStatecode  2 loop ",devicebusinessNM);
 
                               for(var k =0; k < sensorsPkey.length; k++){
@@ -492,8 +495,15 @@ function activeDevice(db,dataToInsert,Token){
                                   var Senkey = Object.keys(dataToInsert.sensors[sensorsPkey[k]])
                                  if(Senkey.includes(devicebusinessNM[0])){
                                     gomos.gomosLog(TRACE_DEBUG,"this is Condition Satisfied 4 ",devicebusinessNM);
-                                    devicesStateKeyValue[deviceStateKey[i]][deviceStatecode[j]][devicebusinessNM[0]] = dataToInsert.sensors[sensorsPkey[k]][devicebusinessNM[0]];
-                                    devicesStateKeyValue[deviceStateKey[i]][deviceStatecode[j]]["dateTime"] = dateTime;
+                                    if( devicesStateKeyValue[deviceStateKey[i]][deviceStatecode[j]][devicebusinessNM[0]] == dataToInsert.sensors[sensorsPkey[k]][devicebusinessNM[0]]){
+                                      devicesStateKeyValue[deviceStateKey[i]][deviceStatecode[j]][devicebusinessNM[0]] = dataToInsert.sensors[sensorsPkey[k]][devicebusinessNM[0]];
+                                      devicesStateKeyValue[deviceStateKey[i]][deviceStatecode[j]]["dateTime"] = dateTime;
+                                    }else{
+                                      devicesStateKeyValue[deviceStateKey[i]][deviceStatecode[j]][devicebusinessNM[0]] = dataToInsert.sensors[sensorsPkey[k]][devicebusinessNM[0]];
+                                      devicesStateKeyValue[deviceStateKey[i]][deviceStatecode[j]]["valueChangeAt"] = dateTime;
+                                      devicesStateKeyValue[deviceStateKey[i]][deviceStatecode[j]]["dateTime"] = dateTime;
+                                    }
+                              
                                       gomos.gomosLog(TRACE_DEBUG,"This Is key of devicesStateKeyValue 1",devicesStateKeyValue);  
                                     }
                               }

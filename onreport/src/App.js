@@ -18,6 +18,7 @@ import AlertReport from './Components/alertReport';
 import activeDashbord from './Components/activeDashbord';
 import soketdemo from './Components/soketdemo';
 import Header from "./layout/Header"
+import ClimateTemp from "./Components/ClimateControlTemp/climateControlTemp"
 import alertSetup from "./Components/AlertSetupComponent/alertSetup"
 // import UserList from './Components/List/index';socketdashbord
 class App extends Component {
@@ -34,6 +35,7 @@ class App extends Component {
               <Route exact path="/menu" component={Menu} />
               <Route exact path="/AlertReport" component={AlertReport} />
               <Route exact path="/alertSetup" component={alertSetup} />
+              <Route exact path= "/climatTemp" component= {ClimateTemp}/> 
               <Route exact path="/activeDashbord" component={activeDashbord} />
               {/* <Route exact path="/chartcomp/:data" component = {chartcomp} />     */}
               <Route exact path="/chartcomp" component = {chartcomp} />

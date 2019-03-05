@@ -130,7 +130,7 @@ function onConnection(socket) {
            ActiveIdentifier['type'] = keyofCode[i];
            var devicebusinessNM = Object.keys(result[0][deviceStateKey[k]][keyofCode[i]]);
           //  gomos.gomosLog(TRACE_DEBUG,"this devicebusinessNM",devicebusinessNM); 
-          var keysToRemove3 = ["sortName","displayPosition","dateTime"];
+          var keysToRemove3 = ["sortName","displayPosition","valueChangeAt","dateTime","Type"];
           for (var l = 0; l < keysToRemove3.length; l++) {
             if (deviceStateKey.includes(keysToRemove2[l])) {
               devicebusinessNM.splice(devicebusinessNM.indexOf(keysToRemove3[l]), 1);
@@ -140,6 +140,7 @@ function onConnection(socket) {
                ActiveIdentifier["Value"]    =  result[0][deviceStateKey[k]][keyofCode[i]][devicebusinessNM[0]];
                ActiveIdentifier["sortName"]    =  result[0][deviceStateKey[k]][keyofCode[i]]["sortName"];
                ActiveIdentifier["position"]    =  result[0][deviceStateKey[k]][keyofCode[i]]["displayPosition"];
+               ActiveIdentifier["valueChangeAt"]    =  result[0][deviceStateKey[k]][keyofCode[i]]["valueChangeAt"];
                ActiveIdentifier["dateTime"] =  result[0][deviceStateKey[k]][keyofCode[i]]["dateTime"];
                sensorsArray.push(ActiveIdentifier);
           }
