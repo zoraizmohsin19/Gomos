@@ -28,32 +28,13 @@ class Chartcom extends Component {
               {
                 label: legend,
                 data: arrData,
-                // width: [12, 4, 5, 13, 12, 2, 19,19,10,10],
-                // fill: false,
-                // borderColor: "rgba(75,192,192,1)",
-                // backgroundColor: "rgba(75,192,192,0.4)",
-                // pointRadius: 0,
+                // backgroundColor: {bgColors },
+                // borderColor: {borderColors},
                 pointBorderWidth: 3,
                 pointBorderColor: "red",
                 fontSize: 12,
                 borderWidth: 2
               }
-              // {
-              //   label: "Some Things New",
-              //   data: ["10","20","70","90","101",'120',"70","20","100","10"],
-              //   width: [12, 4, 5, 13, 12, 2, 19,19,10,10],
-              //   // backgroundColor: {bgColors },
-              //   // borderColor: {borderColors},
-              //   fill: false,
-              //   borderColor: "rgba(192,75,192,1)",
-              //   backgroundColor: "rgba(192,75,192,0.4)",
-                
-              //   pointBorderWidth: 3,
-              //   pointBorderColor: "green",
-              //   fontSize: 12,
-              //   borderWidth: 2,
-              //   // pointRadius: 0
-              // }
             ]
           },
           options: {

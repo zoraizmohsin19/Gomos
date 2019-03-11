@@ -192,77 +192,80 @@ getAllDetails(){
       +":"+selectedAssetsValue+":"+ArrayOfSPs+":"
       +":"+ArrayOfCusts+":"+ArrayOfSubCusts+":"
       +":"+selectedlevelValue);
-    var dateTime1 = new Date(startDate).toISOString();
-    var dateTime2 = new Date(endDate).toISOString();
+    var dateTime1 = new Date(startDate);
+    var dateTime2 = new Date(endDate);
   var spToSend = [], custToSend = [], subCustToSend = [];
   spToSend.push(selectedSPValue);
   custToSend.push(selectedCustValue);
   subCustToSend.push(selectedSubCustValue);
-
+var body = {};
   if (selectedSPValue == "ALL" && selectedCustValue == "ALL" && selectedSubCustValue == "ALL") {
-      this.getAllDataApi(ArrayOfSPs,ArrayOfCusts,ArrayOfSubCusts,selectedAssetsValue,dateTime1,
-        dateTime2, selectedlevelValue)
+    body= {ArrayOfSPs,ArrayOfCusts,ArrayOfSubCusts,selectedAssetsValue,dateTime1,
+      dateTime2, selectedlevelValue}
+      this.getAllDataApi(body)
   }
   else if (selectedSPValue == "ALL" && selectedSubCustValue == "ALL") {
-      this.getAllDataApi(ArrayOfSPs,custToSend,ArrayOfSubCusts,selectedAssetsValue,dateTime1,
-        dateTime2, selectedlevelValue)
+    body = {ArrayOfSPs,custToSend,ArrayOfSubCusts,selectedAssetsValue,dateTime1,
+      dateTime2, selectedlevelValue}
+      this.getAllDataApi(body)
   }
   else if (selectedSPValue == "ALL" && selectedCustValue == "ALL") {
-      this.getAllDataApi(ArrayOfSPs,ArrayOfCusts,subCustToSend,selectedAssetsValue,dateTime1,
-        dateTime2, selectedlevelValue)
+    body = {ArrayOfSPs,ArrayOfCusts,subCustToSend,selectedAssetsValue,dateTime1,
+      dateTime2, selectedlevelValue}
+      this.getAllDataApi(body)
 }
   else if (selectedSubCustValue == "ALL" && selectedCustValue == "ALL") {
-
-      this.getAllDataApi(spToSend,ArrayOfCusts,ArrayOfSubCusts,selectedAssetsValue,dateTime1,
-        dateTime2, selectedlevelValue)
+body = {spToSend,ArrayOfCusts,ArrayOfSubCusts,selectedAssetsValue,dateTime1,
+  dateTime2, selectedlevelValue}
+      this.getAllDataApi(body)
 }
   
   else if (selectedCustValue == "ALL") {
-      this.getAllDataApi(spToSend,ArrayOfCusts,subCustToSend,selectedAssetsValue,dateTime1,
-        dateTime2, selectedlevelValue)
+    body = {spToSend,ArrayOfCusts,subCustToSend,selectedAssetsValue,dateTime1,
+      dateTime2, selectedlevelValue}
+      this.getAllDataApi(body)
   }
   else if (selectedSPValue == "ALL") {
-        this.getAllDataApi(ArrayOfSPs,custToSend,subCustToSend,selectedAssetsValue,dateTime1,
-        dateTime2, selectedlevelValue)
+    body = {ArrayOfSPs,custToSend,subCustToSend,selectedAssetsValue,dateTime1,
+      dateTime2, selectedlevelValue}
+        this.getAllDataApi(body)
   }
   else if (selectedSubCustValue == "ALL") {
-          this.getAllDataApi(spToSend,custToSend,ArrayOfSubCusts,selectedAssetsValue,dateTime1,
-          dateTime2, selectedlevelValue)
+    body = {spToSend,custToSend,ArrayOfSubCusts,selectedAssetsValue,dateTime1,
+      dateTime2, selectedlevelValue}
+          this.getAllDataApi(body)
   }
   else {
-      this.getAllDataApi(spToSend,custToSend,subCustToSend,selectedAssetsValue,dateTime1,
-        dateTime2, selectedlevelValue)
+    body = {spToSend,custToSend,subCustToSend,selectedAssetsValue,dateTime1,
+      dateTime2, selectedlevelValue}
+      this.getAllDataApi(body)
   }
 }
 //THIS IS API METHOD FOR FETCH ALL DATA FROM SERVER BASED ON SELECTED CRITERIA.
-getAllDataApi(SendForSp,SendFroCustCD,SendForSbCd,SendForAssets,SendForStartDate,
-  SendForEndDate,SendForLevel){
-    fetch("http://localhost:3992/getAlert?spCode=" + SendForSp + "&&custCd=" +
-    SendFroCustCD + "&&subCustCd=" + SendForSbCd + "&&assets=" + SendForAssets +
-  "&&startDate=" + SendForStartDate + "&&endDate=" + SendForEndDate + 
-  "&&level=" + SendForLevel)
-    .then(response => response.json())
+getAllDataApi(body){
+    axios.post("http://localhost:3992/getAlert", body)
+    // .then(response => response.json())
     .then(json =>  {
       alert(json)
-      if(json !=0){
+      if(json["data"].length !=0){
         swal("Success!", "", "success");
     
         // console.log("this json data");
-         console.log(json);
-          alert(json)
+         console.log(json["data"]);
+          alert(json["data"])
          var MainData =[];
-        for (var i = 0; i <= json.length - 1; i++) {
+        for (var i = 0; i <= json["data"].length - 1; i++) {
           // var DeviceName = ;
           // var totalDevice = ;
-          var processedData = json[i].processedData;
+          var processedData = json["data"][i].processedData;
           // var  processed_Y;
           // var  processed_N;
           // var  processed_E;
           // var  processed_I;
           // var  processed_F;
           MainData.push({
-            "DeviceName": json[i]._id,
-            "totalDevice":json[i].totalCount,
+            "DeviceName": json["data"][i]._id,
+            "totalDevice":json["data"][i].totalCount,
             "processed_Y":0, 
             "processed_E":0,  
             "processed_N":0,  
@@ -305,7 +308,7 @@ getAllDataApi(SendForSp,SendFroCustCD,SendForSbCd,SendForAssets,SendForStartDate
       // alert(json)
         }else{
           swal("Sorry!", "No Data Available For This Range!", "error");
-          this.setState({tableDataToSend : 0 ,result : 0 });
+          this.setState({tableDataToSend : [] ,result : []});
         }
     });
 }

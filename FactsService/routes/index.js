@@ -5,6 +5,8 @@ var scheduleTemp = require("node-schedule");
 var urlConn, dbName;
 var dataFromDevices = [], dataFromAssets = [], dataFromSubCust = [], dataFromPayload = [];
 var factSrvcSchedule;
+const uuidv4 = require('uuid/v4');
+
 var fs = require("fs");
 var dateTime = require("node-datetime");
 
@@ -17,7 +19,7 @@ const TRACE_STAGE = 2;
 const TRACE_TEST  = 3;
 const TRACE_DEV   = 4;
 const TRACE_DEBUG = 5;
-var  gomos = require("../../commanFunction");
+var  gomos = require("../../commanFunction/routes/commanFunction");
 
 //method to update mqtt collection when particular data is taken from mqtt and inserted into fact.
 function updateMQTT(objId, db,processedFlag ) {
@@ -26,7 +28,7 @@ function updateMQTT(objId, db,processedFlag ) {
     { $set: { processed: processedFlag } },
     function (err, result) {
       if (err) {
-        errorCustmHandler("updateMQTT",err);
+        gomos.errorCustmHandler("updateMQTT",err);
         process.hasUncaughtExceptionCaptureCallback();
       }
       gomos.gomosLog(TRACE_TEST,"updateMQTT for _id", objId);
@@ -41,7 +43,7 @@ function getDevices() {
     { useNewUrlParser: true },
     function (err, connection) {
       if (err) {
-        errorCustmHandler("getDevices",err);
+        gomos.errorCustmHandler("getDevices",err);
         process.hasUncaughtExceptionCaptureCallback();
       }
       var db = connection.db(dbName);
@@ -49,7 +51,7 @@ function getDevices() {
         .find()
         .toArray(function (err, result) {
           if (err) {
-            errorCustmHandler("getDevices",err);
+            gomos.errorCustmHandler("getDevices",err);
             process.hasUncaughtExceptionCaptureCallback();
           }
           try{
@@ -59,7 +61,7 @@ function getDevices() {
             gomos.gomosLog(TRACE_PROD,"getDevices - No. of devices read from collection", dataFromDevices.length);
           }
           catch(err){
-            errorCustmHandler("getDevices",err);
+            gomos.errorCustmHandler("getDevices",err);
           }
          
           connection.close();
@@ -82,7 +84,7 @@ function getAssets() {
         .find()
         .toArray(function (err, result) {
           if (err) {
-            errorCustmHandler("getAssets",err);
+            gomos.errorCustmHandler("getAssets",err);
             process.hasUncaughtExceptionCaptureCallback();
           }
           try{
@@ -92,7 +94,7 @@ function getAssets() {
             gomos.gomosLog(TRACE_PROD,"getAssets - No. of assets read from collection", dataFromAssets.length);
           }
           catch(err){
-            errorCustmHandler("getAssets",err);            
+            gomos.errorCustmHandler("getAssets",err);            
           }
          
           connection.close();
@@ -108,7 +110,7 @@ function getSubCustomers() {
     { useNewUrlParser: true },
     function (err, connection) {
       if (err) {
-        errorCustmHandler("getSubCustomers",err);            
+        gomos.errorCustmHandler("getSubCustomers",err);            
         process.hasUncaughtExceptionCaptureCallback();
       }
       var db = connection.db(dbName);
@@ -116,7 +118,7 @@ function getSubCustomers() {
         .find()
         .toArray(function (err, result) {
           if (err) {
-            errorCustmHandler("getSubCustomers",err);
+            gomos.errorCustmHandler("getSubCustomers",err);
             process.hasUncaughtExceptionCaptureCallback();
           }
           try{
@@ -126,7 +128,7 @@ function getSubCustomers() {
             gomos.gomosLog(TRACE_PROD,"getSubCustomers - No. of subeCustomer read from collection", dataFromSubCust.length);
           }
           catch(err){
-            errorCustmHandler("getSubCustomers",err);    
+            gomos.errorCustmHandler("getSubCustomers",err);    
           }
           connection.close();
         });
@@ -141,7 +143,7 @@ function getPayloads() {
     { useNewUrlParser: true },
     function (err, connection) {
       if (err) {
-        errorCustmHandler("getPayloads",err);  
+        gomos.errorCustmHandler("getPayloads",err);  
         process.hasUncaughtExceptionCaptureCallback();
       }
       var db = connection.db(dbName);
@@ -149,7 +151,7 @@ function getPayloads() {
         .find()
         .toArray(function (err, result) {
           if (err) {
-            errorCustmHandler("getPayloads",err);  
+            gomos.errorCustmHandler("getPayloads",err);  
             process.hasUncaughtExceptionCaptureCallback();
           }
           try{
@@ -159,7 +161,7 @@ function getPayloads() {
             gomos.gomosLog(TRACE_PROD,"getPayload - No. of payload read from collection", dataFromPayload.length);
           }
           catch(err){
-            errorCustmHandler("getPayloads",err);  
+            gomos.errorCustmHandler("getPayloads",err);  
           }
           
           connection.close();
@@ -187,7 +189,7 @@ function processFactMessages() {
   }
   else {
     gomos.gomosLog(TRACE_PROD,"Scheduling issues, Can not proceed : It can only support Seconds, Minutes up to 59",factSrvcSchedule);
-    errorCustmHandler("processFactMessages","Scheduling issues, Can not proceed : It can only support Seconds, Minutes up to 59");  
+    gomos.errorCustmHandler("processFactMessages","Scheduling issues, Can not proceed : It can only support Seconds, Minutes up to 59");  
     process.exit(0);
   }
   var schPattern = sec + min + "* * * *";
@@ -200,7 +202,7 @@ function processFactMessages() {
       { useNewUrlParser: true },
       function (err, connection) {
         if (err) {
-           errorCustmHandler("processFactMessages",err);  
+           gomos.errorCustmHandler("processFactMessages",err);  
           process.hasUncaughtExceptionCaptureCallback();
         }
         var db = connection.db(dbName);
@@ -208,7 +210,7 @@ function processFactMessages() {
           .find({ processed: "N" }).limit( 100 )
           .toArray(function (err, result) {
             if (err) {
-              errorCustmHandler("processFactMessages",err); 
+              gomos.errorCustmHandler("processFactMessages",err); 
               process.hasUncaughtExceptionCaptureCallback();
             }
             if (result.length > 0) {
@@ -222,7 +224,7 @@ function processFactMessages() {
 
                var id  = result[this.index]._id
                gomos.gomosLog(TRACE_DEBUG,"processFactMessages - going to process for index",this.index );
-              var currentTime= new Date().toISOString();
+              var currentTime = new Date(new Date().toISOString());
                 db.collection("MqttDump")
                 .findOneAndUpdate(
                    {
@@ -237,14 +239,6 @@ function processFactMessages() {
                    },
                  })
                  .then(function(result1) {
-                  // db.collection("MqttDump").updateOne(
-                  //   { _id: id },
-                  //   { $set: { processed: "I" } },
-                  //   function (err, result1) {
-                  //     if (err) {
-                  //       process.hasUncaughtExceptionCaptureCallback();
-                  //     }
-                      // console.log("Updated : "+ this.index + result.length);
                    
                 //filtering data which are obtained from Payloads Collection to get the sensors names 
                 //of particular mac.
@@ -253,7 +247,8 @@ function processFactMessages() {
                 mac = result[count].mac;
                 createdTime = result[count].createdTime;
                 payloadId = result[count].payloadId;
-                gomos.gomosLog(TRACE_DEBUG,"processFactMessages - going to process after updation for id, mac , payloadid and CreatedTime",objId+":"+mac+":"+payloadId+":"+createdTime );
+             
+                gomos.gomosLog(TRACE_DEV,"processFactMessages - going to process after updation for id, mac , payloadid and CreatedTime",objId+":"+mac+":"+payloadId+":"+createdTime );
                 if (dataFromPayload.filter(item => item.mac == mac).length == 0 ) {
                   processedFlag = "E"
                   updateMQTT(objId, db, processedFlag);
@@ -299,7 +294,7 @@ function processFactMessages() {
                       if (dataFromAssets.filter(item => item.assetId == assetsId).length == 0) {
                         processedFlag = "E";
                         updateMQTT(objId, db, processedFlag);
-                        gomos.gomosLog(TRACE_TEST,"Assets Not Present for mac ", mac +":"+ assetsId);
+                        gomos.gomosLog(TRACE_PROD,"Assets Not Present for mac ", mac +":"+ assetsId);
                       }
                       else {
                         var sensorKeys, msgFactsKeys,subCustCd, custCd, spCd, objId;
@@ -332,12 +327,13 @@ function processFactMessages() {
                             gomos.gomosLog(TRACE_DEBUG,"processFactMessages -  where msgFactsKeys and sensorsNms values",sensorKeys+":"+msgFactsKeys);                             
                             //if the msg pattern changes wven these keys also changes,so it has to be manually inserted
                             // when ever there is change in the msg pattern.
-                            keysToRemove = ["payloadId", "mac", "createdTime","updatedTime","_id", "processed"];
+                            keysToRemove = ["payloadId", "mac", "createdTime","updatedTime","_id", "processed","Token"];
 
                             //except the business names related keys all other keys has to be removed from the 
                             //msgFactskeys,which is further used for mapping with payload business names.
                             for (var i = 0; i < keysToRemove.length; i++) {
                               if (msgFactsKeys.includes(keysToRemove[i])) {
+                                gomos.gomosLog(TRACE_DEBUG,"this is condition For Checking Remove key",keysToRemove[i]);
                                 msgFactsKeys.splice(msgFactsKeys.indexOf(keysToRemove[i]), 1);
                               }
                             }
@@ -369,16 +365,19 @@ function processFactMessages() {
                               createdTime: createdTime,
                               updatedTime: updatedTime
                             };
+                           
+                            activeDevice(db,dataToInsert,result[count].Token);
                             gomos.gomosLog(TRACE_DEBUG,"processFactMessages -  where dataToInsert ready ",dataToInsert);
                             db.collection("MsgFacts").insertOne(dataToInsert, function (
                               err,
                               result) {
                               if (err) {
-                                errorCustmHandler("processFactMessages",err);  
+                                gomos.errorCustmHandler("processFactMessages",err);  
                                 process.hasUncaughtExceptionCaptureCallback();
                               }
                               gomos.gomosLog(TRACE_TEST,"Inserted : IN MsgFacts",mac +":"+payloadId +":"+ createdTime);
                             });
+
                             //Update processed flag in 'MqttDump'
                             // updateMQTT(objId, db);
                             processedFlag = "Y"
@@ -399,7 +398,7 @@ function processFactMessages() {
               }
                }
                catch(err){
-              errorCustmHandler("processFactMessages",err);  
+              gomos.errorCustmHandler("processFactMessages",err);  
 
                }    
                   count++;
@@ -423,13 +422,333 @@ function processFactMessages() {
     });
 }
 
+function activeDevice(db,dataToInsert,Token){
+
+       db.collection("DeviceState").find({"mac": dataToInsert.mac})
+       .toArray(function (err, result2) {
+         if (err) {
+             gomos.errorCustmHandler("activeDevice",err);  
+           process.hasUncaughtExceptionCaptureCallback();
+              }
+           try{
+            var currentTime = new Date(new Date().toISOString());
+            db.collection("DeviceState").findOneAndUpdate({
+              $and: [
+                {_id: result2[0]["_id"]},
+                {updatedTime:result2[0].updatedTime}
+                ]},
+                { $set: {
+                  updatedTime: currentTime
+              },
+            })
+            .then(function (result3) {
+              if (err) {
+                  gomos.errorCustmHandler("activeDevice",err);  
+                process.hasUncaughtExceptionCaptureCallback();
+                   }
+                try{
+                  gomos.gomosLog(TRACE_DEBUG,"This is result of Update ", dataToInsert.mac)
+                 db.collection("Devices").find({"mac":dataToInsert.mac})
+                 .toArray(function (err, result1) {
+                   if (err) {
+                       gomos.errorCustmHandler("activeDevice",err);  
+                       process.hasUncaughtExceptionCaptureCallback();
+                        }
+                     try{ 
+                       var devicesStateKeyValue = result3.value;
+                       var _id = result3.value._id;
+                       var dateTime = new Date(new Date().toISOString());
+                        gomos.gomosLog(TRACE_DEBUG,"this is data of DevicesSate : ",devicesStateKeyValue);
+                         var deviceStateKey = Object.keys(devicesStateKeyValue);
+                    
+                      var keysToRemove2 = ["_id", "mac", "DeviceName","updatedTime","createdTime"];
+                      gomos.gomosLog(TRACE_DEBUG,"This Is key of identifire 1 Place",deviceStateKey);  
+                      for (var l = 0; l < keysToRemove2.length; l++) {
+                        if (deviceStateKey.includes(keysToRemove2[l])) {
+                          deviceStateKey.splice(deviceStateKey.indexOf(keysToRemove2[l]), 1);
+                        }
+                      }
+                      gomos.gomosLog(TRACE_DEBUG,"This Is key of deviceStateKey",deviceStateKey);  
+
+                      var sensorsPkey = Object.keys(dataToInsert.sensors);
+                      gomos.gomosLog(TRACE_DEBUG,"This Is key of sensorsPkey",sensorsPkey);  
+                      gomos.gomosLog(TRACE_DEBUG,"This Is key of devicesStateKeyValue out Loop",devicesStateKeyValue); 
+                      for(var i = 0; i < deviceStateKey.length ; i++){
+                        gomos.gomosLog(TRACE_DEBUG,"This Is key of deviceStateKey In Loop",deviceStateKey); 
+                       
+
+                         var deviceStatecode  =  Object.keys(devicesStateKeyValue[deviceStateKey[i]]);
+                         gomos.gomosLog(TRACE_DEBUG,"This Is key of deviceStatecode",deviceStatecode);  
+
+                           for(var j = 0;  j < deviceStatecode.length; j++ ){
+                                
+                              var devicebusinessNM = Object.keys(devicesStateKeyValue[deviceStateKey[i]][deviceStatecode[j]]);
+                              devicebusinessNM.splice(devicebusinessNM.indexOf("dateTime"), 1);
+                              gomos.gomosLog(TRACE_DEBUG,"this is  deviceStatecode  2 loop ",devicebusinessNM);
+
+                              for(var k =0; k < sensorsPkey.length; k++){
+                                  gomos.gomosLog(TRACE_DEBUG,"this is  devicebusinessNM  3 loop ",devicebusinessNM);
+                                  gomos.gomosLog(TRACE_DEBUG,"this is dataToInsert.sensors  3 loop ",dataToInsert.sensors);
+                                  var Senkey = Object.keys(dataToInsert.sensors[sensorsPkey[k]])
+                                 if(Senkey.includes(devicebusinessNM[0])){
+                                    gomos.gomosLog(TRACE_DEBUG,"this is Condition Satisfied 4 ",devicebusinessNM);
+                                    devicesStateKeyValue[deviceStateKey[i]][deviceStatecode[j]][devicebusinessNM[0]] = dataToInsert.sensors[sensorsPkey[k]][devicebusinessNM[0]];
+                                    devicesStateKeyValue[deviceStateKey[i]][deviceStatecode[j]]["dateTime"] = dateTime;
+                                      gomos.gomosLog(TRACE_DEBUG,"This Is key of devicesStateKeyValue 1",devicesStateKeyValue);  
+                                    }
+                              }
+                           }
+                         gomos.gomosLog(TRACE_DEBUG,"this is data of DevicesSate",devicesStateKeyValue);  
+                           
+                      }
+                      
+                      if(Token != '' && Token != undefined ){
+                    
+                       if(dataToInsert.payloadId == "GHPStatus"){
+                        updateDevInstrForRActive(db,dataToInsert,Token);
+
+                       }else{
+                        updateDeviceInstruction(db,dateTime,dataToInsert ,Token);
+
+                       }
+                      }
+                       gomos.gomosLog(TRACE_DEBUG,"This Is key of devicesStateKeyValue Last",devicesStateKeyValue);  
+                       updateDeviceState(db,_id,devicesStateKeyValue,dateTime);
+                     
+                 }
+                catch(err){
+
+              }
+             
+            }) 
+            gomos.gomosLog(TRACE_DEBUG,"this is data of deviceState : ",result2);
+            }
+           catch(err){
+         }
+        
+       }) 
+       }
+      catch(err){
+    }
+   
+  }) 
+     
+ gomos.gomosLog(TRACE_DEBUG,"this is called",dataToInsert);
+}
+
+function updateDevInstrForRActive(db,dataToInsert,Token){
+  gomos.gomosLog(TRACE_PROD,"This updateDevInstrForRActive Data  "+Token , dataToInsert);
+  var criteria = {
+    "mac": dataToInsert.mac,
+    "type":"ActiveJob",
+    "sourceMsg.referenceToken": Token
+  }
+  
+  db.collection("DeviceInstruction")
+  .find(criteria)
+  .toArray(function (err, result) {
+    if (err) {
+      process.hasUncaughtExceptionCaptureCallback();
+    }
+    if(result.length!=0){
+      gomos.gomosLog(TRACE_DEV,"This is find Of updateDevInstrForRActive",result);
+      for(var i =0; i< result.length; i++){
+// var tempobj = {
+//   "_id": uuidv4(),
+//   "mac": dataToInsert.mac,
+//    "DeviceName": dataToInsert.DeviceName,
+//    "type": "InActiveJob",
+//    "sourceMsg":result[i].sourceMsg,
+//    "createdTime":dateTime,
+//    "updatedTime": dateTime
+// }
+  updatedDeviceinstruction(db,result[i]); 
+//  DeviceInstructionInsert(db,tempobj);
+ 
+      }
+  
+   
+    }
+    gomos.gomosLog(TRACE_DEV,"This is find Of updateDevInstrForRActive",result);
+  });
+}
+function updateDeviceInstruction(db,dateTime,dataToInsert,Token){
+gomos.gomosLog(TRACE_DEBUG,"This updateDeviceInstruction Data  "+Token , dataToInsert);
+var criteria = {
+  "mac": dataToInsert.mac,
+  "type":"SentInstruction",
+  "sourceMsg.Token": Token
+}
+
+db.collection("DeviceInstruction")
+.find(criteria)
+.toArray(function (err, result) {
+  if (err) {
+    process.hasUncaughtExceptionCaptureCallback();
+  }
+  if(result.length!=0){
+    gomos.gomosLog(TRACE_DEBUG,"This is find Of DeviceInstruction",result);
+  deleteinstruction(db,result[0]._id); 
+  insertActivejob(db,result[0],dataToInsert);
+  }
+  gomos.gomosLog(TRACE_DEBUG,"This is find Of DeviceInstruction",result);
+});
+gomos.gomosLog(TRACE_DEBUG,"this callig after Find Of Deviceinstruction");
+} 
+function insertActivejob(db,dataInsruction,dataToInsert){ 
+  gomos.gomosLog(TRACE_DEBUG,"this is need For Insert", dataInsruction);
+  gomos.gomosLog(TRACE_DEBUG,"this is need For Insert", dataToInsert);
+  var keysofBNm = Object.keys(dataInsruction.sourceMsg);
+  var channelName = dataInsruction.sourceMsg["Channel"];
+  var Token =  dataInsruction.sourceMsg["Token"];
+  var payloadId =  dataInsruction.sourceMsg["ActionType"];
+  var isDailyJob = dataInsruction.sourceMsg["isDailyJob"];
+  var keyForRemove = ["Channel","Token","ActionType","isDailyJob"];
+for(var i = 0 ; i< keyForRemove.length; i++){
+    if (keysofBNm.includes(keyForRemove[i])) {
+      keysofBNm.splice(keysofBNm.indexOf(keyForRemove[i]), 1);
+    }
+  }
+  var dataTime = new Date(new Date().toISOString());
+  gomos.gomosLog(TRACE_DEBUG,"this is key",keysofBNm);
+  var data = {
+    "mac": dataToInsert.mac,
+    "DeviceName": dataToInsert.DeviceName,
+    "type" : "ActiveJob",
+    "sourceMsg": {"referenceToken": Token,
+    "Channel":channelName,
+    // "Action": payloadId,
+    "isDailyJob": isDailyJob,
+    },
+    "createdTime": dataTime,
+    "updatedTime": dataTime
+   
+  }
+  var arrayBName = []
+  if(dataToInsert.payloadId ==  "AckSchedule"){
+    
+    var dArray = ["ONTime","OFFTime"];
+    for(var i =0; i< keysofBNm.length; i++){
+      var dataforsplit =  dataInsruction.sourceMsg[keysofBNm[i]];
+      var temp = dataforsplit.split(",");
+      gomos.gomosLog(TRACE_PROD,"this is split values"+temp[0],temp[1]);
+     for(var j =0; j< temp.length; j++){
+      data["_id"] =uuidv4();
+      data["sourceMsg"]["ActionType"] = dArray[j];
+      data["sourceMsg"]["ActionValues"] = temp[j];
+      if(isDailyJob == true ){
+        data["sourceMsg"]["ActionTime"] = "";
+      }
+      else{
+        data["sourceMsg"]["ActionTime"] = compareDate(temp[j]);
+     
+      }
+      DeviceInstructionInsert(db,data);
+     }
+    }
+  }else{
+    for(var i = 0; i< keysofBNm.length; i++ ){
+    gomos.gomosLog(TRACE_DEBUG,"This is key of DeviceInstruction",dataInsruction.sourceMsg[keysofBNm[i]])
+      var key = keysofBNm[i];
+      var value =  dataInsruction.sourceMsg[keysofBNm[i]]
+    gomos.gomosLog(TRACE_DEBUG,"This is key of DeviceInstruction",key+ value)
+  
+        arrayBName.push({"bsName": key, "value": value});
+      }
+  
+  gomos.gomosLog(TRACE_DEBUG,"this is some Array",arrayBName);
+ 
+    for(var k = 0 ; k < arrayBName.length ;k++ ){
+      data["_id"] =uuidv4();
+      data["sourceMsg"]["ActionType"] = arrayBName[k].bsName;
+      data["sourceMsg"]["ActionValues"] = arrayBName[k].value;
+      // data["sourceMsg"]["ActionTime"] = new Date(arrayBName[k].value).toISOString();
+      if(isDailyJob == true ){
+        data["sourceMsg"]["ActionTime"] = "";
+        }
+        else{
+         data["sourceMsg"]["ActionTime"] =compareDate(arrayBName[k].value);
+        }
+      DeviceInstructionInsert(db,data);
+   
+    }
+    
+  }
+ 
+
+} 
+function compareDate(str1){
+  gomos.gomosLog(TRACE_DEBUG,"this what coming Date", str1)
+  var arraydate = str1.split(":")
+  gomos.gomosLog(TRACE_DEBUG,"this what coming Date",arraydate[5]+"," +arraydate[4]+","+ arraydate[3]+","+arraydate[2]+","+ arraydate[1]+","+ arraydate[0])
+  var date1 = new Date("20"+arraydate[5], arraydate[4] - 1, arraydate[3],arraydate[2], arraydate[1], arraydate[0]);
+  return date1;
+  }
+function DeviceInstructionInsert(db,data){
+  db.collection("DeviceInstruction").insertOne(data, function (err, result) {
+    if (err) {
+      gomos.errorCustmHandler("DeviceInstruction",err);
+      gomos.gomosLog(TRACE_DEV,"This is error",err);
+      process.hasUncaughtExceptionCaptureCallback();
+    }
+    gomos.gomosLog(TRACE_DEV," insert  in DeleteDeviceState activeJob");
+  
+  });
+} 
+function deleteinstruction(db,id){
+  db.collection("DeviceInstruction")
+  .deleteOne({"_id": id},
+    function (err, result) {
+      if (err) {
+        gomos.errorCustmHandler("updateDeviceState",err);
+        process.hasUncaughtExceptionCaptureCallback();
+      }
+      gomos.gomosLog(TRACE_DEV,"DeleteDeviceState ", id);
+    }
+  );
+}
+function updateDeviceState(db,_id,devicesStateKeyValue, dateTime) {
+  db.collection("DeviceState").updateOne(
+    { _id: _id },
+    { $set: { sensors: devicesStateKeyValue.sensors,
+      channel:  devicesStateKeyValue.channel,
+      updatedTime :dateTime
+     } },
+    function (err, result) {
+      if (err) {
+        gomos.errorCustmHandler("updateDeviceState",err);
+        process.hasUncaughtExceptionCaptureCallback();
+      }
+      gomos.gomosLog(TRACE_DEBUG,"updateDeviceState ", _id);
+    }
+  );
+}
+function updatedDeviceinstruction(db,updatedData){
+  var id = updatedData["_id"];
+  dateTime = new Date(new Date().toISOString())
+
+  db.collection("DeviceInstruction").updateOne(
+    { _id: id },
+    { $set: { type: "executedJob",
+      updatedTime :dateTime
+     } },
+    function (err, result) {
+      if (err) {
+        gomos.errorCustmHandler("updateDeviceState",err);
+        process.hasUncaughtExceptionCaptureCallback();
+      }
+      gomos.gomosLog(TRACE_DEBUG,"updateDeviceState ", id);
+    }
+  );
+}
+
 function getServiceConfig() {
   MongoClient.connect(
     urlConn,
     { useNewUrlParser: true },
     function (err, connection) {
       if (err) {
-        errorCustmHandler("getServiceConfig",err);  
+        gomos.errorCustmHandler("getServiceConfig",err);  
         process.hasUncaughtExceptionCaptureCallback();
       }
       var db = connection.db(dbName);
@@ -437,7 +756,7 @@ function getServiceConfig() {
         .find()
         .toArray(function (err, result) {
           if (err) {
-        errorCustmHandler("getServiceConfig",err);  
+        gomos.errorCustmHandler("getServiceConfig",err);  
             process.hasUncaughtExceptionCaptureCallback();
           }
           if (result.length > 0) {
@@ -449,7 +768,7 @@ function getServiceConfig() {
               }
             }
             catch(err){
-              errorCustmHandler("getServiceConfig",err);
+              gomos.errorCustmHandler("getServiceConfig",err);
             }
            
           }
@@ -458,35 +777,6 @@ function getServiceConfig() {
     }
   );
 }
-var dt = dateTime.create();
-var formattedDate = dt.format("Y-m-d");
-function errorCustmHandler(functionName,typeofError){
-  // console.log(typeofError);
-    let writeStream = fs.createWriteStream("../commanError-" + formattedDate + ".log", { flags: "a" });
-    var dateTime = new Date().toISOString();
-  // write some data with a base64 encoding
-  writeStream.write(
-    "DateTime: " +dateTime+ "\n"+  
-    "Error handler: " + "\n"+
-    "serviceName:"+ "FactsService"+"\n"+
-    "functionName:"+ functionName +"\n"+
-    // "lineNo: " + lineNo  +"\n"+
-    "Error Code:" + typeofError.statusCode +"\n"+
-    " Error: " + typeofError + "\n"+
-    "typeofError.stack"+ typeofError.stack +
-    "\n"
-  );
-  
-  // the finish event is emitted when all data has been flushed from the stream
-  writeStream.on('finish', () => {  
-    gomos.gomosLog(TRACE_TEST,'wrote all data to file');
-  });
-  
-  // close the stream
-  writeStream.end();
-  
-  }
-
 
 var factTempInv = null;
 module.exports = function (app) {

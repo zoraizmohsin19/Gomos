@@ -5,7 +5,7 @@ class soketdemo extends Component {
     super();
     this.state = {
       response: false,
-      endpoint: "http://18.203.28.35:3003",
+      endpoint: "http://localhost:4001",
       text1: '',
       socket:'',
       appendchild: null,
@@ -16,9 +16,9 @@ class soketdemo extends Component {
       console.log("Hello Takreem");
       var data1 ='';
     const { endpoint } = this.state;
-    const socket = socketIOClient("http://18.203.28.35:3003");
-    socket.on("timer", data =>{
-    //  console.log(data);
+    const socket = socketIOClient(endpoint);
+    socket.on("FromAPI", data =>{
+    console.log(data);
     this.setState({ response: data , socket: socket});
     data1 = data
     console.log(data);

@@ -1,39 +1,43 @@
 
 .tableactuter {
-    
+
     margin: 20px 0px;
-    height: 184px;
+    max-height: 320px;
+    overflow-y: auto;
     
 }
 
-.dropdown.btn-group.btn-group-primary {
+/* .dropdown.btn-group.btn-group-primary {
     margin: 20px 30px;
+} */
+.AcDropS {
+    color: black;
+    margin: 20px 30px;
+    background: white;
 }
-/* .ActvieBtn {
-    margin: 10px;
-    /* padding: 3px 40px; */
-    /* font-size: 24px;
-    padding-left: 40px;
-    padding-right: 40px;
-    padding-top: 9px;
-    padding-bottom: 38px;
-} */ */
+.AcDropS>.open>.dropdown-menu {
+    display: block;
+    margin-top: -20px;
+}
 
-
+.red-border{
+    border: 1px solid red;
+}
 .ActiveSensorsRow {
     overflow: auto;
 
 }
 
 .small-boxDActive {
-    width: 99px;
+    width: 70px;
     background: white;
     border: 1px solid gainsboro;
+    margin: 4px;
 }
 .ActiveSheading{
     font-size: 20px;
-   
     text-align: center;
+    margin-bottom: 0px;
 }
 .channelStatus{
     position: relative;
@@ -53,7 +57,7 @@
 
 #containersimg {
     width: 636px;
-    height: 90px;
+    height: 97px;
     overflow-y: hidden !important;
     margin-top: 7px;
 
@@ -82,14 +86,17 @@
     margin-bottom: 0px;
 }
 .ActiveTableH {
-    max-height: 230px;
+    max-height: 275px;
     overflow-y: scroll;
+    margin-bottom: 10px;
   
 }
 
 .ActiveSelection {
-    width: 20%;
+    width: 17%;
     display: inline;
+    padding: 4px 9px;
+    font-size: 12px;
   } 
   .pagerActive {
     /* padding-left: 0; */
@@ -104,6 +111,8 @@
     border-radius: 20px;
     padding-right: 17px;
     margin-left: 10px;
+    font-size: 12px;
+    float: right;
 }
   .pagerActive li>a, .pagerActive li>span {
     display: inline-block;
@@ -114,6 +123,9 @@
     color: #337ab7;
     text-decoration: none;
     
+}
+.Acustmborder{
+    border: 1px solid red !important;
 }
 li.ActiveList {
     color: #337ab7;
@@ -134,3 +146,229 @@ li.ActiveList {
     padding-right: 30px;
     border: 1px #62D27B solid;
 }
+@media (max-width: 768px) {
+    #containersimg {
+        width: 327px ;
+    }
+    #wrapper {
+        width: 207%;
+    }
+  }
+  label.ActiveLabel {
+    margin-top: 30px !important;
+    margin-left: 8px;
+}
+.ActivedateTime {
+    font-size: 10px;
+    text-align: center;
+    margin-top: -9px;
+    margin-bottom: 2px;
+}
+/* this is slider */
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 60px;
+    height: 34px;
+  }
+  
+  .switch input { 
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+  
+  .slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    -webkit-transition: .4s;
+    transition: .4s;
+  }
+  
+  .slider:before {
+    position: absolute;
+    content: "";
+    height: 26px;
+    width: 26px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    -webkit-transition: .4s;
+    transition: .4s;
+  }
+  
+  input:checked + .slider {
+    background-color: #62D27B;
+  }
+  
+  input:focus + .slider {
+    box-shadow: 0 0 1px #62D27B;
+  }
+  
+  input:checked + .slider:before {
+    -webkit-transform: translateX(26px);
+    -ms-transform: translateX(26px);
+    transform: translateX(26px);
+  }
+  
+  /* Rounded sliders */
+  .slider.round {
+    border-radius: 34px;
+  }
+  
+  .slider.round:before {
+    border-radius: 50%;
+  }
+  /* this is end slider */
+  span.Aidate {
+    display: inline-block;
+}
+input.houremin {
+    display: inline-block;
+    width: 45px;
+    padding: 3px;
+    margin-left: 7px;
+    font-size: 11px;
+}
+
+
+span.Acolon {
+    margin-left: 3px;
+    font-size: 18px;
+}
+.Acustmtd {
+    text-align: center;
+    margin: 0px;
+    padding: 0px;
+    font-size: 12px;
+}
+textarea.ActivetestArea {
+    margin: 0px;
+    width: 100%;
+    height: 300px;
+    margin-top: 20px;
+    font-size: 14px;
+}
+.Acustmtd {
+    padding: 0px !important;
+}
+.ActiveSinput {
+    margin-left: 44px;
+}
+.ActiveTableinput {
+    padding: 0px !important;
+    text-align: center;
+}
+.Acustmfloat {
+    float: right;
+    margin-right: -175px;
+}
+
+.Apadh{
+    padding-left: 40px !important;
+    padding-right: 40px !important;
+}
+.ExecutejobDate {
+    display: inline-block !important;
+}
+.ExecutejobDatepiker {
+    padding: 5px;
+    border-radius: 4px;
+    margin-left: 28px;
+}
+.modal-90w.modal-dialog {
+    width: 90%;
+}
+.OpdLable {
+    margin-right: -20px;
+}
+.toggleButton {
+    margin: 0px;
+    padding: 0px;
+    background: white;
+    border-radius: 10px;
+    border-style: none;
+}
+.AcSetInterval {
+    margin-top: 20px;
+}
+.sensorsDive {
+    display: inline-block;
+}
+.paddForm {
+    margin: 15px;
+}
+.SensorsOuter {
+    width: max-content;
+    /* overflow: hidden !important; */
+    /* overflow-x: auto; */
+}
+.SensorsWrapper {
+    overflow-x: auto;
+}
+
+.ActiveP.textArea {
+    margin-bottom: -21px;
+    margin-top: 21px;
+}
+.ActiveCorner {
+    background: rgba(185,249,174,.85);
+    height: 568px;
+    margin: -15px;
+    padding: 20px;
+}
+.ChannelBGColorYellow{
+    background: rgba(251, 255, 0, 0.87);
+    border: 1px solid #ffc800;
+    -webkit-animation-name: example1; /* Safari 4.0 - 8.0 */
+    -webkit-animation-duration: 4s; /* Safari 4.0 - 8.0 */
+    -webkit-animation-iteration-count: infinite; /* Safari 4.0 - 8.0 */
+    animation-name: example1;
+    animation-duration: 4s;
+    animation-iteration-count: infinite;
+}
+@-webkit-keyframes example1 {
+    
+    25%  {background-color:yellow;}
+    50%   {background-color:greenyellow;}
+  }
+  
+  /* Standard syntax */
+  @keyframes example1 {
+   
+    25%  {background-color:yellow; }
+    50%   {background-color:greenyellow;}
+   
+  } 
+.ChannelBGColortransition {
+    background: #04830499;
+    color: white;
+    border: 1px solid #0d2502;
+    -webkit-animation-name: example; /* Safari 4.0 - 8.0 */
+    -webkit-animation-duration: 4s; /* Safari 4.0 - 8.0 */
+    -webkit-animation-iteration-count: infinite; /* Safari 4.0 - 8.0 */
+    animation-name: example;
+    animation-duration: 4s;
+    animation-iteration-count: infinite;
+}
+
+/* Safari 4.0 - 8.0 */
+@-webkit-keyframes example {
+    50%  {background-color:green; }
+  }
+  
+  /* Standard syntax */
+  @keyframes example {   
+    50%  {background-color:green;}
+   
+  } 
+  .onbackground{
+      background: rgb(46, 207, 81);
+      border: 1px solid rgb(3, 148, 3);
+      color: white;
+  } 

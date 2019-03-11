@@ -14,7 +14,7 @@ const TRACE_STAGE = 2;
 const TRACE_TEST  = 3;
 const TRACE_DEV   = 4;
 const TRACE_DEBUG = 5;
-var  gomos = require("../../commanFunction");
+var  gomos = require("../../commanFunction/routes/commanFunction");
 
 /* GET home page. */
 router.get("/", function (req, res, next) {
@@ -48,7 +48,7 @@ router.post("/sendto", function (req, res, next) {
     { useNewUrlParser: true },
     function (err, connection) {
       if (err) {
-        errorCustmHandler("/sendto",err);
+        gomos.errorCustmHandler("/sendto",err);
         process.hasUncaughtExceptionCaptureCallback();
       }
       var db = connection.db(dbName);
@@ -70,7 +70,7 @@ router.post("/sendto", function (req, res, next) {
               .toArray(function (err, result) {
                 if (err) {
                   // console.log(err);
-                  errorCustmHandler("/sendto",err)
+                  gomos.errorCustmHandler("/sendto",err)
                   process.hasUncaughtExceptionCaptureCallback();
                 }
                 try {
@@ -82,7 +82,7 @@ router.post("/sendto", function (req, res, next) {
                     .find({mac: mac, payloadId: payloadId })
                       .toArray(function (err, result) {
                         if (err) {
-                          errorCustmHandler("/sendto",err)
+                          gomos.errorCustmHandler("/sendto",err)
                           process.hasUncaughtExceptionCaptureCallback();
                         }
                       //  console.log(result);
@@ -118,7 +118,7 @@ router.post("/sendto", function (req, res, next) {
                       errorUpdate(DeviceName,payloadId, subCustCd, custCd, Date, message , db,res,"Payload ["+payloadId+"] not Present");   
                     }
                       } catch (err) {
-                        errorCustmHandler("/sendto",err)
+                        gomos.errorCustmHandler("/sendto",err)
                       }    
                 });
                   
@@ -127,7 +127,7 @@ router.post("/sendto", function (req, res, next) {
               errorUpdate(DeviceName,payloadId, subCustCd, custCd, Date, message, db, res,"Device ["+DeviceName +"] not found !;");
               }
                 } catch (err) {
-                  errorCustmHandler("/sendto",err)
+                  gomos.errorCustmHandler("/sendto",err)
                 }
           // });
           // } 
@@ -140,7 +140,7 @@ router.post("/sendto", function (req, res, next) {
       }
     });
   }catch(err){
-    errorCustmHandler("/sendto",err)
+    gomos.errorCustmHandler("/sendto",err)
   }
 });
  
@@ -177,11 +177,11 @@ router.post("/sendto", function (req, res, next) {
           errorUpdate(DeviceName,payloadId, subCustCd, custCd, Date, message, db,res,assetId,sensorsNotFound);     
         }   
       } catch (err) {
-        errorCustmHandler("translateMethod",err)  
+        gomos.errorCustmHandler("translateMethod",err)  
       }
 }
 function successUpdate(DeviceName,payloadId,subCustCd, custCd,DateTime, message, finalSensors,res,db,responseTosend,mac,assetId){
-  var nowDateTime = new Date().toISOString()
+  var nowDateTime = new Date(new Date().toISOString())
   var dataToStore ={
     DeviceName: DeviceName,
     mac: mac,
@@ -205,7 +205,7 @@ function successUpdate(DeviceName,payloadId,subCustCd, custCd,DateTime, message,
     db.collection("Alerts")
     .insertOne(dataToStore, function (err, result) {
       if (err) {
-        errorCustmHandler("successUpdate",err)
+        gomos.errorCustmHandler("successUpdate",err)
         process.hasUncaughtExceptionCaptureCallback();
       } else {
         gomos.gomosLog(TRACE_PROD,"Entry saved in Alert With Translated Msg Collection");
@@ -214,10 +214,10 @@ function successUpdate(DeviceName,payloadId,subCustCd, custCd,DateTime, message,
       }
     });
 }
-    
+
 
  function errorUpdate(DeviceName,payloadId ,subCustCd, custCd, DateTime, message, db,res,responseTosend){
-  var nowDateTime = new Date().toISOString()
+  var nowDateTime =  new Date(new Date().toISOString())
               var dataToStore ={
                 DeviceName: DeviceName,
                 payloadId: payloadId,
@@ -240,7 +240,7 @@ function successUpdate(DeviceName,payloadId,subCustCd, custCd,DateTime, message,
                 db.collection("Alerts")
                 .insertOne(dataToStore, function (err, result) {
                   if (err) {
-                    errorCustmHandler("successUpdate",err)  
+                    gomos.errorCustmHandler("successUpdate",err)  
                     process.hasUncaughtExceptionCaptureCallback();
                   } else {
                     res.json(responseTosend);
@@ -248,61 +248,34 @@ function successUpdate(DeviceName,payloadId,subCustCd, custCd,DateTime, message,
                   });
 }
 
-var dt = dateTime.create();
-var formattedDate = dt.format("Y-m-d");
-function errorCustmHandler(functionName,typeofError){
-  // console.log(typeofError);
-    let writeStream = fs.createWriteStream("../commanError-" + formattedDate + ".log", { flags: "a" });
-    var dateTime = new Date().toISOString();
-  // write some data with a base64 encoding
-  writeStream.write(
-  "DateTime: " +dateTime+ "\n"+  
-  "Error handler: " + "\n"+
-  "serviceName:"+ "EndPointMiddelayer"+"\n"+
-  "functionName:"+ functionName +"\n"+
-  // "lineNo: " + lineNo  +"\n"+
-  "Error Code:" + typeofError.statusCode +"\n"+
-  " Error: " + typeofError + "\n"+
-  "typeofError.stack"+ typeofError.stack +
-  "\n"
-  );
+// var dt = dateTime.create();
+// var formattedDate = dt.format("Y-m-d");
+// function gomos.errorCustmHandler(functionName,typeofError){
+//   // console.log(typeofError);
+//     let writeStream = fs.createWriteStream("../commanError-" + formattedDate + ".log", { flags: "a" });
+//     var dateTime = new Date().toISOString();
+//   // write some data with a base64 encoding
+//   writeStream.write(
+//   "DateTime: " +dateTime+ "\n"+  
+//   "Error handler: " + "\n"+
+//   "serviceName:"+ "EndPointMiddelayer"+"\n"+
+//   "functionName:"+ functionName +"\n"+
+//   // "lineNo: " + lineNo  +"\n"+
+//   "Error Code:" + typeofError.statusCode +"\n"+
+//   " Error: " + typeofError + "\n"+
+//   "typeofError.stack"+ typeofError.stack +
+//   "\n"
+//   );
   
-  // the finish event is emitted when all data has been flushed from the stream
-  writeStream.on('finish', () => {  
-    gomos.gomosLog(TRACE_PROD,'wrote all data to file');
-  });
+//   // the finish event is emitted when all data has been flushed from the stream
+//   writeStream.on('finish', () => {  
+//     gomos.gomosLog(TRACE_PROD,'wrote all data to file');
+//   });
   
-  // close the stream
-  writeStream.end(); 
-  
-    // MongoClient.connect(
-    //   urlConn,
-    //   { useNewUrlParser: true },
-    //   function (err, connection) {
-    //     if (err) {
-    //       // console.log(err);
-    //       process.hasUncaughtExceptionCaptureCallback();
-    //     }
-    //     var createdTime = new Date();
-    //     errorobj = {
-    //       lineNo,
-    //       functionName,
-    //       Error,
-    //       typeofError,
-    //       createdTime
-    //     }
-    //     var db = connection.db(dbName);
-    //     db.collection("MqttErrorhandler")
-    //     .insert(errorobj, function (err, result) {
-    //       if (err) {
-    //         // console.log(err);
-    //          process.hasUncaughtExceptionCaptureCallback();
-    //       } else console.log("Entry saved in MqttErrorhandler Collection");
-    //     });
-    //   }
-    // )
-  
-  }
+//   // close the stream
+//   writeStream.end(); 
+
+//   }
 
 
 

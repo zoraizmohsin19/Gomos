@@ -10,7 +10,7 @@ const TRACE_STAGE = 2;
 const TRACE_TEST  = 3;
 const TRACE_DEV   = 4;
 const TRACE_DEBUG = 5;
-var  gomos = require("../../commanFunction");;
+var  gomos = require("../../commanFunction/routes/commanFunction");;
 //global method to get the assetId for the particular mac
 function getDevices(db, macPassed, businessNm, businessNmValues, message) {
   db.collection("Devices")
@@ -28,7 +28,7 @@ function getDevices(db, macPassed, businessNm, businessNmValues, message) {
     ])
     .toArray(function (err, result) {
       if (err) {
-        errorCustmHandler("getDevices",err)
+        gomos.errorCustmHandler("getDevices",err)
         process.hasUncaughtExceptionCaptureCallback();
       }
       if (result.length > 0) {
@@ -39,7 +39,7 @@ function getDevices(db, macPassed, businessNm, businessNmValues, message) {
           getAssets(db, assetsId, businessNm, businessNmValues, macPassed, message, DeviceName);
         }
         catch(err){
-          errorCustmHandler("getDevices",err)
+          gomos.errorCustmHandler("getDevices",err)
         }
       
       }
@@ -62,7 +62,7 @@ function getAssets(db, passedAssetId, businessNm, businessNmValues, mac, message
     ])
     .toArray(function (err, result) {
       if (err) {
-        errorCustmHandler("getAssets",err)
+        gomos.errorCustmHandler("getAssets",err)
         process.hasUncaughtExceptionCaptureCallback();
       }
       if (result.length > 0) {
@@ -71,7 +71,7 @@ function getAssets(db, passedAssetId, businessNm, businessNmValues, mac, message
           getSubCustomers(db,passedAssetId, subCustId, businessNm,businessNmValues, mac, message, DeviceName);
         }
         catch(err){
-          errorCustmHandler("getAssets",err)
+          gomos.errorCustmHandler("getAssets",err)
         }
      } 
     });
@@ -93,7 +93,7 @@ function getSubCustomers(db, passedAssetId, passedSubCust, businessNm,businessNm
     ])
     .toArray(function (err, result) {
       if (err) {
-        errorCustmHandler("getSubCustomers",err)
+        gomos.errorCustmHandler("getSubCustomers",err)
         process.hasUncaughtExceptionCaptureCallback();
       }
       if (result.length > 0) {
@@ -106,7 +106,7 @@ function getSubCustomers(db, passedAssetId, passedSubCust, businessNm,businessNm
           checkCriteria(db,passedAssetId, custId, subCustId,businessNmValues, mac, message, DeviceName);
         }
         catch(err){
-          errorCustmHandler("getSubCustomers",err)
+          gomos.errorCustmHandler("getSubCustomers",err)
         }
         
       }
@@ -119,7 +119,7 @@ function connectToDb() {
     { useNewUrlParser: true },
     function (err, connection) {
       if (err) {
-        errorCustmHandler("connectToDb",err)
+        gomos.errorCustmHandler("connectToDb",err)
         process.hasUncaughtExceptionCaptureCallback();
       }
       var db = connection.db(dbName);
@@ -138,7 +138,7 @@ function connectToDb() {
         ])
         .toArray(function (err, result) {
           if (err) {
-            errorCustmHandler("connectToDb",err)
+            gomos.errorCustmHandler("connectToDb",err)
             process.hasUncaughtExceptionCaptureCallback();
           }
           try{
@@ -163,7 +163,7 @@ function connectToDb() {
           }
           }
           catch(err){
-            errorCustmHandler("connectToDb",err);
+            gomos.errorCustmHandler("connectToDb",err);
           }
         });
     }
@@ -195,7 +195,7 @@ function onMqttConnect() {
      isMqttSubscribed = true;
     }
     catch(err){
-      errorCustmHandler("onMqttConnect",err);
+      gomos.errorCustmHandler("onMqttConnect",err);
     }
   }
 }
@@ -207,52 +207,75 @@ function handleMqttMessage(topic, message) {
     var messKeys = []; //to store the keys of the arrived msg
     var messValues = {}; //to store the msg in json formate alog with two extra fields(i.e., processed and queueDateTime).
     messKeys = Object.keys(JSON.parse(message));
-   var dateTime = new Date().toISOString();
-  for (var i = 0; i < messKeys.length; i++) {
-    messValues[messKeys[i]] = JSON.parse(message)[messKeys[i]];
-  }
-  messValues["processed"] = "N";
-  messValues["createdTime"] = "" + dateTime + "";
-  messValues["updatedTime"] = "" + dateTime + "";
-  messValues["topic"] = topic;
-  var messResult = messValues; //stores the modified msg
-  var messResultKeys = Object.keys(messResult);//stores the keys of the modified msg
-  var keysNotRequired = ["payloadId", "mac", "processed", "createdTime","updatedTime"];
-  //All the keys except the keys related to businessNames are removed from the array
-  //This array is usefull for checking the criteria for each sensor.
-  for (var i = 0; i < keysNotRequired.length; i++) {
-    if (messResultKeys.includes(keysNotRequired[i])) {
-      messResultKeys.splice(messResultKeys.indexOf(keysNotRequired[i]), 1);
-    }
-  } 
-
-  //mongoDb query to dump the modified messages in MqttDump Collection.
-  MongoClient.connect(
-    urlConn,
-    { useNewUrlParser: true },
-    function (err, connection) {
-      if (err) {
-        // console.log(err);
-        errorCustmHandler("handleMqttMessage",err)
-        process.hasUncaughtExceptionCaptureCallback();
-      }
-      var db = connection.db(dbName);
-     //This is Filter for Cube Rootz Which only Take perticuler topic data 
-    //  criteriaForCubeRootz(db,topic,messValues);
-      getDevices(db, messValues["mac"], messResultKeys, messValues, message);
-      db.collection("MqttDump").insertOne(messValues, function (err, result) {
+    var tempMessage = JSON.parse(message);
+    MongoClient.connect(
+      urlConn,
+      { useNewUrlParser: true },
+      function (err, connection) {
         if (err) {
-          errorCustmHandler("handleMqttMessage",err)
-           process.hasUncaughtExceptionCaptureCallback();
-         } 
-          gomos.gomosLog(TRACE_PROD,"Entry saved in MsgDump Collection",message.toString());
-        });
+          // console.log(err);
+          gomos.errorCustmHandler("handleMqttMessage",err)
+          process.hasUncaughtExceptionCaptureCallback();
+        }
+        var db = connection.db(dbName);
+        gomos.gomosLog(TRACE_DEBUG,"This is mac ", tempMessage.mac);
+        db.collection("Devices").find({mac: tempMessage.mac, active: "Y" }) 
+        .toArray(function (err, result) {
+          if (err) {
+            gomos.errorCustmHandler("handleMqttMessage",err)
+             process.hasUncaughtExceptionCaptureCallback();
+           }
+           if(result.length > 0 ){
+            gomos.gomosLog(TRACE_PROD,"Entry in filter of Mqqt ",message.toString());
+            var dateTime = new Date(new Date().toISOString());
+            for (var i = 0; i < messKeys.length; i++) {
+              messValues[messKeys[i]] = JSON.parse(message)[messKeys[i]];
+            }
+            
+            messValues["processed"] = "N";
+            messValues["createdTime"] = "" + dateTime + "";
+            messValues["updatedTime"] = "" + dateTime + "";
+            messValues["topic"] = topic;
+            var messResult = messValues; //stores the modified msg
+            var messResultKeys = Object.keys(messResult);//stores the keys of the modified msg
+            var keysNotRequired = ["payloadId", "mac", "processed", "createdTime","updatedTime"];
+            //All the keys except the keys related to businessNames are removed from the array
+            //This array is usefull for checking the criteria for each sensor.
+            for (var i = 0; i < keysNotRequired.length; i++) {
+              if (messResultKeys.includes(keysNotRequired[i])) {
+                messResultKeys.splice(messResultKeys.indexOf(keysNotRequired[i]), 1);
+              }
+            } 
+          
+            //mongoDb query to dump the modified messages in MqttDump Collection.
+          
+              
+               //This is Filter for Cube Rootz Which only Take perticuler topic data 
+              //  criteriaForCubeRootz(db,topic,messValues);
+                getDevices(db, messValues["mac"], messResultKeys, messValues, message);
+                db.collection("MqttDump").insertOne(messValues, function (err, result) {
+                  if (err) {
+                    gomos.errorCustmHandler("handleMqttMessage",err)
+                     process.hasUncaughtExceptionCaptureCallback();
+                   } 
+                    gomos.gomosLog(TRACE_PROD,"Entry saved in MsgDump Collection",message.toString());
+                  });
+           } 
+           else{
+             gomos.gomosLog(TRACE_DEBUG,"Device Not Presents", message);
+             gomos.unWantedLog("handleMqttMessage",message)
+            //  console.log(gomos)
+           }
+         
+          });
+     
+  
     }
   );
   }
   catch(err){
-    errorCustmHandler("handleMqttMessage",err);
-     gomos.gomosLog(TRACE_PROD,"Not VAlid JSON :ERROR!",err);  
+    gomos.errorCustmHandler("handleMqttMessage",err,message);
+     gomos.gomosLog(TRACE_DEBUG,"Not VAlid JSON :ERROR!",err);  
   } 
 }
   
@@ -276,12 +299,12 @@ function checkCriteria(db,passedAssetId, custId, subCustId,businessNmValues,  ma
  }])
     .toArray(function (err, result) {
       if (err) {
-        errorCustmHandler("checkCriteria",err)
+        gomos.errorCustmHandler("checkCriteria",err)
         process.hasUncaughtExceptionCaptureCallback();
       }
       if (result.length > 0) {
         for (var i = 0; i < result.length; i++) {
-         var nowDateTime = new Date().toISOString();
+         var nowDateTime = new Date(new Date().toISOString());
         if(result[i].assetId == passedAssetId){
           try{
             gomos.gomosLog(TRACE_DEBUG,"passedAssetId check for level3 passed",passedAssetId);        
@@ -308,7 +331,7 @@ function checkCriteria(db,passedAssetId, custId, subCustId,businessNmValues,  ma
             gomos.gomosLog(TRACE_TEST,"Object for level 3 alertData ready",alertData);        
             db.collection("Alerts").insertOne(alertData, function (err, result) {
               if (err) {
-                errorCustmHandler("checkCriteria",err)
+                gomos.errorCustmHandler("checkCriteria",err)
                 process.hasUncaughtExceptionCaptureCallback();
               }
               gomos.gomosLog(TRACE_PROD,"Alert Saved For Perticuler Payload Into Alerts collection",alertData);        
@@ -316,7 +339,7 @@ function checkCriteria(db,passedAssetId, custId, subCustId,businessNmValues,  ma
           }
         } 
         catch(err){
-          errorCustmHandler("checkCriteria",err)  
+          gomos.errorCustmHandler("checkCriteria",err)  
         }
       }      
       else{
@@ -338,9 +361,8 @@ function checkCriteria(db,passedAssetId, custId, subCustId,businessNmValues,  ma
             }
           }catch(err)
           {
-            errorCustmHandler("checkCriteria",err)
+            gomos.errorCustmHandler("checkCriteria",err)
           }
-  
             // if criteria is matched the insert the required data into Alerts Collection.
             if (eval(result[i].criteria)) {
               var alertData = {
@@ -364,7 +386,7 @@ function checkCriteria(db,passedAssetId, custId, subCustId,businessNmValues,  ma
               };
               db.collection("Alerts").insertOne(alertData, function (err, result) {
                 if (err) {
-                  errorCustmHandler("checkCriteria",err)
+                  gomos.errorCustmHandler("checkCriteria",err)
                   process.hasUncaughtExceptionCaptureCallback();
                 } else gomos.gomosLog(TRACE_TEST,"Alert Saved Into Alerts collection");        
 
@@ -377,33 +399,33 @@ function checkCriteria(db,passedAssetId, custId, subCustId,businessNmValues,  ma
       }
     });
 }
-var dt = dateTime.create();
-var formattedDate = dt.format("Y-m-d");
+// var dt = dateTime.create();
+// var formattedDate = dt.format("Y-m-d");
 
-function errorCustmHandler(functionName,typeofError){
-// console.log(typeofError);
-  let writeStream = fs.createWriteStream("../commanError-" + formattedDate + ".log", { flags: "a" });
-  var dateTime = new Date().toISOString();
-// write some data with a base64 encoding
-writeStream.write(
-  "DateTime: " +dateTime+ "\n"+  
-  "Error handler: " + "\n"+
-  "serviceName:"+ "Mqtt_listener"+"\n"+
-  "functionName:"+ functionName +"\n"+
-  // "lineNo: " + lineNo  +"\n"+
-  "Error Code:" + typeofError.statusCode +"\n"+
-  " Error: " + typeofError + "\n"+
-  "typeofError.stack"+ typeofError.stack +
-  "\n"
-);
+// function gomos.errorCustmHandler(functionName,typeofError){
+// // console.log(typeofError);
+//   let writeStream = fs.createWriteStream("../commanError-" + formattedDate + ".log", { flags: "a" });
+//   var dateTime = new Date().toISOString();
+// // write some data with a base64 encoding
+// writeStream.write(
+//   "DateTime: " +dateTime+ "\n"+  
+//   "Error handler: " + "\n"+
+//   "serviceName:"+ "Mqtt_listener"+"\n"+
+//   "functionName:"+ functionName +"\n"+
+//   // "lineNo: " + lineNo  +"\n"+
+//   "Error Code:" + typeofError.statusCode +"\n"+
+//   " Error: " + typeofError + "\n"+
+//   "typeofError.stack"+ typeofError.stack +
+//   "\n"
+// );
 
-// the finish event is emitted when all data has been flushed from the stream
-writeStream.on('finish', () => {  
-  gomos.gomosLog(TRACE_PROD,"wrote all data to file For Error");  
-});
+// // the finish event is emitted when all data has been flushed from the stream
+// writeStream.on('finish', () => {  
+//   gomos.gomosLog(TRACE_PROD,"wrote all data to file For Error");  
+// });
 
-// close the stream
-writeStream.end(); 
+// // close the stream
+// writeStream.end(); 
 
   // MongoClient.connect(
   //   urlConn,
@@ -432,7 +454,7 @@ writeStream.end();
   //   }
   // )
 
-}
+// }
 
 function onMqttDisconnect() {
   isMqttConnected = false;

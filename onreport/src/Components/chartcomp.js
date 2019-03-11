@@ -77,13 +77,14 @@ componentDidMount(){
     var arrData = [];
     var arrLabels =[];
     // if(sessionStorage.getItem("dataToSend1")){
-    arrData = sessionStorage.getItem("dataToSend1");
-    arrLabels= sessionStorage.getItem("dataToSend2");
+      arrLabels = sessionStorage.getItem("dataToSend1");
+      arrData= sessionStorage.getItem("dataToSend2");
     var yaxisName = sessionStorage.getItem("yaxisName");
     var fromDate = sessionStorage.getItem("formDate");
     var  toDate = sessionStorage.getItem("toDate");
-    arrData =  arrData.split(",");
+    arrData =  arrData
     arrLabels =  arrLabels.split(",");
+    console.log(arrData[0])
     var bgColors =[];
     var borderColors =[];
     for (var i = 0; i <  arrData.length; i++) {
@@ -121,6 +122,26 @@ updateState(arrData, arrLabels, yaxisName, fromDate ,toDate ,bgColors, borderCol
   //    this.state.myChart.destroy();
   //     this.setState({myChart:null});
   //  }
+  var dataset = [];
+for(var i = 0 ; i< arrData.length ;i++){
+  var tempob=   {
+    label: legend,
+    // data: arrData,
+    backgroundColor: this.state.bgColors,
+    borderColor: this.state.borderColors,
+    pointBorderWidth: 3,
+    pointBorderColor: "red",
+    fontSize: 100,
+    borderWidth: 2
+  }
+  var key = Object.keys(arrData); 
+  for(var j =0; j< key.length ; j++){
+    tempob["data"] = arrData[i][key[j]];
+    
+  }
+}
+
+
    console.log(type + "this name of chart");
 
     this.state.myChart = new Chart("barchart", {

@@ -22,6 +22,7 @@ class SensorsActive extends Component {
         <div className={bgclass} onClick = {this.props.Change}>
         <div className=""><p className= {heading_class_name}>{message}</p>
             <p className= {P_name_class}>{label}</p>
+            <p className= {takenClass}>{dateTime}</p>
            
             
             </div>
@@ -37,7 +38,7 @@ class SensorsActive extends Component {
   SensorsActive.propTypes = {
     label: PropTypes.string.isRequired,
     P_name_class: PropTypes.string.isRequired,
-    message: PropTypes.string.isRequired,
+  
     bgclass: PropTypes.string.isRequired,
     heading_class_name: PropTypes.string.isRequired,
   };
