@@ -143,6 +143,7 @@ function connectToDb() {
           }
           try{
           spConfig = result;
+          gomos.gomosLog(TRACE_PROD,"ServiceProviders No. - groupe by mqttClient and PubTopic", spConfig);
           gomos.gomosLog(TRACE_PROD,"ServiceProviders No. - groupe by mqttClient and PubTopic", spConfig.length);
           // Commect to all the queues from SERVICE PROVIDER
           for (var i = 0; i <= spConfig.length - 1; ++i) {
@@ -233,8 +234,8 @@ function handleMqttMessage(topic, message) {
             }
             
             messValues["processed"] = "N";
-            messValues["createdTime"] = "" + dateTime + "";
-            messValues["updatedTime"] = "" + dateTime + "";
+            messValues["createdTime"] =  dateTime ;
+            messValues["updatedTime"] =  dateTime ;
             messValues["topic"] = topic;
             var messResult = messValues; //stores the modified msg
             var messResultKeys = Object.keys(messResult);//stores the keys of the modified msg

@@ -66,23 +66,25 @@ class activeDashbord extends Component {
         },
         'in_prog':false,
         submitDataObj:{
-          mac: "5ccf7f0015bc",
-         subCustCd: "001",
-         CustCd: "DevCub",
-         DeviceName : "PilotGH_002T",
+          mac: "",
+         subCustCd: "",
+         CustCd: "",
+         DeviceName : "",
          payloadId: "",
          dataBody: {},
          isDaillyJob: "",
          ChannelName: "",
         },
         CriteriaForOP:{
-           spCd: "ASAGRISY",
-          subCustCd: "001",
-          CustCd: "DevCub",
-          DeviceName : "PilotGH_002T",
-           mac: "5ccf7f0015bc"
+           spCd: "",
+           subCustCd: "",
+           CustCd: "",
+           DeviceName : "",
+           mac: "",
+           assetId: ""
         },
-        deviceAllData:{}
+        deviceAllData:{},
+        Defaultparameter: {}
   
       }
 
@@ -221,12 +223,12 @@ for(var key =0; key < configkeyInput.length; key++) {
 }
 SubmitForParameter(){
   // var me = this;
-  alert("Hello Takreem ")
+  // alert("Hello Takreem ")
   var dataToSendApi ={};
 var me = this;
   const {selectedAtionType, configkeyInput, configkeyInputKeyValue} =this.state;
   for(var key =0; key < configkeyInput.length; key++) {
-    dataToSendApi[configkeyInput[key]] = configkeyInputKeyValue[configkeyInput[key]];
+    dataToSendApi[configkeyInput[key]] = [configkeyInputKeyValue[configkeyInput[key]+"Lower"],configkeyInputKeyValue[configkeyInput[key]+"higher"]]
      } 
     me.state.submitDataObj.payloadId   = selectedAtionType;
     me.state.submitDataObj.dataBody    = dataToSendApi;
@@ -235,6 +237,19 @@ var me = this;
     me.setState({submitDataObj :me.state.submitDataObj});
 
   me.callApiForAction();
+  me.callApiForClimateSave();
+}
+callApiForClimateSave(){
+  var me = this;
+  axios.post("http://localhost:3992/ActiveClimatesave",me.state.submitDataObj)
+  .then(json =>  {
+  // if(json["data"] == "success"){
+   
+  //   swal("Success!", "You Send Action!", "success");
+  // 
+  alert("result")
+  console.log(json)
+});
 }
     callApiForAction(){
     var me = this;
@@ -374,8 +389,10 @@ var me = this;
           var  keysofObj = Object.keys(objectpayload.sensors)
           var obj = this.getStrucOfClimateParam();
             allBusinessName = obj.businessName;
-             for (var i =0; i< obj.businessName.length; i++) {  
-               configkeyInputKeyValue[obj.businessName[i]] =  ""; 
+             for (var i =0; i< obj.businessName.length; i++) { 
+               configkeyInputKeyValue[obj.businessName[i]] =  ''; 
+               configkeyInputKeyValue[obj.businessName[i]+"Lower"] =  this.state.Defaultparameter[obj.businessName[i]+"Lower"]; 
+               configkeyInputKeyValue[obj.businessName[i]+"higher"] =  this.state.Defaultparameter[obj.businessName[i]+"higher"]; 
                configkeyInputKeyValue[obj.businessName[i]+"max"] = obj.max[i];
                configkeyInputKeyValue[obj.businessName[i]+"min"] =  obj.min[i];
              }
@@ -425,14 +442,29 @@ var me = this;
             }
    componentDidMount(){
      var me = this;
+     var mainData = JSON.parse(sessionStorage.getItem("configData"));
+// console.log(mainData)
+    this.state.CriteriaForOP.spCd = mainData.spCd;
+    this.state.CriteriaForOP.subCustCd = mainData.subCustCd;
+    this.state.CriteriaForOP.CustCd = mainData.custCd;
+    this.state.CriteriaForOP.DeviceName = mainData.DeviceName;
+    this.state.CriteriaForOP.mac = mainData.mac;
+    this.state.CriteriaForOP.assetId= mainData.assetId;
+    this.state.submitDataObj.mac  = mainData.mac;
+    this.state.submitDataObj.subCustCd  = mainData.subCustCd;
+    this.state.submitDataObj.CustCd  = mainData.custCd;   
+    this.state.submitDataObj.DeviceName  =  mainData.DeviceName;  
+    this.setState({CriteriaForOP: this.state.CriteriaForOP,
+      submitDataObj: this.state.submitDataObj
+    })
      Date.prototype.addHours = function(h){
       this.setHours(this.getHours()+h);
       return this;
-  }
-  Date.prototype.addDay = function(h){
-    this.setDate(this.getDate()+h);
-    return this;
-}
+    }
+      Date.prototype.addDay = function(h){
+        this.setDate(this.getDate()+h);
+        return this;
+    }
      var ActiveJobsArray = [];
     axios.post("http://localhost:3992/getActiveDashBoardDevice",{mac: this.state.CriteriaForOP.mac})
 
@@ -480,6 +512,7 @@ var me = this;
 this.fetchForClimate();
 this.fetchClimateControlAllData();
 this.fetchClimateControlDevice();
+this.fetchClimateParameter();
 var onDeviceinstruction = socketIOClient(endpoint+"/onDeviceinstruction");
 onDeviceinstruction.emit('onDeviceinstructionClientEvent', { mac : this.state.CriteriaForOP.mac, type: "SentInstruction"});
 onDeviceinstruction.on('DeviceInstruction',function(data) {
@@ -526,6 +559,20 @@ onDeviceinstruction.on('DeviceInstruction',function(data) {
     axios.post("http://localhost:3992/getActiveDAction",{mac:this.state.CriteriaForOP.mac})
     .then(json =>  {
      this.setState({deviceAllData: json["data"]})
+    })
+   }
+   fetchClimateParameter(){
+    axios.post("http://localhost:3992/getAClimateparameter",{mac:this.state.CriteriaForOP.mac})
+    .then(json =>  {
+      var keys1 = Object.keys(json["data"]);
+      var obj={}
+      for(var i =0; i< keys1.length; i++){
+      obj[keys1[i]+"Lower"] = json["data"][keys1[i]][0];
+      obj[keys1[i]+"higher"] = json["data"][keys1[i]][1];
+      }
+      console.log(obj)
+      console.log( json["data"])
+     this.setState({Defaultparameter: obj})
     })
    }
    fetchForClimate(){
@@ -580,12 +627,15 @@ timeDifference(date1, date2) {
           // alert("this called");
           var me = this;
           const {channelArray,tilesPayloaddata} = this.state;
-        //   console.log(tilesPayloaddata);
+         alert(this.state.submitDataObj.payloadId);
        var age = this.timeDifference(new Date(data.valueChangeAt),new Date(new Date().toISOString()))
       //  console.log(age)
-        me.state.submitDataObj.payloadId   = tilesPayloaddata.payloadId;
-        me.state.submitDataObj.isDaillyJob = false;
-        me.state.submitDataObj.ChannelName = data.devicebusinessNM;
+      // console.log(me.state.submitDataObj.payloadId)
+        alert(tilesPayloaddata.payloadId +"Hello")
+        this.state.submitDataObj.payloadId   = tilesPayloaddata.payloadId;
+        alert(this.state.submitDataObj.payloadId)
+        this.state.submitDataObj.isDaillyJob = false;
+        this.state.submitDataObj.ChannelName = data.devicebusinessNM;
         if( this.state.channelArray[index].ActionCond == this.state.channelArray[index].Value){
 
         // if(channelArray[index].ActionCond == 0){
@@ -595,11 +645,11 @@ timeDifference(date1, date2) {
          obj["age"]= age.hours+":"+ age.minutes;
          obj["UpdatedTime"] = dateFormat(data.dateTime, "dd-mmm HH:MM");
          obj["index"] = index;
-         me.state.channelAlerrModel = obj;
-       me.setState({show: true,
-         channelArray: me.state.channelArray,
+         this.state.channelAlerrModel = obj;
+         this.setState({show: true,
+         channelArray: this.state.channelArray,
          channelAlerrModel:  this.state.channelAlerrModel,
-         submitDataObj:me.state.submitDataObj}) 
+         submitDataObj:this.state.submitDataObj}) 
         }
         else{
           alert("This Already Click");
@@ -609,25 +659,33 @@ timeDifference(date1, date2) {
    }
    handleSubmit(){
      var me = this;
-     const {channelAlerrModel,channelArray, submitDataObj} = this.state;
+     const {channelAlerrModel,channelArray,submitDataObj} = this.state;
      if(Object.keys(submitDataObj.dataBody).length !== 0){
       submitDataObj.dataBody = {};
-     }
+      me.setState({submitDataObj: submitDataObj});
+     } 
+     console.log("hello")
+     console.log(channelArray[channelAlerrModel["index"]].ActionCond )
      if(channelArray[channelAlerrModel["index"]].ActionCond  == 1){
-      //  alert(submitDataObj.dataBody[channelAlerrModel["channelName"]])
-      // console.log(submitDataObj)
+       alert(submitDataObj.dataBody[channelAlerrModel["channelName"]])
+      console.log(submitDataObj)
+      alert("1")
       channelArray[channelAlerrModel["index"]].ActionCond = 0; 
       submitDataObj.dataBody[channelAlerrModel["channelName"]]    = 0 ;
-      me.setState({channelArray: channelArray, submitDataObj: submitDataObj ,show: false})
-      me.callApiForAction();
+      console.log("second Obj");
+      console.log(submitDataObj)
+      me.setState({channelArray: channelArray, submitDataObj:submitDataObj ,show: false})
+      // me.callApiForAction();
      }
      else{
-        // alert(  submitDataObj.dataBody[channelAlerrModel["channelName"]])
+      alert("0")
+        alert( submitDataObj.dataBody[channelAlerrModel["channelName"]])
       channelArray[channelAlerrModel["index"]].ActionCond = 1; 
       submitDataObj.dataBody[channelAlerrModel["channelName"]]  = 1 ;
       me.setState({channelArray: channelArray, submitDataObj: submitDataObj,show: false})
-      me.callApiForAction();
+      // me.callApiForAction();
      } 
+     me.callApiForAction();
 }
 
 fetchClimateControlAllData(){
@@ -691,7 +749,7 @@ this.setState({selectedExpression,selectedClimateAction, ClimateIndex: index});
 fetchActiveJob(){
   var me = this;
   var ActiveBody = {
-    mac: "5ccf7f0015bc",
+    mac: this.state.CriteriaForOP.mac,
     startDate : this.state.startDatelimit,
     endDate: this.state.endDatelimit,
   }
@@ -721,7 +779,7 @@ fetchActiveJob(){
     var items=[];
     this.setState({'in_prog':true});
     var body = {
-      mac: "5ccf7f0015bc" ,
+      mac: this.state.CriteriaForOP.mac ,
       filter: this.state.filter 
   };
     if(this.state.filter.TypeOfJobs == "ExecutedJob"){
@@ -975,18 +1033,134 @@ changePage(page){
    </div>
    </form>;
   }
+  if(formStructure == "ClimateControl"){
+    inputField =     <div className= "col-sm-12">
+    <table>
+     <tr>
+       <td>
+     <label>Select Template</label>
+       </td>
+       <td>
+     <DropdownButton  className = "" 
+           onSelect={this.filterClimateFun}
+          bsStyle={"Awhite"}
+           title={ "Select Template Type"}>
+            {/* {this.state.climateSensor.map( (item) =>
+           <MenuItem   eventKey={item}>{item}</MenuItem>
+            )}  */}
+           </DropdownButton>
+           </td>
+   
+           <td>
+     <label>Select Version</label>
+     </td>
+     <td>
+     <DropdownButton  className = "" 
+           onSelect={this.filterClimateFun}
+          bsStyle={"Awhite"}
+           title={ "Select Version"}>
+            {/* {this.state.climateSensor.map( (item) =>
+           <MenuItem   eventKey={item}>{item}</MenuItem>
+            )}  */}
+           </DropdownButton>
+           </td>
+
+     </tr>
+     </table>
+   <div className ="col-sm-8">
+     <div className= "Activefilterdiv">
+         <label className="OpdLable">Sensor Type :</label>
+         <DropdownButton  className = "" 
+           onSelect={this.filterClimateFun}
+          bsStyle={"Awhite"}
+           title={this.state.selectedfilFSensor || "Select Sensor Type"}>
+            {this.state.climateSensor.map( (item) =>
+           <MenuItem   eventKey={item}>{item}</MenuItem>
+            )} 
+           </DropdownButton>
+              <button type= "button" className= "ActivFilterBtn btn btn-sm ">filter</button>
+            </div>
+           <p className ="ActiveP" >Climate Control Table </p>
+               <div  className="table-responsive">
+               <Table  className="table table-hover table-sm table-bordered ">
+                       <thead className='' style={{background: "gainsboro"}}>
+                       <tr>
+                       <th className='Acustmtd'> SI</th>
+                       <th className='Acustmtd'>Sensor Type</th>
+                       <th className='Acustmtd'>Expression</th>
+                       <th className=' Acustmtd'>Action</th>
+                       <th className='Acustmtd'>Flag</th>
+                       </tr>
+                       </thead>
+                       <tbody>
+    { this.state.ArrayForClimateTable.map( (item,i) => 
+                   <tr key ={i} onClick ={this.ClimateRow.bind(this,i)}>
+                   <td className='Acustmtd'>{i + 1}</td>
+                   <td className='Acustmtd'>{item.sensorsType}</td>
+                   <td className='Acustmtd'>{item.expression}</td>
+                   <td className='Acustmtd'>{item.actionsOn}</td>
+                   <td className='Acustmtd'>{item.process}</td>
+                   </tr>
+                   )}
+                       </tbody> 
+                       </Table>
+               </div>
+
+           </div>
+           <div className="col-sm-4">
+        <div className="">
+        <p className ="ActiveP " >Serial No. :{this.state.ClimateIndex} </p>
+   <textarea type="text" className ='ActivetestArea ClimateTExM textareacust' value= {JSON.stringify(this.state.selectedExpression,undefined, 2) }/>
+        </div>
+        <table className="">
+        {this.state.selectedClimateAction.map((item, i)=>
+             <tr key= {i}>
+            <td> <label>{item.key}</label></td>
+           <td> <label className="switch ActiveSinput">
+             <input type="checkbox" checked= {(item.value ==1)? true: false} value="Text" onChange = {this.handleChechBox.bind(this)} disabled/>
+             <span className="slider round"></span>
+             </label>
+             </td>
+             </tr>
+        )}
+        </table>
+           </div>
+
+   </div>;
+  }
   if(formStructure == "SetParameter"){
     inputField =  <div className ="">
     <div className="col-xs-12">
     {this.state.configkeyInput.map(item =><div>
     <div className= "col-xs-6">
-    <label> Set {item} :</label>
+    <label> Set {item} :</label><span className="rangeLabel">{"Min : "+configkeyInputKeyValue[item+"Lower"]+",  Max :  "+configkeyInputKeyValue[item+"higher"]}</span>
     </div>
     <div className= "col-xs-6">
-    <input type="range" name={configkeyInputKeyValue[item]} max = {configkeyInputKeyValue[item+"max"]}
-    min = {configkeyInputKeyValue[item+"min"]}
-    onChange={(e)=>{ configkeyInputKeyValue[item] =e.target.value
-     this.setState({configkeyInputKeyValue : configkeyInputKeyValue})}}/><span>{configkeyInputKeyValue[item]}</span>
+    <div className="displayRange">{ "Min : "+configkeyInputKeyValue[item+"Lower"]+",  Max :  "+configkeyInputKeyValue[item+"higher"]}</div>
+    <br/>
+     <span className="rangeLabel">Min  : </span>
+    <span className="rangeLabel">{configkeyInputKeyValue[item+"min"]}</span>
+    <input className= "rangeClassActive" type="range" 
+    name={configkeyInputKeyValue[item+"Lower"]} 
+    max = {configkeyInputKeyValue[item+"higher"]}
+    min = {configkeyInputKeyValue[item+"min"]} 
+    title={configkeyInputKeyValue[item+"Lower"]}
+    value ={configkeyInputKeyValue[item+"Lower"]}
+    onChange={(e)=>{ configkeyInputKeyValue[item+"Lower"] =e.target.value
+     this.setState({configkeyInputKeyValue : configkeyInputKeyValue})}}/>
+     <span className="rangeLabel">{configkeyInputKeyValue[item+"higher"]}</span>
+     <br/>
+     <span className="rangeLabel">Max  :  </span>
+     <span className="rangeLabel">{configkeyInputKeyValue[item+"Lower"]}</span>
+         <input className= "rangeClassActive" type="range" 
+    name={configkeyInputKeyValue[item+"higher"]} 
+    max = {configkeyInputKeyValue[item+"max"]}
+    min = {configkeyInputKeyValue[item+"Lower"]} 
+    title={configkeyInputKeyValue[item+"higher"]}
+    value ={configkeyInputKeyValue[item+"higher"]}
+    onChange={(e)=>{ configkeyInputKeyValue[item+"higher"] =e.target.value
+     this.setState({configkeyInputKeyValue : configkeyInputKeyValue})}}/>
+     <span className="rangeLabel">{configkeyInputKeyValue[item+"max"]}</span>
     </div>
     </div>
     )}
@@ -1314,7 +1488,7 @@ inputField =
          )}
       
           </div>
-          <div className="SensorsOuter">
+          <div className="SensorsOuter pointer1">
           { this.state.channelArray.map((item,i) =>  <div onClick= {this.ActionOnChanel.bind(this,item,i)} className="sensorsDive"> 
          <SensorsActive key ={item._id}
              bgclass= {  (item.OldValue != item.Value) ? " small-boxDActive ChannelBGColortransition":(item.ActionCond != item.Value)?"small-boxDActive  ChannelBGColorYellow ": "small-boxDActive" &&
@@ -1370,236 +1544,11 @@ inputField =
     
       <div className ="paddForm">
       {inputField}
-      <table>
-      <tr>
-        <td>
-      <label>Select Template</label>
-        </td>
-        <td>
-      <DropdownButton  className = "" 
-            onSelect={this.filterClimateFun}
-           bsStyle={"Awhite"}
-            title={ "Select Template Type"}>
-             {/* {this.state.climateSensor.map( (item) =>
-            <MenuItem   eventKey={item}>{item}</MenuItem>
-             )}  */}
-            </DropdownButton>
-            </td>
-    
-            <td>
-      <label>Select Version</label>
-      </td>
-      <td>
-      <DropdownButton  className = "" 
-            onSelect={this.filterClimateFun}
-           bsStyle={"Awhite"}
-            title={ "Select Version"}>
-             {/* {this.state.climateSensor.map( (item) =>
-            <MenuItem   eventKey={item}>{item}</MenuItem>
-             )}  */}
-            </DropdownButton>
-            </td>
-
-      </tr>
-      </table>
+     </div>
    </div>
-    <div className= "col-sm-12">
-    <div className ="col-sm-8">
-      <div className= "Activefilterdiv">
-          <label className="OpdLable">Sensor Type :</label>
-          <DropdownButton  className = "" 
-            onSelect={this.filterClimateFun}
-           bsStyle={"Awhite"}
-            title={this.state.selectedfilFSensor || "Select Sensor Type"}>
-             {this.state.climateSensor.map( (item) =>
-            <MenuItem   eventKey={item}>{item}</MenuItem>
-             )} 
-            </DropdownButton>
-          
-               <button type= "button" className= "ActivFilterBtn btn btn-sm ">filter</button>
-             </div>
-            <p className ="ActiveP" >Climate Control Table </p>
-                <div  className="table-responsive">
-                <Table  className="table table-hover table-sm table-bordered ">
-                        <thead className='' style={{background: "gainsboro"}}>
-                        <tr>
-                        <th className='Acustmtd'> SI</th>
-                        <th className='Acustmtd'>Sensor Type</th>
-                        <th className='Acustmtd'>Expression</th>
-                        <th className=' Acustmtd'>Action</th>
-                        <th className='Acustmtd'>Flag</th>
-                       
-                        </tr>
-                        </thead>
-                        <tbody>
-                
-     { this.state.ArrayForClimateTable.map( (item,i) => 
-                    
-                    <tr key ={i} onClick ={this.ClimateRow.bind(this,i)}>
-                    <td className='Acustmtd'>{i + 1}</td>
-                    <td className='Acustmtd'>{item.sensorsType}</td>
-                    <td className='Acustmtd'>{item.expression}</td>
-                    <td className='Acustmtd'>{item.actionsOn}</td>
-                    <td className='Acustmtd'>{item.process}</td>
-                    </tr>
-                    )}
-                        </tbody> 
-                        {/* { "Pages: " +total_page } */}
-                        </Table>
-                </div>
-                {/* <div className='align-right'>
-{ total_page > 1 && <CPagination  page={state.filter.page} totalpages={total_page} onPageChange={this.changePage}/>}
-    </div>  */}
-            </div>
-            <div className="col-sm-4">
-         <div className="">
-         <p className ="ActiveP " >Serial No. :{this.state.ClimateIndex} </p>
-    <textarea type="text" className ='ActivetestArea ClimateTExM textareacust' value= {JSON.stringify(this.state.selectedExpression,undefined, 2) }/>
-         
-         </div>
-         <table className="">
-         {this.state.selectedClimateAction.map((item, i)=>
-              <tr key= {i}>
-             <td> <label>{item.key}</label></td>
-            <td> <label className="switch ActiveSinput">
-              <input type="checkbox" checked= {(item.value ==1)? true: false} value="Text" onChange = {this.handleChechBox.bind(this)} disabled/>
-              <span className="slider round"></span>
-              </label>
-              </td>
-              </tr>
-         )}
-        
-         </table>
-            </div>
-    </div>
-      {/* <div className="col-lg-6">
-      <div className="col-xs-6">
-          <div className= "col-xs-7">
-          <label>Left Curtain 
-          </label>
-          </div>
-          <div className="col-xs-5">
-          <label className="switch ">
-                <input type="checkbox" value="Text" onChange = {()=> alert("Hello")}/>
-                <span className="slider round"></span>
-              </label>
-                </div>
-         </div>
-         <div className="col-xs-6">
-          <div className= "col-xs-7">
-          <label>Right Curtain 
-          </label>
-          </div>
-          <div className="col-xs-5">
-          <label className="switch ">
-                <input type="checkbox" value="Text" onChange = {()=> alert("Hello")}/>
-                <span className="slider round"></span>
-              </label>
-                </div>
-         </div>
-         <div className="col-xs-6">
-          <div className= "col-xs-7">
-          <label>Top Curtain 
-          </label>
-          </div>
-          <div className="col-xs-5">
-          <label className="switch ">
-                <input type="checkbox" value="Text" onChange = {()=> alert("Hello")}/>
-                <span className="slider round"></span>
-              </label>
-                </div>
-         </div>
-         <div className="col-xs-6">
-          <div className= "col-xs-7">
-          <label>Fan 
-          </label>
-          </div>
-          <div className="col-xs-5">
-          <label className="switch ">
-                <input type="checkbox" value="Text" onChange = {()=> alert("Hello")}/>
-                <span className="slider round"></span>
-              </label>
-                </div>
-         </div>
-         <div className="col-xs-6">
-          <div className= "col-xs-7">
-          <label>Pad 
-          </label>
-          </div>
-          <div className="col-xs-5">
-          <label className="switch ">
-                <input type="checkbox" value="Text" onChange = {()=> alert("Hello")}/>
-                <span className="slider round"></span>
-              </label>
-                </div>
-         </div>
-         <div className="col-xs-6">
-          <div className= "col-xs-7">
-          <label>CO2 Valve  
-          </label>
-          </div>
-          <div className="col-xs-5">
-          <label className="switch ">
-                <input type="checkbox" value="Text" onChange = {()=> alert("Hello")}/>
-                <span className="slider round"></span>
-              </label>
-                </div>
-         </div>
-         <div className="col-xs-6">
-          <div className= "col-xs-7">
-          <label>Fogger  
-          </label>
-          </div>
-          <div className="col-xs-5">
-          <label className="switch ">
-                <input type="checkbox" value="Text" onChange = {()=> alert("Hello")}/>
-                <span className="slider round"></span>
-              </label>
-                </div>
-         </div>
-         <div className="col-xs-6">
-          <div className= "col-xs-7">
-          <label>Irrg Pump
-          </label>
-          </div>
-          <div className="col-xs-5">
-          <label className="switch ">
-                <input type="checkbox" value="Text" onChange = {()=> alert("Hello")}/>
-                <span className="slider round"></span>
-              </label>
-                </div>
-         </div>
-         <div className="col-xs-6">
-          <div className= "col-xs-7">
-          <label>Irrg Valve1
-          </label>
-          </div>
-          <div className="col-xs-5">
-          <label className="switch ">
-                <input type="checkbox" value="Text" onChange = {()=> alert("Hello")}/>
-                <span className="slider round"></span>
-              </label>
-                </div>
-         </div>
-         <div className="col-xs-6">
-          <div className= "col-xs-7">
-          <label>Irrg Valve2  
-          </label>
-          </div>
-          <div className="col-xs-5">
-          <label className="switch ">
-                <input type="checkbox" value="Text" onChange = {()=> alert("Hello")}/>
-                <span className="slider round"></span>
-              </label>
-                </div>
-         </div>
-              
-    </div> */}
-    </div>
+
 
 </div>
-
-
     <div className= "col-lg-2 ">
               <div className= "ActiveCorner">
                   <div className= "">
@@ -1614,8 +1563,6 @@ inputField =
                   <label>TDS :</label>
                   <span>02-Feb 15:27 </span>
                   </div>
-                {/* </div> */}
-                {/* <div className= "col-lg-12"> */}
                 <div className="col-lg-6">
                 <label>Age </label>
                 <p> 30 min</p>
@@ -1624,38 +1571,21 @@ inputField =
                 <label>Pending </label>
                 <p> 5</p>
                 </div>
+                <div className="col-lg-12">
+                <ul class="nav nav-pills nav-stacked">
+                  <li><a className=" " onClick={() =>{ 
+                         this.props.history.push("/socketdashbord")
+                           }}>View Dashboard</a></li>
+                  <li><a className=" " onClick={() =>{ 
+                         this.props.history.push("/NevMenu")
+                           }}>Menu</a></li>
+                </ul> 
                 </div>
+                </div>
+               
          </div>
          
  </div>
-
-
- {/* <Modal show={this.state.MExpression} onHide={this.handelMExpression}
-             dialogClassName=""
-             aria-labelledby="example-custom-modal-styling-title">
-          <Modal.Header closeButton>
-            <Modal.Title id="example-custom-modal-styling-title" ></Modal.Title>
-          </Modal.Header>
-          <Modal.Body>
-      <div className= "row">
-     
-    
-     
-      </div>
-
-
-      
- </Modal.Body>
-          <Modal.Footer>
-            <label className="Mlabel">Action Requested: <u> Switch {(this.state.channelAlerrModel.currentStatus == 1)?"OFF":"ON"}</u>  &nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;Please Confirm ?</label>
-            <button className="btn btn-sm " onClick = {this.handleClose}>Cancel</button>
-            <button   className="btn btn-sm btn-success" onClick = {this.handleSubmit} >Submit</button>
-           
-           
-          </Modal.Footer>
-        </Modal> */}
-
-
  <Modal show={this.state.show} onHide={this.handleClose}
              dialogClassName=""
              aria-labelledby="example-custom-modal-styling-title">
@@ -1673,16 +1603,10 @@ inputField =
       <div className= "col-xs-7">
       <label> Last Updated Time :</label> <span>{this.state.channelAlerrModel.UpdatedTime}</span>
       </div>
-    
       <div className= "col-xs-7">
       <label>Channel is  {(this.state.channelAlerrModel.currentStatus == 1)?"ON":"OFF"} since :</label> <span>{this.state.channelAlerrModel.age} hrs.</span>
       </div>
-    
-     
       </div>
-
-
-      
  </Modal.Body>
           <Modal.Footer>
             <label className="Mlabel">Action Requested: <u> Switch {(this.state.channelAlerrModel.currentStatus == 1)?"OFF":"ON"}</u>  &nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;Please Confirm ?</label>

@@ -66,6 +66,7 @@ import Spinner from '../layout/Spinner';
              if (response["data"] != 0) {
                 sessionStorage.setItem("userDetails", JSON.stringify(response["data"].userDtls));
                 sessionStorage.setItem("dashboardConfigobj", JSON.stringify(response["data"].dashboardConfigobj));
+                sessionStorage.setItem("configData", JSON.stringify(response["data"].configData));
                 me.setState({ 'Spinnerdata':true});
                 me.props.history.push("/socketdashbord")
               }

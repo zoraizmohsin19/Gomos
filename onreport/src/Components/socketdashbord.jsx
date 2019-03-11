@@ -4,11 +4,8 @@ import Sensors from "../layout/widgetofSensors/sensorsCantainer";
 import Chartcom from "../layout/widgetofSensors/chartCom";
 import {Table} from 'react-bootstrap';
 import socketIOClient from "socket.io-client";
-
 import axios from "axios";
-import SelectionInput from '../layout/SelectionInput';
 import CPagination from "../layout/Pagination";
-import {NavItem ,Nav} from "react-bootstrap"
 import * as ExcelJs from "exceljs/dist/exceljs.min.js";
 import * as FileSaver from "file-saver";
 import dateFormat  from  "dateformat";
@@ -17,6 +14,7 @@ class socketdashbord extends Component {
 constructor(){
   super();
   this.state={
+  body: {
     endpoint: "http://localhost:4001",
     socket1: {},
     arrData: [],
@@ -36,11 +34,11 @@ constructor(){
     spDisable:null,
     subCustDisable: null,
     custDisable: null,
-    spCd: [],
-    custCd: [],
-    subCustCd: [],
-    Assets: [],
-    Devices: [],
+    // spCd: [],
+    // custCd: [],
+    // subCustCd: [],
+    // Assets: [],
+    // Devices: [],
     Sensors: [],
     selectedSensorsType1: '',
     mac: '',
@@ -54,168 +52,171 @@ constructor(){
     selectedSensorsName: "",
     lastAlertdata: {}
   }
+  }
   this.changePage     =   this.changePage.bind(this);
-  this.clickAsset     = this.clickAsset.bind(this);
-  this.clickDevices     = this.clickDevices.bind(this);
+  // this.clickAsset     = this.clickAsset.bind(this);
+  // this.clickDevices     = this.clickDevices.bind(this);
   // this.handleSelect  = this.handleSelect.bind(this);
   this.changePagesize = this.changePagesize.bind(this);
 }
 changePage(page){
   // this.state.page = page 
-    this.setState({page:  page});
-    this.fetchdata(this.state.page_size, page,this.state.selectedSensorsName,this.state.selectedSensorsType1,this.state.mac,this.state.selectedSubCustValue,this.state.selectedCustValue,this.state.selectedSPValue  );
+    this.state.body.page = page
+    this.setState({body:  this.state.body});
+    this.fetchdata();
     }
    
     changePagesize(e){
-      // alert(e.target.value);
+      alert(e.target.value);
       var me = this
       var page = 1;
-      me.setState({page_size:e.target.value,page: page});
-      this.fetchdata(e.target.value,page,this.state.selectedSensorsName,this.state.selectedSensorsType1,this.state.mac,this.state.selectedSubCustValue,this.state.selectedCustValue,this.state.selectedSPValue  );
-      
-
+      me.state.body.page_size = e.target.value;
+      me.state.body.page = page;
+      me.setState({body: me.state.body});
+      this.fetchdata();
     }
 
-clickAsset(assetId){
-  // alert(assetId);
-  this.setState({selectedAssets: assetId})
-  var subCustCd = this.state.selectedSubCustValue;
-  var custCd = this.state.selectedCustValue;
-  var spCd = this.state.selectedSPValue;
-  var Devices = [];
-  var Sensors = [];
-  // alert("this is clicked"+ assetId);
-  // this.getDevices(assetId)
-  fetch("http://localhost:3992/getDevice?assetId=" + assetId )
-  .then(response => response.json())
-  .then(json =>  {
-  // var sensorType =  json.map( x =>  { return  x  });
-   Devices = json;
-   var page_size = 10;
-    var page = 1
-   this.setState({mac: Devices[0].mac, Devices : json,page_size:page_size, page: page})
-   fetch("http://localhost:3992/getSensors?mac=" + Devices[0].mac)
-   .then(response => response.json())
-   .then(json =>  {
+// clickAsset(assetId){
+//   // alert(assetId);
+//   this.setState({selectedAssets: assetId})
+//   var subCustCd = this.state.selectedSubCustValue;
+//   var custCd = this.state.selectedCustValue;
+//   var spCd = this.state.selectedSPValue;
+//   var Devices = [];
+//   var Sensors = [];
+//   // alert("this is clicked"+ assetId);
+//   // this.getDevices(assetId)
+//   fetch("http://localhost:3992/getDevice?assetId=" + assetId )
+//   .then(response => response.json())
+//   .then(json =>  {
+//   // var sensorType =  json.map( x =>  { return  x  });
+//    Devices = json;
+//    var page_size = 10;
+//     var page = 1
+//    this.setState({mac: Devices[0].mac, Devices : json,page_size:page_size, page: page})
+//    fetch("http://localhost:3992/getSensors?mac=" + Devices[0].mac)
+//    .then(response => response.json())
+//    .then(json =>  {
   
-    // Sensors = json[0];
-    var Sensors = Object.keys(json)
-    var selecteSensorName = Object.values(json[Sensors[0]]);
-    this.setState({selectedSensorsType1: Sensors[0], selectedSensorsName: selecteSensorName[0]})
-    this.fetchdata( page_size,page,selecteSensorName[0],Sensors[0],Devices[0].mac,subCustCd,custCd,spCd);
+//     // Sensors = json[0];
+//     var Sensors = Object.keys(json)
+//     var selecteSensorName = Object.values(json[Sensors[0]]);
+//     this.setState({selectedSensorsType1: Sensors[0], selectedSensorsName: selecteSensorName[0]})
+//     this.fetchdata( page_size,page,selecteSensorName[0],Sensors[0],Devices[0].mac,subCustCd,custCd,spCd);
   
-   });
+//    });
   
-  });
-}
-clickDevices(mac){
+//   });
+// }
+// clickDevices(mac){
  
-   fetch("http://localhost:3992/getSensors?mac=" + mac)
-  .then(response => response.json())
-  .then(json =>  {
-  var page_size = 10;
-  var page = 1;
-  // Sensors = json[0];
-    var Sensors = Object.keys(json)
-    var selectedSensorsName = Object.values(json[Sensors[0]]);
-    this.setState({mac: mac , selectedSensorsType1: Sensors[0],page_size: page_size,page:page,selectedSensorsName: selectedSensorsName[0]});
+//    fetch("http://localhost:3992/getSensors?mac=" + mac)
+//   .then(response => response.json())
+//   .then(json =>  {
+//   var page_size = 10;
+//   var page = 1;
+//   // Sensors = json[0];
+//     var Sensors = Object.keys(json)
+//     var selectedSensorsName = Object.values(json[Sensors[0]]);
+//     this.setState({mac: mac , selectedSensorsType1: Sensors[0],page_size: page_size,page:page,selectedSensorsName: selectedSensorsName[0]});
    
-   this.fetchdata(page_size,page,selectedSensorsName[0],Sensors[0],mac,this.state.selectedSubCustValue,this.state.selectedCustValue,this.state.selectedSPValue  );
-  });
+//    this.fetchdata(page_size,page,selectedSensorsName[0],Sensors[0],mac,this.state.selectedSubCustValue,this.state.selectedCustValue,this.state.selectedSPValue  );
+//   });
   
 
-}
+// }
 handler(selectedSensorsType1,selectedSensorsName){
   // alert(selectedSensorsType1+selectedSensorsName);
   // alert(selectedSensorsType1);
-  var page_size = 10;
-  var page = 1;
-  this.setState({selectedSensorsType1: selectedSensorsType1,page_size: page_size,page: page,selectedSensorsName:selectedSensorsName }) 
-   this.fetchdata(page_size,page,selectedSensorsName,selectedSensorsType1,this.state.mac,this.state.selectedSubCustValue,this.state.selectedCustValue,this.state.selectedSPValue  );
-
+  var me = this;
+   me.state.body.page_size = 10;
+   me.state.body.page = 1;
+   me.state.body.selectedSensorsType1 =selectedSensorsType1;
+   me.state.body.selectedSensorsName =selectedSensorsName;
+   this.setState({body : me.state.body}); 
+   this.fetchdata();
 }
 componentDidMount(){
-   var mainData = JSON.parse(sessionStorage.getItem("userDetails"));
-   var sessionData = mainData[0].serviceProviders.split(",");
-   var ActiveData = JSON.parse(sessionStorage.getItem("dashboardConfigobj"));
-   var AspCd = ActiveData.ActiveSpCd;
-   var AcustCd = ActiveData.ActiveCustCd;
-   var AsubCustCd = ActiveData.ActiveSubCustCd;
-  this.setState({selectedSPValue:AspCd, 
-    selectedCustValue: AcustCd, 
-    selectedSubCustValue: AsubCustCd
-  });
+  var me = this;
+  //  var mainData = JSON.parse(sessionStorage.getItem("userDetails"));
+  //  var sessionData = mainData[0].serviceProviders.split(",");
+  var mainData = JSON.parse(sessionStorage.getItem("configData"));
+  //  var ActiveData = JSON.parse(sessionStorage.getItem("dashboardConfigobj"));
+   me.state.body.selectedSPValue       =     mainData.spCd;
+   me.state.body.selectedCustValue     =     mainData.custCd;
+   me.state.body.selectedSubCustValue  =     mainData.subCustCd;
+   me.state.body.mac                   =     mainData.mac;
+   me.state.body.selectedDeviceName    =     mainData.DeviceName;
+   me.state.body.selectedAssets        =     mainData.assetId;
+   me.setState({body: me.state.body});
  
     
-   if (sessionData.length == 1 && sessionData[0] == "ALL") {
+//    if (sessionData.length == 1 && sessionData[0] == "ALL") {
      
-  fetch('http://localhost:3992/getRegisterSP')
-  .then(response => response.json())
-  .then(json =>  {
-  var spCd =  json.map( x =>  { return  x.spCd  });
-  // this.setState({ArrayOfSPs : spCd});
-  // spCd.push("ALL");
-  // console.log(spCd)
-  this.setState({spCd : spCd});
- }
-  ); 
-}
-  else {
-   var  spCd = []
-    for (var i = 0; i < sessionData.length; i++) {
-     spCd.push(sessionData[i]);
-    }
-    if(spCd.length == 1){
-      this.setState({spDisable: true})
-    }
+//   fetch('http://localhost:3992/getRegisterSP')
+//   .then(response => response.json())
+//   .then(json =>  {
+//   var spCd =  json.map( x =>  { return  x.spCd  });
+//   this.setState({spCd : spCd});
+//  }
+//   ); 
+// }
+//   else {
+//    var  spCd = []
+//     for (var i = 0; i < sessionData.length; i++) {
+//      spCd.push(sessionData[i]);
+//     }
+//     if(spCd.length == 1){
+//       this.setState({spDisable: true})
+//     }
   
-     this.setState({spCd : spCd});
-}
+//      this.setState({spCd : spCd});
+// }
 
-var customers = mainData[0].customers.split(",");
- var custCd = [];
-if (customers.length == 1 && customers[0] == "ALL") {
-  fetch("http://localhost:3992/getCustomers?spCode=" + AspCd)
-.then(response => response.json())
-.then(json =>  {
-var custCd =  json.map( x =>  { return  x._id  });
-this.setState({custCd: custCd });
-});
-}
-else{
-for (var i = 0; i < customers.length; i++) {
-  custCd.push(customers[i]);
+// var customers = mainData[0].customers.split(",");
+//  var custCd = [];
+// if (customers.length == 1 && customers[0] == "ALL") {
+//   fetch("http://localhost:3992/getCustomers?spCode=" + AspCd)
+// .then(response => response.json())
+// .then(json =>  {
+// var custCd =  json.map( x =>  { return  x._id  });
+// this.setState({custCd: custCd });
+// });
+// }
+// else{
+// for (var i = 0; i < customers.length; i++) {
+//   custCd.push(customers[i]);
 
-}
-if(custCd.length == 1){
-  this.setState({custDisable: true})
+// }
+// if(custCd.length == 1){
+//   this.setState({custDisable: true})
 
-}
-this.setState({custCd: custCd});
-}
-var subCustomers = mainData[0].subCustomers.split(",");
-var subCustCd= [];
-if (subCustomers.length == 1 && subCustomers[0] == "ALL") {
-fetch("http://localhost:2992/getSubCustomers?spCode=" + AspCd +
-"&&custCd=" + AcustCd )
-.then(response => response.json())
-.then(json =>  {
-var subCustCd =  json.map( x =>  { return  x._id  });
-this.setState({subCustCd: subCustCd });
+// }
+// this.setState({custCd: custCd});
+// }
+// var subCustomers = mainData[0].subCustomers.split(",");
+// var subCustCd= [];
+// if (subCustomers.length == 1 && subCustomers[0] == "ALL") {
+// fetch("http://localhost:2992/getSubCustomers?spCode=" + AspCd +
+// "&&custCd=" + AcustCd )
+// .then(response => response.json())
+// .then(json =>  {
+// var subCustCd =  json.map( x =>  { return  x._id  });
+// this.setState({subCustCd: subCustCd });
 
-});
-}
-else{
+// });
+// }
+// else{
 
-  for (var i = 0; i < subCustomers.length; i++) {
-    subCustCd.push(subCustomers[i]);
+//   for (var i = 0; i < subCustomers.length; i++) {
+//     subCustCd.push(subCustomers[i]);
    
-  }
-  if(subCustCd.length == 1){
-    this.setState({subCustDisable: true})
-  }
-  this.setState({subCustCd:subCustCd})
-}
+//   }
+//   if(subCustCd.length == 1){
+//     this.setState({subCustDisable: true})
+//   }
+//   this.setState({subCustCd:subCustCd})
+// }
 
 
   this.startFunction()
@@ -226,167 +227,166 @@ else{
 
   startFunction(){
     var data = [];
-  const {lastupdatedData} = this.state;
+    var me   = this;
+  // const {lastupdatedData} = this.state;
     var dashboardData = JSON.parse(sessionStorage.getItem("dashboardConfigobj"));
     // console.log(dashboardData)
     // console.log(lastupdatedData);
     // alert(lastupdatedData);
     var arrayOfsensors= dashboardData.Sensors;
     var arrayofbgClass =dashboardData.SensorsBgC;
-    var keysofBsnm = Object.keys(this.state.lastupdatedData);
-    var values = Object.values(this.state.lastupdatedData);
+    var keysofBsnm = Object.keys(me.state.body.lastupdatedData);
+    var values = Object.values(me.state.body.lastupdatedData);
     
     for (var i = 0; i < 3; i++ ){ 
        data.push({ "sensorsNM": arrayOfsensors[i].ActivesesnorsType, "bgClass": arrayofbgClass[i],
-        nameofbsnm : keysofBsnm[i], valuseS: values[i] , lastUpdatedTime: this.state.lastUpdatedTime});
+        nameofbsnm : keysofBsnm[i], valuseS: values[i] , lastUpdatedTime: this.state.body.lastUpdatedTime});
       }
-      var page_size = 10;
-      var page = 1;
-    this.setState({Assets : dashboardData.Assets, 
-    Devices: dashboardData.Devices,
-    Sensors: data,
-    selectedSensorsType1: dashboardData.ActivesesnorsType,
-    selectedSensorsName: dashboardData.ActiveSensorsName,
-    selectedAssets : dashboardData.ActiveAssets, 
-    mac : dashboardData.ActiveDevice,
-    page_size: page_size,
-    page: page
-  });
-  this.fetchdata(page_size,page,dashboardData.ActiveSensorsName,dashboardData.ActivesesnorsType,dashboardData.ActiveDevice,dashboardData.ActiveSubCustCd,dashboardData.ActiveCustCd,dashboardData.ActiveSpCd);
+  
+      me.state.body.Assets                =   dashboardData.Assets;
+      me.state.body.Devices               =   dashboardData.Devices;
+      me.state.body.selectedSensorsType1  =   dashboardData.ActivesesnorsType;
+      me.state.body.selectedSensorsName   =   dashboardData.ActiveSensorsName;
+      me.state.body.page_size             =    10;
+      me.state.body.page                  =    1;
+      me.setState({ body: me.state.body});
+      me.fetchdata();
   }
 
-  submitBtn() {
-    var me = this;
-   var subCustCd = me.state.selectedSubCustValue;
-   var custCd = me.state.selectedCustValue;
-   var spCd = me.state.selectedSPValue;
-   var Assets = [];
-   var Devices = [];
+  // submitBtn() {
+  //   var me = this;
+  //  var subCustCd = me.state.selectedSubCustValue;
+  //  var custCd = me.state.selectedCustValue;
+  //  var spCd = me.state.selectedSPValue;
+  //  var Assets = [];
+  //  var Devices = [];
 
-   fetch("http://localhost:3992/getAssets?subCustCd=" + subCustCd)
-  .then(response => response.json())
-  .then(json =>  {
-   Assets = json 
-   this.setState({selectedAssets: Assets[0], Assets : json})
-   fetch("http://localhost:3992/getDevice?assetId=" + Assets[0])
-   .then(response => response.json())
-   .then(json =>  {
-    this.setState({Devices : json});
-    Devices = json;
-    this.setState({Devices : json , mac : Devices[0].mac});
-    // alert(Devices[0].mac)
-    fetch("http://localhost:3992/getSensors?mac=" + Devices[0].mac)
-    .then(response => response.json())
-    .then(json =>  {
-      if(json.length!=0){
-        // alert(json);
+  //  fetch("http://localhost:3992/getAssets?subCustCd=" + subCustCd)
+  // .then(response => response.json())
+  // .then(json =>  {
+  //  Assets = json 
+  //  this.setState({selectedAssets: Assets[0], Assets : json})
+  //  fetch("http://localhost:3992/getDevice?assetId=" + Assets[0])
+  //  .then(response => response.json())
+  //  .then(json =>  {
+  //   this.setState({Devices : json});
+  //   Devices = json;
+  //   this.setState({Devices : json , mac : Devices[0].mac});
+  //   // alert(Devices[0].mac)
+  //   fetch("http://localhost:3992/getSensors?mac=" + Devices[0].mac)
+  //   .then(response => response.json())
+  //   .then(json =>  {
+  //     if(json.length!=0){
+  //       // alert(json);
         
-        // alert(json);
-        // console.log(json)
-      var Sensors = Object.keys(json)
-      var selecteSensorName = Object.values(json[Sensors[0]]);
-      // alert(json[Sensors[0]]);
-  var page_size = 10;
-  var page = 1;
-  this.setState({selectedSensorsType1: Sensors[0],page_size: page_size, page:page, selectedSensorsName : selecteSensorName[0]})
-     this.fetchdata(page_size,page,selecteSensorName[0],Sensors[0],Devices[0].mac,subCustCd,custCd,spCd);
-      }
-    });
-   });
-  });
-  }
+  //       // alert(json);
+  //       // console.log(json)
+  //     var Sensors = Object.keys(json)
+  //     var selecteSensorName = Object.values(json[Sensors[0]]);
+  //     // alert(json[Sensors[0]]);
+  // var page_size = 10;
+  // var page = 1;
+  // this.setState({selectedSensorsType1: Sensors[0],page_size: page_size, page:page, selectedSensorsName : selecteSensorName[0]})
+  //    this.fetchdata(page_size,page,selecteSensorName[0],Sensors[0],Devices[0].mac,subCustCd,custCd,spCd);
+  //     }
+  //   });
+  //  });
+  // });
+  // }
 
  //This For handler for Service Provider
- handleSp = (e) => {
-  this.setState({ selectedSPValue : e.target.value })
-  this.getCustomerApi(e.target.value);
-  this.setState({ custDisable : null})
+//  handleSp = (e) => {
+//   this.setState({ selectedSPValue : e.target.value })
+//   this.getCustomerApi(e.target.value);
+//   this.setState({ custDisable : null})
  
-  }  
+//   }  
   //This IS FOR HANDLE CUSTOMER 
-  handleCutMr =(e) =>{
-    const {selectedSPValue} = this.state;
-    // alert(e.target.value + "customer")
-    this.setState({ selectedCustValue : e.target.value,subCustDisable : null })
+  // handleCutMr =(e) =>{
+  //   const {selectedSPValue} = this.state;
+  //   // alert(e.target.value + "customer")
+  //   this.setState({ selectedCustValue : e.target.value,subCustDisable : null })
    
-    this.getSubCustomerApi(selectedSPValue, e.target.value);
-    // this.setState({  })
-   }
+  //   this.getSubCustomerApi(selectedSPValue, e.target.value);
+  //   // this.setState({  })
+  //  }
    //THIS IS FOR HANDLE SUBCUSTOMER
-   handleSubCs =(e) =>{
+  //  handleSubCs =(e) =>{
     
-    this.setState({ selectedSubCustValue : e.target.value });
-      // this.getAssets( e.target.value );
+  //   this.setState({ selectedSubCustValue : e.target.value });
+  //     // this.getAssets( e.target.value );
     
-   }
+  //  }
   //THIS METHOD FOR GET CUSTOMER CODE
-  getCustomerApi(SendForSp){
-    var mainData = JSON.parse(sessionStorage.getItem("userDetails"));
-    var sessionData = mainData[0].customers.split(",");
-     var custCd = [];
-    if (sessionData.length == 1 && sessionData[0] == "ALL") {
-      fetch("http://localhost:3992/getCustomers?spCode=" + SendForSp)
-    .then(response => response.json())
-    .then(json =>  {
-    var custCd =  json.map( x =>  { return  x._id  });
-    this.setState({custCd: custCd, selectedCustValue:custCd[0]  });
-   });
-  }
-  else{
-    for (var i = 0; i < sessionData.length; i++) {
-      custCd.push(sessionData[i]);
+  // getCustomerApi(SendForSp){
+  //   var mainData = JSON.parse(sessionStorage.getItem("userDetails"));
+  //   var sessionData = mainData[0].customers.split(",");
+  //    var custCd = [];
+  //   if (sessionData.length == 1 && sessionData[0] == "ALL") {
+  //     fetch("http://localhost:3992/getCustomers?spCode=" + SendForSp)
+  //   .then(response => response.json())
+  //   .then(json =>  {
+  //   var custCd =  json.map( x =>  { return  x._id  });
+  //   this.setState({custCd: custCd, selectedCustValue:custCd[0]  });
+  //  });
+  // }
+  // else{
+  //   for (var i = 0; i < sessionData.length; i++) {
+  //     custCd.push(sessionData[i]);
    
-    }
-    this.setState({custCd: custCd, selectedCustValue:custCd[0] });
+  //   }
+  //   this.setState({custCd: custCd, selectedCustValue:custCd[0] });
 
-  }
-  }
+  // }
+  // }
   
-  getSubCustomerApi(SendForSp,SendFroCustCD){
-    var mainData = JSON.parse(sessionStorage.getItem("userDetails"));
+//   getSubCustomerApi(SendForSp,SendFroCustCD){
+//     var mainData = JSON.parse(sessionStorage.getItem("userDetails"));
    
-    var sessionData = mainData[0].subCustomers.split(",");
-    var subCustCd= [];
-    if (sessionData.length == 1 && sessionData[0] == "ALL") {
-    fetch("http://localhost:3992/getSubCustomers?spCode=" + SendForSp +
-    "&&custCd=" + SendFroCustCD )
-    .then(response => response.json())
-    .then(json =>  {
-    var subCustCd =  json.map( x =>  { return  x._id  });
+//     var sessionData = mainData[0].subCustomers.split(",");
+//     var subCustCd= [];
+//     if (sessionData.length == 1 && sessionData[0] == "ALL") {
+//     fetch("http://localhost:3992/getSubCustomers?spCode=" + SendForSp +
+//     "&&custCd=" + SendFroCustCD )
+//     .then(response => response.json())
+//     .then(json =>  {
+//     var subCustCd =  json.map( x =>  { return  x._id  });
    
-    this.setState({subCustCd: subCustCd, selectedSubCustValue: subCustCd[0] });
+//     this.setState({subCustCd: subCustCd, selectedSubCustValue: subCustCd[0] });
     
-});
-    }
-    else{
-      for (var i = 0; i < sessionData.length; i++) {
-        subCustCd.push(sessionData[i]);
-      }
-      this.setState({subCustCd:subCustCd,selectedSubCustValue: subCustCd[0]})
-    }
-}
+// });
+//     }
+//     else{
+//       for (var i = 0; i < sessionData.length; i++) {
+//         subCustCd.push(sessionData[i]);
+//       }
+//       this.setState({subCustCd:subCustCd,selectedSubCustValue: subCustCd[0]})
+//     }
+// }
 
-getAssets(SendForSbCd){
-  fetch("http://localhost:3992/getAssets?subCustCd=" + SendForSbCd)
-  .then(response => response.json())
-  .then(json =>  {
-  // var sensorType =  json.map( x =>  { return  x  });
-   this.setState({Assets : json});
+// getAssets(SendForSbCd){
+//   fetch("http://localhost:3992/getAssets?subCustCd=" + SendForSbCd)
+//   .then(response => response.json())
+//   .then(json =>  {
+//   // var sensorType =  json.map( x =>  { return  x  });
+//    this.setState({Assets : json});
 
-  });
-}
-getDevices(assetId){
-  fetch("http://localhost:3992/getDevice?assetId=" + assetId)
-  .then(response => response.json())
-  .then(json =>  {
-  // var sensorType =  json.map( x =>  { return  x  });
-   this.setState({Devices : json, selectedAssets: assetId});
-  console.log(json +'this data of assets' );
-  });
-}
+//   });
+// }
+// getDevices(assetId){
+//   fetch("http://localhost:3992/getDevice?assetId=" + assetId)
+//   .then(response => response.json())
+//   .then(json =>  {
+//   // var sensorType =  json.map( x =>  { return  x  });
+//    this.setState({Devices : json, selectedAssets: assetId});
+//   console.log(json +'this data of assets' );
+//   });
+// }
 
 DisplayChart(result, valueSensoor ){
-  if( result.length >0 ){
+  console.log(result)
+  var me = this;
+  if( result.length > 0 ){
     var arrData = [];
     var arrLabels =[];
     var dataToSend1 =[];
@@ -398,47 +398,44 @@ DisplayChart(result, valueSensoor ){
         formattedDate 
       );
     }
-    // if(sessionStorage.getItem("dataToSend1")){
+    console.log(dataToSend1)
+    console.log(dataToSend2)
+    console.log(valueSensoor)
     arrData = dataToSend1;
     arrLabels= dataToSend2;
     var yaxisName = valueSensoor;
     var fromDate = new Date();
     var  toDate =  new Date();
-    // console.log(arrData );
-    // arrData =  arrData.split(",");
-    // arrLabels =  arrLabels.split(",");
-  
     var borderColors =[];
     for (var i = 0; i <  arrData.length; i++) {
         // bgColors.push(this.getRandomBgColor());
         borderColors.push(this.getRandomBorColor());
         // sessionStorage.clear();
-        this.setState({arrData: arrData,
-          arrLabels: arrLabels,
-           yaxisName: yaxisName,
-           fromDate:fromDate,
-           toDate: toDate,
-          //  bgColors: bgcolor,
-           borderColors: borderColors
-          });
+        me.state.body.arrData = arrData;
+        me.state.body.arrLabels = arrLabels;
+        me.state.body.yaxisName = yaxisName;
+        me.state.body.fromDate = fromDate;
+        me.state.body.borderColors = borderColors;
+
+
+        this.setState({ body: me.state.body});
   }
 
  
       // this.updateState(arrData, arrLabels, yaxisName, fromDate ,toDate,bgcolor, borderColors);
   }
   else{
-    this.setState({arrData: undefined,
-      arrLabels: undefined,
-       yaxisName: undefined,
-       fromDate:undefined,
-       toDate: undefined,
-       bgColors: undefined,
-       borderColors: undefined
-      });
+    me.state.body.arrData = undefined;
+    me.state.body.arrLabels = undefined;
+    me.state.body.yaxisName = undefined;
+    me.state.body.fromDate = undefined;
+    me.state.body.borderColors = undefined;
+    this.setState({ body: me.state.body});
   }
 }
-  fetchdata(page_size,page,selectedSensorsName,selectedSensorsType1,mac,selectedSubCustValue,selectedCustValue,selectedSPValue){
-    this.setState({'in_prog':true});
+  fetchdata(){
+    this.state.body.in_prog = true;
+    this.setState({body: this.state.body});
     var dashboardData = JSON.parse(sessionStorage.getItem("dashboardConfigobj"));
     var arrayOfsensors= dashboardData.Sensors;
     var arrayofbgClass =dashboardData.SensorsBgC;  
@@ -453,49 +450,37 @@ DisplayChart(result, valueSensoor ){
         temobj["sensorsValues"]= 0.0;
         obj.push(temobj);
     }
-  //  var obj = [
-  //   {"sesnorsType": "sensorType1",
-  //   "sensorsName": "sensor1",
-  //   "sensorsValues": 0.0  },
-  //   {"sesnorsType": "sensorType2",
-  //   "sensorsName": "sensor2",
-  //   "sensorsValues": 0.0  },
-  //   {"sesnorsType": "sensorType3",
-  //   "sensorsName": "sensor3",
-  //   "sensorsValues": 0.0  }
-  //  ]
     this.firstTimeRender("0:0:0:0",obj );
     var me = this;
    var body = {
-    sensorNm: selectedSensorsType1,
-      sensorsBSN : selectedSensorsName,
-      spCd :selectedSPValue,
-      custCd: selectedCustValue,
-      subCustCd : selectedSubCustValue,
-      mac: mac,
-      page : page,
-      page_size:page_size
+      sensorNm: me.state.body.selectedSensorsType1,
+      sensorsBSN : me.state.body.selectedSensorsName,
+      spCd :me.state.body.selectedSPValue,
+      custCd: me.state.body.selectedCustValue,
+      subCustCd : me.state.body.selectedSubCustValue,
+      mac: me.state.body.mac,
+      page : me.state.body.page,
+      page_size: me.state.body.page_size
     }
   
-// console.log(body);
-this.callToSocket(body);
-this.callForlastAlert(selectedCustValue,selectedSubCustValue, mac);
-   this.setState({in_prog:true, Spinnerdata: false});
-   var FdataArray =[];
-   var dataArray =[];
+    me.callToSocket(body);
+    me.callForlastAlert(me.state.body.selectedCustValue,me.state.body.selectedSubCustValue, me.state.body.mac);
+    me.state.body.in_prog      =   true;
+    me.state.body.Spinnerdata  = false; 
+    me.setState({body: me.state.body});
+    var FdataArray =[];
+    var dataArray =[];
     axios.post("http://localhost:3992/getdashboard",body)
-   
     .then(json =>  {
       // console.log(json);
       // console.log(json["data"]);
-      me.setState({ Spinnerdata: true})
+      me.state.body.Spinnerdata = true;
+      me.setState({ body: me.state.body})
       let json1 =[];
       console.log("this is data");
       console.log(json["data"]);
      json1 = json["data"]["finalResult"]
       if(json1 !== 0){
-       
-      
         for (var i = 0; i < json1.length ; i++) {
           FdataArray.push({
                   column1: json1[i][0],
@@ -505,7 +490,6 @@ this.callForlastAlert(selectedCustValue,selectedSubCustValue, mac);
                   column5: json1[i][4]
      
         })
-        // var formattedDate = dateFormat(result[i]["column5"], "dd, mmm, HH, MM");
         dataArray.push({
           column1: json1[i][0],
           column2: json1[i][1],
@@ -520,33 +504,28 @@ this.callForlastAlert(selectedCustValue,selectedSubCustValue, mac);
       var lastUpdatedTime = dateFormat(json["data"]["lastCreatedTime"] , "dd-mmm-yy HH:MM:ss")
       // me.setState({'users':items,'total_count':users_data.count,'in_prog':false});
       console.log(dataArray);
-      me.setState({DataArray :dataArray ,
-        'in_prog':false,
-        selectedSensorsType1: selectedSensorsType1,
-        total_count:json["data"]["data_count"],
-        excelresult : dataArray,
-        lastupdatedData:json["data"]["lastdataObj"] ,
-        lastUpdatedTime : lastUpdatedTime 
-      })
-   
-      me.DisplayChart(FdataArray, selectedSensorsName);
-      me.firstTimeRender(lastUpdatedTime,json["data"]["lastdataObj"])
-
-
-//  console.log(FdataArray+"data new");
-//  console.log(FdataArray);
+      me.state.body.DataArray         =  dataArray;
+      me.state.body.in_prog           =  false;
+      me.state.body.total_count       =  json["data"]["data_count"];
+      me.state.body.lastupdatedData   =  json["data"]["lastdataObj"];
+      me.state.body.lastUpdatedTime   =  lastUpdatedTime;
+      me.setState({ body: me.state.body})
+      me.DisplayChart(FdataArray, me.state.body.selectedSensorsName);
+     // me.firstTimeRender(lastUpdatedTime,json["data"]["lastdataObj"])
       }
     }) 
     .catch(error=>{
-      this.DisplayChart(FdataArray, selectedSensorsName);
-      this.setState({ DataArray:[], in_prog:false, selectedSensorsName: selectedSensorsType1,total_count:0, Spinnerdata: true});
+      me.DisplayChart(FdataArray, me.state.body.selectedSensorsName);
+      me.state.body.DataArray     =   [];
+      me.state.body.in_prog       =   false;
+      me.state.body.total_count   =   0;
+      me.state.body.Spinnerdata   =   true;
+      me.setState({ body: me.state.body});
   })
-
-
 }
 
 callToSocket(body){
-  const { endpoint, socket1} = this.state;
+  const { endpoint, socket1} = this.state.body;
   var me = this;
   if(Object.entries(socket1).length !== 0 && socket1.constructor !== Object){
     socket1.emit("end");
@@ -557,26 +536,32 @@ callToSocket(body){
   // socket1.close();
   console.log("This is log of socket");
   console.log(socket)
-  me.setState({socket1: socket});
+  me.state.body.socket1   =   socket;
+  me.setState({body: me.state.body});
   var dashboardData = JSON.parse(sessionStorage.getItem("dashboardConfigobj"));
   var arrayOfsensors= dashboardData.Sensors;
   var arrayofbgClass = dashboardData.SensorsBgC;
   socket.emit('lastUpdatedValue',body);  
   socket.on("onViewDashboard", data =>{
     console.log("This is socket ");
-    console.log(data);
+    console.log(data.sensors);
     var array = [];
     // var lastUpdatedTime = dateFormat(data.lastCreatedTime , "dd-mmm-yy HH:MM:ss");
-    for (var i = 0 ; i < data.lastdataObj.length ; i++ ){ 
-      array.push({ "sensorsNM": data.lastdataObj[i].sesnorsType, 
+    for (var i = 0 ; i < data.sensors.length ; i++ ){ 
+      array.push({ "sensorsNM": data.sensors[i].type, 
       "bgClass": arrayofbgClass[i],
-       nameofbsnm : data.lastdataObj[i].sensorsName,
-       valuseS:data.lastdataObj[i].sensorsValues , 
-       lastUpdatedTime:  dateFormat(data.lastCreatedTime , "dd-mmm-yy HH:MM:ss")});
+       nameofbsnm : data.sensors[i].devicebusinessNM,
+       valuseS:data.sensors[i].Value , 
+       lastUpdatedTime:  dateFormat(data.sensors[i].dateTime , "dd-mmm-yy HH:MM:ss")});
      }
-     this.setState({Sensors : array});
-    // me.setState({lastupdatedData:data.lastdataObj ,
-    // lastUpdatedTime :lastUpdatedTime});
+     for(var j =0; j< array.length; j++){
+       if(array[j].lastUpdatedTime != me.state.body.Sensors[j].lastUpdatedTime ){
+        me.state.body.Sensors   =   array;     
+        me.setState({body :me.state.body});
+        break;
+       }
+     }
+     
   });
 }
 callForlastAlert(custCd,subCustCd, mac){
@@ -586,13 +571,13 @@ callForlastAlert(custCd,subCustCd, mac){
   .then(json =>  {
     // alert(json["data"]);
     // console.log(json["data"]);
-    me.setState({lastAlertdata: json["data"]});
+    me.state.body.lastAlertdata   =    json["data"];     
+    me.setState({body: me.state.body});
   })
-
 }
 firstTimeRender(lastupdatedTime, obj){
   var me = this
-  if(true){
+  // if(true){
     var data = [];
     var dashboardData = JSON.parse(sessionStorage.getItem("dashboardConfigobj"));
     var arrayOfsensors= dashboardData.Sensors;
@@ -601,220 +586,221 @@ firstTimeRender(lastupdatedTime, obj){
        data.push({ "sensorsNM": obj[i].sesnorsType, "bgClass": arrayofbgClass[i],
         nameofbsnm : obj[i].sensorsName, valuseS:obj[i].sensorsValues ,  lastUpdatedTime: lastupdatedTime});
       }
-      me.setState({Sensors : data})
-  }
+      me.state.body.Sensors   =    data;     
+      me.setState({body: me.state.body});
+  // }
 }
 
 
 //THIS IS HANDER FOR EXCEL DOWNLOAD
-downloadToExcel() {
-  const {excelresult} = this.state;
-  //HERE PUTING RESULT DATA WHICH STORED IN STATE VARIABLE AND ASSIGN TO LOCAL VARIABLE dataForExcel
- var dataForExcel = excelresult;
- if (dataForExcel) {
-//THIS  HEADER OF COLUMN FOR EXCEL DATASHEET
-   var arColumns = [
-     "Device",
-     "Device Name",
-     "Bussiness Name",
-     this.state.selectedSensorsType1,
-     "QueueDateTime"
-   ];
-   var arKeys = ["column1", "column2", "column3", "column4","column5"];
-   var arWidths = [35, 35, 35, 35, 35];
-   var reportName = this.state.selectedSensorsType1 + " Report";
-   var dataSet = dataForExcel;
-   this.exportToExcel(arColumns, arKeys, arWidths, reportName, dataSet);
- } else {
-   // Swal({
-   //   title: "There is no data to export!!",
-   //   type: "info",
-   //   background: '#fff',
-   //   width: 400
-   // });
-   alert("There is no data to export!!");
- }
-}
+// downloadToExcel() {
+//   const {excelresult} = this.state;
+//   //HERE PUTING RESULT DATA WHICH STORED IN STATE VARIABLE AND ASSIGN TO LOCAL VARIABLE dataForExcel
+//  var dataForExcel = excelresult;
+//  if (dataForExcel) {
+// //THIS  HEADER OF COLUMN FOR EXCEL DATASHEET
+//    var arColumns = [
+//      "Device",
+//      "Device Name",
+//      "Bussiness Name",
+//      this.state.selectedSensorsType1,
+//      "QueueDateTime"
+//    ];
+//    var arKeys = ["column1", "column2", "column3", "column4","column5"];
+//    var arWidths = [35, 35, 35, 35, 35];
+//    var reportName = this.state.selectedSensorsType1 + " Report";
+//    var dataSet = dataForExcel;
+//    this.exportToExcel(arColumns, arKeys, arWidths, reportName, dataSet);
+//  } else {
+//    // Swal({
+//    //   title: "There is no data to export!!",
+//    //   type: "info",
+//    //   background: '#fff',
+//    //   width: 400
+//    // });
+//    alert("There is no data to export!!");
+//  }
+// }
  //export To Excel and Save it to server and add the Details to Collection
- exportToExcel(arColumns, arKeys, arWidths, reportName, dataSet) {
-   var workbook = new ExcelJs.Workbook();
-   workbook.created = new Date();
+//  exportToExcel(arColumns, arKeys, arWidths, reportName, dataSet) {
+//    var workbook = new ExcelJs.Workbook();
+//    workbook.created = new Date();
 
-   // create a sheet with blue tab colour
-   var ws = workbook.addWorksheet(reportName, {
-     properties: { tabColor: { argb: "1E1E90FF" } }
-   });
+//    // create a sheet with blue tab colour
+//    var ws = workbook.addWorksheet(reportName, {
+//      properties: { tabColor: { argb: "1E1E90FF" } }
+//    });
 
-   // Add initial set of rows
-   var titleRows = [
-     ["ReportName", this.state.selectedSensorsType1 + " Report"],
-     ["Report Generated On", Date().toLocaleString()]
-     // ["Class", this.std]
-   ];
+//    // Add initial set of rows
+//    var titleRows = [
+//      ["ReportName", this.state.selectedSensorsType1 + " Report"],
+//      ["Report Generated On", Date().toLocaleString()]
+//      // ["Class", this.std]
+//    ];
 
-   // Add title rows
-   ws.addRows(titleRows);
+//    // Add title rows
+//    ws.addRows(titleRows);
 
-   for (var i = 1; i <= titleRows.length; ++i) {
-     ws.getRow(i).font = { size: 12, bold: true };
-     ws.getRow(i).alignment = {
-       vertical: "middle",
-       horizontal: "center",
-       wrapText: true
-     };
-     ws.getCell("A" + i).fill = {
-       type: "pattern",
-       pattern: "solid",
-       fgColor: { argb: "8787CEFA" }
-     };
-     ws.getCell("A" + i).border = ws.getCell("B" + i).border = {
-       left: { style: "thin" },
-       top: { style: "thin" },
-       bottom: { style: "thin" },
-       right: { style: "thin" }
-     };
-   }
+//    for (var i = 1; i <= titleRows.length; ++i) {
+//      ws.getRow(i).font = { size: 12, bold: true };
+//      ws.getRow(i).alignment = {
+//        vertical: "middle",
+//        horizontal: "center",
+//        wrapText: true
+//      };
+//      ws.getCell("A" + i).fill = {
+//        type: "pattern",
+//        pattern: "solid",
+//        fgColor: { argb: "8787CEFA" }
+//      };
+//      ws.getCell("A" + i).border = ws.getCell("B" + i).border = {
+//        left: { style: "thin" },
+//        top: { style: "thin" },
+//        bottom: { style: "thin" },
+//        right: { style: "thin" }
+//      };
+//    }
 
-   /*Set Column headers and keys*/
-   for (let i = 0; i < arColumns.length; ++i) {
-     ws.getColumn(i + 1).key = arKeys[i];
-     ws.getColumn(i + 1).width = arWidths[i];
-   }
+//    /*Set Column headers and keys*/
+//    for (let i = 0; i < arColumns.length; ++i) {
+//      ws.getColumn(i + 1).key = arKeys[i];
+//      ws.getColumn(i + 1).width = arWidths[i];
+//    }
 
-   ws.getRow(titleRows.length + 2).height = 40;
-   ws.getRow(titleRows.length + 2).font = { size: 12, bold: true };
-   ws.getRow(titleRows.length + 2).values = arColumns;
+//    ws.getRow(titleRows.length + 2).height = 40;
+//    ws.getRow(titleRows.length + 2).font = { size: 12, bold: true };
+//    ws.getRow(titleRows.length + 2).values = arColumns;
 
-   // add all the rows in datasource to sheet - make sure keys are matching
-   ws.addRows(dataSet);
+//    // add all the rows in datasource to sheet - make sure keys are matching
+//    ws.addRows(dataSet);
 
-   // loop through and style all the cells - Optimize this loop later.
-   var j = titleRows.length + 2;
-   for (
-     var i = titleRows.length + 2;
-     i <= dataSet.length + titleRows.length + 2;
-     ++i
-   ) {
-     ws.getRow(i).alignment = {
-       vertical: "middle",
-       horizontal: "center",
-       wrapText: true
-     };
-     if (i === titleRows.length + 2) {
-       var strDataCol = "A";
-       for (var k = 0; k < arColumns.length; ++k) {
-         if (k === 0) {
-           ws.getCell(strDataCol + j).fill = {
-             type: "pattern",
-             pattern: "solid",
-             fgColor: { argb: "8787CEFA" }
-           };
-           ws.getCell(strDataCol + j).border = {
-             left: { style: "medium" },
-             top: { style: "medium" },
-             bottom: { style: "medium" },
-             right: { style: "thin" }
-           };
-         } else if (k === arColumns.length - 1) {
-           ws.getCell(strDataCol + j).fill = {
-             type: "pattern",
-             pattern: "solid",
-             fgColor: { argb: "8787CEFA" }
-           };
-           ws.getCell(strDataCol + j).border = {
-             left: { style: "thin" },
-             top: { style: "medium" },
-             bottom: { style: "medium" },
-             right: { style: "medium" }
-           };
-         } else {
-           ws.getCell(strDataCol + j).fill = {
-             type: "pattern",
-             pattern: "solid",
-             fgColor: { argb: "8787CEFA" }
-           };
-           ws.getCell(strDataCol + j).border = {
-             left: { style: "thin" },
-             top: { style: "medium" },
-             bottom: { style: "medium" },
-             right: { style: "thin" }
-           };
-         }
-         strDataCol = String.fromCharCode(strDataCol.charCodeAt(0) + 1);
-       }
-     } else {
-       if (i === dataSet.length + titleRows.length + 2) {
-         strDataCol = "A";
-         ws.getRow(j).alignment = { vertical: "middle", horizontal: "center" };
-         for (var k = 0; k < arColumns.length; ++k) {
-           if (k == 0) {
-             ws.getCell(strDataCol + j).border = {
-               left: { style: "medium" },
-               top: { style: "thin" },
-               bottom: { style: "medium" },
-               right: { style: "thin" }
-             };
-           } else if (k == arColumns.length - 1) {
-             ws.getCell(strDataCol + j).border = {
-               left: { style: "thin" },
-               top: { style: "thin" },
-               bottom: { style: "medium" },
-               right: { style: "medium" }
-             };
-           } else {
-             ws.getCell(strDataCol + j).border = {
-               left: { style: "thin" },
-               top: { style: "thin" },
-               bottom: { style: "medium" },
-               right: { style: "thin" }
-             };
-           }
-           strDataCol = String.fromCharCode(strDataCol.charCodeAt(0) + 1);
-         }
-       } else {
-         var strDataCol = "A";
-         for (var k = 0; k < arColumns.length; ++k) {
-           if (k == 0) {
-             ws.getCell(strDataCol + j).border = {
-               left: { style: "medium" },
-               top: { style: "thin" },
-               bottom: { style: "thin" },
-               right: { style: "thin" }
-             };
-           } else if (k == arColumns.length - 1) {
-             ws.getCell(strDataCol + j).border = {
-               left: { style: "thin" },
-               top: { style: "thin" },
-               bottom: { style: "thin" },
-               right: { style: "medium" }
-             };
-           } else {
-             ws.getCell(strDataCol + j).border = {
-               left: { style: "thin" },
-               top: { style: "thin" },
-               bottom: { style: "thin" },
-               right: { style: "thin" }
-             };
-           }
-           strDataCol = String.fromCharCode(strDataCol.charCodeAt(0) + 1);
-         }
-       }
-     }
-     j = j + 1;
-   }
+//    // loop through and style all the cells - Optimize this loop later.
+//    var j = titleRows.length + 2;
+//    for (
+//      var i = titleRows.length + 2;
+//      i <= dataSet.length + titleRows.length + 2;
+//      ++i
+//    ) {
+//      ws.getRow(i).alignment = {
+//        vertical: "middle",
+//        horizontal: "center",
+//        wrapText: true
+//      };
+//      if (i === titleRows.length + 2) {
+//        var strDataCol = "A";
+//        for (var k = 0; k < arColumns.length; ++k) {
+//          if (k === 0) {
+//            ws.getCell(strDataCol + j).fill = {
+//              type: "pattern",
+//              pattern: "solid",
+//              fgColor: { argb: "8787CEFA" }
+//            };
+//            ws.getCell(strDataCol + j).border = {
+//              left: { style: "medium" },
+//              top: { style: "medium" },
+//              bottom: { style: "medium" },
+//              right: { style: "thin" }
+//            };
+//          } else if (k === arColumns.length - 1) {
+//            ws.getCell(strDataCol + j).fill = {
+//              type: "pattern",
+//              pattern: "solid",
+//              fgColor: { argb: "8787CEFA" }
+//            };
+//            ws.getCell(strDataCol + j).border = {
+//              left: { style: "thin" },
+//              top: { style: "medium" },
+//              bottom: { style: "medium" },
+//              right: { style: "medium" }
+//            };
+//          } else {
+//            ws.getCell(strDataCol + j).fill = {
+//              type: "pattern",
+//              pattern: "solid",
+//              fgColor: { argb: "8787CEFA" }
+//            };
+//            ws.getCell(strDataCol + j).border = {
+//              left: { style: "thin" },
+//              top: { style: "medium" },
+//              bottom: { style: "medium" },
+//              right: { style: "thin" }
+//            };
+//          }
+//          strDataCol = String.fromCharCode(strDataCol.charCodeAt(0) + 1);
+//        }
+//      } else {
+//        if (i === dataSet.length + titleRows.length + 2) {
+//          strDataCol = "A";
+//          ws.getRow(j).alignment = { vertical: "middle", horizontal: "center" };
+//          for (var k = 0; k < arColumns.length; ++k) {
+//            if (k == 0) {
+//              ws.getCell(strDataCol + j).border = {
+//                left: { style: "medium" },
+//                top: { style: "thin" },
+//                bottom: { style: "medium" },
+//                right: { style: "thin" }
+//              };
+//            } else if (k == arColumns.length - 1) {
+//              ws.getCell(strDataCol + j).border = {
+//                left: { style: "thin" },
+//                top: { style: "thin" },
+//                bottom: { style: "medium" },
+//                right: { style: "medium" }
+//              };
+//            } else {
+//              ws.getCell(strDataCol + j).border = {
+//                left: { style: "thin" },
+//                top: { style: "thin" },
+//                bottom: { style: "medium" },
+//                right: { style: "thin" }
+//              };
+//            }
+//            strDataCol = String.fromCharCode(strDataCol.charCodeAt(0) + 1);
+//          }
+//        } else {
+//          var strDataCol = "A";
+//          for (var k = 0; k < arColumns.length; ++k) {
+//            if (k == 0) {
+//              ws.getCell(strDataCol + j).border = {
+//                left: { style: "medium" },
+//                top: { style: "thin" },
+//                bottom: { style: "thin" },
+//                right: { style: "thin" }
+//              };
+//            } else if (k == arColumns.length - 1) {
+//              ws.getCell(strDataCol + j).border = {
+//                left: { style: "thin" },
+//                top: { style: "thin" },
+//                bottom: { style: "thin" },
+//                right: { style: "medium" }
+//              };
+//            } else {
+//              ws.getCell(strDataCol + j).border = {
+//                left: { style: "thin" },
+//                top: { style: "thin" },
+//                bottom: { style: "thin" },
+//                right: { style: "thin" }
+//              };
+//            }
+//            strDataCol = String.fromCharCode(strDataCol.charCodeAt(0) + 1);
+//          }
+//        }
+//      }
+//      j = j + 1;
+//    }
 
-   workbook.xlsx.writeBuffer().then(data => {
-     const blob = new Blob([data], { type: "application/octet-stream" });
-     var dt = new Date();
-     var strdt;
-     strdt = dt
-       .toString()
-       .split("GMT")[0]
-       .trim();
-     var fileName = reportName + strdt + ".xlsx";
-     FileSaver.saveAs(blob, fileName);
-   });
- }
+//    workbook.xlsx.writeBuffer().then(data => {
+//      const blob = new Blob([data], { type: "application/octet-stream" });
+//      var dt = new Date();
+//      var strdt;
+//      strdt = dt
+//        .toString()
+//        .split("GMT")[0]
+//        .trim();
+//      var fileName = reportName + strdt + ".xlsx";
+//      FileSaver.saveAs(blob, fileName);
+//    });
+//  }
 
 getRandomBorColor() {
 var letters = "0123456789ABCDEF";
@@ -828,22 +814,23 @@ return color;
   render() {
    
     const {arrData, arrLabels, yaxisName,lastAlertdata, fromDate ,toDate ,bgColors,selectedSensorsType1, borderColors,DataArray,in_prog,
-      spCd,custCd,subCustCd
-    }= this.state;
-    var state   =   this.state;
-    var total_page  =   Math.ceil(this.state.total_count/this.state.page_size);
+      selectedSPValue, selectedCustValue,selectedSubCustValue, selectedAssets,selectedDeviceName,selectedSensorsName
+    }= this.state.body;
+    var state   =   this.state.body;
+    var total_page  =   Math.ceil(this.state.body.total_count/this.state.body.page_size);
     var page_start_index    =   ((state.page-1)*state.page_size);
-    if (this.state.Spinnerdata == true) {
+    if (this.state.body.Spinnerdata == true) {
     
     return (
        
       <div className ="container ">
       
           <section className ="content"  >
-
+       
           <div className="box box1">
           <div className="box-header with-border">
-          <div className="row">
+          
+          {/* <div className="row">
                    <div className="col-lg-3 col-md-4 col-sm-10 col-xs-12">
                    <label> SELECT SERVICE PROVIDER</label>
                    <SelectionInput 
@@ -880,9 +867,9 @@ return color;
                    <button onClick = {this.submitBtn.bind(this)} className= "btn btn-md btn-success mt-5 btnalig">Submit</button>
                    </div>
                    </div>
-                 
+                  */}
 
-               <p className= "line2"></p>
+               {/* <p className= "line2"></p>
           <div className="width1">
           <label className="text-center">SELECT ASSETS</label>
            <Nav bsStyle="pills" activeKey={this.state.selectedAssets} onSelect={this.clickAsset}>
@@ -904,14 +891,36 @@ return color;
           )}
 
         </Nav>
-         </div>
+         </div> */}
           </div>
           </div>
+          <div className="row"> 
+            <div className="col-lg-12">  <p className= "line2"></p>
+       <div className="col-lg-12">
+       <div className="ViewBredCum">
+       {/* <span className="spanBredcum">{(selectedSPValue != "")?selectedSPValue: ""}</span> <span  className="spanBredcumslash" >/</span>  */}
+       <span  className="spanBredcum">{(selectedCustValue != "")?selectedCustValue: ""} </span><span className="spanBredcumslash">/</span>
+      <span  className="spanBredcum"> {(selectedSubCustValue != "")?selectedSubCustValue: "" }</span> <span className="spanBredcumslash">/</span> 
+      <span  className="spanBredcum">{(selectedAssets != "")?selectedAssets: ""} </span> <span className="spanBredcumslash">/</span> 
+       <span  className="spanBredcum">{(selectedDeviceName != "")? selectedDeviceName: ""}</span>
+       {/* <span className="spanBredcumslash">/</span>  */}
+       {/* <span  className="spanBredcum"> {(selectedSensorsName != "")? selectedSensorsName: ""}</span> */}
+     <div className="navright"><span  className="spanNev"  onClick={() =>{ 
+                         this.props.history.push("/NevMenu")}}>Device Menu</span>
+     <span className="spanNev"  onClick={() =>{ 
+                         this.props.history.push("/activeDashbord")}}>Operating Dashboard</span>
+     </div>
+      </div>
+      </div>
+      </div>
+      </div>
         <div className="row">
        <div className = "col-lg-9 col-sm-6 col-xs-12">
        <div className= "custmDivSensorUpper">
+      
+
        <div className= "wrapperSenSors">
-        { this.state.Sensors.map(item => 
+        { this.state.body.Sensors.map(item => 
             <span className="custmDivSensor">
                 <Sensors key = {item.nameofbsnm} 
                   bgclass={item.bgClass}
@@ -997,14 +1006,14 @@ return color;
                    </div>
                    <div className="col-lg-2 col-md-2 col-sm-7 col-xs-3">
                    <span className="spanchart">#ROWS </span>
-                  <select onChange={this.changePagesize} className=" selectcolor" value={this.state.page_size}   id="Page_Size">{this.state.page_size}
+                  <select onChange={this.changePagesize} className=" selectcolor" value={this.state.body.page_size}   id="Page_Size">{this.state.body.page_size}
                    
                    {["10","20","50","100"].map( n => 
                      <option className="selectcolor " value={n}>{n}</option>)
                      }
                    
                    </select>  
-                   <button type="button" onClick={this.downloadToExcel.bind(this)}>downloadToExcel</button> 
+                   {/* <button type="button" onClick={this.downloadToExcel.bind(this)}>downloadToExcel</button>  */}
                    </div>
             </div>
             <div className="chart-container" >

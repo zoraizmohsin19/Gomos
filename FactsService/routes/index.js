@@ -608,12 +608,12 @@ gomos.gomosLog(TRACE_DEBUG,"this callig after Find Of Deviceinstruction");
 function insertActivejob(db,dataInsruction,dataToInsert){ 
   gomos.gomosLog(TRACE_DEBUG,"this is need For Insert", dataInsruction);
   gomos.gomosLog(TRACE_DEBUG,"this is need For Insert", dataToInsert);
-  var keysofBNm = Object.keys(dataInsruction.sourceMsg);
-  var channelName = dataInsruction.sourceMsg["Channel"];
+  var keysofBNm = Object.keys(dataInsruction.sourceMsg.body);
+  var channelName = dataInsruction.sourceMsg["body"]["Channel"];
   var Token =  dataInsruction.sourceMsg["Token"];
-  var payloadId =  dataInsruction.sourceMsg["ActionType"];
+  var payloadId =  dataInsruction.sourceMsg["body"]["ActionType"];
   var isDailyJob = dataInsruction.sourceMsg["isDailyJob"];
-  var keyForRemove = ["Channel","Token","ActionType","isDailyJob"];
+  var keyForRemove = ["Channel"];
 for(var i = 0 ; i< keyForRemove.length; i++){
     if (keysofBNm.includes(keyForRemove[i])) {
       keysofBNm.splice(keysofBNm.indexOf(keyForRemove[i]), 1);
@@ -625,11 +625,13 @@ for(var i = 0 ; i< keyForRemove.length; i++){
     "mac": dataToInsert.mac,
     "DeviceName": dataToInsert.DeviceName,
     "type" : "ActiveJob",
-    "sourceMsg": {"referenceToken": Token,
-    "Channel":channelName,
+    "sourceMsg": {"body":{
+    "Channel":channelName},
+    "referenceToken": Token,
     // "Action": payloadId,
-    "isDailyJob": isDailyJob,
-    },
+    "isDailyJob": isDailyJob
+    
+  },
     "createdTime": dataTime,
     "updatedTime": dataTime
    
@@ -639,18 +641,18 @@ for(var i = 0 ; i< keyForRemove.length; i++){
     
     var dArray = ["ONTime","OFFTime"];
     for(var i =0; i< keysofBNm.length; i++){
-      var dataforsplit =  dataInsruction.sourceMsg[keysofBNm[i]];
+      var dataforsplit =  dataInsruction.sourceMsg["body"][keysofBNm[i]];
       var temp = dataforsplit.split(",");
       gomos.gomosLog(TRACE_PROD,"this is split values"+temp[0],temp[1]);
      for(var j =0; j< temp.length; j++){
       data["_id"] =uuidv4();
-      data["sourceMsg"]["ActionType"] = dArray[j];
-      data["sourceMsg"]["ActionValues"] = temp[j];
+      data["sourceMsg"]["body"]["ActionType"] = dArray[j];
+      data["sourceMsg"]["body"]["ActionValues"] = temp[j];
       if(isDailyJob == true ){
-        data["sourceMsg"]["ActionTime"] = "";
+        data["sourceMsg"]["body"]["ActionTime"] = "";
       }
       else{
-        data["sourceMsg"]["ActionTime"] = compareDate(temp[j]);
+        data["sourceMsg"]["body"]["ActionTime"] = compareDate(temp[j]);
      
       }
       DeviceInstructionInsert(db,data);
@@ -658,9 +660,9 @@ for(var i = 0 ; i< keyForRemove.length; i++){
     }
   }else{
     for(var i = 0; i< keysofBNm.length; i++ ){
-    gomos.gomosLog(TRACE_DEBUG,"This is key of DeviceInstruction",dataInsruction.sourceMsg[keysofBNm[i]])
+    gomos.gomosLog(TRACE_DEBUG,"This is key of DeviceInstruction",dataInsruction.sourceMsg["body"][keysofBNm[i]])
       var key = keysofBNm[i];
-      var value =  dataInsruction.sourceMsg[keysofBNm[i]]
+      var value =  dataInsruction.sourceMsg["body"][keysofBNm[i]]
     gomos.gomosLog(TRACE_DEBUG,"This is key of DeviceInstruction",key+ value)
   
         arrayBName.push({"bsName": key, "value": value});
@@ -670,14 +672,20 @@ for(var i = 0 ; i< keyForRemove.length; i++){
  
     for(var k = 0 ; k < arrayBName.length ;k++ ){
       data["_id"] =uuidv4();
-      data["sourceMsg"]["ActionType"] = arrayBName[k].bsName;
-      data["sourceMsg"]["ActionValues"] = arrayBName[k].value;
+      data["sourceMsg"]["body"]["ActionType"] = arrayBName[k].bsName;
+      data["sourceMsg"]["body"]["ActionValues"] = arrayBName[k].value;
       // data["sourceMsg"]["ActionTime"] = new Date(arrayBName[k].value).toISOString();
       if(isDailyJob == true ){
-        data["sourceMsg"]["ActionTime"] = "";
+        data["sourceMsg"]["body"]["ActionTime"] = "";
         }
         else{
-         data["sourceMsg"]["ActionTime"] =compareDate(arrayBName[k].value);
+          if(arrayBName[k].value instanceof Date){
+            data["sourceMsg"]["body"]["ActionTime"] = compareDate(arrayBName[k].value);
+          }
+          else{
+            data["sourceMsg"]["body"]["ActionTime"] = arrayBName[k].value;
+          }
+       
         }
       DeviceInstructionInsert(db,data);
    

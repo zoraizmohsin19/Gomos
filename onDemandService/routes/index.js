@@ -129,6 +129,8 @@ router.post("/authenticate", function (req, res, next) {
                 serviceProviders: result[index].spCds,
                 customers: result[index].custCds,
                 subCustomers: result[index].subCustCds,
+                Assets: result[index].Assets,
+                Devices: result[index].Devices,
                 email: result[index].email,
                 userFN: result[index].userFN,
                 userLN: result[index].userLN,
@@ -149,7 +151,8 @@ router.post("/authenticate", function (req, res, next) {
                   Assets: result1[0].Assets,
                   ActiveAssets: result1[0].ActiveAssets,
                   Devices: result1[0].Devices,
-                  ActiveDevice: result1[0].ActiveDevice,
+                  ActiveDevice: result1[0].ActiveDeviceName,
+                  ActiveMac:  result1[0].ActiveMac,
                   Sensors: result1[0].Sensors,
                   SensorsBgC: result1[0].SensorsBgC,
                   ActiveSensorsName: result1[0].ActiveSensorsName,
@@ -157,9 +160,16 @@ router.post("/authenticate", function (req, res, next) {
                 
                  }
                   console.log(dashboardConfigobj); 
+                 var  configData = {
+                  DeviceName: result1[0].ActiveDeviceName,
+                  mac:  result1[0].ActiveMac,
+                  assetId: result1[0].ActiveAssets,
+                  custCd: result1[0].ActiveCustCd,
+                  spCd: result1[0].ActiveSpCd,
+                  subCustCd: result1[0].ActiveSubCustCd
+                 }
 
-
-                res.json({userDtls, dashboardConfigobj});
+                res.json({userDtls, dashboardConfigobj, configData});
               });
 
 
@@ -1485,14 +1495,97 @@ var dateTime = new Date()
       gomos.gomosLog(TRACE_DEBUG,"this err",err);  
         }
   gomos.gomosLog(TRACE_DEBUG,"this is message Value 2", message);
-if(ChannelName !=0 && ChannelName != ""  && ChannelName != undefined){
-  message[ChannelName] = 1
-}
+// if(ChannelName !=0 && ChannelName != ""  && ChannelName != undefined){
+//   message[ChannelName] = 1
+// }
       
       midllelayer.endPointMiddelayerFn(urlConn,dbName,res,CustCd,subCustCd,DeviceName,payloadId,dataTime,message,Token);
       
       })
   });
+});
+router.post("/ActiveClimatesave", function (req,res, next){
+  accessPermission(res);
+  var body = req.body;
+  var message     =   body.dataBody; 
+
+  var mac         =   body.mac;
+var messageValue = message;
+gomos.gomosLog(TRACE_DEBUG,"this is message Value", message);
+MongoClient.connect(
+  urlConn,
+  { useNewUrlParser: true },
+  function (err, connection) {
+    if (err) {
+      next(err);
+    }
+    var db = connection.db(dbName);
+var dateTime = new Date()
+    gomos.gomosLog(TRACE_DEBUG,"This is called in Alert"); 
+    var dataTime = new Date(new Date().toISOString());
+      var temobj={}
+      for (let [key, value] of Object.entries(message)) {  
+        temobj[key]= value;
+      }
+       var object = {
+
+        "sourceMsg": {
+          "body":temobj 
+        },
+        
+        "updatedTime": dataTime,
+     
+       } ;
+      //  object["sourceMsg"]["ActionType"]  = payloadId;
+      
+       gomos.gomosLog(TRACE_DEBUG,"This is log for data submit Data",object );
+      db.collection("DeviceInstruction")
+      .updateOne( {"type": "SentClimateParameter","mac": mac},
+       { $set: { "sourceMsg.body":temobj,
+      updatedTime :dateTime
+        } 
+      }
+      ,function (err, result) {
+        if (err) {
+      gomos.gomosLog(TRACE_DEBUG,"this err",err);  
+        }
+        gomos.gomosLog(TRACE_DEBUG,"This is device Instruction for ClimateSave", result);
+        res.json(result)
+  });
+});
+});
+router.post("/getAClimateparameter", function (req,res, next){
+  accessPermission(res);
+  var body = req.body;
+  var message     =   body.dataBody; 
+  var mac         =   body.mac;
+gomos.gomosLog(TRACE_DEBUG,"this is message Value", message);
+
+MongoClient.connect(
+  urlConn,
+  { useNewUrlParser: true },
+  function (err, connection) {
+    if (err) {
+      next(err);
+    }
+    var db = connection.db(dbName);
+      db.collection("DeviceInstruction")
+      .findOne( {"type": "SentClimateParameter","mac": mac}
+      ,function (err, result) {
+        if (err) {
+      gomos.gomosLog(TRACE_DEBUG,"this err",err);  
+        }
+        gomos.gomosLog(TRACE_DEBUG,"This is device Instruction for ClimateSave", result);
+        try {
+          res.json(result["sourceMsg"]["body"]);
+        } catch (error) {
+          gomos.errorCustmHandler("getAClimateparameter",error, "Sending DataDeviceInstruction ","onDemandService");
+          res.json(error);
+        }
+       
+  });
+});
+
 });
 //get the operations based on serviceProviderCode,CustomerCode,SubCustomerCode and SensorName.
 router.get("/getOperations", function (req, res, next) {
@@ -1849,6 +1942,7 @@ router.post("/getdashboard", function (req, res, next) {
   accessPermission(res);
 
   var body = req.body;
+  gomos.gomosLog(TRACE_DEBUG,"THIS IS DEBUG OF GET DASHBOARD", body);
   var sensorNm = body.sensorNm;
   var spCd = body.spCd;
   var custCd = body.custCd;
@@ -2004,6 +2098,7 @@ gomos.gomosLog(TRACE_DEBUG,"this is debuging in starting",sensorsBSN+"|"+mac+"|"
           .then(function (data) {
           var data_count = data
             var json= {finalResult, data_count, lastdataObj, lastCreatedTime}
+            gomos.gomosLog(TRACE_DEBUG,"This is All Data OF json in getDashBoard", json);
             res.json(json);
           })
           })

@@ -206,3 +206,42 @@ background: #00C0EF !important;
         font-size: 84px !important;
         top: -2px !important;
     }
+    .ViewBredCum {
+        /* margin-top: 10px; */
+        background: aliceblue;
+        padding: 16px;
+        margin-bottom: 10px;
+        border-radius: 7px;
+    }
+    .spanBredcum {
+        font-weight: bold;
+    }
+    
+.spanBredcumslash {
+    margin-left: 5px;
+    margin-right: 10px;
+    font-weight: 900;
+}
+.navright {
+    display: inline;
+    float: right;
+}
+.spanNev {
+    padding: 10px;
+    border-radius: 50px;
+    border: 1px solid #c1e1ac;
+    cursor: pointer;
+    color: #41503e;
+    font-size: 16px !important
+}
+ /* .spanNev :hover{
+ 
+    color: rgb(34, 169, 63) !important;
+    text-decoration: underline ;
+    box-shadow: inset 0 3px 5px rgba(0,0,0,.125)
+  
+} */
+span.spanNev:hover {
+    background: #e0e3de;
+    box-shadow: inset 0 3px 5px rgba(0,0,0,.125);
+}
