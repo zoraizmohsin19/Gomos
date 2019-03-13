@@ -1981,7 +1981,7 @@ gomos.gomosLog(TRACE_DEBUG,"this is debuging in starting",sensorsBSN+"|"+mac+"|"
         subCustCd: subCustCd,
         mac: mac,
        }
-    
+       criteria["sensors."+sensorNm+"."+sensorsBSN]  = {$exists: true}
       // var  queryToExecute = [
       //     {
       //       $match: criteria
@@ -2092,7 +2092,7 @@ gomos.gomosLog(TRACE_DEBUG,"this is debuging in starting",sensorsBSN+"|"+mac+"|"
             }
            
           }
-          
+         
           db.collection("MsgFacts")
           .find(criteria).count()
           .then(function (data) {

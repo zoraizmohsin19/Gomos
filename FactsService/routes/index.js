@@ -268,6 +268,7 @@ function processFactMessages() {
                     var indexOfPayLoad = filetredPayloads.findIndex(element => element.payloadId == payloadId);
                     sensorNms = filetredPayloads[indexOfPayLoad].sensors;
                     var processByFact = filetredPayloads[indexOfPayLoad].processByFact;
+                    var payloadData = filetredPayloads[indexOfPayLoad];
                     gomos.gomosLog(TRACE_DEBUG,"processFactMessages - filteredpayloads where payloadId matched "+ payloadId,sensorNms);          
                     if(processByFact !== "Y" || processByFact == undefined){
                       processedFlag = "IG"
@@ -365,8 +366,19 @@ function processFactMessages() {
                               createdTime: createdTime,
                               updatedTime: updatedTime
                             };
-                           
-                            activeDevice(db,dataToInsert,result[count].Token);
+                        // var index = dataFromPayload.findIndex( item => item.payloadId == dataToInsert.payloadId);
+                        // var payloadObject = dataFromPayload[index];
+                        gomos.gomosLog(TRACE_DEBUG,"This is  payloadData",payloadData);
+                        if(payloadData.processByState == "Y"){
+                        activeDevice(db,dataToInsert);
+                        }
+                        if(payloadData.AckProcess == "Y"){
+                         if(dataToInsert.payloadId == "GHPStatus"){
+                          updateDevInstrForRActive(db,dataToInsert,result[count].Token);
+                         }else{
+                          updateDeviceInstruction(db,dataToInsert ,result[count].Token);
+                         }
+                        }
                             gomos.gomosLog(TRACE_DEBUG,"processFactMessages -  where dataToInsert ready ",dataToInsert);
                             db.collection("MsgFacts").insertOne(dataToInsert, function (
                               err,
@@ -422,7 +434,7 @@ function processFactMessages() {
     });
 }
 
-function activeDevice(db,dataToInsert,Token){
+function activeDevice(db,dataToInsert){
 
        db.collection("DeviceState").find({"mac": dataToInsert.mac})
        .toArray(function (err, result2) {
@@ -512,16 +524,17 @@ function activeDevice(db,dataToInsert,Token){
                            
                       }
                       
-                      if(Token != '' && Token != undefined ){
-                    
-                       if(dataToInsert.payloadId == "GHPStatus"){
-                        updateDevInstrForRActive(db,dataToInsert,Token);
-
-                       }else{
-                        updateDeviceInstruction(db,dateTime,dataToInsert ,Token);
-
-                       }
-                      }
+                      // if(Token != '' && Token != undefined ){
+                      //     var index = dataFromPayload.findIndex( item => item.payloadId == dataToInsert.payloadId);
+                      //     var payloadObject = dataFromPayload[index];
+                        
+                      // if(payloadObject.AckProcess == "Y"){
+                      //  if(dataToInsert.payloadId == "GHPStatus"){
+                      //   updateDevInstrForRActive(db,dataToInsert,Token);
+                      //  }else{
+                      //   updateDeviceInstruction(db,dateTime,dataToInsert ,Token);
+                      //  }
+                      // }
                        gomos.gomosLog(TRACE_DEBUG,"This Is key of devicesStateKeyValue Last",devicesStateKeyValue);  
                        updateDeviceState(db,_id,devicesStateKeyValue,dateTime);
                      
@@ -582,7 +595,7 @@ function updateDevInstrForRActive(db,dataToInsert,Token){
     gomos.gomosLog(TRACE_DEV,"This is find Of updateDevInstrForRActive",result);
   });
 }
-function updateDeviceInstruction(db,dateTime,dataToInsert,Token){
+function updateDeviceInstruction(db,dataToInsert,Token){
 gomos.gomosLog(TRACE_DEBUG,"This updateDeviceInstruction Data  "+Token , dataToInsert);
 var criteria = {
   "mac": dataToInsert.mac,
@@ -597,9 +610,29 @@ db.collection("DeviceInstruction")
     process.hasUncaughtExceptionCaptureCallback();
   }
   if(result.length!=0){
-    gomos.gomosLog(TRACE_DEBUG,"This is find Of DeviceInstruction",result);
-  deleteinstruction(db,result[0]._id); 
-  insertActivejob(db,result[0],dataToInsert);
+    gomos.gomosLog(TRACE_DEV,"This is find Of DeviceInstruction",result);
+    if (dataFromPayload.filter(item => item.payloadId == result[0].sourceMsg.ActionType).length != 0 ) {
+      var index = dataFromPayload.findIndex( item => item.payloadId == result[0].sourceMsg.ActionType);
+      var payloadObject = dataFromPayload[index];
+      gomos.gomosLog(TRACE_DEV,"This is Debug of payloadId", index);
+      gomos.gomosLog(TRACE_DEV,"This is Debug of payloadId", payloadObject);
+      gomos.gomosLog(TRACE_DEV,"This is processByActiveJobs checking ",payloadObject.processByActiveJobs );
+
+      if(payloadObject.processByActiveJobs == "N"){
+        gomos.gomosLog(TRACE_DEV,"This is processByActiveJobs false ",payloadObject.processByActiveJobs );
+        deleteinstruction(db,result[0]._id);
+      }else if(payloadObject.processByActiveJobs =="Y") {
+        gomos.gomosLog(TRACE_DEV,"This is processByActiveJobs True ",payloadObject.processByActiveJobs );
+        deleteinstruction(db,result[0]._id);
+        insertActivejob(db,result[0],dataToInsert);
+      } 
+    }
+    else{
+      gomos.errorCustmHandler("updateDeviceInstruction","DeviceInstruction payloadId Flag not Preset For This Action Type",result[0].sourceMsg.ActionType, "Fact Service");
+    }
+   
+  }else{
+    gomos.errorCustmHandler("updateDeviceInstruction","DeviceInstruction Token Not Present In SentIntruction",Token, "Fact Service");
   }
   gomos.gomosLog(TRACE_DEBUG,"This is find Of DeviceInstruction",result);
 });
@@ -629,8 +662,7 @@ for(var i = 0 ; i< keyForRemove.length; i++){
     "Channel":channelName},
     "referenceToken": Token,
     // "Action": payloadId,
-    "isDailyJob": isDailyJob
-    
+    "isDailyJob": isDailyJob 
   },
     "createdTime": dataTime,
     "updatedTime": dataTime

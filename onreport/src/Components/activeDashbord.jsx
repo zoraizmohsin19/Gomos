@@ -9,11 +9,14 @@ import dateFormat  from  "dateformat";
 import socketIOClient from "socket.io-client";
 import CPagination from "../layout/Pagination";
 import swal from 'sweetalert';
+import InputRange from 'react-input-range';
+import "react-input-range/lib/css/index.css";
 // import QueryBuilder from 'react-querybuilder';
 class activeDashbord extends Component {
     constructor(){
       super();
       this.state={
+        value: { min: 2, max: 10 },
         endpoint: "http://localhost:4001",
         channelName: [],
         actionTypes: [],
@@ -1132,13 +1135,24 @@ changePage(page){
     inputField =  <div className ="">
     <div className="col-xs-12">
     {this.state.configkeyInput.map(item =><div>
-    <div className= "col-xs-6">
+    <div className= "col-sm-8">
     <label> Set {item} :</label><span className="rangeLabel">{"Min : "+configkeyInputKeyValue[item+"Lower"]+",  Max :  "+configkeyInputKeyValue[item+"higher"]}</span>
+    
+   <InputRange
+        maxValue={configkeyInputKeyValue[item+"max"]}
+        minValue={configkeyInputKeyValue[item+"min"]}
+        // formatLabel={value => `${value.min}Min`} 
+        value={ {min: configkeyInputKeyValue[item+"Lower"], max: configkeyInputKeyValue[item+"higher"] }}
+        onChange={value =>{
+           configkeyInputKeyValue[item+"Lower"]  = value.min
+           configkeyInputKeyValue[item+"higher"] = value.max
+          this.setState({configkeyInputKeyValue:configkeyInputKeyValue })}}/>
+          <br/>
     </div>
-    <div className= "col-xs-6">
-    <div className="displayRange">{ "Min : "+configkeyInputKeyValue[item+"Lower"]+",  Max :  "+configkeyInputKeyValue[item+"higher"]}</div>
-    <br/>
-     <span className="rangeLabel">Min  : </span>
+    {/* <div className= "col-xs-6"> */}
+    {/* <div className="displayRange">{ "Min : "+configkeyInputKeyValue[item+"Lower"]+",  Max :  "+configkeyInputKeyValue[item+"higher"]}</div> */}
+    {/* <br/> */}
+     {/* <span className="rangeLabel">Min  : </span>
     <span className="rangeLabel">{configkeyInputKeyValue[item+"min"]}</span>
     <input className= "rangeClassActive" type="range" 
     name={configkeyInputKeyValue[item+"Lower"]} 
@@ -1159,9 +1173,10 @@ changePage(page){
     title={configkeyInputKeyValue[item+"higher"]}
     value ={configkeyInputKeyValue[item+"higher"]}
     onChange={(e)=>{ configkeyInputKeyValue[item+"higher"] =e.target.value
-     this.setState({configkeyInputKeyValue : configkeyInputKeyValue})}}/>
-     <span className="rangeLabel">{configkeyInputKeyValue[item+"max"]}</span>
-    </div>
+     this.setState({configkeyInputKeyValue : configkeyInputKeyValue})}}/> */}
+     {/* <span className="rangeLabel">{configkeyInputKeyValue[item+"max"]}</span> */}
+    
+    {/* </div> */}
     </div>
     )}
     </div>
@@ -1510,8 +1525,8 @@ inputField =
         <div className = 'col-lg-12 col-sm-12'>
  
  <div className= "line3"></div></div>
- <div className= "col-lg-12">
- <Nav bsStyle="pills" activeKey={this.state.selectedAtionType} onSelect={this.handleChange}>
+ <div className= "col-lg-12 margin-topActive">
+ <Nav bsStyle="pills colorpills"  activeKey={this.state.selectedAtionType} onSelect={this.handleChange}>
          { this.state.actionTypes.map(item =>  
           <NavItem eventKey={item.payloadId} >
            {item.payloadId}
@@ -1544,6 +1559,7 @@ inputField =
     
       <div className ="paddForm">
       {inputField}
+   
      </div>
    </div>
 
