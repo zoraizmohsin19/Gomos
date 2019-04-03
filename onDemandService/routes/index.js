@@ -8,6 +8,7 @@ var ObjectId = require('mongodb').ObjectID;
 const uuidv4 = require('uuid/v4');
 
 const Schema = mongoose.Schema;
+const NAMEOFSERVICE = "OnDemandService"
 const  TRACE_PROD = 1
 const TRACE_STAGE = 2;
 const TRACE_TEST  = 3;
@@ -78,6 +79,31 @@ router.post("/dummy", function (req, res, next){
 
 
 });
+
+router.delete("/deleteSentCommand", function (req, res, next) {
+  var query = url.parse(req.url, true).query;
+  // var query = req.body;
+  gomos.gomosLog(TRACE_DEV,"This is id",query.id);
+  var id = query.id;
+
+  accessPermission(res);
+  MongoClient.connect(
+    urlConn,
+    { useNewUrlParser: true },
+    function (err, connection) {
+      if (err) {
+        process.hasUncaughtExceptionCaptureCallback();
+      }
+      var db = connection.db(dbName);
+      db.collection("DeviceInstruction")
+      .deleteOne({_id:ObjectId(id)},function (err,result) {  
+        gomos.gomosLog(TRACE_DEV,"This is result",result);
+        res.json(result)
+  
+        });
+      }
+    );
+    });
 router.post("/dummy1", function (req, res, next){
   accessPermission(res);
   MongoClient.connect(
@@ -156,8 +182,9 @@ router.post("/authenticate", function (req, res, next) {
                   Sensors: result1[0].Sensors,
                   SensorsBgC: result1[0].SensorsBgC,
                   ActiveSensorsName: result1[0].ActiveSensorsName,
-                  ActivesesnorsType: result1[0].ActivesesnorsType
-                
+                  ActivesesnorsType: result1[0].ActivesesnorsType,
+                  ConfADPayload: result1[0].ConfADPayload,
+                  Nevigation : result1[0].Nevigation
                  }
                   console.log(dashboardConfigobj); 
                  var  configData = {
@@ -1009,7 +1036,7 @@ router.post("/PendingJob", function (req, res, next) {
 
       db.collection("DeviceInstruction").find(criteria).toArray(function (err, result) {
         if (err) {
-          gomos.errorCustmHandler("DeviceInstruction",err);
+          gomos.errorCustmHandler(NAMEOFSERVICE,"DeviceInstruction","THis is DEvice Instruction","",err);
           gomos.gomosLog(TRACE_PROD,"This is error",err);
           process.hasUncaughtExceptionCaptureCallback();
         }
@@ -1105,7 +1132,7 @@ router.post("/executedJob", function (req, res, next) {
 
       db.collection("DeviceInstruction").find(criteria).toArray(function (err, result) {
         if (err) {
-          gomos.errorCustmHandler("DeviceInstruction",err);
+          gomos.errorCustmHandler(NAMEOFSERVICE,"DeviceInstruction","","",err);
           gomos.gomosLog(TRACE_PROD,"This is error",err);
           process.hasUncaughtExceptionCaptureCallback();
         }
@@ -1177,7 +1204,7 @@ router.post("/ActiveJobs", function (req, res, next) {
       var db = connection.db(dbName);
       db.collection("DeviceInstruction").find(criteria).toArray(function (err, result) {
         if (err) {
-          gomos.errorCustmHandler("DeviceInstruction",err);
+          gomos.errorCustmHandler(NAMEOFSERVICE,"DeviceInstruction","","",err);
           gomos.gomosLog(TRACE_PROD,"This is error",err);
           process.hasUncaughtExceptionCaptureCallback();
         }
@@ -1245,7 +1272,7 @@ router.post("/ActiveJobs", function (req, res, next) {
         var db = connection.db(dbName);
         db.collection("DeviceInstruction").find({ mac : "5ccf7f0015bc", type: "SentInstruction"}).toArray(function (err, result) {
           if (err) {
-            gomos.errorCustmHandler("DeviceInstruction",err);
+            gomos.errorCustmHandler(NAMEOFSERVICE,"DeviceInstruction","","",err);
             gomos.gomosLog(TRACE_PROD,"This is error",err);
             process.hasUncaughtExceptionCaptureCallback();
           }
@@ -1559,8 +1586,8 @@ router.post("/getAClimateparameter", function (req,res, next){
   var body = req.body;
   var message     =   body.dataBody; 
   var mac         =   body.mac;
-gomos.gomosLog(TRACE_DEBUG,"this is message Value", message);
-
+// gomos.gomosLog(TRACE_TEST,"this is message Value", message);
+gomos.gomosLog(TRACE_TEST,"this is message Value", mac);
 MongoClient.connect(
   urlConn,
   { useNewUrlParser: true },
@@ -1573,13 +1600,13 @@ MongoClient.connect(
       .findOne( {"type": "SentClimateParameter","mac": mac}
       ,function (err, result) {
         if (err) {
-      gomos.gomosLog(TRACE_DEBUG,"this err",err);  
+      gomos.gomosLog(TRACE_TEST,"this err",err);  
         }
-        gomos.gomosLog(TRACE_DEBUG,"This is device Instruction for ClimateSave", result);
+        gomos.gomosLog(TRACE_TEST,"This is device Instruction for ClimateSave", result);
         try {
           res.json(result["sourceMsg"]["body"]);
         } catch (error) {
-          gomos.errorCustmHandler("getAClimateparameter",error, "Sending DataDeviceInstruction ","onDemandService");
+          gomos.errorCustmHandler(NAMEOFSERVICE,"getAClimateparameter", "Sending DataDeviceInstruction ","",error);
           res.json(error);
         }
        
@@ -2113,56 +2140,108 @@ gomos.gomosLog(TRACE_DEBUG,"this is debuging in starting",sensorsBSN+"|"+mac+"|"
 )
 }
 );
-router.post("/getdashbordlastalert",function(req,res,next){
+// router.post("/lastpayloadTime",function(req,res,next){
+// accessPermission(res);
+// var body = req.body;
+// var mac = body.mac;
+// var subCustCd = body.subCustCd;
+// var custCd = body.custCd;
+// var Arrayofpayload = body.Arrayofpayload;
 
-  var body = req.body;
-  var custCd = body.custCd;
-  var subCustCd = body.subCustCd;
-  var mac = body.mac;
- var criteria = {
-   custCd,subCustCd,mac
- }
- gomos.gomosLog(TRACE_DEBUG,"this is result of getdashbordlastalert criteria",criteria);
+//   MongoClient.connect(
+//     urlConn,
+//     { useNewUrlParser: true },
+//     async function (err, connection) {
+//       if (err) {
+//         process.hasUncaughtExceptionCaptureCallback();
+//       }
+   
+//      var maindata = [];
+//       var db = connection.db(dbName);
+//       for(var i = 0; i < Arrayofpayload.length; i++ ){
+//         var criteria = {
+//           mac: mac,
+//           subCustCd: subCustCd,
+//           custCd: custCd
+//         }
+//         criteria["payloadId"] = Arrayofpayload[i]
+//            var response = await getlastpayloadData(criteria,db);
+//            gomos.gomosLog(TRACE_PROD,"THIS IS RESPONSE",response);
+//            maindata.push(response);
+//       }
+     
+//         res.json(maindata);
+// })
+
+// })
+// async function getlastpayloadData(criteria,db){
+
+      
+//   return new Promise((resolve, reject)=> {
+//     db.collection("MsgFacts").find(criteria,{ limit: 1 } ).sort({ createdTime : -1 }).toArray(function (err, result) {
+//       if (err) {
+//         reject(err);
+//       }
+//       gomos.gomosLog(TRACE_PROD,"This is resultqwqw", result);
+//       var object1 = {
+//         payloadId : result[0].payloadId,
+//         createdTime: result[0].createdTime
+//       }
+//       resolve(object1);
+//     })
+
+//   })
+// }
+// router.post("/getdashbordlastalert",function(req,res,next){
+
+//   var body = req.body;
+//   var custCd = body.custCd;
+//   var subCustCd = body.subCustCd;
+//   var mac = body.mac;
+//  var criteria = {
+//    custCd,subCustCd,mac
+//  }
+//  gomos.gomosLog(TRACE_PROD,"this is result of getdashbordlastalert criteria",criteria);
  
-   accessPermission(res);
-   MongoClient.connect(
-     urlConn,
-     { useNewUrlParser: true },
-     function (err, connection) {
-       if (err) {
-         next(err);
-       }
-       var db = connection.db(dbName);
-       db.collection("Alerts").find(criteria,{ limit: 1 } ).sort({ createdTime : -1 }).toArray(function (err, result) {
-         if (err) {
-           process.hasUncaughtExceptionCaptureCallback();
-         }
-         if(result.length !=0){
-           var alertObj ={};
-           alertObj["sensorNm"] = result[0].sensorNm;
-           alertObj["businessNm"] = result[0].businessNm;
-           alertObj["shortName"] = result[0].shortName;
-           alertObj["businessNmValues"] = result[0].businessNmValues;
-           alertObj["criteria"] = result[0].criteria;
-           alertObj["createdTime"] = result[0].createdTime;
-           alertObj["alertText"] = result[0].alertText;
+//    accessPermission(res);
+//    MongoClient.connect(
+//      urlConn,
+//      { useNewUrlParser: true },
+//      function (err, connection) {
+//        if (err) {
+//          next(err);
+//        }
+//        var db = connection.db(dbName);
+//        db.collection("Alerts").find(criteria,{ limit: 1 } ).sort({ createdTime : -1 }).toArray(function (err, result) {
+//          if (err) {
+//            process.hasUncaughtExceptionCaptureCallback();
+//          }
+//          if(result.length !=0){
+//            var alertObj ={};
+//            alertObj["sensorNm"] = result[0].sensorNm;
+//            alertObj["businessNm"] = result[0].businessNm;
+//            alertObj["shortName"] = result[0].shortName;
+//            alertObj["businessNmValues"] = result[0].businessNmValues;
+//            alertObj["criteria"] = result[0].criteria;
+//            alertObj["createdTime"] = result[0].createdTime;
+//            alertObj["alertText"] = result[0].alertText;
         
-       gomos.gomosLog(TRACE_DEBUG,"this is result of getdashbordlastalert",result);
+//        gomos.gomosLog(TRACE_DEBUG,"this is result of getdashbordlastalert",result);
         
-           res.json(alertObj)
+//            res.json(alertObj)
          
-         }
-         else{
-           res.json(0);
-         }
+//          }
+//          else{
+//            res.json(0);
+//          }
        
         
      
-     })
-     }
-   )
+//      })
+//      }
+//    )
  
- })
+//  })
   
 
 //get the reporting details of perticular Sensor based on given data

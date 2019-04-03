@@ -57,7 +57,7 @@ import Spinner from '../layout/Spinner';
             var userdata ={email,
                 password};
                 me.setState({ 'Spinnerdata': false});
-        axios.post('http://localhost:3992/authenticate', {body: userdata
+        axios.post('http://52.212.188.65:3992/authenticate', {body: userdata
            
           })
           .then(function (response) {
@@ -68,7 +68,7 @@ import Spinner from '../layout/Spinner';
                 sessionStorage.setItem("dashboardConfigobj", JSON.stringify(response["data"].dashboardConfigobj));
                 sessionStorage.setItem("configData", JSON.stringify(response["data"].configData));
                 me.setState({ 'Spinnerdata':true});
-                me.props.history.push("/socketdashbord")
+                me.props.history.push(response["data"].dashboardConfigobj.Nevigation)
               }
               else {
                 swal({
@@ -125,7 +125,7 @@ if(this.state.Spinnerdata == true ){
     {/* <!-- <img class="profile-img-card1" src="//lh3.googleusercontent.com/-6V8xOA6M7BA/AAAAAAAAAAI/AAAAAAAAAAA/rzlHcD0KYwo/photo.jpg?sz=120" alt="" /> --> */}
     {/* <img id="profile-img" class="profile-img-card1 img-responsive" src="/static/media/AS_Agri_Logo_Website.9a12eb51.png" /> */}
     <p id="profile-name" class="profile-name-card1"></p>
-    <form class="form-signin">  
+    <form class="form-signin" onSubmit={this.loginbutton}>  
         <span id="reauth-email" class="reauth-email"></span>
         <div className={email_input_class}>
         <input type="email" id="inputEmail" class="form-control"  name="email"  value={this.state.email} onChange={this.onChange} placeholder="Email address" required autofocus />
@@ -140,7 +140,7 @@ if(this.state.Spinnerdata == true ){
                 <input type="checkbox" value="remember-me" /> Remember me
             </label> */}
         </div>
-        <button class="btn btn-lg btn-success btn-block btn-signin" type="button" onClick={this.loginbutton}>Sign in</button>
+        <button class="btn btn-lg btn-success btn-block btn-signin" type="submit" >Sign in</button>
     </form>
     <a href="#" class="forgot-password">
         Forgot the password?

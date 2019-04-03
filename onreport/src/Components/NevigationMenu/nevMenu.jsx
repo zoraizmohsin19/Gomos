@@ -46,23 +46,23 @@ componentDidMount() {
   var configData = JSON.parse(sessionStorage.getItem("configData"));
   var mainData = JSON.parse(sessionStorage.getItem("userDetails"));
   var sessionData = mainData[0].serviceProviders.split(",");
-  var ActiveData = JSON.parse(sessionStorage.getItem("dashboardConfigobj"));
-  var AspCd = ActiveData.ActiveSpCd;
-  var AcustCd = ActiveData.ActiveCustCd;
-  var AsubCustCd = ActiveData.ActiveSubCustCd;
-  var Aasset = ActiveData.ActiveAssets;
+  var ActiveData = JSON.parse(sessionStorage.getItem("configData"));
+  var AspCd = ActiveData.spCd;
+  var AcustCd = ActiveData.custCd;
+  var AsubCustCd = ActiveData.subCustCd;
+  var Aasset = ActiveData.assetId;
   // var Adevice = ActiveData.Devices;
   this.state.Menu.selectedSPValue = AspCd;
   this.state.Menu.selectedCustValue = AcustCd;
   this.state.Menu.selectedSubCustValue = AsubCustCd;
   this.state.Menu.selectedAssetValue = Aasset;
-  this.state.Menu.selectedDeviceValue = ActiveData.ActiveDeviceName;
-  this.state.Menu.selectedMac = ActiveData.ActiveMac;
+  this.state.Menu.selectedDeviceValue = ActiveData.DeviceName;
+  this.state.Menu.selectedMac = ActiveData.mac;
   this.setState({Menu : this.state.Menu});
 
    
   if (sessionData.length == 1 && sessionData[0] == "ALL") {
-      fetch('http://localhost:3992/getRegisterSP')
+      fetch('http://52.212.188.65:3992/getRegisterSP')
       .then(response => response.json())
       .then(json =>  {
       var spCd =  json.map( x =>  { return  x.spCd  });
@@ -87,7 +87,7 @@ componentDidMount() {
     var customers = mainData[0].customers.split(",");
     var custCd = [];
     if (customers.length == 1 && customers[0] == "ALL") {
-        fetch("http://localhost:3992/getCustomers?spCode=" + AspCd)
+        fetch("http://52.212.188.65:3992/getCustomers?spCode=" + AspCd)
         .then(response => response.json())
         .then(json =>  {
         var custCd =  json.map( x =>  { return  x._id  });
@@ -111,12 +111,12 @@ componentDidMount() {
       var subCustomers = mainData[0].subCustomers.split(",");
       var subCustCd= [];
     if (subCustomers.length == 1 && subCustomers[0] == "ALL") {
-        fetch("http://localhost:3992/getSubCustomers?spCode=" + AspCd +
+        fetch("http://52.212.188.65:3992/getSubCustomers?spCode=" + AspCd +
         "&&custCd=" + AcustCd )
         .then(response => response.json())
         .then(json =>  {
         var subCustCd =  json.map( x =>  { return  x._id  });
-        console.log(subCustCd);
+        //console.log(subCustCd);
         this.state.Menu.subCustCd = subCustCd;
         this.setState({Menu : this.state.Menu});
 
@@ -137,7 +137,7 @@ componentDidMount() {
     var Assets = mainData[0].Assets.split(",");
     var Assetsdata= [];
     if (Assets.length == 1 && Assets[0] == "ALL") {
-    fetch("http://localhost:3992/getAssets?subCustCd="+ AsubCustCd )
+    fetch("http://52.212.188.65:3992/getAssets?subCustCd="+ AsubCustCd )
     .then(response => response.json())
     .then(json =>  {
         var Assetsdata =  json;
@@ -162,7 +162,7 @@ componentDidMount() {
  var Devicesdata= [];
  var DeviceMacArray = [];
  if (Devices.length == 1 && Devices[0] == "ALL") {
- fetch("http://localhost:3992/getDevice?assetId="+Aasset )
+ fetch("http://52.212.188.65:3992/getDevice?assetId="+Aasset )
  .then(response => response.json())
  .then(json =>  {
   var Devicesdata =  json.map(item => {return item.DeviceName});
@@ -269,7 +269,7 @@ sessionStorage.setItem("configData", JSON.stringify(temp));
     var sessionData = mainData[0].customers.split(",");
      var custCd = [];
     if (sessionData.length == 1 && sessionData[0] == "ALL") {
-      fetch("http://localhost:3992/getCustomers?spCode=" + SendForSp)
+      fetch("http://52.212.188.65:3992/getCustomers?spCode=" + SendForSp)
     .then(response => response.json())
     .then(json =>  {
     var custCd =  json.map( x =>  { return  x._id  });
@@ -308,14 +308,14 @@ sessionStorage.setItem("configData", JSON.stringify(temp));
         var sessionData = mainData[0].subCustomers.split(",");
         var subCustCd= [];
         if (sessionData.length == 1 && sessionData[0] == "ALL") {
-        fetch("http://localhost:3992/getSubCustomers?spCode=" + SendForSp +
+        fetch("http://52.212.188.65:3992/getSubCustomers?spCode=" + SendForSp +
         "&&custCd=" + SendFroCustCD )
         .then(response => response.json())
         .then(json =>  {
         var subCustCd =  json.map( x =>  { return  x._id  });
-        console.log(SendForSp)
-        console.log(SendFroCustCD)
-        console.log(subCustCd)
+        //console.log(SendForSp)
+        //console.log(SendFroCustCD)
+        //console.log(subCustCd)
         this.getAsset(subCustCd[0])
         me.state.Menu.subCustCd = subCustCd;
         me.state.Menu.selectedSubCustValue = subCustCd[0];
@@ -354,7 +354,7 @@ getAssetApi(SubCustomer){
   var sessionData = mainData[0].Assets.split(",");
   var Assets= [];
   if (sessionData.length == 1 && sessionData[0] == "ALL") {
-  fetch("http://localhost:3992/getAssets?subCustCd="+SubCustomer )
+  fetch("http://52.212.188.65:3992/getAssets?subCustCd="+SubCustomer )
   .then(response => response.json())
   .then(json =>  {
   var Assets =  json;
@@ -386,7 +386,7 @@ getDeviceApi(Asset){
   var Devicesdata= [];
   var DeviceMacArray = [];
   if (sessionData.length == 1 && sessionData[0] == "ALL") {
-  fetch("http://localhost:3992/getDevice?assetId="+Asset )
+  fetch("http://52.212.188.65:3992/getDevice?assetId="+Asset )
   .then(response => response.json())
   .then(json =>  {
     var Devicesdata =  json.map(item => {return item.DeviceName});

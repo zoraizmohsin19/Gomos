@@ -49,15 +49,18 @@ exports.gomosLog = function(x){
     // var errors = typeofError.toS
     var errorobj ={
       DateTime : dateTime,
-      serviceName: arguments[3],
-      functionName : arguments[0],
-      ErrorCode :arguments[1].statusCode,
-       Error : arguments[1].toString(),
-       typeofErrorstack:  arguments[1].stack
+      serviceName: arguments[0],
+      functionName : arguments[1],
+      ErrorCode :arguments[4].statusCode,
+       Error : arguments[4].toString(),
+       typeofErrorstack:  arguments[4].stack
   
     }
     if(arguments[2] != ''){
-      errorobj["message"] = arguments[2]
+      errorobj["messageInfo"] = arguments[2]
+    }
+    if(arguments[3] != '' || arguments[3] != undefined || arguments[3] != null){
+      errorobj["message"] = arguments[3]
     }
     var strObj = JSON.stringify(errorobj)
   // console.log(typeofError);

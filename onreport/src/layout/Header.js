@@ -26,7 +26,7 @@ const Header = props => {
 <Navbar inverse collapseOnSelect>
   <Navbar.Header>
     <Navbar.Brand>
-    <Link to="/" className="navbar-brand pad">
+    <Link to="/NevMenu" className="navbar-brand pad">
      <img src={require('./AS_Agri_Logo_Website.png')} alt="logo"  className="logo responsive" />
     </Link>
     </Navbar.Brand>

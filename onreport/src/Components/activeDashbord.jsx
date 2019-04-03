@@ -17,7 +17,7 @@ class activeDashbord extends Component {
       super();
       this.state={
         value: { min: 2, max: 10 },
-        endpoint: "http://localhost:4001",
+        endpoint: "http://52.212.188.65:4001",
         channelName: [],
         actionTypes: [],
         formStructure: '',
@@ -26,7 +26,7 @@ class activeDashbord extends Component {
         selectedAtionType: '',
         deviceName: '',
         show: false,
-        open: false,
+        open: true,
         instrInput1: "",
         instrInput2:"",
         startDate: "",
@@ -53,6 +53,15 @@ class activeDashbord extends Component {
         SourceClimateData: [],
         Climate:{
           selectedfilter: "",
+        },
+        lastAlertData: {
+          alertText: "",
+          businessNm: "",
+          businessNmValues: "",
+          createdTime: "",
+          criteria: "",
+          sensorNm: "",
+          shortName: ""
         },
         ArrayForClimateTable: [],
         selectedClimateAction: [],
@@ -86,8 +95,13 @@ class activeDashbord extends Component {
            mac: "",
            assetId: ""
         },
+        AryfPayloadfromConfig:[],
         deviceAllData:{},
-        Defaultparameter: {}
+        Defaultparameter: {},
+        lastPayloadDataArray: [],
+        sentCommandArrayLenght: "",
+        rowClickedId: "",
+        age:""
   
       }
 
@@ -140,7 +154,7 @@ class activeDashbord extends Component {
               dataToSendApi[configkeyInput[key]] = dateFormat(configkeyInputKeyValue["ON"+configkeyInput[key]], "ss:MM:HH:dd:mm:yy")+","+dateFormat(configkeyInputKeyValue["OFF"+configkeyInput[key]], "ss:MM:HH:dd:mm:yy"); 
               };
       //  dataToSendApi[selectedChannelB] = 1; 
-       console.log(dataToSendApi)
+       ////console.log(dataToSendApi)
    }
    if(formStructure == "1-input"){
     for(var key =0; key < configkeyInput.length; key++) {
@@ -161,8 +175,8 @@ for(var key =0; key < configkeyInput.length; key++) {
      dataToSendApi[configkeyInput[key]] = configkeyInputKeyValue[configkeyInput[key]];
       } 
         // this.callApiForAction("Schedule",dataToSendApi);
-        alert(dataToSendApi)
-     console.log(dataToSendApi)
+        //alert(dataToSendApi)
+     //console.log(dataToSendApi)
     }
     if(formStructure == "2-input"){
       for(var key =0; key < configkeyInput.length; key++) {
@@ -206,13 +220,13 @@ for(var key =0; key < configkeyInput.length; key++) {
         }   
          } 
           // dataToSendApi[selectedChannelB] = 1; 
-            alert(dataToSendApi)
+            //alert(dataToSendApi)
       }
-      alert(this.state.channelName)
-      console.log(this.state.channelName)
+      //alert(this.state.channelName)
+      //console.log(this.state.channelName)
       if(this.state.channelName.length != 0){
         if(this.state.selectedChannelB == ""){
-        alert("please Select Channel Name");
+        //alert("please Select Channel Name");
         return;
            }
 
@@ -244,19 +258,19 @@ var me = this;
 }
 callApiForClimateSave(){
   var me = this;
-  axios.post("http://localhost:3992/ActiveClimatesave",me.state.submitDataObj)
+  axios.post("http://52.212.188.65:3992/ActiveClimatesave",me.state.submitDataObj)
   .then(json =>  {
   // if(json["data"] == "success"){
    
   //   swal("Success!", "You Send Action!", "success");
   // 
-  alert("result")
-  console.log(json)
+  //alert("result")
+  //console.log(json)
 });
 }
     callApiForAction(){
     var me = this;
-      axios.post("http://localhost:3992/ActiveDAction",me.state.submitDataObj)
+      axios.post("http://52.212.188.65:3992/ActiveDAction",me.state.submitDataObj)
       .then(json =>  {
       if(json["data"] == "success"){
        
@@ -266,7 +280,7 @@ callApiForClimateSave(){
         swal("Error!", "You Send Action!", "error");
          
       }
-      console.log(json)
+      //console.log(json)
       });
     }
   
@@ -289,10 +303,10 @@ callApiForClimateSave(){
         this.state.filter.Fdate= value;
 
         this.setState({filter: this.state.filter});
-        // alert(value);
+        // //alert(value);
       }
     handleChange(selectedAtionType){
-      alert(selectedAtionType);
+      //alert(selectedAtionType);
       var me = this;
       if(selectedAtionType == "SentCommand" || 
           selectedAtionType == "ActiveCommand" ||
@@ -329,9 +343,9 @@ callApiForClimateSave(){
         var  keysofObj = Object.keys(objectpayload.sensors)
         if(keysofObj.length >= 2){
           keysofObj.splice(keysofObj.indexOf("Channel"), 1);
-          console.log(objectpayload.sensors[keysofObj[0]]);
+          //console.log(objectpayload.sensors[keysofObj[0]]);
           var  allBusinessName = Object.values(objectpayload.sensors[keysofObj[0]]);
-          console.log(allBusinessName);
+          //console.log(allBusinessName);
           if(formStructure == "table"){
             var configkeyInputKeyValue = {};
             var tempArray = ["ON","OFF"];
@@ -347,7 +361,7 @@ callApiForClimateSave(){
                configkeyInput:allBusinessName,configkeyInputKeyValue:configkeyInputKeyValue});
           }else if(formStructure == "2-input"){
             var configkeyInputKeyValue = {};
-           alert("this else of 2-input");
+           //alert("this else of 2-input");
            configkeyInputKeyValue["toggle"] = false;
               for (let [key, value] of Object.entries(objectpayload.sensors[keysofObj[0]])) {  
                 configkeyInputKeyValue[value+"date"] =  ""; 
@@ -401,17 +415,17 @@ callApiForClimateSave(){
              }
            
             
-            console.log("This is Object of configkeyInputKeyValue")
-            console.log(configkeyInputKeyValue)
+            //console.log("This is Object of configkeyInputKeyValue")
+            //console.log(configkeyInputKeyValue)
            this.setState({ selectedAtionType: selectedAtionType,
               // channelName: arrayOfChannel,
               configkeyInput:allBusinessName,configkeyInputKeyValue:configkeyInputKeyValue});
          }
         }
-        alert("this else "+ selectedAtionType);
+        //alert("this else "+ selectedAtionType);
       
     }     
-         console.log(arrayOfChannel);
+         //console.log(arrayOfChannel);
     }
     getStrucOfClimateParam(){
       var sensorsArray = this.state.deviceAllData["sensors"];
@@ -424,7 +438,7 @@ callApiForClimateSave(){
      return json;
     }
     handleChange1(value){
-        alert(value);
+        //alert(value);
         var index = this.state.channelName.findIndex(element => element.configName == value);
          var businessName = this.state.channelName[index].businessName ;      
        this.setState({ selectedChannelB: businessName,selectedChannelCn:value});
@@ -432,21 +446,26 @@ callApiForClimateSave(){
             }
        callForActionType(value,deviceName){
        }
-       rowClicked(data,index){
-            // alert(data);
-            // console.log(data);
-            this.setState({rowclickedData: data, sentCommandIndex: index});
-       }
+    
       
     toggle() {
         this.setState({
           open: !this.state.open
         });
-            }
+        }
+    rowClicked(data,index,id){
+      // //alert(data);
+      // //console.log(data);
+      this.setState({rowclickedData: data, sentCommandIndex: index,rowClickedId : id});
+        }
    componentDidMount(){
      var me = this;
      var mainData = JSON.parse(sessionStorage.getItem("configData"));
-// console.log(mainData)
+     var configPayloadData = JSON.parse(sessionStorage.getItem("dashboardConfigobj"));
+    //  //console.log("This Is I want to See");
+    //  //console.log(AryfPayloadfromConfig);
+    this.state.AryfPayloadfromConfig = configPayloadData.ConfADPayload.split(",");
+// //console.log(mainData)
     this.state.CriteriaForOP.spCd = mainData.spCd;
     this.state.CriteriaForOP.subCustCd = mainData.subCustCd;
     this.state.CriteriaForOP.CustCd = mainData.custCd;
@@ -469,11 +488,11 @@ callApiForClimateSave(){
         return this;
     }
      var ActiveJobsArray = [];
-    axios.post("http://localhost:3992/getActiveDashBoardDevice",{mac: this.state.CriteriaForOP.mac})
+    axios.post("http://52.212.188.65:3992/getActiveDashBoardDevice",{mac: this.state.CriteriaForOP.mac})
 
     .then(json =>  {
-      console.log("this componentDidMount getActiveDashBoardDevice");
-      console.log(json)
+      //console.log("this componentDidMount getActiveDashBoardDevice");
+      //console.log(json)
       // if(json.length != 0){
         var channelForfilter = [];
         for(var i =0; i< json["data"].channel.length; i++){
@@ -509,19 +528,42 @@ callApiForClimateSave(){
   }
     
     this.setState({ sensorsArray: data.sensors , channelArray: tempArrayFC});
-    console.log(data);
+    //console.log(data);
       
       });
 this.fetchForClimate();
 this.fetchClimateControlAllData();
 this.fetchClimateControlDevice();
 this.fetchClimateParameter();
+this.callForlastAlert();
+this.callForlastPayload();
 var onDeviceinstruction = socketIOClient(endpoint+"/onDeviceinstruction");
 onDeviceinstruction.emit('onDeviceinstructionClientEvent', { mac : this.state.CriteriaForOP.mac, type: "SentInstruction"});
 onDeviceinstruction.on('DeviceInstruction',function(data) {
-  // console.log("this is second")
-    me.setState({sentCommandArray: data["DeviceInstruction"]});
-      //  console.log(data)
+  //console.log("this is second")
+  //console.log(data["DeviceInstruction"]);
+  //console.log(me.state.rowClickedId)
+  if(me.state.rowClickedId !== '' &&  me.state.rowClickedId !== undefined){
+    // for(let i =0; i < data["DeviceInstruction"].length; i++){
+    // if(data["DeviceInstruction"][me.state.sentCommandIndex]["_id"] !==  me.state.rowClickedId){
+    //   me.setState({rowclickedData: {},sentCommandIndex:0});
+    //   // break;
+    // // }
+    // }
+    let value =  data["DeviceInstruction"].find((item)=> item._id == me.state.rowClickedId)
+    // console.log("Value");
+    // console.log(value)
+    if(value === undefined){
+   me.setState({rowclickedData: {},sentCommandIndex:''});
+    }
+  }
+    me.setState({sentCommandArray: data["DeviceInstruction"], sentCommandArrayLenght  :data["DeviceInstruction"].length});
+
+  
+  // rowclickedData
+  // sentCommandIndex
+    // me.setState({sentCommandArray: data["DeviceInstruction"], sentCommandArrayLenght  :data["DeviceInstruction"].length});
+      //  //console.log(data)
       });
  
     var dataTime =  new Date().toISOString();
@@ -535,19 +577,19 @@ onDeviceinstruction.on('DeviceInstruction',function(data) {
    fetchPayload(){
      var me = this;
     var body = {mac: this.state.CriteriaForOP.mac}
-    axios.post("http://localhost:3992/ActiveActionTypeCall",body)
+    axios.post("http://52.212.188.65:3992/ActiveActionTypeCall",body)
 
     .then(json =>  {
       if(json.length !=0){
-      console.log(json["data"]);
+      //console.log(json["data"]);
       var index  = json["data"].findIndex(item => item.formStructure ==  "manualOverride");
       var containerdata = json["data"][index];
       if(index != null && index != undefined){
         json["data"].splice(index,1);
       }
 
-      console.log(containerdata);
-      console.log("this is container data");
+      //console.log(containerdata);
+      //console.log("this is container data");
       me.setState({actionTypes:json["data"],tilesPayloaddata:  containerdata})
       }
       else{
@@ -558,14 +600,172 @@ onDeviceinstruction.on('DeviceInstruction',function(data) {
     this.state.filter.Fdate= moment(dataTime);
     this.setState({filter: this.state.filter})
    }
+   timeDifference(date1, date2) {
+    var oneDay = 24 * 60 * 60; // hours*minutes*seconds
+    var oneHour = 60 * 60; // minutes*seconds
+    var oneMinute = 60; // 60 seconds
+    var firstDate = date1.getTime(); // convert to milliseconds
+    var secondDate = date2.getTime(); // convert to milliseconds
+    var seconds = Math.round(Math.abs(firstDate - secondDate) / 1000); //calculate the diffrence in seconds
+    // the difference object
+    var difference = {
+      "days": 0,
+      "hours": 0,
+      "minutes": 0,
+      "seconds": 0,
+    }
+    //calculate all the days and substract it from the total
+    while (seconds >= oneDay) {
+      difference.days++;
+      seconds -= oneDay;
+    }
+    //calculate all the remaining hours then substract it from the total
+    while (seconds >= oneHour) {
+      difference.hours++;
+      seconds -= oneHour;
+    }
+    //calculate all the remaining minutes then substract it from the total 
+    while (seconds >= oneMinute) {
+      difference.minutes++;
+      seconds -= oneMinute;
+    }
+    //the remaining seconds :
+    difference.seconds = seconds;
+    //return the difference object
+    return difference;
+  }
+   callForlastAlert(){
+    var me = this;
+    const { lastAlertData , endpoint } = this.state;
+   var body = {custCd: this.state.CriteriaForOP.CustCd,
+    subCustCd: this.state.CriteriaForOP.subCustCd,
+    mac: this.state.CriteriaForOP.mac}
+    var lastError = socketIOClient(endpoint+"/ActivelastError");
+    lastError.emit('lastErrorClientEmit',body );
+    lastError.on('lastErrorServerEmit',function(data) {
+      lastAlertData.alertText = data.alertText;
+      lastAlertData.businessNm = data.businessNm;
+      lastAlertData.businessNmValues  = data.businessNmValues;
+      lastAlertData.createdTime  = data.createdTime;
+      lastAlertData.criteria   =  data.criteria;
+      lastAlertData.sensorNm   = data.sensorNm;
+      lastAlertData.shortName  = data.shortName;
+      me.setState({lastAlertData: lastAlertData});
+      //console.log(data)
+      });
+    // axios.post("http://52.212.188.65:3992/getdashbordlastalert", body)
+    // .then(json =>  {
+    //   // alert("This is last Alert Object Data ");
+    //   //console.log("This is log of Alert Object ")
+    //     //console.log(json);
+    //     lastAlertData.alertText = json["data"].alertText;
+    //     lastAlertData.businessNm = json["data"].businessNm;
+    //     lastAlertData.businessNmValues  = json["data"].businessNmValues;
+    //     lastAlertData.createdTime  = json["data"].createdTime;
+    //     lastAlertData.criteria   = json["data"].criteria;
+    //     lastAlertData.sensorNm   = json["data"].sensorNm;
+    //     lastAlertData.shortName  = json["data"].shortName;
+    //     me.setState({lastAlertData: lastAlertData});
+    // })
+  }
+  callForlastPayload(){
+    const {CriteriaForOP, AryfPayloadfromConfig ,endpoint} = this.state
+   var body = {
+      mac:CriteriaForOP.mac,
+      subCustCd : CriteriaForOP.subCustCd,
+      custCd : CriteriaForOP.CustCd,
+      Arrayofpayload: AryfPayloadfromConfig
+
+    }
+    var me = this;
+    var payloadData = socketIOClient(endpoint+"/LastPayloadData");
+    payloadData.emit('lastPayloadClient',body );
+    payloadData.on('lastPayloadServerData',function(data) {
+    // axios.post("http://52.212.188.65:3992/lastpayloadTime",body)
+    // .then(json =>  {
+      if(data.length > 0){
+        var datedata = [];
+        function sortDates(a, b)
+         {
+             return a.getTime() - b.getTime();
+         }
+         //console.log(data)
+         for(let i = 0 ; i < data.length; i++ ){
+   
+           datedata.push(new Date(data[i].createdTime))
+         }
+         //console.log(datedata)
+         var sorted = datedata.sort(sortDates);
+         var maxDate = sorted[sorted.length-1];
+        var tempValue = me.timeDifference(new Date(maxDate),new Date(new Date().toISOString()))
+        let minutes1 = "";
+        let seconds1 = "";
+        let hours1 = "";
+        if(tempValue.hours.toString().length == 1){
+           hours1  =  "0"+tempValue.hours;
+        }else{
+          hours1 = tempValue.hours;
+        }
+        if(tempValue.minutes.toString().length == 1){
+          minutes1 =  "0"+tempValue.minutes;
+       }else{
+        minutes1 = tempValue.minutes;
+       }
+       if(tempValue.seconds.toString().length == 1){
+        seconds1 =  "0"+tempValue.seconds;
+     }else{
+      seconds1 = tempValue.seconds;
+     }
+     var age = hours1+":"+minutes1+":"+seconds1+"  hrs";
+        
+        me.setState({lastPayloadDataArray: data ,age : age})
+      }else{
+        let temparray = [];
+        for(let j =0 ; j < AryfPayloadfromConfig.length ; j++){
+          temparray.push({"payloadId": AryfPayloadfromConfig[j],"createdTime":null });
+        }
+         
+        me.setState({lastPayloadDataArray: temparray ,age : "00:00:00"})
+      }
+ 
+   
+    // //console.log(json["data"]);
+    });
+  }
+  rowDelete(id){
+    swal({
+      title: "Are you sure ?",
+      text: "Once deleted, you will not be able to recover this SentCommand Info!",
+      icon: "warning",
+      buttons: true,
+      // dangerMode: true,
+    })
+    .then((willDelete) => {
+      if (willDelete) {
+        axios.delete("http://52.212.188.65:3992/deleteSentCommand?id="+ id)
+        .then(json =>  {
+          swal("Poof! Your SentCommand  Info has been deleted!", {
+            icon: "success",
+          });
+        });
+      }
+      // } else {
+      //   swal("Your sentCommand  Info is safe!");
+      // }
+    });
+    // axios.delete("http://52.212.188.65:3992/deleteSentCommand?id="+ id)
+    // .then(json =>  {
+    // });
+   }
+
    fetchClimateControlDevice(){
-    axios.post("http://localhost:3992/getActiveDAction",{mac:this.state.CriteriaForOP.mac})
+    axios.post("http://52.212.188.65:3992/getActiveDAction",{mac:this.state.CriteriaForOP.mac})
     .then(json =>  {
      this.setState({deviceAllData: json["data"]})
     })
    }
    fetchClimateParameter(){
-    axios.post("http://localhost:3992/getAClimateparameter",{mac:this.state.CriteriaForOP.mac})
+    axios.post("http://52.212.188.65:3992/getAClimateparameter",{mac:this.state.CriteriaForOP.mac})
     .then(json =>  {
       var keys1 = Object.keys(json["data"]);
       var obj={}
@@ -573,70 +773,37 @@ onDeviceinstruction.on('DeviceInstruction',function(data) {
       obj[keys1[i]+"Lower"] = json["data"][keys1[i]][0];
       obj[keys1[i]+"higher"] = json["data"][keys1[i]][1];
       }
-      console.log(obj)
-      console.log( json["data"])
+      //console.log(obj)
+      //console.log( json["data"])
      this.setState({Defaultparameter: obj})
     })
    }
    fetchForClimate(){
      var me =this;
-     alert("Hello This Working")
+     //alert("Hello This Working")
      //  THIS IS GETING SENSORNAME BASED ON SPCD,CUSTCD,SUBCUSTCD
-     fetch("http://localhost:3992/getSensorNames?spCode=" +this.state.CriteriaForOP.spCd +
+     fetch("http://52.212.188.65:3992/getSensorNames?spCode=" +this.state.CriteriaForOP.spCd +
      "&&custCd=" + this.state.CriteriaForOP.CustCd + "&&subCustCd=" + this.state.CriteriaForOP.subCustCd)
         .then(response => response.json())
         .then(json =>  {
-          alert(json)
+          //alert(json)
         var climateSensor =  json.map( x =>  { return  x  });
         me.setState({climateSensor : climateSensor});
    // console.log(json );
  });
    }
-timeDifference(date1, date2) {
-  var oneDay = 24 * 60 * 60; // hours*minutes*seconds
-  var oneHour = 60 * 60; // minutes*seconds
-  var oneMinute = 60; // 60 seconds
-  var firstDate = date1.getTime(); // convert to milliseconds
-  var secondDate = date2.getTime(); // convert to milliseconds
-  var seconds = Math.round(Math.abs(firstDate - secondDate) / 1000); //calculate the diffrence in seconds
-  // the difference object
-  var difference = {
-    "days": 0,
-    "hours": 0,
-    "minutes": 0,
-    "seconds": 0,
-  }
-  //calculate all the days and substract it from the total
-  while (seconds >= oneDay) {
-    difference.days++;
-    seconds -= oneDay;
-  }
-  //calculate all the remaining hours then substract it from the total
-  while (seconds >= oneHour) {
-    difference.hours++;
-    seconds -= oneHour;
-  }
-  //calculate all the remaining minutes then substract it from the total 
-  while (seconds >= oneMinute) {
-    difference.minutes++;
-    seconds -= oneMinute;
-  }
-  //the remaining seconds :
-  difference.seconds = seconds;
-  //return the difference object
-  return difference;
-}
+
    ActionOnChanel(data,index){
-          // alert("this called");
+          // //alert("this called");
           var me = this;
           const {channelArray,tilesPayloaddata} = this.state;
-         alert(this.state.submitDataObj.payloadId);
-       var age = this.timeDifference(new Date(data.valueChangeAt),new Date(new Date().toISOString()))
+         //alert(this.state.submitDataObj.payloadId);
+       let age = this.timeDifference(new Date(data.valueChangeAt),new Date(new Date().toISOString()))
       //  console.log(age)
       // console.log(me.state.submitDataObj.payloadId)
-        alert(tilesPayloaddata.payloadId +"Hello")
+        //alert(tilesPayloaddata.payloadId +"Hello")
         this.state.submitDataObj.payloadId   = tilesPayloaddata.payloadId;
-        alert(this.state.submitDataObj.payloadId)
+        //alert(this.state.submitDataObj.payloadId)
         this.state.submitDataObj.isDaillyJob = false;
         this.state.submitDataObj.ChannelName = data.devicebusinessNM;
         if( this.state.channelArray[index].ActionCond == this.state.channelArray[index].Value){
@@ -655,10 +822,10 @@ timeDifference(date1, date2) {
          submitDataObj:this.state.submitDataObj}) 
         }
         else{
-          alert("This Already Click");
+          //alert("This Already Click");
         }
         
-        console.log(index)
+        //console.log(index)
    }
    handleSubmit(){
      var me = this;
@@ -667,22 +834,22 @@ timeDifference(date1, date2) {
       submitDataObj.dataBody = {};
       me.setState({submitDataObj: submitDataObj});
      } 
-     console.log("hello")
-     console.log(channelArray[channelAlerrModel["index"]].ActionCond )
+     //console.log("hello")
+     ////console.log(channelArray[channelAlerrModel["index"]].ActionCond )
      if(channelArray[channelAlerrModel["index"]].ActionCond  == 1){
-       alert(submitDataObj.dataBody[channelAlerrModel["channelName"]])
-      console.log(submitDataObj)
-      alert("1")
+       //alert(submitDataObj.dataBody[channelAlerrModel["channelName"]])
+      //console.log(submitDataObj)
+      //alert("1")
       channelArray[channelAlerrModel["index"]].ActionCond = 0; 
       submitDataObj.dataBody[channelAlerrModel["channelName"]]    = 0 ;
-      console.log("second Obj");
-      console.log(submitDataObj)
+      //console.log("second Obj");
+      //console.log(submitDataObj)
       me.setState({channelArray: channelArray, submitDataObj:submitDataObj ,show: false})
       // me.callApiForAction();
      }
      else{
-      alert("0")
-        alert( submitDataObj.dataBody[channelAlerrModel["channelName"]])
+      //alert("0")
+        //alert( submitDataObj.dataBody[channelAlerrModel["channelName"]])
       channelArray[channelAlerrModel["index"]].ActionCond = 1; 
       submitDataObj.dataBody[channelAlerrModel["channelName"]]  = 1 ;
       me.setState({channelArray: channelArray, submitDataObj: submitDataObj,show: false})
@@ -712,9 +879,9 @@ function tokeyValue(o){
   }
   return temp;
 }
-  axios.post("http://localhost:3992/getAllClimateControl",{subCustCd:this.state.CriteriaForOP.subCustCd,custCd:this.state.CriteriaForOP.CustCd})
+  axios.post("http://52.212.188.65:3992/getAllClimateControl",{subCustCd:this.state.CriteriaForOP.subCustCd,custCd:this.state.CriteriaForOP.CustCd})
   .then(json =>  {
-    console.log("This fetchClimateControlAllData");
+    //console.log("This fetchClimateControlAllData");
 var temp=[];
     for(var i =0; i< json["data"].length; i++){
         var tempObj ={};
@@ -728,7 +895,7 @@ var temp=[];
     this.setState({ArrayForClimateTable:temp,SourceClimateData: json["data"]
   
   });
-   console.log(json);
+   //console.log(json);
   });
 }
 ClimateRow(index){
@@ -744,9 +911,9 @@ ClimateRow(index){
    selectedClimateAction.push(obj);
  }
   }
-  alert(index);
-// console.log(selectedExpression)
-console.log(selectedClimateAction)
+  //alert(index);
+// //console.log(selectedExpression)
+//console.log(selectedClimateAction)
 this.setState({selectedExpression,selectedClimateAction, ClimateIndex: index});
 }
 fetchActiveJob(){
@@ -756,7 +923,7 @@ fetchActiveJob(){
     startDate : this.state.startDatelimit,
     endDate: this.state.endDatelimit,
   }
-    axios.post("http://localhost:3992/ActiveJobs",ActiveBody)
+    axios.post("http://52.212.188.65:3992/ActiveJobs",ActiveBody)
     .then(json =>  {
        var ActiveJobsArray = json["data"]["ActiveJob"];
         if(json["data"]["ActiveJob"].length != 0){
@@ -787,7 +954,7 @@ fetchActiveJob(){
   };
     if(this.state.filter.TypeOfJobs == "ExecutedJob"){
      
-        axios.post("http://localhost:3992/executedJob",body)
+        axios.post("http://52.212.188.65:3992/executedJob",body)
             .then(function (result) {
               var mainActiveJobdata  =   result.data;
               items   =   result.data.executedJob;
@@ -796,7 +963,7 @@ fetchActiveJob(){
         me.setState({mAOfInactivejob:[],'in_prog':false});
       });
     }else if(this.state.filter.TypeOfJobs == "PendingJob"){
-      axios.post("http://localhost:3992/PendingJob",body)
+      axios.post("http://52.212.188.65:3992/PendingJob",body)
       .then(function (result) {
         var mainActiveJobdata  =   result.data;
         items   =   result.data.PendingJob;
@@ -810,7 +977,7 @@ fetchActiveJob(){
 }
 changePage(page){
     this.state.filter.page  =   page;
-    // alert(page);
+    // //alert(page);
     this.setState({"filter":this.state.filter});
     // this.fetch();
     }
@@ -819,12 +986,12 @@ changePage(page){
      
     //  if(maindata.length != 0){
       var sDate = new Date().toISOString();
-      console.log("This is first Render");
+      //console.log("This is first Render");
       var endDate= new Date(sDate).addHours(4).toISOString();
       this.setState({startDate: sDate, endDate: endDate});
-      console.log(maindata)
-      console.log(sDate)
-      console.log(endDate)
+      //console.log(maindata)
+      //console.log(sDate)
+      //console.log(endDate)
       this.filterdata(maindata,sDate,endDate);
     //  }
   
@@ -833,7 +1000,7 @@ changePage(page){
      var me = this;
      var sStartdate = this.state.startDate
      if(Math.sign(value )== 1){
-      //  alert("this is sign for pluse");
+      //  //alert("this is sign for pluse");
 
       var startDate = new Date(sStartdate).addHours(value).toISOString();
       var endDate= new Date(startDate).addHours(value).toISOString();
@@ -846,7 +1013,7 @@ changePage(page){
       me.fetchActiveJob();
       }
     else{
-        alert(startDate+"start date/"+"end Date"+ endDate )
+        //alert(startDate+"start date/"+"end Date"+ endDate )
         me.setState({startDate: startDate, endDate: endDate,ActionVF: 1});
         me.filterdata(me.state.mainActiveJobsArray,startDate,endDate);
         }
@@ -862,7 +1029,7 @@ changePage(page){
          }
       else{
           me.setState({startDate: startDate, endDate: endDate,ActionVF: 1});
-          alert(startDate+"start date/"+"end Date"+ endDate )
+          //alert(startDate+"start date/"+"end Date"+ endDate )
           me.filterdata(me.state.mainActiveJobsArray,startDate,endDate);
         }
     }
@@ -871,9 +1038,9 @@ changePage(page){
    filterdata(maindata,startDate,endDate){
     const {ActionVF} = this.state;
       var resultdata = maindata.filter(item => item.ActionTime >= startDate && item.ActionTime <= endDate );
-      alert("console is print");
-      console.log("this is result data ");
-      console.log(resultdata);
+      //alert("console is print");
+      //console.log("this is result data ");
+      //console.log(resultdata);
       if(ActionVF == 1){
         resultdata.sort(function(a, b) {
           a = new Date(a.ActionTime);
@@ -891,42 +1058,42 @@ changePage(page){
       this.setState({ActiveJobsArray: resultdata}); 
    }
    selectedActioV(e){
-     alert(e.target.value);
-     console.log(e.target.value);
+     //alert(e.target.value);
+     //console.log(e.target.value);
      this.setState({ActionVF: e.target.value});
    }
    selectedChF(e){
-    alert(e.target.value);
-    console.log(e.target.value);
+    //alert(e.target.value);
+    //console.log(e.target.value);
     this.setState({channelFil: e.target.value});
   }
   FselectAction(value){
-    alert(value);
+    //alert(value);
     this.state.filter.Action = value;
     this.setState({filter: this.state.filter});
   }
   filterByChExe(value){
   // var me = this;
-    alert(value);
-    console.log(value);
+    //alert(value);
+    //console.log(value);
     this.state.filter.Fchannel = value; 
     this.setState({filter: this.state.filter});
   }
   filterClimateFun(value){
     var me = this;
-    alert(value)
+    //alert(value)
     this.state.Climate.selectedfilter = value;
     this.setState({selectedfilFSensor: value })
   }
   Mfiltrerbtn(){
     const {filter} = this.state;
-    console.log(filter);
+    //console.log(filter);
     this.fetch();
   }
   filtermethod(){
     const {channelFil, ActionVF,startDate,endDate} = this.state;
     var me = this;
-    alert(channelFil+ " ://"+ ActionVF);
+    //alert(channelFil+ " ://"+ ActionVF);
 
    var arrayofActive = this.state.mainActiveJobsArray.filter(item => item.Channel == channelFil );
    me.filterdata(arrayofActive,startDate,endDate);
@@ -940,7 +1107,7 @@ changePage(page){
    }
  
     render() {
-      
+      // console.log(this.state.rowClickedId)
       const {selectedAtionType,formStructure,configkeyInputKeyValue,configkeyInput,sentCommandArray} = this.state;
       var state   =   this.state;
       var me          =   this;
@@ -950,7 +1117,7 @@ changePage(page){
       const ExecutedJobs =  state.mAOfInactivejob.slice(indexOfFirstTodo, indexOfLastTodo)
     
       var page_start_index    =   ((state.filter.page-1)*state.filter.page_size);
-      // alert(this.state.filter.Fchannel)
+      // //alert(this.state.filter.Fchannel)
     var  inputField = null;
     var className12 = {}
   if(formStructure == "2-input"){
@@ -1142,6 +1309,7 @@ changePage(page){
         maxValue={configkeyInputKeyValue[item+"max"]}
         minValue={configkeyInputKeyValue[item+"min"]}
         // formatLabel={value => `${value.min}Min`} 
+        draggableTrack = {true}
         value={ {min: configkeyInputKeyValue[item+"Lower"], max: configkeyInputKeyValue[item+"higher"] }}
         onChange={value =>{
            configkeyInputKeyValue[item+"Lower"]  = value.min
@@ -1332,12 +1500,12 @@ inputField =
               <td className='Acustmtd '>{item.Channel}</td>
               <td className='Acustmtd '>{dateFormat(item.createdTime, "dd-mmm HH:MM")}</td>
               <td className=" btn-group">
-              <button   onClick= {this.rowClicked.bind(this,item,1+i)}
-                 className="btn color1  btn-sm" > View</button>
-               <button  onClick={() =>{ 
-                     alert(i+"Edit");
-                }}   className="btn color2  btn-sm" > Edit</button>
-               <button  onClick={ ()=> {alert(i+ "Delete")}} className="btn color3  btn-sm" > Delete</button>
+              <button   onClick= {this.rowClicked.bind(this,item,1+i,item._id)}
+                 className="btn color1  btn-xs" > View</button>
+               <button  onClick={()=>{
+
+               }}   className="btn color2  btn-xs" > Edit</button>
+               <button  onClick={ this.rowDelete.bind(this,item._id)} className="btn color3  btn-xs" > Delete</button>
                </td>
               </tr>
               )}
@@ -1483,6 +1651,32 @@ inputField =
 <div className ="container-fluid ">
    <div className="row">
    <div className= "col-lg-10">
+   <p className= "line2"></p>
+   <div className="row"> 
+            <div className="col-lg-12 ">  
+           
+       <div className="col-lg-12  ViewBredCum">
+      
+       <div className="col-sm-8">
+    <div className="spanBredDiv">
+       <span  className="spanBredcum">{(this.state.CriteriaForOP.CustCd != "")?this.state.CriteriaForOP.CustCd: ""} </span><span className="spanBredcumslash">/</span>
+       <span  className="spanBredcum"> {(this.state.CriteriaForOP.subCustCd != "")?this.state.CriteriaForOP.subCustCd: "" }</span> <span className="spanBredcumslash">/</span> 
+       <span  className="spanBredcum">{(this.state.CriteriaForOP.assetId != "")?this.state.CriteriaForOP.assetId: ""} </span> <span className="spanBredcumslash">/</span> 
+       <span  className="spanBredcum">{(this.state.CriteriaForOP.DeviceName != "")? this.state.CriteriaForOP.DeviceName: ""}</span>
+  </div>
+  </div>
+  <div className="col-sm-4">
+     <div className="navright">
+     <button type="button"  className="spanNev btn"  onClick={() =>{ 
+                         this.props.history.push("/NevMenu")}}>Device Menu</button>
+     <button  type="button" className="spanNev btn"  onClick={() =>{ 
+                         this.props.history.push("/socketdashbord")}}>View Dashboard</button>
+     </div>
+     </div>
+      {/* </div> */}
+      </div>
+      </div>
+      </div>
  <button className= ' toggleButton'  onClick={this.toggle.bind(this)}><i className= { (this.state.open ? "fas fa-caret-up": "fas fa-caret-down")}></i></button>
 
        <div className ={"ActiveSensorsRow collapse" + (this.state.open ? ' in' : '')}>
@@ -1535,7 +1729,7 @@ inputField =
          <NavItem eventKey="SentCommand" >
          SentCommand
           </NavItem>
-          <NavItem eventKey="ActiveCommand" >
+          {/* <NavItem eventKey="ActiveCommand" >
           ActiveCommand
           </NavItem>
           <NavItem eventKey="ExecutedJobs" >
@@ -1549,7 +1743,7 @@ inputField =
           </NavItem>   
           <NavItem eventKey="ClimateControl" >
           ClimateControl
-          </NavItem>   
+          </NavItem>    */}
 
         </Nav> 
         
@@ -1567,36 +1761,51 @@ inputField =
 </div>
     <div className= "col-lg-2 ">
               <div className= "ActiveCorner">
-                  <div className= "">
-                  <label>SensorNode :</label>
-                  <span>02-Feb 15:27</span>
+            
+                <div className="col-sm-12">
+                {this.state.lastPayloadDataArray.map(item => <div>
+                  <label>{item.payloadId} :</label>
+                  <span>{(item.createdTime)?dateFormat(item.createdTime, "dd-mmm HH:MM:ss"): "00:00:00:00:00"}</span>
                   </div>
-                  <div className= "">
-                  <label>WaterSensor :</label>
-                  <span>02-Feb 15:27 </span>
-                  </div>
-                  <div className= "">
-                  <label>TDS :</label>
-                  <span>02-Feb 15:27 </span>
-                  </div>
-                <div className="col-lg-6">
-                <label>Age </label>
-                <p> 30 min</p>
-                </div>
-                <div className="col-lg-6">
-                <label>Pending </label>
-                <p> 5</p>
-                </div>
-                <div className="col-lg-12">
+              )
+              }
+                <label className="fonsizename">Age : </label>
+                <span className="spanclass"> {this.state.age}</span>
+                <br/>
+                <br/>
+                <p className= "line2"></p>
+                <br/>
+                <label  className="fonsizename">Pending Command : </label>
+                <span className="spanclass"> {this.state.sentCommandArrayLenght}</span>
+                <br/>
+                <br/>
+               </div>
+              
+                <div className= "col-lg-12">
+                <p className= "line2"></p>
+                <br/>
+                <div className="small-box bg-red" title= {this.state.lastAlertData.alertText} >
+             <div className="inner"><p className= "color12  ">{(this.state.lastAlertData.shortName)?this.state.lastAlertData.shortName:"No Alerts Triggered"}</p>
+            <p className= "criteriaClass ">{(this.state.lastAlertData.criteria)?this.state.lastAlertData.criteria:""} &nbsp;</p>
+            <p className="ForAlertActive">Time:  { (this.state.lastAlertData.createdTime)?dateFormat(this.state.lastAlertData.createdTime, "dd-mmm HH:MM:ss"):""}</p>
+            </div>
+            <div className=" fontsizeicon2 icon"><i className="fas fa-exclamation-triangle"></i>
+            </div>
+            <a href="javascript:void(0)" className= "small-box-footer">&nbsp;</a>
+            </div>
+            </div>
+               
+                {/* <div className="col-lg-12">
                 <ul class="nav nav-pills nav-stacked">
                   <li><a className=" " onClick={() =>{ 
                          this.props.history.push("/socketdashbord")
                            }}>View Dashboard</a></li>
                   <li><a className=" " onClick={() =>{ 
                          this.props.history.push("/NevMenu")
-                           }}>Menu</a></li>
+                           }}> Device Menu</a></li>
                 </ul> 
-                </div>
+                </div> */}
+              
                 </div>
                
          </div>

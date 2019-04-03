@@ -5,11 +5,13 @@ var arrMQTTClients = [];
 var assetsId, subCustId, custId , crTopic;
 var fs = require("fs");
 var dateTime = require("node-datetime");
+const NAMEOFSERVICE = "MqttService";
 const  TRACE_PROD = 1
 const TRACE_STAGE = 2;
 const TRACE_TEST  = 3;
 const TRACE_DEV   = 4;
 const TRACE_DEBUG = 5;
+var dbo = "";
 var  gomos = require("../../commanFunction/routes/commanFunction");;
 //global method to get the assetId for the particular mac
 function getDevices(db, macPassed, businessNm, businessNmValues, message) {
@@ -28,7 +30,7 @@ function getDevices(db, macPassed, businessNm, businessNmValues, message) {
     ])
     .toArray(function (err, result) {
       if (err) {
-        gomos.errorCustmHandler("getDevices",err)
+        gomos.errorCustmHandler(NAMEOFSERVICE,"getDevices","THIS IS GETTING ALL DEVICE QUERY ERROR",'',err)
         process.hasUncaughtExceptionCaptureCallback();
       }
       if (result.length > 0) {
@@ -39,7 +41,7 @@ function getDevices(db, macPassed, businessNm, businessNmValues, message) {
           getAssets(db, assetsId, businessNm, businessNmValues, macPassed, message, DeviceName);
         }
         catch(err){
-          gomos.errorCustmHandler("getDevices",err)
+          gomos.errorCustmHandler(NAMEOFSERVICE,"getDevices",'THIS IS TRY CATCH ERROR','',err)
         }
       
       }
@@ -62,7 +64,7 @@ function getAssets(db, passedAssetId, businessNm, businessNmValues, mac, message
     ])
     .toArray(function (err, result) {
       if (err) {
-        gomos.errorCustmHandler("getAssets",err)
+        gomos.errorCustmHandler(NAMEOFSERVICE,"getAssets",'THIS IS QUERY ERROR','',err)
         process.hasUncaughtExceptionCaptureCallback();
       }
       if (result.length > 0) {
@@ -71,7 +73,7 @@ function getAssets(db, passedAssetId, businessNm, businessNmValues, mac, message
           getSubCustomers(db,passedAssetId, subCustId, businessNm,businessNmValues, mac, message, DeviceName);
         }
         catch(err){
-          gomos.errorCustmHandler("getAssets",err)
+          gomos.errorCustmHandler(NAMEOFSERVICE,"getAssets",'THIS IS TRY CATCH','',err)
         }
      } 
     });
@@ -93,7 +95,7 @@ function getSubCustomers(db, passedAssetId, passedSubCust, businessNm,businessNm
     ])
     .toArray(function (err, result) {
       if (err) {
-        gomos.errorCustmHandler("getSubCustomers",err)
+        gomos.errorCustmHandler(NAMEOFSERVICE,"getSubCustomers",'QUERY EEROR','',err)
         process.hasUncaughtExceptionCaptureCallback();
       }
       if (result.length > 0) {
@@ -106,7 +108,7 @@ function getSubCustomers(db, passedAssetId, passedSubCust, businessNm,businessNm
           checkCriteria(db,passedAssetId, custId, subCustId,businessNmValues, mac, message, DeviceName);
         }
         catch(err){
-          gomos.errorCustmHandler("getSubCustomers",err)
+          gomos.errorCustmHandler(NAMEOFSERVICE,"getSubCustomers",'THIS IS TRY CATCH ERROR','',err)
         }
         
       }
@@ -119,7 +121,7 @@ function connectToDb() {
     { useNewUrlParser: true },
     function (err, connection) {
       if (err) {
-        gomos.errorCustmHandler("connectToDb",err)
+        gomos.errorCustmHandler(NAMEOFSERVICE,"connectToDb",'THIS IS MONGO CLIENT COONENCTION ERROR','',err)
         process.hasUncaughtExceptionCaptureCallback();
       }
       var db = connection.db(dbName);
@@ -138,7 +140,7 @@ function connectToDb() {
         ])
         .toArray(function (err, result) {
           if (err) {
-            gomos.errorCustmHandler("connectToDb",err)
+            gomos.errorCustmHandler(NAMEOFSERVICE,"connectToDb",'THIS IS QUERY ERROR','',err)
             process.hasUncaughtExceptionCaptureCallback();
           }
           try{
@@ -164,7 +166,7 @@ function connectToDb() {
           }
           }
           catch(err){
-            gomos.errorCustmHandler("connectToDb",err);
+            gomos.errorCustmHandler(NAMEOFSERVICE,"connectToDb",'THIS IS TRY CATCH ERROR','',err);
           }
         });
     }
@@ -196,7 +198,7 @@ function onMqttConnect() {
      isMqttSubscribed = true;
     }
     catch(err){
-      gomos.errorCustmHandler("onMqttConnect",err);
+      gomos.errorCustmHandler(NAMEOFSERVICE,"onMqttConnect",'THIS IS TRY CATCH ERROR ','',err);
     }
   }
 }
@@ -209,21 +211,12 @@ function handleMqttMessage(topic, message) {
     var messValues = {}; //to store the msg in json formate alog with two extra fields(i.e., processed and queueDateTime).
     messKeys = Object.keys(JSON.parse(message));
     var tempMessage = JSON.parse(message);
-    MongoClient.connect(
-      urlConn,
-      { useNewUrlParser: true },
-      function (err, connection) {
-        if (err) {
-          // console.log(err);
-          gomos.errorCustmHandler("handleMqttMessage",err)
-          process.hasUncaughtExceptionCaptureCallback();
-        }
-        var db = connection.db(dbName);
+       var db = dbo;
         gomos.gomosLog(TRACE_DEBUG,"This is mac ", tempMessage.mac);
         db.collection("Devices").find({mac: tempMessage.mac, active: "Y" }) 
         .toArray(function (err, result) {
           if (err) {
-            gomos.errorCustmHandler("handleMqttMessage",err)
+            gomos.errorCustmHandler(NAMEOFSERVICE,"handleMqttMessage",'THIS IS QUERY ERROR','',err)
              process.hasUncaughtExceptionCaptureCallback();
            }
            if(result.length > 0 ){
@@ -256,7 +249,7 @@ function handleMqttMessage(topic, message) {
                 getDevices(db, messValues["mac"], messResultKeys, messValues, message);
                 db.collection("MqttDump").insertOne(messValues, function (err, result) {
                   if (err) {
-                    gomos.errorCustmHandler("handleMqttMessage",err)
+                    gomos.errorCustmHandler(NAMEOFSERVICE,"handleMqttMessage",'THIS IS INSERTING ERROR','',err)
                      process.hasUncaughtExceptionCaptureCallback();
                    } 
                     gomos.gomosLog(TRACE_PROD,"Entry saved in MsgDump Collection",message.toString());
@@ -265,17 +258,13 @@ function handleMqttMessage(topic, message) {
            else{
              gomos.gomosLog(TRACE_DEBUG,"Device Not Presents", message);
              gomos.unWantedLog("handleMqttMessage",message)
-            //  console.log(gomos)
            }
-         
           });
-     
-  
-    }
-  );
+  //   }
+  // );
   }
   catch(err){
-    gomos.errorCustmHandler("handleMqttMessage",err,message);
+    gomos.errorCustmHandler(NAMEOFSERVICE,"handleMqttMessage","THIS IS TRY CATCH OF LISNTER ERROR",message,err,);
      gomos.gomosLog(TRACE_DEBUG,"Not VAlid JSON :ERROR!",err);  
   } 
 }
@@ -300,7 +289,7 @@ function checkCriteria(db,passedAssetId, custId, subCustId,businessNmValues,  ma
  }])
     .toArray(function (err, result) {
       if (err) {
-        gomos.errorCustmHandler("checkCriteria",err)
+        gomos.errorCustmHandler(NAMEOFSERVICE,"checkCriteria","THIS QUERY ERROR",'',err)
         process.hasUncaughtExceptionCaptureCallback();
       }
       if (result.length > 0) {
@@ -332,7 +321,7 @@ function checkCriteria(db,passedAssetId, custId, subCustId,businessNmValues,  ma
             gomos.gomosLog(TRACE_TEST,"Object for level 3 alertData ready",alertData);        
             db.collection("Alerts").insertOne(alertData, function (err, result) {
               if (err) {
-                gomos.errorCustmHandler("checkCriteria",err)
+                gomos.errorCustmHandler(NAMEOFSERVICE,"checkCriteria",'THIS IS INSERTION ERROR','',err)
                 process.hasUncaughtExceptionCaptureCallback();
               }
               gomos.gomosLog(TRACE_PROD,"Alert Saved For Perticuler Payload Into Alerts collection",alertData);        
@@ -340,7 +329,7 @@ function checkCriteria(db,passedAssetId, custId, subCustId,businessNmValues,  ma
           }
         } 
         catch(err){
-          gomos.errorCustmHandler("checkCriteria",err)  
+          gomos.errorCustmHandler(NAMEOFSERVICE,"checkCriteria","TRY CATCH ERROR",'',err)  
         }
       }      
       else{
@@ -362,7 +351,7 @@ function checkCriteria(db,passedAssetId, custId, subCustId,businessNmValues,  ma
             }
           }catch(err)
           {
-            gomos.errorCustmHandler("checkCriteria",err)
+            gomos.errorCustmHandler(NAMEOFSERVICE,"checkCriteria",'THIS IS TRY CATCH ERROR',"",err)
           }
             // if criteria is matched the insert the required data into Alerts Collection.
             if (eval(result[i].criteria)) {
@@ -387,7 +376,7 @@ function checkCriteria(db,passedAssetId, custId, subCustId,businessNmValues,  ma
               };
               db.collection("Alerts").insertOne(alertData, function (err, result) {
                 if (err) {
-                  gomos.errorCustmHandler("checkCriteria",err)
+                  gomos.errorCustmHandler(NAMEOFSERVICE,"checkCriteria",'THIS IS INSERTION ERROR','',err)
                   process.hasUncaughtExceptionCaptureCallback();
                 } else gomos.gomosLog(TRACE_TEST,"Alert Saved Into Alerts collection");        
 
@@ -400,63 +389,6 @@ function checkCriteria(db,passedAssetId, custId, subCustId,businessNmValues,  ma
       }
     });
 }
-// var dt = dateTime.create();
-// var formattedDate = dt.format("Y-m-d");
-
-// function gomos.errorCustmHandler(functionName,typeofError){
-// // console.log(typeofError);
-//   let writeStream = fs.createWriteStream("../commanError-" + formattedDate + ".log", { flags: "a" });
-//   var dateTime = new Date().toISOString();
-// // write some data with a base64 encoding
-// writeStream.write(
-//   "DateTime: " +dateTime+ "\n"+  
-//   "Error handler: " + "\n"+
-//   "serviceName:"+ "Mqtt_listener"+"\n"+
-//   "functionName:"+ functionName +"\n"+
-//   // "lineNo: " + lineNo  +"\n"+
-//   "Error Code:" + typeofError.statusCode +"\n"+
-//   " Error: " + typeofError + "\n"+
-//   "typeofError.stack"+ typeofError.stack +
-//   "\n"
-// );
-
-// // the finish event is emitted when all data has been flushed from the stream
-// writeStream.on('finish', () => {  
-//   gomos.gomosLog(TRACE_PROD,"wrote all data to file For Error");  
-// });
-
-// // close the stream
-// writeStream.end(); 
-
-  // MongoClient.connect(
-  //   urlConn,
-  //   { useNewUrlParser: true },
-  //   function (err, connection) {
-  //     if (err) {
-  //       // console.log(err);
-  //       process.hasUncaughtExceptionCaptureCallback();
-  //     }
-  //     var createdTime = new Date();
-  //     errorobj = {
-  //       lineNo,
-  //       functionName,
-  //       Error,
-  //       typeofError,
-  //       createdTime
-  //     }
-  //     var db = connection.db(dbName);
-  //     db.collection("MqttErrorhandler")
-  //     .insert(errorobj, function (err, result) {
-  //       if (err) {
-  //         // console.log(err);
-  //          process.hasUncaughtExceptionCaptureCallback();
-  //       } else console.log("Entry saved in MqttErrorhandler Collection");
-  //     });
-  //   }
-  // )
-
-// }
-
 function onMqttDisconnect() {
   isMqttConnected = false;
 }
@@ -465,6 +397,17 @@ var mBoxApp = null;
 module.exports = function (app) {
   urlConn = app.locals.urlConn;
   dbName = app.locals.dbName;
+  MongoClient.connect(
+    urlConn,
+    { useNewUrlParser: true },
+    function (err, connection) {
+      if (err) {
+        // console.log(err);
+        gomos.errorCustmHandler(NAMEOFSERVICE,"handleMqttMessage",'THIS IS MONGO CLIENT CONNECTION ERROR','',err)
+        process.hasUncaughtExceptionCaptureCallback();
+      }
+     dbo = connection.db(dbName);
+    });
   // gomos =app.locals;
    // CubeRootsCustomer();
   connectToDb();

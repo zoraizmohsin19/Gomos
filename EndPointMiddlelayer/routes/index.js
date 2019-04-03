@@ -9,6 +9,7 @@ const axios = require('axios');
 var urlConn, dbName;
 var fs = require("fs");
 var dateTime = require("node-datetime");
+const NAMEOFSERVICE = "ENDPOINTMIDDLELAYER";
 const  TRACE_PROD = 1
 const TRACE_STAGE = 2;
 const TRACE_TEST  = 3;
@@ -48,7 +49,7 @@ router.post("/sendto", function (req, res, next) {
     { useNewUrlParser: true },
     function (err, connection) {
       if (err) {
-        gomos.errorCustmHandler("/sendto",err);
+        gomos.errorCustmHandler(NAMEOFSERVICE,"/sendto",'THIS IS MONGO CLIENT ERROR','',err);
         process.hasUncaughtExceptionCaptureCallback();
       }
       var db = connection.db(dbName);
@@ -70,7 +71,7 @@ router.post("/sendto", function (req, res, next) {
               .toArray(function (err, result) {
                 if (err) {
                   // console.log(err);
-                  gomos.errorCustmHandler("/sendto",err)
+                  gomos.errorCustmHandler(NAMEOFSERVICE,"/sendto",'THIS IS QUERY ERROR','',err)
                   process.hasUncaughtExceptionCaptureCallback();
                 }
                 try {
@@ -82,7 +83,7 @@ router.post("/sendto", function (req, res, next) {
                     .find({mac: mac, payloadId: payloadId })
                       .toArray(function (err, result) {
                         if (err) {
-                          gomos.errorCustmHandler("/sendto",err)
+                          gomos.errorCustmHandler(NAMEOFSERVICE,"/sendto",'THIS IS QUERY ERROR','',err)
                           process.hasUncaughtExceptionCaptureCallback();
                         }
                       //  console.log(result);
@@ -118,7 +119,7 @@ router.post("/sendto", function (req, res, next) {
                       errorUpdate(DeviceName,payloadId, subCustCd, custCd, Date, message , db,res,"Payload ["+payloadId+"] not Present");   
                     }
                       } catch (err) {
-                        gomos.errorCustmHandler("/sendto",err)
+                        gomos.errorCustmHandler(NAMEOFSERVICE,"/sendto",'THIS IS TRY CATCH ERROR','',err)
                       }    
                 });
                   
@@ -127,20 +128,15 @@ router.post("/sendto", function (req, res, next) {
               errorUpdate(DeviceName,payloadId, subCustCd, custCd, Date, message, db, res,"Device ["+DeviceName +"] not found !;");
               }
                 } catch (err) {
-                  gomos.errorCustmHandler("/sendto",err)
+                  gomos.errorCustmHandler(NAMEOFSERVICE,"/sendto",'THIS IS TRY CATCH ERROR','',err)
                 }
-          // });
-          // } 
-          // else{
-          //   errorUpdate(DeviceName,payloadId, subCustCd, custCd, Date, message, db, res,assetId,"AssetsId ["+assetId+"] not found !;");
-          // }
         });
       }else{
         errorUpdate(DeviceName,payloadId, subCustCd, custCd, Date, message, db, res,"SubCustomer ["+subCustCd +"] not found !;");
       }
     });
   }catch(err){
-    gomos.errorCustmHandler("/sendto",err)
+    gomos.errorCustmHandler(NAMEOFSERVICE,"/sendto",'THIS IS TRY CATCH ERROR','',err)
   }
 });
  
@@ -177,7 +173,7 @@ router.post("/sendto", function (req, res, next) {
           errorUpdate(DeviceName,payloadId, subCustCd, custCd, Date, message, db,res,assetId,sensorsNotFound);     
         }   
       } catch (err) {
-        gomos.errorCustmHandler("translateMethod",err)  
+        gomos.errorCustmHandler(NAMEOFSERVICE,"translateMethod",'THIS IS TRY CATCH ERROR','',err)  
       }
 }
 function successUpdate(DeviceName,payloadId,subCustCd, custCd,DateTime, message, finalSensors,res,db,responseTosend,mac,assetId){
@@ -205,7 +201,7 @@ function successUpdate(DeviceName,payloadId,subCustCd, custCd,DateTime, message,
     db.collection("Alerts")
     .insertOne(dataToStore, function (err, result) {
       if (err) {
-        gomos.errorCustmHandler("successUpdate",err)
+        gomos.errorCustmHandler(NAMEOFSERVICE,"successUpdate",'THIS IS INSERTING ERROR','',err)
         process.hasUncaughtExceptionCaptureCallback();
       } else {
         gomos.gomosLog(TRACE_PROD,"Entry saved in Alert With Translated Msg Collection");
@@ -240,45 +236,13 @@ function successUpdate(DeviceName,payloadId,subCustCd, custCd,DateTime, message,
                 db.collection("Alerts")
                 .insertOne(dataToStore, function (err, result) {
                   if (err) {
-                    gomos.errorCustmHandler("successUpdate",err)  
+                    gomos.errorCustmHandler(NAMEOFSERVICE,"successUpdate",'THIS IS INSERTING ERROR','',err)  
                     process.hasUncaughtExceptionCaptureCallback();
                   } else {
                     res.json(responseTosend);
                    }
                   });
 }
-
-// var dt = dateTime.create();
-// var formattedDate = dt.format("Y-m-d");
-// function gomos.errorCustmHandler(functionName,typeofError){
-//   // console.log(typeofError);
-//     let writeStream = fs.createWriteStream("../commanError-" + formattedDate + ".log", { flags: "a" });
-//     var dateTime = new Date().toISOString();
-//   // write some data with a base64 encoding
-//   writeStream.write(
-//   "DateTime: " +dateTime+ "\n"+  
-//   "Error handler: " + "\n"+
-//   "serviceName:"+ "EndPointMiddelayer"+"\n"+
-//   "functionName:"+ functionName +"\n"+
-//   // "lineNo: " + lineNo  +"\n"+
-//   "Error Code:" + typeofError.statusCode +"\n"+
-//   " Error: " + typeofError + "\n"+
-//   "typeofError.stack"+ typeofError.stack +
-//   "\n"
-//   );
-  
-//   // the finish event is emitted when all data has been flushed from the stream
-//   writeStream.on('finish', () => {  
-//     gomos.gomosLog(TRACE_PROD,'wrote all data to file');
-//   });
-  
-//   // close the stream
-//   writeStream.end(); 
-
-//   }
-
-
-
 module.exports = function (app) {
   //DB Name and the url for database connection is from appConfig file in app.js
   urlConn = app.locals.urlConn;

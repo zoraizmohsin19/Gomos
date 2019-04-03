@@ -14,6 +14,7 @@ var dateTime = require("node-datetime");
 router.get("/", function (req, res, next) {
   res.render("index", { title: "Express" });
 });
+const NAMEOFSERVICE = "factService"
 const  TRACE_PROD = 1
 const TRACE_STAGE = 2;
 const TRACE_TEST  = 3;
@@ -28,7 +29,7 @@ function updateMQTT(objId, db,processedFlag ) {
     { $set: { processed: processedFlag } },
     function (err, result) {
       if (err) {
-        gomos.errorCustmHandler("updateMQTT",err);
+        gomos.errorCustmHandler(NAMEOFSERVICE,"updateMQTT","This is Comman function Updatting Error",objId,err);
         process.hasUncaughtExceptionCaptureCallback();
       }
       gomos.gomosLog(TRACE_TEST,"updateMQTT for _id", objId);
@@ -43,7 +44,7 @@ function getDevices() {
     { useNewUrlParser: true },
     function (err, connection) {
       if (err) {
-        gomos.errorCustmHandler("getDevices",err);
+        gomos.errorCustmHandler(NAMEOFSERVICE,"getDevices","getDevice function MongoClient Error"," ",err);
         process.hasUncaughtExceptionCaptureCallback();
       }
       var db = connection.db(dbName);
@@ -51,7 +52,7 @@ function getDevices() {
         .find()
         .toArray(function (err, result) {
           if (err) {
-            gomos.errorCustmHandler("getDevices",err);
+            gomos.errorCustmHandler(NAMEOFSERVICE,"getDevices","This Query All Device From Collection Error","",err);
             process.hasUncaughtExceptionCaptureCallback();
           }
           try{
@@ -61,7 +62,7 @@ function getDevices() {
             gomos.gomosLog(TRACE_PROD,"getDevices - No. of devices read from collection", dataFromDevices.length);
           }
           catch(err){
-            gomos.errorCustmHandler("getDevices",err);
+            gomos.errorCustmHandler(NAMEOFSERVICE,"getDevices","THis IS Error From Try Catch Some","",err);
           }
          
           connection.close();
@@ -84,7 +85,7 @@ function getAssets() {
         .find()
         .toArray(function (err, result) {
           if (err) {
-            gomos.errorCustmHandler("getAssets",err);
+            gomos.errorCustmHandler(NAMEOFSERVICE,"getAssets","THis is Getting All Asset","",err);
             process.hasUncaughtExceptionCaptureCallback();
           }
           try{
@@ -94,7 +95,7 @@ function getAssets() {
             gomos.gomosLog(TRACE_PROD,"getAssets - No. of assets read from collection", dataFromAssets.length);
           }
           catch(err){
-            gomos.errorCustmHandler("getAssets",err);            
+            gomos.errorCustmHandler(NAMEOFSERVICE,"getAssets","This is generated From Try Catch error","",err);            
           }
          
           connection.close();
@@ -110,7 +111,7 @@ function getSubCustomers() {
     { useNewUrlParser: true },
     function (err, connection) {
       if (err) {
-        gomos.errorCustmHandler("getSubCustomers",err);            
+        gomos.errorCustmHandler(NAMEOFSERVICE,"getSubCustomers","THis is MongoClient Error","",err);            
         process.hasUncaughtExceptionCaptureCallback();
       }
       var db = connection.db(dbName);
@@ -118,7 +119,7 @@ function getSubCustomers() {
         .find()
         .toArray(function (err, result) {
           if (err) {
-            gomos.errorCustmHandler("getSubCustomers",err);
+            gomos.errorCustmHandler(NAMEOFSERVICE,"getSubCustomers","This IS Getting All SubCustmoer","",err);
             process.hasUncaughtExceptionCaptureCallback();
           }
           try{
@@ -128,7 +129,7 @@ function getSubCustomers() {
             gomos.gomosLog(TRACE_PROD,"getSubCustomers - No. of subeCustomer read from collection", dataFromSubCust.length);
           }
           catch(err){
-            gomos.errorCustmHandler("getSubCustomers",err);    
+            gomos.errorCustmHandler(NAMEOFSERVICE,"getSubCustomers","This is Try catch Of getting All Sub Custmoer",err);    
           }
           connection.close();
         });
@@ -143,7 +144,7 @@ function getPayloads() {
     { useNewUrlParser: true },
     function (err, connection) {
       if (err) {
-        gomos.errorCustmHandler("getPayloads",err);  
+        gomos.errorCustmHandler(NAMEOFSERVICE,"getPayloads","This is Mongo Client Error","",err);  
         process.hasUncaughtExceptionCaptureCallback();
       }
       var db = connection.db(dbName);
@@ -151,7 +152,7 @@ function getPayloads() {
         .find()
         .toArray(function (err, result) {
           if (err) {
-            gomos.errorCustmHandler("getPayloads",err);  
+            gomos.errorCustmHandler(NAMEOFSERVICE,"getPayloads","This Is Getting All PayloadId","",err);  
             process.hasUncaughtExceptionCaptureCallback();
           }
           try{
@@ -161,7 +162,7 @@ function getPayloads() {
             gomos.gomosLog(TRACE_PROD,"getPayload - No. of payload read from collection", dataFromPayload.length);
           }
           catch(err){
-            gomos.errorCustmHandler("getPayloads",err);  
+            gomos.errorCustmHandler(NAMEOFSERVICE,"getPayloads","This Is Try Catch Of Getting All Payload","",err);  
           }
           
           connection.close();
@@ -189,7 +190,7 @@ function processFactMessages() {
   }
   else {
     gomos.gomosLog(TRACE_PROD,"Scheduling issues, Can not proceed : It can only support Seconds, Minutes up to 59",factSrvcSchedule);
-    gomos.errorCustmHandler("processFactMessages","Scheduling issues, Can not proceed : It can only support Seconds, Minutes up to 59");  
+    gomos.errorCustmHandler(NAMEOFSERVICE,"processFactMessages","Scheduling issues, Can not proceed : It can only support Seconds, Minutes up to 59");  
     process.exit(0);
   }
   var schPattern = sec + min + "* * * *";
@@ -202,7 +203,7 @@ function processFactMessages() {
       { useNewUrlParser: true },
       function (err, connection) {
         if (err) {
-           gomos.errorCustmHandler("processFactMessages",err);  
+           gomos.errorCustmHandler(NAMEOFSERVICE,"processFactMessages","This Mongo Client  Error","",err);  
           process.hasUncaughtExceptionCaptureCallback();
         }
         var db = connection.db(dbName);
@@ -210,7 +211,7 @@ function processFactMessages() {
           .find({ processed: "N" }).limit( 100 )
           .toArray(function (err, result) {
             if (err) {
-              gomos.errorCustmHandler("processFactMessages",err); 
+              gomos.errorCustmHandler(NAMEOFSERVICE,"processFactMessages","This Finding Dump From Db","",err); 
               process.hasUncaughtExceptionCaptureCallback();
             }
             if (result.length > 0) {
@@ -384,7 +385,7 @@ function processFactMessages() {
                               err,
                               result) {
                               if (err) {
-                                gomos.errorCustmHandler("processFactMessages",err);  
+                                gomos.errorCustmHandler(NAMEOFSERVICE,"processFactMessages","This Inserting To Msg Fact Error","",err);  
                                 process.hasUncaughtExceptionCaptureCallback();
                               }
                               gomos.gomosLog(TRACE_TEST,"Inserted : IN MsgFacts",mac +":"+payloadId +":"+ createdTime);
@@ -410,7 +411,7 @@ function processFactMessages() {
               }
                }
                catch(err){
-              gomos.errorCustmHandler("processFactMessages",err);  
+              gomos.errorCustmHandler(NAMEOFSERVICE,"processFactMessages","This is Genrated From Try Catch Error","",err);  
 
                }    
                   count++;
@@ -439,7 +440,7 @@ function activeDevice(db,dataToInsert){
        db.collection("DeviceState").find({"mac": dataToInsert.mac})
        .toArray(function (err, result2) {
          if (err) {
-             gomos.errorCustmHandler("activeDevice",err);  
+             gomos.errorCustmHandler(NAMEOFSERVICE,"activeDevice","This Is Query Error","",err);  
            process.hasUncaughtExceptionCaptureCallback();
               }
            try{
@@ -455,7 +456,7 @@ function activeDevice(db,dataToInsert){
             })
             .then(function (result3) {
               if (err) {
-                  gomos.errorCustmHandler("activeDevice",err);  
+                  gomos.errorCustmHandler(NAMEOFSERVICE,"activeDevice","This IS Updateting TimeStamp Error","",err);  
                 process.hasUncaughtExceptionCaptureCallback();
                    }
                 try{
@@ -463,7 +464,7 @@ function activeDevice(db,dataToInsert){
                  db.collection("Devices").find({"mac":dataToInsert.mac})
                  .toArray(function (err, result1) {
                    if (err) {
-                       gomos.errorCustmHandler("activeDevice",err);  
+                       gomos.errorCustmHandler(NAMEOFSERVICE,"activeDevice","This is Query Error",err);  
                        process.hasUncaughtExceptionCaptureCallback();
                         }
                      try{ 
@@ -628,11 +629,11 @@ db.collection("DeviceInstruction")
       } 
     }
     else{
-      gomos.errorCustmHandler("updateDeviceInstruction","DeviceInstruction payloadId Flag not Preset For This Action Type",result[0].sourceMsg.ActionType, "Fact Service");
+      gomos.errorCustmHandler(NAMEOFSERVICE,"updateDeviceInstruction","DeviceInstruction payloadId Flag not Preset For This Action Type",result[0].sourceMsg.ActionType);
     }
    
   }else{
-    gomos.errorCustmHandler("updateDeviceInstruction","DeviceInstruction Token Not Present In SentIntruction",Token, "Fact Service");
+    gomos.errorCustmHandler(NAMEOFSERVICE,"updateDeviceInstruction","DeviceInstruction Token Not Present In SentIntruction",Token);
   }
   gomos.gomosLog(TRACE_DEBUG,"This is find Of DeviceInstruction",result);
 });
@@ -737,7 +738,7 @@ function compareDate(str1){
 function DeviceInstructionInsert(db,data){
   db.collection("DeviceInstruction").insertOne(data, function (err, result) {
     if (err) {
-      gomos.errorCustmHandler("DeviceInstruction",err);
+      gomos.errorCustmHandler(NAMEOFSERVICE,"DeviceInstruction","This Query Error","",err);
       gomos.gomosLog(TRACE_DEV,"This is error",err);
       process.hasUncaughtExceptionCaptureCallback();
     }
@@ -750,7 +751,7 @@ function deleteinstruction(db,id){
   .deleteOne({"_id": id},
     function (err, result) {
       if (err) {
-        gomos.errorCustmHandler("updateDeviceState",err);
+        gomos.errorCustmHandler(NAMEOFSERVICE,"updateDeviceState","This is Deleting Error","",err);
         process.hasUncaughtExceptionCaptureCallback();
       }
       gomos.gomosLog(TRACE_DEV,"DeleteDeviceState ", id);
@@ -766,7 +767,7 @@ function updateDeviceState(db,_id,devicesStateKeyValue, dateTime) {
      } },
     function (err, result) {
       if (err) {
-        gomos.errorCustmHandler("updateDeviceState",err);
+        gomos.errorCustmHandler(NAMEOFSERVICE,"updateDeviceState","This is Updateting Error","",err);
         process.hasUncaughtExceptionCaptureCallback();
       }
       gomos.gomosLog(TRACE_DEBUG,"updateDeviceState ", _id);
@@ -784,7 +785,7 @@ function updatedDeviceinstruction(db,updatedData){
      } },
     function (err, result) {
       if (err) {
-        gomos.errorCustmHandler("updateDeviceState",err);
+        gomos.errorCustmHandler(NAMEOFSERVICE,"updateDeviceState","This is Updateing Error","",err);
         process.hasUncaughtExceptionCaptureCallback();
       }
       gomos.gomosLog(TRACE_DEBUG,"updateDeviceState ", id);
@@ -798,7 +799,7 @@ function getServiceConfig() {
     { useNewUrlParser: true },
     function (err, connection) {
       if (err) {
-        gomos.errorCustmHandler("getServiceConfig",err);  
+        gomos.errorCustmHandler(NAMEOFSERVICE,"getServiceConfig","This MongoClient Error","",err);  
         process.hasUncaughtExceptionCaptureCallback();
       }
       var db = connection.db(dbName);
@@ -806,7 +807,7 @@ function getServiceConfig() {
         .find()
         .toArray(function (err, result) {
           if (err) {
-        gomos.errorCustmHandler("getServiceConfig",err);  
+        gomos.errorCustmHandler(NAMEOFSERVICE,"getServiceConfig","This Query Error","",err);  
             process.hasUncaughtExceptionCaptureCallback();
           }
           if (result.length > 0) {
@@ -818,7 +819,7 @@ function getServiceConfig() {
               }
             }
             catch(err){
-              gomos.errorCustmHandler("getServiceConfig",err);
+              gomos.errorCustmHandler(NAMEOFSERVICE,"getServiceConfig","This is Try catch Error","",err);
             }
            
           }
