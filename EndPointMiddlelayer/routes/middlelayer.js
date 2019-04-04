@@ -55,7 +55,7 @@ function accessPermission(res) {
       gomos.gomosLog(TRACE_TEST,"translateMeg key value",finalSensors);      
       if(sensorsNotFound.length == 0 ){
       
-        if(token.length != 0){
+        if( token != undefined && token.length != 0){
           message["Token"] = token;
           finalSensors["Token"]= token;
         }
@@ -65,6 +65,7 @@ function accessPermission(res) {
           errorUpdate(DeviceName,payloadId, subCustCd, custCd, Date, message, db,res,assetId,sensorsNotFound);     
         }   
       } catch (err) {
+        res.json("some Error is generated");
         gomos.errorCustmHandler(NAMEOFSERVICE,"translateMethod",'THIS IS TRY CATCH ERROR','',err);
       }
 }
@@ -242,42 +243,3 @@ exports.endPointMiddelayerFn = function (urlConn,dbName,res,custCd,subCustCd,Dev
                    }
                   });
 }
-
-// var dt = dateTime.create();
-// var formattedDate = dt.format("Y-m-d");
-// function gomos.errorCustmHandler(functionName,typeofError){
-//   // console.log(typeofError);
-//     let writeStream = fs.createWriteStream("../commanError-" + formattedDate + ".log", { flags: "a" });
-//     var dateTime = new Date().toISOString();
-//   // write some data with a base64 encoding
-//   writeStream.write(
-//   "DateTime: " +dateTime+ "\n"+  
-//   "Error handler: " + "\n"+
-//   "serviceName:"+ "EndPointMiddelayer"+"\n"+
-//   "functionName:"+ functionName +"\n"+
-//   // "lineNo: " + lineNo  +"\n"+
-//   "Error Code:" + typeofError.statusCode +"\n"+
-//   " Error: " + typeofError + "\n"+
-//   "typeofError.stack"+ typeofError.stack +
-//   "\n"
-//   );
-  
-//   // the finish event is emitted when all data has been flushed from the stream
-//   writeStream.on('finish', () => {  
-//     gomos.gomosLog(TRACE_PROD,'wrote all data to file');
-//   });
-  
-//   // close the stream
-//   writeStream.end(); 
-
-//   }
-
-
-
-// module.exports = function (app) {
-//   //DB Name and the url for database connection is from appConfig file in app.js
-//   urlConn = app.locals.urlConn;
-//   dbName = app.locals.dbName;
-//  // gomos =app.locals;
-//   return router;
-// };
