@@ -6,7 +6,7 @@ var urlConn, dbName;
 var dataFromDevices = [], dataFromAssets = [], dataFromSubCust = [], dataFromPayload = [];
 var factSrvcSchedule;
 const uuidv4 = require('uuid/v4');
-
+var dbo;
 var fs = require("fs");
 var dateTime = require("node-datetime");
 
@@ -20,7 +20,13 @@ const TRACE_STAGE = 2;
 const TRACE_TEST  = 3;
 const TRACE_DEV   = 4;
 const TRACE_DEBUG = 5;
-var  gomos = require("../../commanFunction/routes/commanFunction");
+var  gomos          =   require("../../commanFunction/routes/commanFunction");
+let gomosSchedule   =   require("../../commanfunction/routes/getServiceConfig");
+let gomosDevices    =   require("../../commanfunction/routes/getDevices");
+let gomosAssets     =   require("../../commanfunction/routes/getAssets");
+let gomosSubCustCd  =   require("../../commanfunction/routes/getSubCustomers");
+let goomosPayloads  =   require("../../commanfunction/routes/getPayloads");
+
 
 //method to update mqtt collection when particular data is taken from mqtt and inserted into fact.
 function updateMQTT(objId, db,processedFlag ) {
@@ -37,141 +43,6 @@ function updateMQTT(objId, db,processedFlag ) {
   );
 }
 
-//global method to get All the devices data.
-function getDevices() {
-  MongoClient.connect(
-    urlConn,
-    { useNewUrlParser: true },
-    function (err, connection) {
-      if (err) {
-        gomos.errorCustmHandler(NAMEOFSERVICE,"getDevices","getDevice function MongoClient Error"," ",err);
-        process.hasUncaughtExceptionCaptureCallback();
-      }
-      var db = connection.db(dbName);
-      db.collection("Devices")
-        .find()
-        .toArray(function (err, result) {
-          if (err) {
-            gomos.errorCustmHandler(NAMEOFSERVICE,"getDevices","This Query All Device From Collection Error","",err);
-            process.hasUncaughtExceptionCaptureCallback();
-          }
-          try{
-            for (var i = 0; i < result.length; i++) {
-              dataFromDevices.push(result[i]);
-            }
-            gomos.gomosLog(TRACE_PROD,"getDevices - No. of devices read from collection", dataFromDevices.length);
-          }
-          catch(err){
-            gomos.errorCustmHandler(NAMEOFSERVICE,"getDevices","THis IS Error From Try Catch Some","",err);
-          }
-         
-          connection.close();
-        });
-    }
-  );
-}
-
-//global method to get All the Assets data.
-function getAssets() {
-  MongoClient.connect(
-    urlConn,
-    { useNewUrlParser: true },
-    function (err, connection) {
-      if (err) {
-        process.hasUncaughtExceptionCaptureCallback();
-      }
-      var db = connection.db(dbName);
-      db.collection("Assets")
-        .find()
-        .toArray(function (err, result) {
-          if (err) {
-            gomos.errorCustmHandler(NAMEOFSERVICE,"getAssets","THis is Getting All Asset","",err);
-            process.hasUncaughtExceptionCaptureCallback();
-          }
-          try{
-            for (var i = 0; i < result.length; i++) {
-              dataFromAssets.push(result[i]);
-            }
-            gomos.gomosLog(TRACE_PROD,"getAssets - No. of assets read from collection", dataFromAssets.length);
-          }
-          catch(err){
-            gomos.errorCustmHandler(NAMEOFSERVICE,"getAssets","This is generated From Try Catch error","",err);            
-          }
-         
-          connection.close();
-        });
-    }
-  );
-}
-
-//global method to get All the SubCustomers data.
-function getSubCustomers() {
-  MongoClient.connect(
-    urlConn,
-    { useNewUrlParser: true },
-    function (err, connection) {
-      if (err) {
-        gomos.errorCustmHandler(NAMEOFSERVICE,"getSubCustomers","THis is MongoClient Error","",err);            
-        process.hasUncaughtExceptionCaptureCallback();
-      }
-      var db = connection.db(dbName);
-      db.collection("SubCustomers")
-        .find()
-        .toArray(function (err, result) {
-          if (err) {
-            gomos.errorCustmHandler(NAMEOFSERVICE,"getSubCustomers","This IS Getting All SubCustmoer","",err);
-            process.hasUncaughtExceptionCaptureCallback();
-          }
-          try{
-            for (var i = 0; i < result.length; i++) {
-              dataFromSubCust.push(result[i]);
-            }
-            gomos.gomosLog(TRACE_PROD,"getSubCustomers - No. of subeCustomer read from collection", dataFromSubCust.length);
-          }
-          catch(err){
-            gomos.errorCustmHandler(NAMEOFSERVICE,"getSubCustomers","This is Try catch Of getting All Sub Custmoer",err);    
-          }
-          connection.close();
-        });
-    }
-  );
-}
-
-//global method to get All the Payloads data.
-function getPayloads() {
-  MongoClient.connect(
-    urlConn,
-    { useNewUrlParser: true },
-    function (err, connection) {
-      if (err) {
-        gomos.errorCustmHandler(NAMEOFSERVICE,"getPayloads","This is Mongo Client Error","",err);  
-        process.hasUncaughtExceptionCaptureCallback();
-      }
-      var db = connection.db(dbName);
-      db.collection("Payloads")
-        .find()
-        .toArray(function (err, result) {
-          if (err) {
-            gomos.errorCustmHandler(NAMEOFSERVICE,"getPayloads","This Is Getting All PayloadId","",err);  
-            process.hasUncaughtExceptionCaptureCallback();
-          }
-          try{
-            for (var i = 0; i < result.length; i++) {
-              dataFromPayload.push(result[i]);
-            }
-            gomos.gomosLog(TRACE_PROD,"getPayload - No. of payload read from collection", dataFromPayload.length);
-          }
-          catch(err){
-            gomos.errorCustmHandler(NAMEOFSERVICE,"getPayloads","This Is Try Catch Of Getting All Payload","",err);  
-          }
-          
-          connection.close();
-        });
-      // db.on('close', () => { console.log('-> lost connection'); });
-      // db.on('reconnect', () => { console.log('-> reconnected'); });
-    }
-  );
-}
 
 //method to look into mqtt collection to get the messages which is not yet processed
 //and insert into fact collection and also update mqtt.
@@ -198,16 +69,16 @@ function processFactMessages() {
   //var tempSchedule = scheduleTemp.scheduleJob("*/30 * * * * *", function() {
   var tempSchedule = scheduleTemp.scheduleJob(schPattern, function () {
     gomos.gomosLog(TRACE_PROD,"Processing Started - Fact Messages");
-    MongoClient.connect(
-      urlConn,
-      { useNewUrlParser: true },
-      function (err, connection) {
-        if (err) {
-           gomos.errorCustmHandler(NAMEOFSERVICE,"processFactMessages","This Mongo Client  Error","",err);  
-          process.hasUncaughtExceptionCaptureCallback();
-        }
-        var db = connection.db(dbName);
-        db.collection("MqttDump")
+    // MongoClient.connect(
+    //   urlConn,
+    //   { useNewUrlParser: true },
+    //   function (err, connection) {
+    //     if (err) {
+    //        gomos.errorCustmHandler(NAMEOFSERVICE,"processFactMessages","This Mongo Client  Error","",err);  
+    //       process.hasUncaughtExceptionCaptureCallback();
+    //     }
+    //     var db = connection.db(dbName);
+    dbo.collection("MqttDump")
           .find({ processed: "N" }).limit( 100 )
           .toArray(function (err, result) {
             if (err) {
@@ -226,7 +97,7 @@ function processFactMessages() {
                var id  = result[this.index]._id
                gomos.gomosLog(TRACE_DEBUG,"processFactMessages - going to process for index",this.index );
               var currentTime = new Date(new Date().toISOString());
-                db.collection("MqttDump")
+                dbo.collection("MqttDump")
                 .findOneAndUpdate(
                    {
                      $and: [
@@ -252,7 +123,7 @@ function processFactMessages() {
                 gomos.gomosLog(TRACE_DEV,"processFactMessages - going to process after updation for id, mac , payloadid and CreatedTime",objId+":"+mac+":"+payloadId+":"+createdTime );
                 if (dataFromPayload.filter(item => item.mac == mac).length == 0 ) {
                   processedFlag = "E"
-                  updateMQTT(objId, db, processedFlag);
+                  updateMQTT(objId, dbo, processedFlag);
                   gomos.gomosLog(TRACE_TEST,"Payloads Not Present : Please associate with - " , mac );
                 }
                 else {
@@ -260,7 +131,7 @@ function processFactMessages() {
                   gomos.gomosLog(TRACE_DEBUG,"processFactMessages - dataFromPayload if mac present - "+ mac,filetredPayloads);
                   if (filetredPayloads.filter(item => item.payloadId == payloadId).length == 0  ) {
                     processedFlag = "E"
-                    updateMQTT(objId, db, processedFlag);
+                    updateMQTT(objId, dbo, processedFlag);
                     gomos.gomosLog(TRACE_TEST,"Payloads Not Present : Please associate with", mac + ":" + payloadId );
             
                   }
@@ -273,7 +144,7 @@ function processFactMessages() {
                     gomos.gomosLog(TRACE_DEBUG,"processFactMessages - filteredpayloads where payloadId matched "+ payloadId,sensorNms);          
                     if(processByFact !== "Y" || processByFact == undefined){
                       processedFlag = "IG"
-                      updateMQTT(objId, db, processedFlag);
+                      updateMQTT(objId, dbo, processedFlag);
                       gomos.gomosLog(TRACE_TEST," Ignoring Payload - ProcessByFact Value", processByFact +":"+ mac + ":" + payloadId);
                     }
                     else if(processByFact == "Y"){
@@ -282,7 +153,7 @@ function processFactMessages() {
                     //of particular mac.
                     if (dataFromDevices.filter(item => item.mac == mac).length == 0) {
                       processedFlag = "E";
-                      updateMQTT(objId, db, processedFlag);
+                      updateMQTT(objId, dbo, processedFlag);
                       gomos.gomosLog(TRACE_TEST,"Device Not Present : Please add a Device for - " , mac);
                     }
                     else {
@@ -295,7 +166,7 @@ function processFactMessages() {
                       //of particular assetId.
                       if (dataFromAssets.filter(item => item.assetId == assetsId).length == 0) {
                         processedFlag = "E";
-                        updateMQTT(objId, db, processedFlag);
+                        updateMQTT(objId, dbo, processedFlag);
                         gomos.gomosLog(TRACE_PROD,"Assets Not Present for mac ", mac +":"+ assetsId);
                       }
                       else {
@@ -309,7 +180,7 @@ function processFactMessages() {
                         //and serviceProviderCd of particular subCustomerCd.
                         if (dataFromSubCust.filter(item => item.subCustCd == subCustCd).length == 0) {
                         processedFlag = "E"; 
-                        updateMQTT(objId, db, processedFlag);                         
+                        updateMQTT(objId, dbo, processedFlag);                         
                         gomos.gomosLog(TRACE_TEST,"SubCustomers Not Present for mac ", mac +":"+ subCustCd);
                         }
                         else {
@@ -371,17 +242,17 @@ function processFactMessages() {
                         // var payloadObject = dataFromPayload[index];
                         gomos.gomosLog(TRACE_DEBUG,"This is  payloadData",payloadData);
                         if(payloadData.processByState == "Y"){
-                        activeDevice(db,dataToInsert);
+                        activeDevice(dbo,dataToInsert);
                         }
                         if(payloadData.AckProcess == "Y"){
                          if(dataToInsert.payloadId == "GHPStatus"){
-                          updateDevInstrForRActive(db,dataToInsert,result[count].Token);
+                          updateDevInstrForRActive(dbo,dataToInsert,result[count].Token);
                          }else{
-                          updateDeviceInstruction(db,dataToInsert ,result[count].Token);
+                          updateDeviceInstruction(dbo,dataToInsert ,result[count].Token);
                          }
                         }
                             gomos.gomosLog(TRACE_DEBUG,"processFactMessages -  where dataToInsert ready ",dataToInsert);
-                            db.collection("MsgFacts").insertOne(dataToInsert, function (
+                            dbo.collection("MsgFacts").insertOne(dataToInsert, function (
                               err,
                               result) {
                               if (err) {
@@ -392,13 +263,13 @@ function processFactMessages() {
                             });
 
                             //Update processed flag in 'MqttDump'
-                            // updateMQTT(objId, db);
+                            // updateMQTT(objId, dbo);
                             processedFlag = "Y"
-                            updateMQTT(objId, db, processedFlag);
+                            updateMQTT(objId, dbo, processedFlag);
                           }
                           else{
                             processedFlag = "E";  
-                            updateMQTT(objId, db, processedFlag);
+                            updateMQTT(objId, dbo, processedFlag);
                             gomos.gomosLog(TRACE_TEST,"Something is missing for this record - ",
                             "sensors : " + sensorNms + "assets : " + assetsId + "subcust : " + subCustCd + "cust : " + custCd 
                             + "SP : " + spCd);
@@ -432,12 +303,12 @@ function processFactMessages() {
           });
         }
       );
-    });
+    // });
 }
 
-function activeDevice(db,dataToInsert){
+function activeDevice(dbo,dataToInsert){
 
-       db.collection("DeviceState").find({"mac": dataToInsert.mac})
+       dbo.collection("DeviceState").find({"mac": dataToInsert.mac})
        .toArray(function (err, result2) {
          if (err) {
              gomos.errorCustmHandler(NAMEOFSERVICE,"activeDevice","This Is Query Error","",err);  
@@ -445,7 +316,7 @@ function activeDevice(db,dataToInsert){
               }
            try{
             var currentTime = new Date(new Date().toISOString());
-            db.collection("DeviceState").findOneAndUpdate({
+            dbo.collection("DeviceState").findOneAndUpdate({
               $and: [
                 {_id: result2[0]["_id"]},
                 {updatedTime:result2[0].updatedTime}
@@ -461,7 +332,7 @@ function activeDevice(db,dataToInsert){
                    }
                 try{
                   gomos.gomosLog(TRACE_DEBUG,"This is result of Update ", dataToInsert.mac)
-                 db.collection("Devices").find({"mac":dataToInsert.mac})
+                 dbo.collection("Devices").find({"mac":dataToInsert.mac})
                  .toArray(function (err, result1) {
                    if (err) {
                        gomos.errorCustmHandler(NAMEOFSERVICE,"activeDevice","This is Query Error",err);  
@@ -531,13 +402,13 @@ function activeDevice(db,dataToInsert){
                         
                       // if(payloadObject.AckProcess == "Y"){
                       //  if(dataToInsert.payloadId == "GHPStatus"){
-                      //   updateDevInstrForRActive(db,dataToInsert,Token);
+                      //   updateDevInstrForRActive(dbo,dataToInsert,Token);
                       //  }else{
-                      //   updateDeviceInstruction(db,dateTime,dataToInsert ,Token);
+                      //   updateDeviceInstruction(dbo,dateTime,dataToInsert ,Token);
                       //  }
                       // }
                        gomos.gomosLog(TRACE_DEBUG,"This Is key of devicesStateKeyValue Last",devicesStateKeyValue);  
-                       updateDeviceState(db,_id,devicesStateKeyValue,dateTime);
+                       updateDeviceState(dbo,_id,devicesStateKeyValue,dateTime);
                      
                  }
                 catch(err){
@@ -560,7 +431,7 @@ function activeDevice(db,dataToInsert){
  gomos.gomosLog(TRACE_DEBUG,"this is called",dataToInsert);
 }
 
-function updateDevInstrForRActive(db,dataToInsert,Token){
+function updateDevInstrForRActive(dbo,dataToInsert,Token){
   gomos.gomosLog(TRACE_PROD,"This updateDevInstrForRActive Data  "+Token , dataToInsert);
   var criteria = {
     "mac": dataToInsert.mac,
@@ -568,7 +439,7 @@ function updateDevInstrForRActive(db,dataToInsert,Token){
     "sourceMsg.referenceToken": Token
   }
   
-  db.collection("DeviceInstruction")
+  dbo.collection("DeviceInstruction")
   .find(criteria)
   .toArray(function (err, result) {
     if (err) {
@@ -577,26 +448,16 @@ function updateDevInstrForRActive(db,dataToInsert,Token){
     if(result.length!=0){
       gomos.gomosLog(TRACE_DEV,"This is find Of updateDevInstrForRActive",result);
       for(var i =0; i< result.length; i++){
-// var tempobj = {
-//   "_id": uuidv4(),
-//   "mac": dataToInsert.mac,
-//    "DeviceName": dataToInsert.DeviceName,
-//    "type": "InActiveJob",
-//    "sourceMsg":result[i].sourceMsg,
-//    "createdTime":dateTime,
-//    "updatedTime": dateTime
-// }
-  updatedDeviceinstruction(db,result[i]); 
-//  DeviceInstructionInsert(db,tempobj);
+
+  updatedDeviceinstruction(dbo,result[i]); 
+//  DeviceInstructionInsert(dbo,tempobj);
  
       }
-  
-   
     }
     gomos.gomosLog(TRACE_DEV,"This is find Of updateDevInstrForRActive",result);
   });
 }
-function updateDeviceInstruction(db,dataToInsert,Token){
+function updateDeviceInstruction(dbo,dataToInsert,Token){
 gomos.gomosLog(TRACE_DEBUG,"This updateDeviceInstruction Data  "+Token , dataToInsert);
 var criteria = {
   "mac": dataToInsert.mac,
@@ -604,7 +465,7 @@ var criteria = {
   "sourceMsg.Token": Token
 }
 
-db.collection("DeviceInstruction")
+dbo.collection("DeviceInstruction")
 .find(criteria)
 .toArray(function (err, result) {
   if (err) {
@@ -621,11 +482,11 @@ db.collection("DeviceInstruction")
 
       if(payloadObject.processByActiveJobs == "N"){
         gomos.gomosLog(TRACE_DEV,"This is processByActiveJobs false ",payloadObject.processByActiveJobs );
-        deleteinstruction(db,result[0]._id);
+        deleteinstruction(dbo,result[0]._id);
       }else if(payloadObject.processByActiveJobs =="Y") {
         gomos.gomosLog(TRACE_DEV,"This is processByActiveJobs True ",payloadObject.processByActiveJobs );
-        deleteinstruction(db,result[0]._id);
-        insertActivejob(db,result[0],dataToInsert);
+        deleteinstruction(dbo,result[0]._id);
+        insertActivejob(dbo,result[0],dataToInsert);
       } 
     }
     else{
@@ -639,7 +500,7 @@ db.collection("DeviceInstruction")
 });
 gomos.gomosLog(TRACE_DEBUG,"this callig after Find Of Deviceinstruction");
 } 
-function insertActivejob(db,dataInsruction,dataToInsert){ 
+function insertActivejob(dbo,dataInsruction,dataToInsert){ 
   gomos.gomosLog(TRACE_DEBUG,"this is need For Insert", dataInsruction);
   gomos.gomosLog(TRACE_DEBUG,"this is need For Insert", dataToInsert);
   var keysofBNm = Object.keys(dataInsruction.sourceMsg.body);
@@ -688,7 +549,7 @@ for(var i = 0 ; i< keyForRemove.length; i++){
         data["sourceMsg"]["body"]["ActionTime"] = compareDate(temp[j]);
      
       }
-      DeviceInstructionInsert(db,data);
+      DeviceInstructionInsert(dbo,data);
      }
     }
   }else{
@@ -718,15 +579,11 @@ for(var i = 0 ; i< keyForRemove.length; i++){
           else{
             data["sourceMsg"]["body"]["ActionTime"] = arrayBName[k].value;
           }
-       
         }
-      DeviceInstructionInsert(db,data);
+      DeviceInstructionInsert(dbo,data);
    
-    }
-    
+    }  
   }
- 
-
 } 
 function compareDate(str1){
   gomos.gomosLog(TRACE_DEBUG,"this what coming Date", str1)
@@ -735,8 +592,8 @@ function compareDate(str1){
   var date1 = new Date("20"+arraydate[5], arraydate[4] - 1, arraydate[3],arraydate[2], arraydate[1], arraydate[0]);
   return date1;
   }
-function DeviceInstructionInsert(db,data){
-  db.collection("DeviceInstruction").insertOne(data, function (err, result) {
+function DeviceInstructionInsert(dbo,data){
+  dbo.collection("DeviceInstruction").insertOne(data, function (err, result) {
     if (err) {
       gomos.errorCustmHandler(NAMEOFSERVICE,"DeviceInstruction","This Query Error","",err);
       gomos.gomosLog(TRACE_DEV,"This is error",err);
@@ -746,8 +603,8 @@ function DeviceInstructionInsert(db,data){
   
   });
 } 
-function deleteinstruction(db,id){
-  db.collection("DeviceInstruction")
+function deleteinstruction(dbo,id){
+  dbo.collection("DeviceInstruction")
   .deleteOne({"_id": id},
     function (err, result) {
       if (err) {
@@ -758,8 +615,8 @@ function deleteinstruction(db,id){
     }
   );
 }
-function updateDeviceState(db,_id,devicesStateKeyValue, dateTime) {
-  db.collection("DeviceState").updateOne(
+function updateDeviceState(dbo,_id,devicesStateKeyValue, dateTime) {
+  dbo.collection("DeviceState").updateOne(
     { _id: _id },
     { $set: { sensors: devicesStateKeyValue.sensors,
       channel:  devicesStateKeyValue.channel,
@@ -774,11 +631,11 @@ function updateDeviceState(db,_id,devicesStateKeyValue, dateTime) {
     }
   );
 }
-function updatedDeviceinstruction(db,updatedData){
+function updatedDeviceinstruction(dbo,updatedData){
   var id = updatedData["_id"];
   dateTime = new Date(new Date().toISOString())
 
-  db.collection("DeviceInstruction").updateOne(
+  dbo.collection("DeviceInstruction").updateOne(
     { _id: id },
     { $set: { type: "executedJob",
       updatedTime :dateTime
@@ -793,42 +650,15 @@ function updatedDeviceinstruction(db,updatedData){
   );
 }
 
-function getServiceConfig() {
-  MongoClient.connect(
-    urlConn,
-    { useNewUrlParser: true },
-    function (err, connection) {
-      if (err) {
-        gomos.errorCustmHandler(NAMEOFSERVICE,"getServiceConfig","This MongoClient Error","",err);  
-        process.hasUncaughtExceptionCaptureCallback();
-      }
-      var db = connection.db(dbName);
-      db.collection("ServiceSchedules")
-        .find()
-        .toArray(function (err, result) {
-          if (err) {
-        gomos.errorCustmHandler(NAMEOFSERVICE,"getServiceConfig","This Query Error","",err);  
-            process.hasUncaughtExceptionCaptureCallback();
-          }
-          if (result.length > 0) {
-            try{
-              var keys = Object.keys(result[0]);
-              if (keys.includes("factSrvc")) {
-                factSrvcSchedule = result[0]["factSrvc"];
-                gomos.gomosLog(TRACE_PROD,"ServiceConfig freq. of Fact srvcs",factSrvcSchedule); 
-              }
-            }
-            catch(err){
-              gomos.errorCustmHandler(NAMEOFSERVICE,"getServiceConfig","This is Try catch Error","",err);
-            }
-           
-          }
-          connection.close();
-        });
-    }
-  );
-}
 
+async  function getAllconfig(){
+  factSrvcSchedule  =  await gomosSchedule.getServiceConfig(dbo,NAMEOFSERVICE,"factSrvc");
+  dataFromDevices   =  await gomosDevices.getDevices(dbo,NAMEOFSERVICE);
+  dataFromAssets    =  await gomosAssets.getAssets(dbo,NAMEOFSERVICE);
+  dataFromSubCust   =  await gomosSubCustCd.getSubCustomers(dbo,NAMEOFSERVICE);
+  dataFromPayload   =  await goomosPayloads.getPayloads(dbo,NAMEOFSERVICE)
+
+}
 var factTempInv = null;
 module.exports = function (app) {
   //const router = express.Router()
@@ -837,20 +667,23 @@ module.exports = function (app) {
   dbName = app.locals.dbName;
   // gomos =app.locals;
   // gomos.gomosLog(TRACE_DEBUG,urlConn);
+  MongoClient.connect(
+    urlConn,
+    { useNewUrlParser: true },
+    function (err, connection) {
+      if (err) {
+        // console.log(err);
+        gomos.errorCustmHandler(NAMEOFSERVICE,"handleMqttMessage",'THIS IS MONGO CLIENT CONNECTION ERROR','',err)
+        process.hasUncaughtExceptionCaptureCallback();
+      }
+     dbo = connection.db(dbName);
+    });
   setTimeout(function () {
     factTempInv = app;
-    getServiceConfig();
-    getDevices();
-    getAssets();
-    getSubCustomers();
-    getPayloads();
-  
-    //gomos.gomosLog(TRACE_TEST,"hello TAkreem", {name: "some"});
-    
-     
-    
+    getAllconfig();
+   
     setTimeout(function () {
       processFactMessages();
     }, 2000);
-  }, 100);
+  }, 2000);
 };
