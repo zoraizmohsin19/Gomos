@@ -17,6 +17,8 @@ const TRACE_TEST  = 3;
 const TRACE_DEV   = 4;
 const TRACE_DEBUG = 5;
 var  gomos = require("../../commanFunction/routes/commanFunction");
+var midllelayer = require("../../EndPointMiddlelayer/routes/middlelayer");
+
 /* GET home page. */
 router.get("/", function (req, res, next) {
   res.render("index", { title: "Express" });
@@ -46,6 +48,7 @@ router.post("/sendto/plateform", function (req, res, next) {
   var DeviceName = identifier.DeviceName;
   var subCustCd = identifier.subCustCd;
   var custCd = identifier.custCd;
+  var Token = identifier.Token; 
   // var assetId = identifier.assetId;
   var Date = identifier.Date;
   gomos.gomosLog(TRACE_DEBUG,"post method and getting following data ",userId+":"+password+":"+payloadId+":"+DeviceName+":"+custCd+":"+subCustCd); 
@@ -71,17 +74,19 @@ router.post("/sendto/plateform", function (req, res, next) {
           }
           if (result.length > 0) {
                 gomos.gomosLog(TRACE_DEBUG,"userId and password validation ",userId+":"+password);     
-                dataToStore = {
-                          payloadId,
-                          DeviceName,
-                          subCustCd,
-                          custCd,
-                          // assetId,
-                          Date,
-                          message
-                            }
-                gomos.gomosLog(TRACE_DEBUG," After userId and password validation dataToStore sendToMidlelayer",dataToStore);     
-                asyncPostData(res,dataToStore);            
+                // dataToStore = {
+                //           payloadId,
+                //           DeviceName,
+                //           subCustCd,
+                //           custCd,
+                //           // assetId,
+                //           Date,
+                //           message
+                //             }
+                // gomos.gomosLog(TRACE_DEBUG," After userId and password validation dataToStore sendToMidlelayer",dataToStore);     
+                // asyncPostData(res,dataToStore);  
+           midllelayer.endPointMiddelayerFn(urlConn,dbName,res,custCd,subCustCd,DeviceName,payloadId,dateTime,message,Token);
+          
           }
           else{
             gomos.gomosLog(TRACE_PROD,"UserId and password not validate");     
@@ -91,17 +96,17 @@ router.post("/sendto/plateform", function (req, res, next) {
    });
   });
 });
-async function asyncPostData(res,dataToStore) {
-  try {
-    const response = await axios.post('http://localhost:3996/sendto', {body: dataToStore});
-    gomos.gomosLog(TRACE_PROD,"success in endPoint and response value come from middlelayer :", response["data"]);     
-    res.json(response["data"])
-      } catch(err) {
-        gomos.errorCustmHandler(NAMEOFSERVICE,"asyncPostData",'THIS IS TRY CATCH ERROR','',err)
-        res.json("somthing wrong");
-      }
+// async function asyncPostData(res,dataToStore) {
+//   try {
+//     const response = await axios.post('http://localhost:3996/sendto', {body: dataToStore});
+//     gomos.gomosLog(TRACE_PROD,"success in endPoint and response value come from middlelayer :", response["data"]);     
+//     res.json(response["data"])
+//       } catch(err) {
+//         gomos.errorCustmHandler(NAMEOFSERVICE,"asyncPostData",'THIS IS TRY CATCH ERROR','',err)
+//         res.json("somthing wrong");
+//       }
 
-}
+// }
 module.exports = function (app) {
   //DB Name and the url for database connection is from appConfig file in app.js
   urlConn = app.locals.urlConn;
