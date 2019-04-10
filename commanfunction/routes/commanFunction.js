@@ -50,11 +50,7 @@ exports.gomosLog = function(x){
     var errorobj ={
       DateTime : dateTime,
       serviceName: arguments[0],
-      functionName : arguments[1],
-      ErrorCode :arguments[4].statusCode,
-       Error : arguments[4].toString(),
-       typeofErrorstack:  arguments[4].stack
-  
+      functionName : arguments[1]
     }
     if(arguments[2] != ''){
       errorobj["messageInfo"] = arguments[2]
@@ -62,6 +58,16 @@ exports.gomosLog = function(x){
     if(arguments[3] != '' || arguments[3] != undefined || arguments[3] != null){
       errorobj["message"] = arguments[3]
     }
+    try {
+      errorobj["ErrorCode"] =arguments[4].statusCode,
+      errorobj["Error"] = arguments[4].toString(),
+      errorobj["typeofErrorstack"] = arguments[4].stack  
+    } catch (error) {
+      errorobj["ErrorMassage"] = arguments[4]
+    }
+   
+
+
     var strObj = JSON.stringify(errorobj)
   // console.log(typeofError);
     writeStream.write(

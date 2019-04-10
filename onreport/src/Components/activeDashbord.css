@@ -318,8 +318,9 @@ textarea.ActivetestArea {
 }
 .ActiveCorner {
     background: rgba(185,249,174,.85);
-    height: 600px;
+    /* height: 600px; */
     /* margin: -15px; */
+    height: 790px;
     padding-top: 20px;
     padding-left: 5px;
     padding-right: 5px;
@@ -472,4 +473,35 @@ element.style {
 }
 .spanclass {
     font-size: 12px;
+}
+.NotActivefont{
+    font-weight: 500;
+    color: gray;
+
+}
+.NotActivefont{
+    font-weight: bold;
+    color:black;
+}
+.marginbtnManual {
+    margin-bottom:46px  !important
+}
+.pull-right {
+    float: right !important; 
+}
+.pull-left {
+    float: left !important; 
+}
+.classForsvgManual{
+    background-image:url(../layout/MANUAL.svg);
+    background-repeat: no-repeat;
+}
+.classForsvgatomatic{
+    background-image:url(../layout/automatic.svg);
+    background-repeat: no-repeat;
+}
+
+.fontsizeicon12 {
+    width: 19px;
+    margin-right: 2px;
 }

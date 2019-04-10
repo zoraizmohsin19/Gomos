@@ -13,7 +13,7 @@ const  TRACE_PROD = 1
 const TRACE_STAGE = 2;
 const TRACE_TEST  = 3;
 const TRACE_DEV   = 4;
-const TRACE_DEBUG = 5;
+const TRACE_DEBUG = 5; 
 var  gomos = require("../../commanFunction/routes/commanFunction");
 var midllelayer = require("../../EndPointMiddlelayer/routes/middlelayer");
 var urlConn, dbName;
@@ -1581,6 +1581,103 @@ var dateTime = new Date()
   });
 });
 });
+router.post("/ActivesaveForManualOverForTiles", function (req,res, next){
+  accessPermission(res);
+  var body = req.body;
+  var message     =   body.dataBody; 
+
+  var mac         =   body.mac;
+gomos.gomosLog(TRACE_DEBUG,"this is message Value ActivesaveForManualOverForTiles", message);
+MongoClient.connect(
+  urlConn,
+  { useNewUrlParser: true },
+  function (err, connection) {
+    if (err) {
+      next(err);
+    }
+    var db = connection.db(dbName);
+var dateTime = new Date()
+    gomos.gomosLog(TRACE_DEBUG,"This is called in Alert"); 
+    var dataTime = new Date(new Date().toISOString());
+      var temobj={}
+      
+       var businessNameKey = Object.keys(message);
+      // for (let [key, value] of Object.entries(message)) {  
+      //   temobj[key]= value;
+      // }
+       var object = {
+
+        "sourceMsg": {
+          "body":temobj 
+        },
+        
+        "updatedTime": dataTime,
+     
+       } ;
+       temobj[`sourceMsg.body.${businessNameKey[0]}.pendingMode`] = message[businessNameKey[0]]["mode"]; 
+       gomos.gomosLog(TRACE_DEBUG,"This is log for data submit Data ActivesaveForManualOverForTiles",temobj );
+      db.collection("DeviceInstruction")
+      .updateOne( {"type": "SentManOverride","mac": mac},
+       { $set: temobj 
+      }
+      ,function (err, result) {
+        if (err) {
+      gomos.gomosLog(TRACE_DEBUG,"this err",err);  
+        }
+        gomos.gomosLog(TRACE_DEBUG,"This is device Instruction for ClimateSave", result);
+        res.json(result)
+  });
+});
+});
+router.post("/ActivesaveForManualOver", function (req,res, next){
+  accessPermission(res);
+  var body = req.body;
+  var message     =   body.dataBody; 
+
+  var mac         =   body.mac;
+gomos.gomosLog(TRACE_DEBUG,"this is message Value", message);
+MongoClient.connect(
+  urlConn,
+  { useNewUrlParser: true },
+  function (err, connection) {
+    if (err) {
+      next(err);
+    }
+    var db = connection.db(dbName);
+var dateTime = new Date()
+    gomos.gomosLog(TRACE_DEBUG,"This is called in Alert"); 
+    var dataTime = new Date(new Date().toISOString());
+      var temobj={}
+      for (let [key, value] of Object.entries(message)) {  
+        temobj[key]= value;
+      }
+       var object = {
+
+        "sourceMsg": {
+          "body":temobj 
+        },
+        
+        "updatedTime": dataTime,
+     
+       } ;
+      //  object["sourceMsg"]["ActionType"]  = payloadId;
+      
+       gomos.gomosLog(TRACE_DEBUG,"This is log for data submit Data",object );
+      db.collection("DeviceInstruction")
+      .updateOne( {"type": "SentManOverride","mac": mac},
+       { $set: { "sourceMsg.body":temobj,
+      updatedTime :dateTime
+        } 
+      }
+      ,function (err, result) {
+        if (err) {
+      gomos.gomosLog(TRACE_DEBUG,"this err",err);  
+        }
+        gomos.gomosLog(TRACE_DEBUG,"This is device Instruction for ClimateSave", result);
+        res.json(result)
+  });
+});
+});
 router.post("/getAClimateparameter", function (req,res, next){
   accessPermission(res);
   var body = req.body;
@@ -1614,6 +1711,40 @@ MongoClient.connect(
 });
 
 });
+router.post("/getAManualOverride", function (req,res, next){
+  accessPermission(res);
+  var body = req.body;
+  var message     =   body.dataBody; 
+  var mac         =   body.mac;
+// gomos.gomosLog(TRACE_TEST,"this is message Value", message);
+gomos.gomosLog(TRACE_TEST,"this is message Value", mac);
+MongoClient.connect(
+  urlConn,
+  { useNewUrlParser: true },
+  function (err, connection) {
+    if (err) {
+      next(err);
+    }
+    var db = connection.db(dbName);
+      db.collection("DeviceInstruction")
+      .findOne( {"type": "SentManOverride","mac": mac}
+      ,function (err, result) {
+        if (err) {
+      gomos.gomosLog(TRACE_TEST,"this err",err);  
+        }
+        gomos.gomosLog(TRACE_TEST,"This is device Instruction for ClimateSave", result);
+        try {
+          res.json(result["sourceMsg"]["body"]);
+        } catch (error) {
+          gomos.errorCustmHandler(NAMEOFSERVICE,"getAClimateparameter", "Sending DataDeviceInstruction ","",error);
+          res.json(error);
+        }
+       
+  });
+});
+
+});
+
 //get the operations based on serviceProviderCode,CustomerCode,SubCustomerCode and SensorName.
 router.get("/getOperations", function (req, res, next) {
   var query = url.parse(req.url, true).query;

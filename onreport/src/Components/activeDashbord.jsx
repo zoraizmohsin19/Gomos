@@ -17,7 +17,7 @@ class activeDashbord extends Component {
       super();
       this.state={
         value: { min: 2, max: 10 },
-        endpoint: "http://localhost:4001",
+        endpoint: "http://52.212.188.65:4001",
         channelName: [],
         actionTypes: [],
         formStructure: '',
@@ -101,7 +101,8 @@ class activeDashbord extends Component {
         lastPayloadDataArray: [],
         sentCommandArrayLenght: "",
         rowClickedId: "",
-        age:""
+        age:"",
+        DefaulaManualOverride: {}
   
       }
 
@@ -126,7 +127,7 @@ class activeDashbord extends Component {
     onChange = e => this.setState({ [e.target.name]: e.target.value });
     Submit(){
       var me = this;
- const {configkeyInput,configkeyInputKeyValue,selectedAtionType,selectedChannelB,formStructure} = this.state;
+ const {configkeyInput,configkeyInputKeyValue,selectedAtionType,selectedChannelB,formStructure,DefaulaManualOverride} = this.state;
  var dataToSendApi = {};
       if(formStructure == "table"){
         var tempArray = ["ON","OFF"];
@@ -231,12 +232,28 @@ for(var key =0; key < configkeyInput.length; key++) {
            }
 
 }
+if(formStructure == "manualOverride"){
+  //console.log("This is manualOverride")
+  //console.log(configkeyInputKeyValue)
+  //console.log(DefaulaManualOverride)
+
+  for(var key =0; key < configkeyInput.length; key++) {
+      dataToSendApi[configkeyInput[key]] = configkeyInputKeyValue[configkeyInput[key]]
+     } 
+      // dataToSendApi[selectedChannelB] = 1; 
+        //alert(dataToSendApi)
+  
+}
+//console.log()
     me.state.submitDataObj.payloadId   = selectedAtionType;
     me.state.submitDataObj.dataBody    = dataToSendApi;
     me.state.submitDataObj.isDaillyJob =  configkeyInputKeyValue["toggle"];
     me.state.submitDataObj.ChannelName = selectedChannelB;
     me.setState({submitDataObj :me.state.submitDataObj});
     me.callApiForAction();
+    if(formStructure == "manualOverride"){
+   me.callApiForManoverride();
+    }
 }
 SubmitForParameter(){
   // var me = this;
@@ -258,19 +275,45 @@ var me = this;
 }
 callApiForClimateSave(){
   var me = this;
-  axios.post("http://localhost:3992/ActiveClimatesave",me.state.submitDataObj)
+  axios.post("http://52.212.188.65:3992/ActiveClimatesave",me.state.submitDataObj)
   .then(json =>  {
   // if(json["data"] == "success"){
    
-  //   swal("Success!", "You Send Action!", "success");
+  //   swal("Success!", "You Send Action!", "success");ActivesaveForManualOver
   // 
   //alert("result")
   //console.log(json)
 });
 }
+callApiForManoverride(){
+  var me = this;
+  axios.post("http://52.212.188.65:3992/ActivesaveForManualOver",me.state.submitDataObj)
+  .then(json =>  {
+  // if(json["data"] == "success"){
+   
+  //   swal("Success!", "You Send Action!", "success");ActivesaveForManualOver
+  // 
+  //alert("result")
+  //console.log(json)
+});
+}
+callApiForManoverrideForTiles(){
+  var me = this;
+  axios.post("http://52.212.188.65:3992/ActivesaveForManualOverForTiles",me.state.submitDataObj)
+  .then(json =>  {
+  // if(json["data"] == "success"){
+   
+  //   swal("Success!", "You Send Action!", "success");ActivesaveForManualOver
+  // 
+  //alert("result")
+  ////console.log(json)
+});
+}
     callApiForAction(){
     var me = this;
-      axios.post("http://localhost:3992/ActiveDAction",me.state.submitDataObj)
+    //console.log(me.state.submitDataObj)
+    //alert(me.state.submitDataObj)
+      axios.post("http://52.212.188.65:3992/ActiveDAction",me.state.submitDataObj)
       .then(json =>  {
       if(json["data"] == "success"){
        
@@ -333,6 +376,13 @@ callApiForClimateSave(){
       var index = this.state.actionTypes.findIndex(element => element.payloadId == selectedAtionType);
       var objectpayload = this.state.actionTypes[index];
       var formStructure = objectpayload.formStructure;
+      //console.log(formStructure);
+      //console.log(formStructure);
+      //console.log(index);
+      //console.log(this.state.actionTypes);
+
+      //console.log(objectpayload);
+
       this.setState({formStructure: formStructure})
       var arrayOfChannel= [];
       if(objectpayload.sensors.Channel !== 0 && objectpayload.sensors.Channel !== undefined && objectpayload.sensors.Channel !== null ){
@@ -341,11 +391,17 @@ callApiForClimateSave(){
         }
 
         var  keysofObj = Object.keys(objectpayload.sensors)
+        //console.log(objectpayload);
+        if(formStructure == "manualOverride"){
+          
+         this.manualOverrideProcess( objectpayload,selectedAtionType);
+        }
         if(keysofObj.length >= 2){
           keysofObj.splice(keysofObj.indexOf("Channel"), 1);
           //console.log(objectpayload.sensors[keysofObj[0]]);
           var  allBusinessName = Object.values(objectpayload.sensors[keysofObj[0]]);
           //console.log(allBusinessName);
+        
           if(formStructure == "table"){
             var configkeyInputKeyValue = {};
             var tempArray = ["ON","OFF"];
@@ -400,6 +456,7 @@ callApiForClimateSave(){
              channelName: [],
              configkeyInput:allBusinessName,configkeyInputKeyValue:configkeyInputKeyValue});
         }
+        
         if(formStructure == "SetParameter"){
           var configkeyInputKeyValue = {};
           var  allBusinessName =[];
@@ -427,6 +484,22 @@ callApiForClimateSave(){
     }     
          //console.log(arrayOfChannel);
     }
+  manualOverrideProcess(objectpayload,selectedAtionType){
+    var configkeyInputKeyValue = {};
+         
+    var  keysofObj = Object.keys(objectpayload.sensors)
+    //console.log(keysofObj);
+    //console.log("This is of Data");
+    var  allBusinessName = Object.values(objectpayload.sensors[keysofObj[0]]);
+      for (let [key, value] of Object.entries(objectpayload.sensors[keysofObj[0]])) {  
+        configkeyInputKeyValue[value] = this.state.DefaulaManualOverride[value];
+        configkeyInputKeyValue[value+"toggle"] = (this.state.DefaulaManualOverride[value]["pendingMode"] == 0)? false : true;
+
+      }
+    this.setState({ selectedAtionType: selectedAtionType,
+       channelName: [],
+       configkeyInput:allBusinessName,configkeyInputKeyValue:configkeyInputKeyValue});
+  }
     getStrucOfClimateParam(){
       var sensorsArray = this.state.deviceAllData["sensors"];
       var data = sensorsArray.filter(item => item.climateControl.flag == "Y"); 
@@ -447,7 +520,29 @@ callApiForClimateSave(){
        callForActionType(value,deviceName){
        }
     
-      
+       AllSelectionManual(event){
+      const  {configkeyInputKeyValue, configkeyInput} =this.state;
+       //alert(event)
+       if(event === "manual"){
+        for (var i = 0 ; i< configkeyInput.length; i++ ) {  
+          configkeyInputKeyValue[configkeyInput[i]]['pendingMode'] =  0;
+          configkeyInputKeyValue[configkeyInput[i]+"toggle"] = false;
+
+        }
+        //alert("This is  configkeyInputKeyValue")
+        //console.log("configkeyInput")
+        //console.log(configkeyInput)
+        this.setState({configkeyInputKeyValue:configkeyInputKeyValue});
+       }
+       else{
+        for (var i = 0 ; i< configkeyInput.length; i++ ) {  
+          configkeyInputKeyValue[configkeyInput[i]]["pendingMode"] =  1;
+          configkeyInputKeyValue[configkeyInput[i]+"toggle"] = true;
+
+        }
+        this.setState({configkeyInputKeyValue:configkeyInputKeyValue});
+       }
+       }
     toggle() {
         this.setState({
           open: !this.state.open
@@ -488,7 +583,7 @@ callApiForClimateSave(){
         return this;
     }
      var ActiveJobsArray = [];
-    axios.post("http://localhost:3992/getActiveDashBoardDevice",{mac: this.state.CriteriaForOP.mac})
+    axios.post("http://52.212.188.65:3992/getActiveDashBoardDevice",{mac: this.state.CriteriaForOP.mac})
 
     .then(json =>  {
       //console.log("this componentDidMount getActiveDashBoardDevice");
@@ -506,6 +601,7 @@ callApiForClimateSave(){
     const socket = socketIOClient(endpoint);
     socket.emit('clientEvent', {mac: this.state.CriteriaForOP.mac});
     socket.on("FromAPI", data =>{
+      //console.log(data);
       var tempArrayFC = [];
       for(var i = 0;i< data.channel.length;i++){
         if(this.state.channelArray[i] != undefined && this.state.channelArray[i] !=null ){
@@ -535,6 +631,7 @@ this.fetchForClimate();
 this.fetchClimateControlAllData();
 this.fetchClimateControlDevice();
 this.fetchClimateParameter();
+this.fetchFromManualOverride();
 this.callForlastAlert();
 this.callForlastPayload();
 var onDeviceinstruction = socketIOClient(endpoint+"/onDeviceinstruction");
@@ -577,16 +674,16 @@ onDeviceinstruction.on('DeviceInstruction',function(data) {
    fetchPayload(){
      var me = this;
     var body = {mac: this.state.CriteriaForOP.mac}
-    axios.post("http://localhost:3992/ActiveActionTypeCall",body)
+    axios.post("http://52.212.188.65:3992/ActiveActionTypeCall",body)
 
     .then(json =>  {
       if(json.length !=0){
       //console.log(json["data"]);
       var index  = json["data"].findIndex(item => item.formStructure ==  "manualOverride");
       var containerdata = json["data"][index];
-      if(index != null && index != undefined){
-        json["data"].splice(index,1);
-      }
+      // if(index != null && index != undefined){
+      //   json["data"].splice(index,1);
+      // }
 
       //console.log(containerdata);
       //console.log("this is container data");
@@ -742,7 +839,7 @@ onDeviceinstruction.on('DeviceInstruction',function(data) {
     })
     .then((willDelete) => {
       if (willDelete) {
-        axios.delete("http://localhost:3992/deleteSentCommand?id="+ id)
+        axios.delete("http://52.212.188.65:3992/deleteSentCommand?id="+ id)
         .then(json =>  {
           swal("Poof! Your SentCommand  Info has been deleted!", {
             icon: "success",
@@ -759,13 +856,13 @@ onDeviceinstruction.on('DeviceInstruction',function(data) {
    }
 
    fetchClimateControlDevice(){
-    axios.post("http://localhost:3992/getActiveDAction",{mac:this.state.CriteriaForOP.mac})
+    axios.post("http://52.212.188.65:3992/getActiveDAction",{mac:this.state.CriteriaForOP.mac})
     .then(json =>  {
      this.setState({deviceAllData: json["data"]})
     })
    }
    fetchClimateParameter(){
-    axios.post("http://localhost:3992/getAClimateparameter",{mac:this.state.CriteriaForOP.mac})
+    axios.post("http://52.212.188.65:3992/getAClimateparameter",{mac:this.state.CriteriaForOP.mac})
     .then(json =>  {
       var keys1 = Object.keys(json["data"]);
       var obj={}
@@ -774,15 +871,25 @@ onDeviceinstruction.on('DeviceInstruction',function(data) {
       obj[keys1[i]+"higher"] = json["data"][keys1[i]][1];
       }
       //console.log(obj)
-      //console.log( json["data"])
+      //console.log( json["data"])getAManualOverride
      this.setState({Defaultparameter: obj})
+    })
+   }
+   fetchFromManualOverride(){
+    axios.post("http://52.212.188.65:3992/getAManualOverride",{mac:this.state.CriteriaForOP.mac})
+    .then(json =>  {
+      var keys1 = Object.keys(json["data"]);
+      var obj={}
+      console.log("This is all json data for getmanualoverride");
+      console.log(json["data"])
+     this.setState({DefaulaManualOverride: json["data"]})
     })
    }
    fetchForClimate(){
      var me =this;
      //alert("Hello This Working")
      //  THIS IS GETING SENSORNAME BASED ON SPCD,CUSTCD,SUBCUSTCD
-     fetch("http://localhost:3992/getSensorNames?spCode=" +this.state.CriteriaForOP.spCd +
+     fetch("http://52.212.188.65:3992/getSensorNames?spCode=" +this.state.CriteriaForOP.spCd +
      "&&custCd=" + this.state.CriteriaForOP.CustCd + "&&subCustCd=" + this.state.CriteriaForOP.subCustCd)
         .then(response => response.json())
         .then(json =>  {
@@ -811,6 +918,7 @@ onDeviceinstruction.on('DeviceInstruction',function(data) {
         // if(channelArray[index].ActionCond == 0){
          var obj = {}
          obj["channelName"] = data.devicebusinessNM;
+         obj["mode"] = data.mode;
          obj["currentStatus"] = channelArray[index].ActionCond;
          obj["age"]= age.hours+":"+ age.minutes;
          obj["UpdatedTime"] = dateFormat(data.dateTime, "dd-mmm HH:MM");
@@ -841,7 +949,7 @@ onDeviceinstruction.on('DeviceInstruction',function(data) {
       //console.log(submitDataObj)
       //alert("1")
       channelArray[channelAlerrModel["index"]].ActionCond = 0; 
-      submitDataObj.dataBody[channelAlerrModel["channelName"]]    = 0 ;
+      submitDataObj.dataBody[channelAlerrModel["channelName"]]    = { "mode": 0, "action": 0} ;
       //console.log("second Obj");
       //console.log(submitDataObj)
       me.setState({channelArray: channelArray, submitDataObj:submitDataObj ,show: false})
@@ -851,10 +959,11 @@ onDeviceinstruction.on('DeviceInstruction',function(data) {
       //alert("0")
         //alert( submitDataObj.dataBody[channelAlerrModel["channelName"]])
       channelArray[channelAlerrModel["index"]].ActionCond = 1; 
-      submitDataObj.dataBody[channelAlerrModel["channelName"]]  = 1 ;
+      submitDataObj.dataBody[channelAlerrModel["channelName"]]  = { "mode": 0, "action": 1} ;
       me.setState({channelArray: channelArray, submitDataObj: submitDataObj,show: false})
       // me.callApiForAction();
      } 
+     me.callApiForManoverrideForTiles();
      me.callApiForAction();
 }
 
@@ -879,7 +988,7 @@ function tokeyValue(o){
   }
   return temp;
 }
-  axios.post("http://localhost:3992/getAllClimateControl",{subCustCd:this.state.CriteriaForOP.subCustCd,custCd:this.state.CriteriaForOP.CustCd})
+  axios.post("http://52.212.188.65:3992/getAllClimateControl",{subCustCd:this.state.CriteriaForOP.subCustCd,custCd:this.state.CriteriaForOP.CustCd})
   .then(json =>  {
     //console.log("This fetchClimateControlAllData");
 var temp=[];
@@ -923,7 +1032,7 @@ fetchActiveJob(){
     startDate : this.state.startDatelimit,
     endDate: this.state.endDatelimit,
   }
-    axios.post("http://localhost:3992/ActiveJobs",ActiveBody)
+    axios.post("http://52.212.188.65:3992/ActiveJobs",ActiveBody)
     .then(json =>  {
        var ActiveJobsArray = json["data"]["ActiveJob"];
         if(json["data"]["ActiveJob"].length != 0){
@@ -954,7 +1063,7 @@ fetchActiveJob(){
   };
     if(this.state.filter.TypeOfJobs == "ExecutedJob"){
      
-        axios.post("http://localhost:3992/executedJob",body)
+        axios.post("http://52.212.188.65:3992/executedJob",body)
             .then(function (result) {
               var mainActiveJobdata  =   result.data;
               items   =   result.data.executedJob;
@@ -963,7 +1072,7 @@ fetchActiveJob(){
         me.setState({mAOfInactivejob:[],'in_prog':false});
       });
     }else if(this.state.filter.TypeOfJobs == "PendingJob"){
-      axios.post("http://localhost:3992/PendingJob",body)
+      axios.post("http://52.212.188.65:3992/PendingJob",body)
       .then(function (result) {
         var mainActiveJobdata  =   result.data;
         items   =   result.data.PendingJob;
@@ -1107,6 +1216,7 @@ changePage(page){
    }
  
     render() {
+    //console.log(this.state.channelAlerrModel.mode);
       // console.log(this.state.rowClickedId)
       const {selectedAtionType,formStructure,configkeyInputKeyValue,configkeyInput,sentCommandArray} = this.state;
       var state   =   this.state;
@@ -1298,6 +1408,47 @@ changePage(page){
 
    </div>;
   }
+  if(formStructure == "manualOverride"){
+    // console.log(configkeyInputKeyValue);
+    // console.log("This I Want See");
+  
+      inputField = <form > 
+      <div className = 'col-sm-12 col-xs-12 col-md-12 col-lg-12'>
+      <div className ="col-sm-12 col-lg-12 col-xs-12">
+      <div className ="col-sm-4 col-lg-4 col-xs-4"></div>
+      <div className ="col-sm-4 col-lg-4 col-xs-4">
+      <div class="marginbtnManual">
+      <button className="btn btn-default btn-xs pull-left" type="button" onClick={this.AllSelectionManual.bind(this,"manual")}>All Manual</button> 
+      <button className="btn btn-default btn-xs pull-right" type ="button" onClick={this.AllSelectionManual.bind(this,"automatic")}>All Automatic</button>
+      </div>
+      <div className ="col-sm-4 col-lg-4 col-xs-4"></div>
+      </div>
+      </div>
+      {this.state.configkeyInput.map(item => <div className= "col-sm-12"><div className='col-sm-4 col-xs-4 col-md-4 col-lg-4 '>
+       <label>{item}</label>
+       </div>
+       <div className ="col-sm-8 col-xs-8 col-md-8 col-lg-8">
+       <span  className={(configkeyInputKeyValue[item+"toggle"])?"Activefont": "NotActivefont" }> Manual</span>
+       <label className="switch ActiveSinput">
+          <input type="checkbox" value = "Text" checked ={ configkeyInputKeyValue[item+"toggle"]}
+           onChange={e =>{
+            configkeyInputKeyValue[item+"toggle"] = !configkeyInputKeyValue[item+"toggle"]
+            configkeyInputKeyValue[item]["pendingMode"] = (configkeyInputKeyValue[item+"toggle"] == true)? 1: 0 
+             this.setState({configkeyInputKeyValue : configkeyInputKeyValue})}} />
+          <span className="slider round"></span>
+        </label> &nbsp; &nbsp;  &nbsp; &nbsp;  &nbsp; &nbsp; &nbsp;
+        <span  className={(configkeyInputKeyValue[item+"toggle"])?"NotActivefont": "Activefont" }> Automatic</span>
+        </div>
+        </div>
+        )}
+       </div>
+       <div class="form-group"> 
+       <div class="col-sm-offset-2 col-sm-10">
+         <button type="button" class="btn btn-default" onClick = {this.Submit}>Submit</button>
+       </div>
+        </div>
+       </form>;
+     }
   if(formStructure == "SetParameter"){
     inputField =  <div className ="">
     <div className="col-xs-12">
@@ -1361,7 +1512,7 @@ changePage(page){
        className12[key+"Classerror"] = "Acustmborder";
       }
      });
-    inputField =  <form class="form-horizontal" >
+    inputField =  <form className="form-horizontal" >
      <div className="AcSetInterval">
     {this.state.configkeyInput.map(item =><div class="form-group">
       <label class="control-label col-sm-2" for="ON">Interval:</label>
@@ -1387,6 +1538,7 @@ changePage(page){
     </div>
     </form>;
    }
+  
   if(formStructure == "table"){
      var tempArray = ["ON","OFF"];
      configkeyInput.forEach(function(key) {
@@ -1691,6 +1843,7 @@ inputField =
             P_name_class= "ActivePclass" 
             heading_class_name=" ActiveSheading"
             message={item.Value}
+           
             dateTime = {dateFormat(item.dateTime, "dd-mmm HH:MM")}
            />
          </div>
@@ -1707,6 +1860,8 @@ inputField =
             P_name_class= "ActivePclass" 
             heading_class_name=" ActiveSheading"
             message={(item.Value == 1)? "ON":"OFF" }
+            div_icon_class=" fontsizeicon12"
+            iconclass= {item.mode}
             dateTime = {dateFormat(item.dateTime, "dd-mmm HH:MM")}
          />
          </div>
@@ -1753,7 +1908,7 @@ inputField =
     
       <div className ="paddForm">
       {inputField}
-   
+    
      </div>
    </div>
 
@@ -1831,14 +1986,15 @@ inputField =
       <div className= "col-xs-7">
       <label>Channel is  {(this.state.channelAlerrModel.currentStatus == 1)?"ON":"OFF"} since :</label> <span>{this.state.channelAlerrModel.age} hrs.</span>
       </div>
+      <div className= "col-xs-12">
+      <label>Current Mode :</label> <span>{(this.state.channelAlerrModel.mode == 1)?"Automatic":"Manual"}</span>
+      </div>
       </div>
  </Modal.Body>
           <Modal.Footer>
-            <label className="Mlabel">Action Requested: <u> Switch {(this.state.channelAlerrModel.currentStatus == 1)?"OFF":"ON"}</u>  &nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;Please Confirm ?</label>
+            <label className="Mlabel">Action Requested: <u> Switch {(this.state.channelAlerrModel.currentStatus == 1)?"OFF":"ON"}</u> And <u>Manual</u> Please Confirm ?</label>
             <button className="btn btn-sm " onClick = {this.handleClose}>Cancel</button>
-            <button   className="btn btn-sm btn-success" onClick = {this.handleSubmit} >Submit</button>
-           
-           
+            <button   className="btn btn-sm btn-success" onClick = {this.handleSubmit} >Submit</button>    
           </Modal.Footer>
         </Modal>
 </div>

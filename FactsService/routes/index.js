@@ -20,12 +20,12 @@ const TRACE_STAGE = 2;
 const TRACE_TEST  = 3;
 const TRACE_DEV   = 4;
 const TRACE_DEBUG = 5;
-var  gomos          =   require("../../commanfunction/routes/commanFunction");
-let gomosSchedule   =   require("../../commanfunction/routes/getServiceConfig");
-let gomosDevices    =   require("../../commanfunction/routes/getDevices");
-let gomosAssets     =   require("../../commanfunction/routes/getAssets");
-let gomosSubCustCd  =   require("../../commanfunction/routes/getSubCustomers");
-let goomosPayloads  =   require("../../commanfunction/routes/getPayloads");
+var  gomos          =   require("../../commanFunction/routes/commanFunction");
+let gomosSchedule   =   require("../../commanFunction/routes/getServiceConfig");
+let gomosDevices    =   require("../../commanFunction/routes/getDevices");
+let gomosAssets     =   require("../../commanFunction/routes/getAssets");
+let gomosSubCustCd  =   require("../../commanFunction/routes/getSubCustomers");
+let goomosPayloads  =   require("../../commanFunction/routes/getPayloads");
 
 
 //method to update mqtt collection when particular data is taken from mqtt and inserted into fact.
@@ -450,7 +450,7 @@ function updateDevInstrForRActive(dbo,dataToInsert,Token){
       for(var i =0; i< result.length; i++){
 
   updatedDeviceinstruction(dbo,result[i]); 
-//  DeviceInstructionInsert(dbo,tempobj);
+  DeviceInstructionInsert(dbo,tempobj);
  
       }
     }
@@ -467,7 +467,7 @@ var criteria = {
 
 dbo.collection("DeviceInstruction")
 .find(criteria)
-.toArray(function (err, result) {
+.toArray(async function (err, result) {
   if (err) {
     process.hasUncaughtExceptionCaptureCallback();
   }
@@ -476,10 +476,12 @@ dbo.collection("DeviceInstruction")
     if (dataFromPayload.filter(item => item.payloadId == result[0].sourceMsg.ActionType).length != 0 ) {
       var index = dataFromPayload.findIndex( item => item.payloadId == result[0].sourceMsg.ActionType);
       var payloadObject = dataFromPayload[index];
-      gomos.gomosLog(TRACE_DEV,"This is Debug of payloadId", index);
-      gomos.gomosLog(TRACE_DEV,"This is Debug of payloadId", payloadObject);
+      gomos.gomosLog(TRACE_DEV,"This is Debug of payloadId Index", index);
+      gomos.gomosLog(TRACE_DEV,"This is Debug of payloadId Data", payloadObject);
       gomos.gomosLog(TRACE_DEV,"This is processByActiveJobs checking ",payloadObject.processByActiveJobs );
-
+      if(payloadObject.formStructure == "manualOverride"){
+       await manualOverrideProcess(dbo,result[0]);
+      }
       if(payloadObject.processByActiveJobs == "N"){
         gomos.gomosLog(TRACE_DEV,"This is processByActiveJobs false ",payloadObject.processByActiveJobs );
         deleteinstruction(dbo,result[0]._id);
@@ -490,16 +492,55 @@ dbo.collection("DeviceInstruction")
       } 
     }
     else{
-      gomos.errorCustmHandler(NAMEOFSERVICE,"updateDeviceInstruction","DeviceInstruction payloadId Flag not Preset For This Action Type",result[0].sourceMsg.ActionType);
+      gomos.errorCustmHandler(NAMEOFSERVICE,"updateDeviceInstruction","DeviceInstruction payloadId Flag not Preset For This Action Type","", result[0].sourceMsg.ActionType);
     }
    
   }else{
-    gomos.errorCustmHandler(NAMEOFSERVICE,"updateDeviceInstruction","DeviceInstruction Token Not Present In SentIntruction",Token);
+    gomos.errorCustmHandler(NAMEOFSERVICE,"updateDeviceInstruction","DeviceInstruction Token Not Present In SentIntruction",'',Token,);
   }
   gomos.gomosLog(TRACE_DEBUG,"This is find Of DeviceInstruction",result);
 });
 gomos.gomosLog(TRACE_DEBUG,"this callig after Find Of Deviceinstruction");
 } 
+
+ async function  manualOverrideProcess(dbo,dataInsruction){
+
+  dbo.collection("DeviceInstruction")
+  .find({mac : dataInsruction.mac, type: "SentManOverride" })
+  .toArray(function (err, result) {
+    if (err) {
+      process.hasUncaughtExceptionCaptureCallback();
+    }
+    if(result.length!=0){
+    gomos.gomosLog(TRACE_DEV,"This ManualOverrideProcessFunction data", result);
+    gomos.gomosLog(TRACE_DEV,"This ManualOverrideProcessFun Splite data ito part", result[0].sourceMsg.body);
+    gomos.gomosLog(TRACE_DEV,"This ManualOverrideProcessFun dataInsruction.sourceMsg.body Splite data ito part", dataInsruction.sourceMsg.body);
+    var keyOfmode = Object.keys(dataInsruction.sourceMsg.body);
+    var keyOfResult = Object.keys(result[0].sourceMsg.body);
+    for(let i =0 ; i< keyOfmode.length ; i++ ){
+      if(keyOfResult.includes(keyOfmode[i])){
+      result[0].sourceMsg.body[keyOfmode[i]]["activeMode"] =  dataInsruction.sourceMsg.body[keyOfmode[i]]["mode"];
+    }
+  }
+  gomos.gomosLog(TRACE_DEV,"This is ManualOverrideProcessFun after asing",  result[0].sourceMsg.body) 
+  dbo.collection("DeviceInstruction")
+  .updateOne(
+    { _id: result[0]["_id"]},
+    { $set: { "sourceMsg.body": result[0].sourceMsg.body,
+      updatedTime :new Date(new Date().toISOString())
+     } },
+    function (err, result) {
+      if (err) {
+        gomos.errorCustmHandler(NAMEOFSERVICE,"update For Manual Override","This is Updateting Error","",err);
+        process.hasUncaughtExceptionCaptureCallback();
+      }
+      gomos.gomosLog(TRACE_DEBUG,"update For Manual Override ");
+    }
+  );
+  }
+})
+}
+
 function insertActivejob(dbo,dataInsruction,dataToInsert){ 
   gomos.gomosLog(TRACE_DEBUG,"this is need For Insert", dataInsruction);
   gomos.gomosLog(TRACE_DEBUG,"this is need For Insert", dataToInsert);
@@ -599,7 +640,7 @@ function DeviceInstructionInsert(dbo,data){
       gomos.gomosLog(TRACE_DEV,"This is error",err);
       process.hasUncaughtExceptionCaptureCallback();
     }
-    gomos.gomosLog(TRACE_DEV," insert  in DeleteDeviceState activeJob");
+    gomos.gomosLog(TRACE_DEV," insert  in DeviceInstructionInsert activeJob");
   
   });
 } 
@@ -611,7 +652,7 @@ function deleteinstruction(dbo,id){
         gomos.errorCustmHandler(NAMEOFSERVICE,"updateDeviceState","This is Deleting Error","",err);
         process.hasUncaughtExceptionCaptureCallback();
       }
-      gomos.gomosLog(TRACE_DEV,"DeleteDeviceState ", id);
+      gomos.gomosLog(TRACE_DEV,"deleteinstruction ", id);
     }
   );
 }

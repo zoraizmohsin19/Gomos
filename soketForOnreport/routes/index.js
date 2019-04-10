@@ -13,9 +13,11 @@ try {
   gomos.gomosLog(TRACE_DEV,"New client connected  lastPayloadData comming");
   socket.on('lastPayloadClient', function(data) {
     gomos.gomosLog(TRACE_DEV,"This is lastPayloadClient",data);
-    setTimeout(function () {lastPayloadDataCall(socket,data)}, 1000);
+    setTimeout(function () {lastPayloadDataCall(socket,data)}, 1000); 
     setInterval(
       () =>
+      //  socket.on("disconnect", () => clearInterval()),
+
       lastPayloadDataCall(socket,data),
       360000
     );
@@ -229,10 +231,13 @@ gomos.errorCustmHandler(NAMEOFSERVICE,"onConnection","THIS IS Try Catch OF Funct
  
 }
 
-  const getApiAndEmit =  function(socket,data){ 
+  const getApiAndEmit =  async function(socket,data){ 
     try{
       gomos.gomosLog(TRACE_DEBUG,"This is getApiAndEmit Function");   
       var mac = data.mac;
+      var ObjectofModeData = await getmode({mac: mac,type: "SentManOverride"});
+      gomos.gomosLog(TRACE_DEV, "This is debug for ObjectofModeData",ObjectofModeData)
+
        dbo.collection("DeviceState")
        .find({ mac: mac})
        .toArray(function (err, result) {
@@ -248,6 +253,7 @@ gomos.errorCustmHandler(NAMEOFSERVICE,"onConnection","THIS IS Try Catch OF Funct
            }
          }
        var json = {}
+       
         for(var k =0; k < deviceStateKey.length; k++){
           var name = deviceStateKey[k]
           var keyofCode = Object.keys(result[0][deviceStateKey[k]]);
@@ -265,6 +271,11 @@ gomos.errorCustmHandler(NAMEOFSERVICE,"onConnection","THIS IS Try Catch OF Funct
               }
             } 
             ActiveIdentifier["devicebusinessNM"] = devicebusinessNM[0];
+            try {
+              ActiveIdentifier["mode"] =     ObjectofModeData[devicebusinessNM[0]]["activeMode"];
+            } catch (error) {
+              
+            }
             ActiveIdentifier["Value"]    =  result[0][deviceStateKey[k]][keyofCode[i]][devicebusinessNM[0]];
             ActiveIdentifier["sortName"]    =  result[0][deviceStateKey[k]][keyofCode[i]]["sortName"];
             ActiveIdentifier["position"]    =  result[0][deviceStateKey[k]][keyofCode[i]]["displayPosition"];
@@ -285,7 +296,29 @@ gomos.errorCustmHandler(NAMEOFSERVICE,"onConnection","THIS IS Try Catch OF Funct
     }  
        
   }
+ 
+  async  function getmode(criteria){
+    try{
+      gomos.gomosLog(TRACE_DEV,"Cheacking Criteria",criteria )
+return new Promise((resolve, reject)=>{
+  dbo.collection("DeviceInstruction").find(criteria).toArray(function (err, result) {
+    if (err) {
+      reject(err);
+    }
+    gomos.gomosLog(TRACE_DEV,"This is for ManulaOverride", result);
+    if(result.length > 0){ 
 
+       var  data = result[0].sourceMsg.body; 
+    }
+    resolve(data);
+  })
+}
+)
+    }
+    catch(err){
+
+    }
+  }
 function dbConnection(){
   MongoClient.connect(
     urlConn,
