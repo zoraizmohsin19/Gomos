@@ -17,7 +17,7 @@ class activeDashbord extends Component {
       super();
       this.state={
         value: { min: 2, max: 10 },
-        endpoint: "http://52.212.188.65:4001",
+        endpoint: "http://localhost:4001",
         channelName: [],
         actionTypes: [],
         formStructure: '',
@@ -275,7 +275,7 @@ var me = this;
 }
 callApiForClimateSave(){
   var me = this;
-  axios.post("http://52.212.188.65:3992/ActiveClimatesave",me.state.submitDataObj)
+  axios.post("http://localhost:3992/ActiveClimatesave",me.state.submitDataObj)
   .then(json =>  {
   // if(json["data"] == "success"){
    
@@ -287,7 +287,7 @@ callApiForClimateSave(){
 }
 callApiForManoverride(){
   var me = this;
-  axios.post("http://52.212.188.65:3992/ActivesaveForManualOver",me.state.submitDataObj)
+  axios.post("http://localhost:3992/ActivesaveForManualOver",me.state.submitDataObj)
   .then(json =>  {
   // if(json["data"] == "success"){
    
@@ -299,7 +299,7 @@ callApiForManoverride(){
 }
 callApiForManoverrideForTiles(){
   var me = this;
-  axios.post("http://52.212.188.65:3992/ActivesaveForManualOverForTiles",me.state.submitDataObj)
+  axios.post("http://localhost:3992/ActivesaveForManualOverForTiles",me.state.submitDataObj)
   .then(json =>  {
   // if(json["data"] == "success"){
    
@@ -313,7 +313,7 @@ callApiForManoverrideForTiles(){
     var me = this;
     //console.log(me.state.submitDataObj)
     //alert(me.state.submitDataObj)
-      axios.post("http://52.212.188.65:3992/ActiveDAction",me.state.submitDataObj)
+      axios.post("http://localhost:3992/ActiveDAction",me.state.submitDataObj)
       .then(json =>  {
       if(json["data"] == "success"){
        
@@ -583,7 +583,7 @@ callApiForManoverrideForTiles(){
         return this;
     }
      var ActiveJobsArray = [];
-    axios.post("http://52.212.188.65:3992/getActiveDashBoardDevice",{mac: this.state.CriteriaForOP.mac})
+    axios.post("http://localhost:3992/getActiveDashBoardDevice",{mac: this.state.CriteriaForOP.mac})
 
     .then(json =>  {
       //console.log("this componentDidMount getActiveDashBoardDevice");
@@ -674,7 +674,7 @@ onDeviceinstruction.on('DeviceInstruction',function(data) {
    fetchPayload(){
      var me = this;
     var body = {mac: this.state.CriteriaForOP.mac}
-    axios.post("http://52.212.188.65:3992/ActiveActionTypeCall",body)
+    axios.post("http://localhost:3992/ActiveActionTypeCall",body)
 
     .then(json =>  {
       if(json.length !=0){
@@ -839,7 +839,7 @@ onDeviceinstruction.on('DeviceInstruction',function(data) {
     })
     .then((willDelete) => {
       if (willDelete) {
-        axios.delete("http://52.212.188.65:3992/deleteSentCommand?id="+ id)
+        axios.delete("http://localhost:3992/deleteSentCommand?id="+ id)
         .then(json =>  {
           swal("Poof! Your SentCommand  Info has been deleted!", {
             icon: "success",
@@ -856,13 +856,13 @@ onDeviceinstruction.on('DeviceInstruction',function(data) {
    }
 
    fetchClimateControlDevice(){
-    axios.post("http://52.212.188.65:3992/getActiveDAction",{mac:this.state.CriteriaForOP.mac})
+    axios.post("http://localhost:3992/getActiveDAction",{mac:this.state.CriteriaForOP.mac})
     .then(json =>  {
      this.setState({deviceAllData: json["data"]})
     })
    }
    fetchClimateParameter(){
-    axios.post("http://52.212.188.65:3992/getAClimateparameter",{mac:this.state.CriteriaForOP.mac})
+    axios.post("http://localhost:3992/getAClimateparameter",{mac:this.state.CriteriaForOP.mac})
     .then(json =>  {
       var keys1 = Object.keys(json["data"]);
       var obj={}
@@ -876,7 +876,7 @@ onDeviceinstruction.on('DeviceInstruction',function(data) {
     })
    }
    fetchFromManualOverride(){
-    axios.post("http://52.212.188.65:3992/getAManualOverride",{mac:this.state.CriteriaForOP.mac})
+    axios.post("http://localhost:3992/getAManualOverride",{mac:this.state.CriteriaForOP.mac})
     .then(json =>  {
       var keys1 = Object.keys(json["data"]);
       var obj={}
@@ -889,7 +889,7 @@ onDeviceinstruction.on('DeviceInstruction',function(data) {
      var me =this;
      //alert("Hello This Working")
      //  THIS IS GETING SENSORNAME BASED ON SPCD,CUSTCD,SUBCUSTCD
-     fetch("http://52.212.188.65:3992/getSensorNames?spCode=" +this.state.CriteriaForOP.spCd +
+     fetch("http://localhost:3992/getSensorNames?spCode=" +this.state.CriteriaForOP.spCd +
      "&&custCd=" + this.state.CriteriaForOP.CustCd + "&&subCustCd=" + this.state.CriteriaForOP.subCustCd)
         .then(response => response.json())
         .then(json =>  {
@@ -988,7 +988,7 @@ function tokeyValue(o){
   }
   return temp;
 }
-  axios.post("http://52.212.188.65:3992/getAllClimateControl",{subCustCd:this.state.CriteriaForOP.subCustCd,custCd:this.state.CriteriaForOP.CustCd})
+  axios.post("http://localhost:3992/getAllClimateControl",{subCustCd:this.state.CriteriaForOP.subCustCd,custCd:this.state.CriteriaForOP.CustCd})
   .then(json =>  {
     //console.log("This fetchClimateControlAllData");
 var temp=[];
@@ -1032,7 +1032,7 @@ fetchActiveJob(){
     startDate : this.state.startDatelimit,
     endDate: this.state.endDatelimit,
   }
-    axios.post("http://52.212.188.65:3992/ActiveJobs",ActiveBody)
+    axios.post("http://localhost:3992/ActiveJobs",ActiveBody)
     .then(json =>  {
        var ActiveJobsArray = json["data"]["ActiveJob"];
         if(json["data"]["ActiveJob"].length != 0){
@@ -1063,7 +1063,7 @@ fetchActiveJob(){
   };
     if(this.state.filter.TypeOfJobs == "ExecutedJob"){
      
-        axios.post("http://52.212.188.65:3992/executedJob",body)
+        axios.post("http://localhost:3992/executedJob",body)
             .then(function (result) {
               var mainActiveJobdata  =   result.data;
               items   =   result.data.executedJob;
@@ -1072,7 +1072,7 @@ fetchActiveJob(){
         me.setState({mAOfInactivejob:[],'in_prog':false});
       });
     }else if(this.state.filter.TypeOfJobs == "PendingJob"){
-      axios.post("http://52.212.188.65:3992/PendingJob",body)
+      axios.post("http://localhost:3992/PendingJob",body)
       .then(function (result) {
         var mainActiveJobdata  =   result.data;
         items   =   result.data.PendingJob;
@@ -1412,36 +1412,33 @@ changePage(page){
     // console.log(configkeyInputKeyValue);
     // console.log("This I Want See");
   
-      inputField = <form > 
-      <div className = 'col-sm-12 col-xs-12 col-md-12 col-lg-12'>
-      <div className ="col-sm-12 col-lg-12 col-xs-12">
-      <div className ="col-sm-4 col-lg-4 col-xs-4"></div>
-      <div className ="col-sm-4 col-lg-4 col-xs-4">
-      <div class="marginbtnManual">
-      <button className="btn btn-default btn-xs pull-left" type="button" onClick={this.AllSelectionManual.bind(this,"manual")}>All Manual</button> 
-      <button className="btn btn-default btn-xs pull-right" type ="button" onClick={this.AllSelectionManual.bind(this,"automatic")}>All Automatic</button>
-      </div>
-      <div className ="col-sm-4 col-lg-4 col-xs-4"></div>
-      </div>
-      </div>
-      {this.state.configkeyInput.map(item => <div className= "col-sm-12"><div className='col-sm-4 col-xs-4 col-md-4 col-lg-4 '>
-       <label>{item}</label>
-       </div>
-       <div className ="col-sm-8 col-xs-8 col-md-8 col-lg-8">
-       <span  className={(configkeyInputKeyValue[item+"toggle"])?"Activefont": "NotActivefont" }> Manual</span>
-       <label className="switch ActiveSinput">
+      inputField = <form className ="table-responsive" > 
+      <table className="">
+        <thead>
+        <tr>
+          <td></td>
+          <td> <button className="btn btn-default btn-xs " type="button" onClick={this.AllSelectionManual.bind(this,"manual")}>All Manual</button> </td>
+          <td></td>
+          <td><button className="btn btn-default btn-xs " type ="button" onClick={this.AllSelectionManual.bind(this,"automatic")}>All Automatic</button></td>
+        </tr>
+        
+        </thead>
+        <tbody>
+        {this.state.configkeyInput.map(item =>  <tr>
+            <td> <label className ="margincell">{item}</label></td>
+            <td> <span  className={(configkeyInputKeyValue[item+"toggle"])?"maualclass Activefont": "maualclass NotActivefont" }> Manual</span></td>
+            <td><label className="switch magintd">
           <input type="checkbox" value = "Text" checked ={ configkeyInputKeyValue[item+"toggle"]}
            onChange={e =>{
             configkeyInputKeyValue[item+"toggle"] = !configkeyInputKeyValue[item+"toggle"]
             configkeyInputKeyValue[item]["pendingMode"] = (configkeyInputKeyValue[item+"toggle"] == true)? 1: 0 
              this.setState({configkeyInputKeyValue : configkeyInputKeyValue})}} />
           <span className="slider round"></span>
-        </label> &nbsp; &nbsp;  &nbsp; &nbsp;  &nbsp; &nbsp; &nbsp;
-        <span  className={(configkeyInputKeyValue[item+"toggle"])?"NotActivefont": "Activefont" }> Automatic</span>
-        </div>
-        </div>
-        )}
-       </div>
+        </label> </td>
+            <td><span  className={  (configkeyInputKeyValue[item+"toggle"])?" automaticClas NotActivefont": "automaticClas  Activefont" }> Automatic</span></td>
+          </tr>)}
+        </tbody>
+      </table>
        <div class="form-group"> 
        <div class="col-sm-offset-2 col-sm-10">
          <button type="button" class="btn btn-default" onClick = {this.Submit}>Submit</button>
@@ -1451,7 +1448,7 @@ changePage(page){
      }
   if(formStructure == "SetParameter"){
     inputField =  <div className ="">
-    <div className="col-xs-12">
+    <div className="row">
     {this.state.configkeyInput.map(item =><div>
     <div className= "col-sm-8">
     <label> Set {item} :</label><span className="rangeLabel">{"Min : "+configkeyInputKeyValue[item+"Lower"]+",  Max :  "+configkeyInputKeyValue[item+"higher"]}</span>
@@ -1629,8 +1626,8 @@ inputField =
 </form>;
   }
   if(formStructure == "SentCommand"){
-    inputField = <div className= "col-lg-12">
-    <div className= "col-lg-6">
+    inputField = <div className= "row">
+    <div className= "col-lg-7  col-md-8 col-sm-12">
       <div className ="tableactuter">
       <p className ="ActiveP">Sent Command</p>
           <div  className="table-responsive">
@@ -1666,7 +1663,7 @@ inputField =
           </div> 
       </div>
      </div> 
-     <div className= "col-lg-6">
+     <div className= "col-lg-5  col-md-4 col-sm-12">
     <div className= "ActiveDivareainput">
     <p className ="ActiveP textArea">Sent Command = {this.state.sentCommandIndex}</p>
     <textarea type="text" className ='ActivetestArea textareacust' value= {JSON.stringify( this.state.rowclickedData,undefined, 2) }/>
@@ -1802,14 +1799,14 @@ inputField =
         return(
 <div className ="container-fluid ">
    <div className="row">
-   <div className= "col-lg-10">
+   <div className= "col-lg-10 col-md-10 col-sm-10 col-sx-6">
    <p className= "line2"></p>
    <div className="row"> 
             <div className="col-lg-12 ">  
            
        <div className="col-lg-12  ViewBredCum">
       
-       <div className="col-sm-8">
+       <div className=" col-lg-8 col-md-7 col-sm-6">
     <div className="spanBredDiv">
        <span  className="spanBredcum">{(this.state.CriteriaForOP.CustCd != "")?this.state.CriteriaForOP.CustCd: ""} </span><span className="spanBredcumslash">/</span>
        <span  className="spanBredcum"> {(this.state.CriteriaForOP.subCustCd != "")?this.state.CriteriaForOP.subCustCd: "" }</span> <span className="spanBredcumslash">/</span> 
@@ -1817,7 +1814,7 @@ inputField =
        <span  className="spanBredcum">{(this.state.CriteriaForOP.DeviceName != "")? this.state.CriteriaForOP.DeviceName: ""}</span>
   </div>
   </div>
-  <div className="col-sm-4">
+  <div className=" col-lg-4 col-md-5 col-sm-6">
      <div className="navright">
      <button type="button"  className="spanNev btn"  onClick={() =>{ 
                          this.props.history.push("/NevMenu")}}>Device Menu</button>
@@ -1872,7 +1869,6 @@ inputField =
         
         </div>
         <div className = 'col-lg-12 col-sm-12'>
- 
  <div className= "line3"></div></div>
  <div className= "col-lg-12 margin-topActive">
  <Nav bsStyle="pills colorpills"  activeKey={this.state.selectedAtionType} onSelect={this.handleChange}>
@@ -1914,10 +1910,10 @@ inputField =
 
 
 </div>
-    <div className= "col-lg-2 ">
+    <div className= "col-lg-2 col-md-2 col-sm-2 col-sx-6">
               <div className= "ActiveCorner">
             
-                <div className="col-sm-12">
+                <div className="col-xs-12">
                 {this.state.lastPayloadDataArray.map(item => <div>
                   <label>{item.payloadId} :</label>
                   <span>{(item.createdTime)?dateFormat(item.createdTime, "dd-mmm HH:MM:ss"): "00:00:00:00:00"}</span>
@@ -1936,7 +1932,7 @@ inputField =
                 <br/>
                </div>
               
-                <div className= "col-lg-12">
+                <div className= "col-xs-12">
                 <p className= "line2"></p>
                 <br/>
                 <div className="small-box bg-red" title= {this.state.lastAlertData.alertText} >
