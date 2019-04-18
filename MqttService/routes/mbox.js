@@ -368,12 +368,13 @@ function checkCriteria(db,passedAssetId, custId, subCustId,businessNmValues,  ma
                 user: result[i].user,
                 type: result[i].type,
                 criteria: result[i].criteria,
-                alertText: result[i].alertText,
+                alertText: eval(result[i].alertText),
                 processed: "N",
                 dtTime: result[i].dtTime,
                 createdTime: nowDateTime,
                 updatedTime: nowDateTime
               };
+              gomos.gomosLog(TRACE_DEV,"This is eval(result[i].alertText)",eval(result[i].alertText));
               db.collection("Alerts").insertOne(alertData, function (err, result) {
                 if (err) {
                   gomos.errorCustmHandler(NAMEOFSERVICE,"checkCriteria",'THIS IS INSERTION ERROR','',err)

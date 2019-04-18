@@ -1475,6 +1475,8 @@ router.post("/ActiveDAction", function (req,res, next){
   var subCustCd   =   body.subCustCd; 
   var DeviceName  =   body.DeviceName;
   var mac         =   body.mac;
+  var messageObj = {}
+  //messageObj["payloadId"] = payloadId;
 var messageValue = message;
 gomos.gomosLog(TRACE_DEBUG,"this is message Value", message);
 MongoClient.connect(
@@ -1491,12 +1493,26 @@ var dateTime = new Date()
       var Token = uuidv4();
 
       var temobj={}
+      gomos.gomosLog(TRACE_DEV,"This is Cheacking payloadId", payloadId)
       if(ChannelName  != '' && ChannelName != undefined && ChannelName != null){
         temobj = {"Channel":ChannelName}
       }
-      for (let [key, value] of Object.entries(message)) {  
-        temobj[key]= value;
+      gomos.gomosLog(TRACE_DEV,"This is ChannelName", ChannelName);
+      if(payloadId === "ManOverride" && ChannelName == "" || ChannelName == undefined){
+        for (let [key, value] of Object.entries(message)) {  
+          temobj[key]= {"mode": value.pendingMode};
+          messageObj[key]= {"mode": value.pendingMode};
+          gomos.gomosLog(TRACE_DEV,"This is ManOverride", value);
+          gomos.gomosLog(TRACE_DEV,"This is ManOverride",  temobj[key]);
+        }
       }
+      else{
+        for (let [key, value] of Object.entries(message)) {  
+          temobj[key]= value;
+          messageObj[key]= value;
+        }
+      }
+     
        var object = {
         "mac": mac,
         "type": "SentInstruction",
@@ -1514,7 +1530,7 @@ var dateTime = new Date()
         object["sourceMsg"]["body"]["isDailyJob"] = isDaillyJob;
        }
      
-       gomos.gomosLog(TRACE_DEBUG,"This is log for data submit Data",object );
+       gomos.gomosLog(TRACE_DEV,"This is log for data submit Data",object );
       db.collection("DeviceInstruction")
       .insertOne( object
       ,function (err, result) {
@@ -1526,7 +1542,7 @@ var dateTime = new Date()
 //   message[ChannelName] = 1
 // }
       
-      midllelayer.endPointMiddelayerFn(urlConn,dbName,res,CustCd,subCustCd,DeviceName,payloadId,dataTime,message,Token);
+      midllelayer.endPointMiddelayerFn(urlConn,dbName,res,CustCd,subCustCd,DeviceName,payloadId,dataTime,messageObj,Token);
       
       })
   });

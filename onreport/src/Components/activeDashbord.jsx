@@ -241,10 +241,10 @@ if(formStructure == "manualOverride"){
       dataToSendApi[configkeyInput[key]] = configkeyInputKeyValue[configkeyInput[key]]
      } 
       // dataToSendApi[selectedChannelB] = 1; 
-        //alert(dataToSendApi)
+        alert(dataToSendApi)
   
 }
-//console.log()
+console.log(dataToSendApi)
     me.state.submitDataObj.payloadId   = selectedAtionType;
     me.state.submitDataObj.dataBody    = dataToSendApi;
     me.state.submitDataObj.isDaillyJob =  configkeyInputKeyValue["toggle"];
