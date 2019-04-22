@@ -163,6 +163,7 @@ router.post("/authenticate", function (req, res, next) {
                 userType : result[index].userTypegetSensorNames
               });  
               var dashboardConfigId = result[0].dashboardConfigId;
+              var clientID = result[0].clientID;
               db.collection("DashboardConfig")
               .find({ dashboardConfigId: dashboardConfigId })
               .toArray(function (err, result1) {
@@ -195,9 +196,21 @@ router.post("/authenticate", function (req, res, next) {
                   spCd: result1[0].ActiveSpCd,
                   subCustCd: result1[0].ActiveSubCustCd
                  }
+                 db.collection("ClientMenuConfig")
+                 .find({ clientID: clientID })
+                 .toArray(function (err, clientData) {
+                   if (err) {
+                     process.hasUncaughtExceptionCaptureCallback();
+                   } 
 
-                res.json({userDtls, dashboardConfigobj, configData});
+                  gomos.gomosLog(TRACE_DEV,"This is clientID ",clientData);
+                  var ClientObj = {
+                    OperatingForms : clientData[0].activeDashBoard.OperatingForms
+                  }
+                  gomos.gomosLog(TRACE_DEV,"This is ClientObj",ClientObj)
+                res.json({userDtls, dashboardConfigobj, configData,ClientObj});
               });
+            });
 
 
 
@@ -988,6 +1001,42 @@ var mac = body.mac;
   );
 });
 
+router.post("/getStream", function (req, res, next) {
+  accessPermission(res);
+  var body = req.body;
+var mac = body.mac;
+  MongoClient.connect(
+    urlConn,
+    { useNewUrlParser: true },
+    function (err, connection) {
+      if (err) {
+        next(err);
+      }
+      var db = connection.db(dbName);
+      var query = url.parse(req.url, true).query;
+      gomos.gomosLog(TRACE_DEBUG,"This is called in Alert"); 
+      
+
+      const collection = db.collection("DeviceState")
+      const changeStream = collection.watch({"mac": mac});
+      changeStream.on("change", function(change) {
+        console.log(change);
+        gomos.gomosLog(TRACE_DEV,"This is Our Data ",change)
+        res.json(change);
+      });
+
+         
+     
+    
+
+      
+        
+       
+    
+    }
+  );
+});
+
 function AddDay(){
   Date.prototype.addDay = function(h){
     this.setDate(this.getDate()+h);
@@ -1317,9 +1366,6 @@ router.post("/ActiveJobs", function (req, res, next) {
     });
   });
   
-
-
-
 function compareDate(str1){
   gomos.gomosLog(TRACE_PROD,"this what coming Date", str1)
   var arraydate = str1.split(":")
@@ -1881,91 +1927,6 @@ router.post("/getAlertFlag", function (req, res, next) {
     }
   );
 });
-// router.get("/updateAlert", function (req, res, next) {
-//   accessPermission(res);
-//   MongoClient.connect(
-//     urlConn,
-//     { useNewUrlParser: true },
-//     function (err, connection) {
-//       if (err) {
-//         next(err);
-//       }
-//       var db = connection.db(dbName);
-  
-//     //  console.log({DeviceName: DeviceName,subCustCd: subCustCd,type: type,processed: processed})
-//         //query to get the last dateTime the collection was modified.This dateTime is used only in excel report.
-//         db.collection("Alerts")
-//         .updateMany({ 
-//           "spCd": "ASAGRISY",
-//           "custCd": "Cuberootz",
-//           "subCustCd": "TF1",
-//           "assetId": "FERTENVCONT",
-//           "type": "level3",
-//           "processed": "Y",
-//           "lasterrorString": {
-//             "$exists": false
-//         },
-//         "lasterrorTime": {
-//             "$exists": false
-//         },
-//         "numberOfAttempt": {
-//             "$exists": false
-//         },
-//          },
-//         { $set: {
-//                 lasterrorString: "",
-//                 lasterrorTime: '',
-//           numberOfAttempt: 1,
-//             }},
-//             function(err, res) {
-//               if (err) throw err;
-//               console.log(res.result.nModified + " document(s) updated");
-              
-//             });
-    
-  
-//         // .toArray(function (err, result) {
-      
-           
-//             // for(var i = 0; i < result.length ; i++){
-//             //   fileWriter(i,result[i]);
-//             //  var objId = result[i]._id;
-//             //  var sourceMsg = result[i].message
-//             // console.log(objId);
-//             // console.log(i+ "this is index");
-//             // var count = 1;
-//             // db.collection("Alerts")
-//             // .updateOne(
-//             //   { _id: objId },
-//             //   { $unset: {
-//             //     sourceMsg:sourceMsg,
-//             //       },
-//             //     },
-//             //   function (err, result) {
-//             //     if (err) {
-//             //       gomos.errorCustmHandler("updateAlertsForError",err);     
-//             //       process.hasUncaughtExceptionCaptureCallback();
-//             //     }
-              
-//             //     // console.log(result);
-//             //   console.log("upadated" + count);
-//             //   count ++;
-//             //   // res.json(result)
-//             //   }
-//             // ); 
-//             // .deleteOne({_id: objId},function (err,result) {  
-//             //   //  console.log(result);
-//             //   console.log("upadated" + i);
-//             //     // res.json(result )
-          
-//             //     });
-//             }
-       
-//   )
-  
-//   //   }
-//   // );
-// });
 var fs = require("fs");
 function fileWriter(count,data){
   // console.log(typeofError);
@@ -2155,7 +2116,7 @@ gomos.gomosLog(TRACE_DEBUG,"this is debuging in starting",sensorsBSN+"|"+mac+"|"
         subCustCd: subCustCd,
         mac: mac,
        }
-       criteria["sensors."+sensorNm+"."+sensorsBSN]  = {$exists: true}
+      criteria["sensors."+sensorNm+"."+sensorsBSN]  = {$exists: true}
       // var  queryToExecute = [
       //     {
       //       $match: criteria
@@ -2191,11 +2152,7 @@ gomos.gomosLog(TRACE_DEBUG,"this is debuging in starting",sensorsBSN+"|"+mac+"|"
             process.hasUncaughtExceptionCaptureCallback();
           }
           if (result1.length > 0) {
-            console.log("this is result")
-          
-            console.log("this is copy");
             var resultCopy = result1;
-            
             console.log(resultCopy);
             result = [];
             result4 = []
@@ -2204,45 +2161,21 @@ gomos.gomosLog(TRACE_DEBUG,"this is debuging in starting",sensorsBSN+"|"+mac+"|"
             for (var i = 0; i < resultCopy.length; i++) {
               var sensorNmKeys = Object.keys(resultCopy[i]["sensors"]);
               gomos.gomosLog(TRACE_DEBUG,"this is debuging for resultCopy",i);
-              // for(var j =0; j< sensorNmKeys.length; j++ ){
               gomos.gomosLog(TRACE_DEBUG,"this is debuging for sensorNmKeys",sensorNmKeys[i]);
-
                 if (sensorNmKeys.includes(sensorNm)){
               gomos.gomosLog(TRACE_DEBUG,"this is debuging for sensorNm pass Condition",sensorNm);
-
                   var sensorsBSNkeys = Object.keys(resultCopy[i]["sensors"][sensorNm]);
               gomos.gomosLog(TRACE_DEBUG,"this is debuging for sensorNm pass Condition sensorsBSNkeys",sensorsBSNkeys);
-
                       if(sensorsBSNkeys.includes(sensorsBSN) ){
                        gomos.gomosLog(TRACE_DEBUG,"this is debuging for  sensorsBSN pass",sensorsBSN);
-
-                        // result.push(resultCopy[i]["sensors"][sensorNm][sensorsBSN]);
-                        // result4.push(resultCopy[i])
-                        gomos.gomosLog(TRACE_DEBUG,"this criteria after checking ", resultCopy[i].mac,resultCopy[i].DeviceName,sensorsBSN, 
+                       gomos.gomosLog(TRACE_DEBUG,"this criteria after checking ", resultCopy[i].mac,resultCopy[i].DeviceName, 
                         resultCopy[i]["sensors"][sensorNm][sensorsBSN], resultCopy[i].createdTime);
                   finalResult.push([resultCopy[i].mac,resultCopy[i].DeviceName,sensorsBSN, 
-                    resultCopy[i]["sensors"][sensorNm][sensorsBSN], resultCopy[i].createdTime]);
+                    resultCopy[i]["sensors"][sensorNm], resultCopy[i].createdTime]);
 
                       }
-
-               
-                 
                 }
-              // }
-            
             }
-   
-            //copy all data from the copy of result to remove json with in json.
-            // for (var i = 0; i < result.length; i++) {
-           
-            //   var formattedDate = result4[i].createdTime;
-            //   var sensorNmKeys = Object.keys(result[i]);
-            //   for (var j = 0; j < sensorNmKeys.length; j++) {
-             
-            //       finalResult.push([result4[i].mac,result4[i].DeviceName,sensorNmKeys[j], result[i][sensorNmKeys[j]], formattedDate]);
-            //   }
-            // }
-         
            
            db.collection("MsgFacts").find(criteria,{ limit: 1 } ).sort({ createdTime : -1 }).toArray(function (err, result2) {
             if (err) {
@@ -2287,110 +2220,57 @@ gomos.gomosLog(TRACE_DEBUG,"this is debuging in starting",sensorsBSN+"|"+mac+"|"
 )
 }
 );
-// router.post("/lastpayloadTime",function(req,res,next){
-// accessPermission(res);
-// var body = req.body;
-// var mac = body.mac;
-// var subCustCd = body.subCustCd;
-// var custCd = body.custCd;
-// var Arrayofpayload = body.Arrayofpayload;
-
-//   MongoClient.connect(
-//     urlConn,
-//     { useNewUrlParser: true },
-//     async function (err, connection) {
-//       if (err) {
-//         process.hasUncaughtExceptionCaptureCallback();
-//       }
-   
-//      var maindata = [];
-//       var db = connection.db(dbName);
-//       for(var i = 0; i < Arrayofpayload.length; i++ ){
-//         var criteria = {
-//           mac: mac,
-//           subCustCd: subCustCd,
-//           custCd: custCd
-//         }
-//         criteria["payloadId"] = Arrayofpayload[i]
-//            var response = await getlastpayloadData(criteria,db);
-//            gomos.gomosLog(TRACE_PROD,"THIS IS RESPONSE",response);
-//            maindata.push(response);
-//       }
-     
-//         res.json(maindata);
-// })
-
-// })
-// async function getlastpayloadData(criteria,db){
-
-      
-//   return new Promise((resolve, reject)=> {
-//     db.collection("MsgFacts").find(criteria,{ limit: 1 } ).sort({ createdTime : -1 }).toArray(function (err, result) {
-//       if (err) {
-//         reject(err);
-//       }
-//       gomos.gomosLog(TRACE_PROD,"This is resultqwqw", result);
-//       var object1 = {
-//         payloadId : result[0].payloadId,
-//         createdTime: result[0].createdTime
-//       }
-//       resolve(object1);
-//     })
-
-//   })
-// }
-// router.post("/getdashbordlastalert",function(req,res,next){
-
-//   var body = req.body;
-//   var custCd = body.custCd;
-//   var subCustCd = body.subCustCd;
-//   var mac = body.mac;
-//  var criteria = {
-//    custCd,subCustCd,mac
-//  }
-//  gomos.gomosLog(TRACE_PROD,"this is result of getdashbordlastalert criteria",criteria);
- 
-//    accessPermission(res);
-//    MongoClient.connect(
-//      urlConn,
-//      { useNewUrlParser: true },
-//      function (err, connection) {
-//        if (err) {
-//          next(err);
-//        }
-//        var db = connection.db(dbName);
-//        db.collection("Alerts").find(criteria,{ limit: 1 } ).sort({ createdTime : -1 }).toArray(function (err, result) {
-//          if (err) {
-//            process.hasUncaughtExceptionCaptureCallback();
-//          }
-//          if(result.length !=0){
-//            var alertObj ={};
-//            alertObj["sensorNm"] = result[0].sensorNm;
-//            alertObj["businessNm"] = result[0].businessNm;
-//            alertObj["shortName"] = result[0].shortName;
-//            alertObj["businessNmValues"] = result[0].businessNmValues;
-//            alertObj["criteria"] = result[0].criteria;
-//            alertObj["createdTime"] = result[0].createdTime;
-//            alertObj["alertText"] = result[0].alertText;
-        
-//        gomos.gomosLog(TRACE_DEBUG,"this is result of getdashbordlastalert",result);
-        
-//            res.json(alertObj)
-         
-//          }
-//          else{
-//            res.json(0);
-//          }
-       
-        
-     
-//      })
-//      }
-//    )
- 
-//  })
   
-
+router.post("/getDevicesIdentifier", function (req, res, next) {
+  accessPermission(res);
+  MongoClient.connect(
+    urlConn,
+    { useNewUrlParser: true },
+    function (err, connection) {
+      if (err) {
+        next(err);
+      }
+      var db = connection.db(dbName);
+      var body = req.body;
+      console.log(body)
+      var mac = body.mac;
+        db.collection("Devices")
+        .find({mac: mac})
+        .toArray(function (err, result) {
+          if (err) {
+          }
+          var deviceStateKey = Object.keys(result[0]);
+          var keysToRemove2 = ["_id", "mac","deviceTemplate","active","assetId", "DeviceName",];
+          gomos.gomosLog(TRACE_DEV,"This Is key of identifire 1 Place",deviceStateKey);  
+          for (var l = 0; l < keysToRemove2.length; l++) {
+            if (deviceStateKey.includes(keysToRemove2[l])) {
+              deviceStateKey.splice(deviceStateKey.indexOf(keysToRemove2[l]), 1);
+            }
+          }
+          gomos.gomosLog(TRACE_DEV,"This is key left in result",deviceStateKey );
+          var json = {}
+          for(var k =0; k < deviceStateKey.length; k++){
+            var name = deviceStateKey[k]
+            var keyofCode = Object.keys(result[0][deviceStateKey[k]]);
+           gomos.gomosLog(TRACE_DEBUG,"This is SensorsKey",keyofCode);
+          var sensorsArray= [];
+          for(var i = 0; i< keyofCode.length; i++){
+            var ActiveIdentifier = {};
+           gomos.gomosLog(TRACE_DEBUG,"this devicebusinessNM"); 
+               ActiveIdentifier["devicebusinessNM"] = result[0][deviceStateKey[k]][keyofCode[i]]["businessName"];
+               ActiveIdentifier["group"]    =  result[0][deviceStateKey[k]][keyofCode[i]]["group"];
+               sensorsArray.push(ActiveIdentifier);
+          }
+          json[name] = sensorsArray;
+        }
+        gomos.gomosLog(TRACE_DEV,"This is json which i want send to front end", json);
+            res.json(json)
+        
+        });
+    
+    }
+  );
+});
 //get the reporting details of perticular Sensor based on given data
 router.get("/getFacts", function (req, res, next) {
   accessPermission(res);
@@ -2425,11 +2305,11 @@ router.get("/getFacts", function (req, res, next) {
         subCustCd: arSubCustomerIDs ,
         DeviceName : deviceName, 
         createdTime: {
-          $gte: startDate,
-          $lte: endDate
+          $gte: new Date(startDate),
+          $lte: new Date(endDate)
         }
       };
-gomos.gomosLog(TRACE_DEBUG,"This is gomos get messageFact",  query.sensorNm);
+gomos.gomosLog(TRACE_DEBUG,"This is gomos get messageFact",  criteria);
       // if (operation) {
       //   if (query.equalsFacts) {
       //     equalsFacts = parseFloat(query.equalsFacts);
@@ -2551,6 +2431,7 @@ function factsOperations(db, sensorNm, startFactValue, endFactValue, connection,
           }
           if (finalResult.length != 0) {
             finalResult.push([ltdttm, 0, 0]);
+            gomos.gomosLog(TRACE_DEBUG,"This is Final result of GetFact", finalResult);
             res.json(finalResult);
           }
           else {

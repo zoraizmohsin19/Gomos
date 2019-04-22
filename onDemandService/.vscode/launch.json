@@ -16,7 +16,7 @@
             "request": "launch",
             "name": "Debug---",
             "program": "${workspaceFolder}\\bin\\www",
-            "args": [ "test", "5" ]
+            "args": [ "dev", "5" ]
         },
     ]
 }

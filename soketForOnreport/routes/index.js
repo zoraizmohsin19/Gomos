@@ -10,29 +10,40 @@ var urlConn, dbName, dbo;
 
 function LastPayloadDataFn(socket){
 try {
-  gomos.gomosLog(TRACE_DEV,"New client connected  lastPayloadData comming");
+ // gomos.gomosLog(TRACE_PROD,"New client connected  lastPayloadData comming");
+  var checkInterval;
   socket.on('lastPayloadClient', function(data) {
-    gomos.gomosLog(TRACE_DEV,"This is lastPayloadClient",data);
-    setTimeout(function () {lastPayloadDataCall(socket,data)}, 1000); 
-    setInterval(
+    var tempArray = [];
+    gomos.gomosLog(TRACE_PROD,"This is lastPayloadClient",data);
+    setTimeout(function () {lastPayloadDataCall(socket,data,tempArray)}, 1000); 
+    clearInterval(checkInterval);
+    
+    checkInterval =  setInterval(
       () =>
-      //  socket.on("disconnect", () => clearInterval()),
+        // socket.on("disconnect", () => {clearInterval(checkInterval)
+        //   gomos.gomosLog(TRACE_TEST,"Client disconnected on onDeviceinstruction")
+        // }),
 
-      lastPayloadDataCall(socket,data),
-      360000
+      lastPayloadDataCall(socket,data,tempArray),
+      1000
     );
 });
+socket.on("disconnect", () =>{
+ clearInterval(checkInterval)
+gomos.gomosLog(TRACE_TEST,"Client disconnected on onDeviceinstruction")}); 
+
 } catch (err) {
   gomos.errorCustmHandler(NAMEOFSERVICE,"LastPayloadDataFn"," THIS IS TRY CATCH ERROR",'',err)
 }
 }
-async  function lastPayloadDataCall(socket,data){
+async  function lastPayloadDataCall(socket,data,tempArray){
   try {
     var mac = data.mac;
     var subCustCd = data.subCustCd;
     var custCd = data.custCd;
     var Arrayofpayload = data.Arrayofpayload;
     var maindata = [];
+   var flag = false;
     for(var i = 0; i < Arrayofpayload.length; i++ ){
       var criteria = {
         mac: mac,
@@ -44,10 +55,25 @@ async  function lastPayloadDataCall(socket,data){
          gomos.gomosLog(TRACE_DEV,"THIS IS RESPONSE",response);
          if(Object.keys(response).length !== 0 ){
           maindata.push(response);
+          if(tempArray.length == 0){
+            flag == true;
+            gomos.gomosLog(TRACE_DEV,"This is check tempArray.length", response);
+            tempArray.push(response)
+          }
          }
-       
     }
-    socket.emit("lastPayloadServerData", maindata);
+    for(let i = 0 ; i < maindata.length ; i++ ){
+      gomos.gomosLog(TRACE_PROD,"This is check tempArray value", tempArray[i].createdTime);
+      gomos.gomosLog(TRACE_PROD,"This is check maindata value", maindata[i].createdTime);
+       if( maindata[i].createdTime.getTime() !== tempArray[i].createdTime.getTime() || flag == true){
+        tempArray = maindata;
+        gomos.gomosLog(TRACE_PROD,"This is lastError data cheacking", maindata);
+        socket.emit("lastPayloadServerData", maindata);
+        break;
+       }
+    }
+  
+  
     
   } catch (err) {
   gomos.errorCustmHandler(NAMEOFSERVICE,"LastPayloadDataFn"," THIS IS TRY CATCH ERROR",'',err)
@@ -84,16 +110,19 @@ async function getlastpayloadData(criteria){
 function ActivelastError(socket){
   try {
     gomos.gomosLog(TRACE_TEST,"New client connected  ActivelastError");
+    var checkInterval;
     socket.on('lastErrorClientEmit', function(data) {
       gomos.gomosLog(TRACE_TEST,"This is LastErrorClientEmit",data);
       setTimeout(function () {ActivelastErrorEmiter(socket,data)}, 1000)
-      setInterval(
+      clearInterval(checkInterval);
+      checkInterval = setInterval(
         () =>
         ActivelastErrorEmiter(socket,data),
         30000
       );
   });
-    socket.on("disconnect", () => gomos.gomosLog(TRACE_TEST,"Client disconnected on onDeviceinstruction")); 
+    socket.on("disconnect", () =>{   clearInterval(checkInterval);
+      gomos.gomosLog(TRACE_TEST,"Client disconnected on onDeviceinstruction")}); 
   } catch (err) {
     gomos.errorCustmHandler(NAMEOFSERVICE,"ActivelastError"," THIS IS TRY CATCH ERROR",'',err)
   }
@@ -140,17 +169,18 @@ try {
 function onDeviceinstruction(socket){
   try {
     gomos.gomosLog(TRACE_DEBUG,"New client connected  onDeviceinstruction");
+    var checkInterval;
     socket.on('onDeviceinstructionClientEvent', function(data) {
       gomos.gomosLog(TRACE_DEBUG,"This is onDeviceinstructionClientEvent Data",data);
       setTimeout(function () {DeviceinstructionEmiter(socket,data)}, 1000)
-
-      setInterval(
+      clearInterval(checkInterval);
+      checkInterval = setInterval(
         () =>
         DeviceinstructionEmiter(socket,data),
         5000
       );
     });
-      socket.on("disconnect", () => gomos.gomosLog(TRACE_PROD,"Client disconnected on onDeviceinstruction")); 
+      socket.on("disconnect", () =>{ clearInterval(checkInterval); gomos.gomosLog(TRACE_PROD,"Client disconnected on onDeviceinstruction")}); 
   } catch (err) {
   gomos.errorCustmHandler(NAMEOFSERVICE,"onDeviceinstruction"," THIS IS TRY CATCH ERROR",'',err)
   }
@@ -176,6 +206,7 @@ function DeviceinstructionEmiter(socket,data){
         var DeviceInstructionArray = [];
           for(var i =0; i< result.length ; i++){
             if(result[i].type == "SentInstruction"){
+              gomos.gomosLog(TRACE_PROD,"This is result data For sentInstruction",result[i]);
               var sentcommand= {};
               var channelName =result[i].sourceMsg.body.Channel;
               var ActionType =result[i].sourceMsg.ActionType;
@@ -214,16 +245,18 @@ function DeviceinstructionEmiter(socket,data){
 }
 function onConnection(socket) {
   try{
+    var checkInterval;
     socket.on('clientEvent', function(data) {
     gomos.gomosLog(TRACE_DEV,"This is ClientsData",data);
     setTimeout(function () {getApiAndEmit(socket,data)}, 1000)
+    checkInterval = clearInterval(checkInterval);
       setInterval(
         () =>
        getApiAndEmit(socket,data),
        30000
       );
    });
-    socket.on("disconnect", () =>   gomos.gomosLog(TRACE_DEV,"Client disconnected"));
+    socket.on("disconnect", () => { clearInterval(checkInterval);  gomos.gomosLog(TRACE_DEV,"Client disconnected")});
   }
   catch(err){
 gomos.errorCustmHandler(NAMEOFSERVICE,"onConnection","THIS IS Try Catch OF Function","",err);

@@ -40,6 +40,7 @@ class Menu extends Component {
             endRange: '',
             startRange: '',
             equalsValue: '',
+            spDisable: true,
             custDisable: true,
             subCustDisable:  true,
             assetDisable: true,
@@ -78,15 +79,53 @@ class Menu extends Component {
   }
 //ON PAGE LOAD DATA FETCH FROM SERVER FOR ALL SERVICE PROVIDER
 componentDidMount() {
-    fetch('http://localhost:3992/getRegisterSP')
-    .then(response => response.json())
-    .then(json =>  {
-    var spCd =  json.map( x =>  { return  x.spCd  });
-    // this.setState({ArrayOfSPs : spCd});
-    // spCd.push("ALL");
-    this.setState({spCd : spCd});
-   }
-    );
+  try {
+    var configData = JSON.parse(sessionStorage.getItem("configData"));
+    var userDetails = JSON.parse(sessionStorage.getItem("userDetails"));
+    var spData = userDetails[0].serviceProviders.split(",");
+if(spData.length ==  1 && spData[0] == "ALL"){
+  this.setState({ spDisable : null})
+  fetch('http://localhost:3992/getRegisterSP')
+  .then(response => response.json())
+  .then(json =>  {
+  var spCd =  json.map( x =>  { return  x.spCd  });
+  this.setState({spCd : spCd});
+ }
+  );
+}
+else{
+  var  spCd = []
+  for (var i = 0; i < spData.length; i++) {
+    spCd.push(spData[i]);
+  }
+  this.setState({spCd : spCd,spDisable : null});
+}
+this.handleSp(configData.spCd);
+this.handleCutMr(configData.custCd);
+this.handleSubCs(configData.subCustCd);
+this.handleAsset(configData.assetId);
+// this.handleDevice(configData.DeviceName);
+var json = {DeviceName: configData.DeviceName}
+this.handleDevice(json);
+    // this.setState({
+    //     selectedSPValue      : configData.spCd,
+    //     selectedCustValue    : configData.custCd,
+    //     selectedSubCustValue : configData.subCustCd,
+    //     selectedAssetValue   : configData.assetId,
+    //     selectedDeviceValue  : configData.DeviceName,
+    //     sensorDisable : null
+    //   })
+    this.getSensor(configData.spCd,configData.custCd,configData.subCustCd )
+
+
+
+
+  } catch (error) {
+   
+  }
+ 
+  
+    
     
 }
 // This is Submit Function
@@ -125,7 +164,7 @@ onSubmit = (e) => {
    }
    handleDevice =(value) =>{
     const {selectedSPValue,selectedCustValue,selectedSubCustValue} = this.state;
-    // // // alert(e.target.value + "SubCustomer")
+      // alert(value)
     this.setState({ selectedDeviceValue : value.DeviceName, })
     this.getSensor(selectedSPValue,selectedCustValue,selectedSubCustValue )
     this.setState({ sensorDisable : null})
@@ -152,63 +191,54 @@ onSubmit = (e) => {
     }
 //THIS METHOD FOR GET CUSTOMER CODE
     getCustomerApi(SendForSp){
-      fetch("http://localhost:3992/getCustomers?spCode=" + SendForSp)
-      .then(response => response.json())
-      .then(json =>  {
-      var custCd =  json.map( x =>  { return  x._id  });
-      // this.setState({ArrayOfCusts: custCd });
-      // custCd.push("ALL");
-      // // console.log(custCd);
-       this.setState({custCd : custCd});
-     });
+      var userDetails = JSON.parse(sessionStorage.getItem("userDetails"));
+      var CustData = userDetails[0].customers.split(",");
+      if(CustData.length == 1 && CustData[0] == "ALL"){
+        fetch("http://localhost:3992/getCustomers?spCode=" + SendForSp)
+        .then(response => response.json())
+        .then(json =>  {
+        var custCd =  json.map( x =>  { return  x._id  });
+         this.setState({custCd : custCd});
+       });
+      }else{
+        var custCd = [];
+        for(let i = 0; i < CustData.length; i++){
+          custCd.push(CustData[i]);
+        }
+        this.setState({custCd:custCd});
+      }
+   
     }
   // THIS METHOD FOR SELECT CUSTOMER CODE BASED ON SERVICE PROVIDER
   getCustomer(selectedSPValue){
      
-    // if (selectedSPValue == "ALL" ) {
-    
-    //   this.getCustomerApi(this.state.ArrayOfSPs)
-    // }
-    // else {
-
       this.getCustomerApi(selectedSPValue)
     
-
-  // }
   }
   //THIS IS  API FOR GET SUBCUSTOMER BASED ON SERVICE PROVIDER AND CUSTOMER CODE
   getSubCustomerApi(SendForSp,SendFroCustCD){
+    var userDetails = JSON.parse(sessionStorage.getItem("userDetails"));
+    var SubCustData = userDetails[0].subCustomers.split(",");
+    if(SubCustData.length ==1 && SubCustData[0] == "ALL"){
       fetch("http://localhost:3992/getSubCustomers?spCode=" + SendForSp +
       "&&custCd=" + SendFroCustCD )
       .then(response => response.json())
       .then(json =>  {
       var subCustCd =  json.map( x =>  { return  x._id  });
-      // this.setState({ArrayOfSubCusts: subCustCd });
-      // subCustCd.push("ALL");
-      // // console.log(subCustCd);
       this.setState({subCustCd : subCustCd});
-      // // console.log(json );
-      
 });
+    }else{
+      var subCustCd = [];
+      for(let i = 0; i < SubCustData.length; i++){
+        subCustCd.push(SubCustData[i]);
+      }
+      this.setState({subCustCd:subCustCd})
+    }
+     
   }
   //THIS IS FOR SELECTION OF SUB-CUSTOMER BASED ON SERVICE PROVIDER AND CUSTOMER CODE
   getSubCustmer(selectedSPValue, selectedCustValue){
-    // if (selectedSPValue == "ALL" &&  selectedCustValue == "ALL") {
-    //  this.getSubCustomerApi(this.state.ArrayOfSPs,this.state.ArrayOfCusts)
-    
-    // }
-    // else if (selectedCustValue == "ALL") {
-    //    this.getSubCustomerApi(selectedSPValue,this.state.ArrayOfCusts)
-    //   // // // alert("sp"+selectedSPValue + "csAll"+ selectedCustValue );
-    // }
-    // else if (selectedSPValue == "ALL") {
-      
-    //     this.getSubCustomerApi(this.state.ArrayOfSPs,selectedCustValue)
-    //   // // // alert("spAll"+selectedSPValue + "cs"+ selectedCustValue );
-    // }
-    // else {
       this.getSubCustomerApi(selectedSPValue,selectedCustValue)
-    // }
 }
 //THIS IS GET ASSET BASED CRITERIA
 getAsset(subCutomerValue){
@@ -221,29 +251,46 @@ getDevice(Asset){
 //THIS API FOR GET ALL ASSET 
 getAssetApi(SubCustomer){
   var me = this;
-  fetch("http://localhost:3992/getAssets?subCustCd="+SubCustomer )
-  .then(response => response.json())
-  .then(json =>  {
-    // // // alert(json)
-  // var Asset =  json[0];
-  me.setState({ArrayofAsset: json });
-  // // console.log(Asset)
-  // console.log(json );
-  
-});
+  var userDetails = JSON.parse(sessionStorage.getItem("userDetails"));
+  var AssetData = userDetails[0].Assets.split(",");
+  if(AssetData.length == 1 && AssetData[0] =="ALL"){
+    fetch("http://localhost:3992/getAssets?subCustCd="+SubCustomer )
+    .then(response => response.json())
+    .then(json =>  {
+    me.setState({ArrayofAsset: json });
+    
+  });
+  }
+  else{
+    var ArrayofAsset = [];
+    for(let i = 0; i < AssetData.length; i++){
+      ArrayofAsset.push(AssetData[i]);
+    }
+    this.setState({ArrayofAsset:ArrayofAsset});
+  }
+ 
 }
 
 getDeviceApi(Asset){
   var me = this;
-  fetch("http://localhost:3992/getDevice?assetId="+Asset )
-  .then(response => response.json())
-  .then(json =>  {
-   
-  me.setState({ArrayofDevice: json });
-  // // console.log(Asset)
-  // console.log(json );
+  var userDetails = JSON.parse(sessionStorage.getItem("userDetails"));
+  var DeviceData = userDetails[0].Devices.split(",");
+  if(DeviceData.length == 1 && DeviceData[0] == "ALL"){
+    fetch("http://localhost:3992/getDevice?assetId="+Asset )
+    .then(response => response.json())
+    .then(json =>  {
+    me.setState({ArrayofDevice: json });
+  });
+  }
+  else{
+    var ArrayofDevice = [];
+    for(let i = 0; i < DeviceData.length; i++){
+      ArrayofDevice.push(DeviceData[i]);
+    }
+    this.setState({ArrayofDevice:ArrayofDevice});
+  }
   
-});
+ 
 }
 //THIS API FOR GET SENSOR  BASED ON SERVICE PROVIDER , CUSTOMER CODE, SUBCUSTOMER CODE
 getSensorApi(SendForSp,SendFroCustCD,SendForSbCd){
@@ -259,39 +306,8 @@ getSensorApi(SendForSp,SendFroCustCD,SendForSbCd){
 
 //THIS IS SELECTION OF SENSORE BASED ON SERVICE PROVIDER , CUSTOMER CODE, SUBCUSTOMER CODE
   getSensor( selectedSPValue,selectedCustValue, selectedSubCustValue){
-    // if (selectedSPValue == "ALL" && selectedCustValue == "ALL" && selectedSubCustValue == "ALL") {
-    //  this.getSensorApi(this.state.ArrayOfSPs,this.state.ArrayOfCusts,this.state.ArrayOfSubCusts)
-    //   //  // // alert("AllSp"+ selectedSPValue +"AllCstCd"+selectedCustValue +"AllSubCst" +selectedSubCustValue )
-    // }
-    // else if (selectedSPValue == "ALL" && selectedSubCustValue == "ALL") {
-    //     this.getSensorApi(this.state.ArrayOfSPs,selectedCustValue,this.state.ArrayOfSubCusts)
-    //   // // // alert("AllSp"+ selectedSPValue +"CstCd"+selectedCustValue +"AllSubCst" +selectedSubCustValue )
-    // }
-    // else if (selectedSPValue == "ALL" && selectedCustValue == "ALL") {
-    //     this.getSensorApi(this.state.ArrayOfSPs, this.state.ArrayOfCusts,selectedSubCustValue)
-    //   // // // alert("AllSp"+ selectedSPValue +"AllCstCd"+selectedCustValue +"SubCst" +selectedSubCustValue )
-    // }
-    // else if (selectedSubCustValue === "ALL" && selectedCustValue === "ALL") {
-    //     this.getSensorApi(selectedSPValue, this.state.ArrayOfCusts,this.state.ArrayOfSubCusts)
-    //   // // // alert("Sp"+ selectedSPValue +"AllCstCd"+selectedCustValue +"SubCst" +selectedSubCustValue )
-    // }
-    // else if (selectedCustValue == "ALL") {
-    //     this.getSensorApi(selectedSPValue, this.state.ArrayOfCusts,selectedSubCustValue)
-    //   // // // alert("Sp"+ selectedSPValue +"AllCstCd"+selectedCustValue +"SubCst" +selectedSubCustValue )
-    // }
-    // else if (selectedSPValue == "ALL") {
-    //     this.getSensorApi(this.state.ArrayOfSPs, selectedCustValue,selectedSubCustValue)
-    //   // // // alert("AllSp"+ selectedSPValue +"CstCd"+selectedCustValue +"SubCst" +selectedSubCustValue )
-    // }
-    // else if (selectedSubCustValue == "ALL") {
-    //         this.getSensorApi(selectedSPValue, selectedCustValue,this.state.ArrayOfSubCusts)
-    //   // // // alert("Sp"+ selectedSPValue +"CstCd"+selectedCustValue +"AllSubCst" +selectedSubCustValue )
-    // }
-    // else {
-     
         this.getSensorApi(selectedSPValue, selectedCustValue,selectedSubCustValue)
-        // // // alert("Sp"+ selectedSPValue +"CstCd"+selectedCustValue +"SubCst" +selectedSubCustValue )
-    // }
+      
   }
   //THIS IS API FOR OPERTION SELECTION BASED ON SERVICE PROVIDER , CUSTOMER CODE, SUBCUSTOMER AND SELECTED SENSORE CODE
   opertionApi(SendForSp,SendFroCustCD,SendForSbCd,SendForSensor){
@@ -311,39 +327,7 @@ getSensorApi(SendForSp,SendFroCustCD,SendForSbCd){
   }
   //THIS METHOD FOR SELECTE OPERTION BASED ON SERVICE PROVIDER , CUSTOMER CODE, SUBCUSTOMER AND SELECTED SENSORE CODE
   selectOpertion(selectedSPValue,selectedCustValue,selectedSubCustValue,selectedSensorValueArray){
-    // if (selectedSPValue == "ALL" && selectedCustValue == "ALL" && selectedSubCustValue == "ALL") {
-    //       this.opertionApi(this.state.ArrayOfSPs,this.state.ArrayOfCusts,this.state.ArrayOfSubCusts,selectedSensorValueArray)  
-    //   //  // // alert("sensorNm"+"AllSp"+ selectedSPValue +"AllCstCd"+selectedCustValue +"AllSubCst" +selectedSubCustValue + selectedSensorValueArray) 
-    // }
-    // else if (selectedSPValue == "ALL" && selectedSubCustValue == "ALL") {
-       
-    //       this.opertionApi(this.state.ArrayOfSPs,selectedCustValue ,this.state.ArrayOfSubCusts,selectedSensorValueArray) 
-    //   // // // alert("sensorNm"+"AllSp"+ selectedSPValue +"CstCd"+selectedCustValue +"AllSubCst" +selectedSubCustValue + selectedSensorValueArray) 
-    //   }
-    // else if (selectedSPValue == "ALL" && selectedCustValue == "ALL") { 
-    // this.opertionApi(this.state.ArrayOfSPs, this.state.ArrayOfCusts ,selectedSubCustValue,selectedSensorValueArray)      
-    //   // // // alert("sensorNm"+"AllSp"+ selectedSPValue +"AllCstCd"+selectedCustValue +"SubCst" +selectedSubCustValue + selectedSensorValueArray) 
-    // }
-    // else if (selectedSubCustValue == "ALL" && selectedCustValue == "ALL") {
-    //  this.opertionApi(selectedSPValue, this.state.ArrayOfCusts ,this.state.ArrayOfSubCusts,selectedSensorValueArray) 
-    //   // // // alert("sensorNm"+"Sp"+ selectedSPValue +"AllCstCd"+selectedCustValue +"AllSubCst" +selectedSubCustValue + selectedSensorValueArray) 
-    // }
-    // else if (selectedCustValue == "ALL") {
-    //     this.opertionApi(selectedSPValue, this.state.ArrayOfCusts ,selectedSubCustValue,selectedSensorValueArray)     
-    //   // // // alert("sensorNm"+"Sp"+ selectedSPValue +"AllCstCd"+selectedCustValue +"SubCst" +selectedSubCustValue + selectedSensorValueArray) 
-    // }
-    // else if (selectedSPValue == "ALL") { 
-    //     this.opertionApi(this.state.ArrayOfSPs, selectedCustValue ,selectedSubCustValue,selectedSensorValueArray)  
-    //   // // // alert("sensorNm"+"AllSp"+ selectedSPValue +"CstCd"+selectedCustValue +"SubCst" +selectedSubCustValue + selectedSensorValueArray) 
-    // }
-    // else if (selectedSubCustValue == "ALL") {
-    //     this.opertionApi(selectedSPValue, selectedCustValue ,this.state.ArrayOfSubCusts,selectedSensorValueArray) 
-    //   // // // alert("sensorNm"+"Sp"+ selectedSPValue +"CstCd"+selectedCustValue +"AllSubCst" +selectedSubCustValue + selectedSensorValueArray) 
-    // }
-    // else {
-     this.opertionApi(selectedSPValue, selectedCustValue ,selectedSubCustValue,selectedSensorValueArray)   
-      // // // alert("sensorNm"+"Sp"+ selectedSPValue +"CstCd"+selectedCustValue +"SubCst" +selectedSubCustValue + selectedSensorValueArray) 
-    // }   
+     this.opertionApi(selectedSPValue, selectedCustValue ,selectedSubCustValue,selectedSensorValueArray)      
   }
 
 //THIS METHOD USE FOR FETCH ALL DATA FROM SERVER BASED ON SELECTED CRITERIA.
@@ -359,38 +343,6 @@ getAllDetails(){
   spToSend.push(selectedSPValue);
   custToSend.push(selectedCustValue);
   subCustToSend.push(selectedSubCustValue);
-
-//   if (selectedSPValue == "ALL" && selectedCustValue == "ALL" && selectedSubCustValue == "ALL") {
-//       this.getAllDataApi(ArrayOfSPs,ArrayOfCusts,ArrayOfSubCusts,selectedSensorValueArray,dateTime1,
-//         dateTime2, operationSelected,equalsValue,startRange,endRange,selectedAssetValue,selectedDeviceValue)
-//   }
-//   else if (selectedSPValue == "ALL" && selectedSubCustValue == "ALL") {
-//       this.getAllDataApi(ArrayOfSPs,custToSend,ArrayOfSubCusts,selectedSensorValueArray,dateTime1,
-//         dateTime2, operationSelected,equalsValue,startRange,endRange,selectedAssetValue,selectedDeviceValue)
-//   }
-//   else if (selectedSPValue == "ALL" && selectedCustValue == "ALL") {
-//       this.getAllDataApi(ArrayOfSPs,ArrayOfCusts,subCustToSend,selectedSensorValueArray,dateTime1,
-//         dateTime2, operationSelected,equalsValue,startRange,endRange,selectedAssetValue,selectedDeviceValue)
-// }
-//   else if (selectedSubCustValue == "ALL" && selectedCustValue == "ALL") {
-
-//       this.getAllDataApi(spToSend,ArrayOfCusts,ArrayOfSubCusts,selectedSensorValueArray,dateTime1,
-//         dateTime2, operationSelected,equalsValue,startRange,endRange,selectedAssetValue,selectedDeviceValue)
-// }
-  
-//   else if (selectedCustValue == "ALL") {
-//       this.getAllDataApi(spToSend,ArrayOfCusts,subCustToSend,selectedSensorValueArray,dateTime1,
-//         dateTime2, operationSelected,equalsValue,startRange,endRange,selectedAssetValue,selectedDeviceValue)
-//   }
-//   else if (selectedSPValue == "ALL") {
-//         this.getAllDataApi(ArrayOfSPs,custToSend,subCustToSend,selectedSensorValueArray,dateTime1,
-//         dateTime2, operationSelected,equalsValue,startRange,endRange,selectedAssetValue,selectedDeviceValue)
-//   }
-//   else if (selectedSubCustValue == "ALL") {
-//           this.getAllDataApi(spToSend,custToSend,ArrayOfSubCusts,selectedSensorValueArray,dateTime1,
-//           dateTime2, operationSelected,equalsValue,startRange,endRange,selectedAssetValue,selectedDeviceValue)
-//   }
-//   else {
       this.getAllDataApi(spToSend,custToSend,subCustToSend,selectedSensorValueArray,dateTime1,
         dateTime2, operationSelected,equalsValue,startRange,endRange,selectedAssetValue,selectedDeviceValue)
   // }
@@ -422,7 +374,7 @@ getAllDataApi(SendForSp,SendFroCustCD,SendForSbCd,SendForSensor,SendForStartDate
           tempobj["CreatedTime"] =  json[i][3]
           FdataArray.push(tempobj)}
         // // console.log("this json data");
-         // console.log(json);
+         console.log(json);
         // // alert(json)
         // // console.log("end json");
         //HERE WE UPDATTING STATE FOR TABLE DATA FOR tableDataToSend AND RESUALT FOR CHART AND EXCEL
@@ -826,7 +778,7 @@ if(this.state.sensorNm.length != 0){
                      <div className="col-sm-3">
                     <div className= "divmanueDrop">
                      <DropdownButton  className = ""  onSelect={this.handleSp}
-                      disabled = {null}
+                      disabled = {this.state.spDisable}
                         bsStyle={"white"}
                         title={this.state.selectedSPValue || "SERVICE PROVIDER"}>
                         {spCd.map( (item) =>

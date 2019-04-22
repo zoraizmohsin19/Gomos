@@ -24,6 +24,7 @@ class activeDashbord extends Component {
         selectedChannelB: '',
         selectedChannelCn: '',        
         selectedAtionType: '',
+        selectedevent : "",
         deviceName: '',
         show: false,
         open: true,
@@ -224,10 +225,12 @@ for(var key =0; key < configkeyInput.length; key++) {
             //alert(dataToSendApi)
       }
       //alert(this.state.channelName)
+      
       //console.log(this.state.channelName)
       if(this.state.channelName.length != 0){
         if(this.state.selectedChannelB == ""){
         //alert("please Select Channel Name");
+        this.errorganerator("Please Select Channel Name !")
         return;
            }
 
@@ -348,34 +351,38 @@ callApiForManoverrideForTiles(){
         this.setState({filter: this.state.filter});
         // //alert(value);
       }
-    handleChange(selectedAtionType){
+    handleChange(selectedevent){
       //alert(selectedAtionType);
       var me = this;
-      if(selectedAtionType == "SentCommand" || 
-          selectedAtionType == "ActiveCommand" ||
-          selectedAtionType == "ExecutedJobs"||
-          selectedAtionType == "PendingJobs"|| 
-          selectedAtionType == "ClimateParameter" ||
-          selectedAtionType ==  "ClimateControl"
+      var index = this.state.actionTypes.findIndex(element => element.name == selectedevent);
+      var objectpayload = this.state.actionTypes[index];
+      var formStructure = objectpayload.formStructure;
+      var selectedAtionType     =  objectpayload.payloadId
+      if(formStructure == "SentCommand" || 
+      formStructure == "ActiveCommand" ||
+      formStructure == "ExecutedJobs"||
+      formStructure == "PendingJobs"|| 
+      formStructure == "ClimateParameter" ||
+      formStructure ==  "ClimateControl"
           ){
-        me.setState({formStructure: selectedAtionType ,selectedAtionType: selectedAtionType});
-        if(selectedAtionType == "ExecutedJobs"){
+        me.setState({formStructure: formStructure ,selectedevent: selectedevent, selectedAtionType: selectedAtionType});
+        if(formStructure == "ExecutedJobs"){
           this.setState({formStructure: "ActiveAndPending"});
           this.handleShowExecuted()
         }
-        me.setState({formStructure: selectedAtionType ,selectedAtionType: selectedAtionType});
+        // me.setState({formStructure: selectedAtionType ,selectedAtionType: selectedAtionType});
         // if(selectedAtionType == "ClimateParameter"){
         //   this.setState({formStructure: "ClimateParameter"});
       
         // }
-        if(selectedAtionType == "PendingJobs"){
+        if(formStructure == "PendingJobs"){
           this.setState({formStructure: "ActiveAndPending"});
           this.handleShowPending()
         }
       }else{
-      var index = this.state.actionTypes.findIndex(element => element.payloadId == selectedAtionType);
-      var objectpayload = this.state.actionTypes[index];
-      var formStructure = objectpayload.formStructure;
+      // var index = this.state.actionTypes.findIndex(element => element.payloadId == selectedAtionType);
+      // var objectpayload = this.state.actionTypes[index];
+      // var formStructure = objectpayload.formStructure;
       //console.log(formStructure);
       //console.log(formStructure);
       //console.log(index);
@@ -413,7 +420,7 @@ callApiForManoverrideForTiles(){
               }
             }
             this.setState({ selectedAtionType: selectedAtionType,
-               channelName: arrayOfChannel,
+               channelName: arrayOfChannel,selectedevent: selectedevent,
                configkeyInput:allBusinessName,configkeyInputKeyValue:configkeyInputKeyValue});
           }else if(formStructure == "2-input"){
             var configkeyInputKeyValue = {};
@@ -428,12 +435,12 @@ callApiForManoverrideForTiles(){
                 configkeyInputKeyValue[value+"min"+"error"] = "";
               }
             this.setState({ selectedAtionType: selectedAtionType,
-               channelName: arrayOfChannel,
+               channelName: arrayOfChannel,selectedevent: selectedevent,
                configkeyInput:allBusinessName,configkeyInputKeyValue:configkeyInputKeyValue});
           }
         
         }else{
-          this.setState({ selectedAtionType: selectedAtionType,
+          this.setState({ selectedAtionType: selectedAtionType,selectedevent: selectedevent,
             channelName: arrayOfChannel});
         }
     
@@ -453,7 +460,7 @@ callApiForManoverrideForTiles(){
 
             }
           this.setState({ selectedAtionType: selectedAtionType,
-             channelName: [],
+             channelName: [],selectedevent: selectedevent,
              configkeyInput:allBusinessName,configkeyInputKeyValue:configkeyInputKeyValue});
         }
         
@@ -474,7 +481,7 @@ callApiForManoverrideForTiles(){
             
             //console.log("This is Object of configkeyInputKeyValue")
             //console.log(configkeyInputKeyValue)
-           this.setState({ selectedAtionType: selectedAtionType,
+           this.setState({ selectedAtionType: selectedAtionType,selectedevent: selectedevent,
               // channelName: arrayOfChannel,
               configkeyInput:allBusinessName,configkeyInputKeyValue:configkeyInputKeyValue});
          }
@@ -675,19 +682,37 @@ onDeviceinstruction.on('DeviceInstruction',function(data) {
      var me = this;
     var body = {mac: this.state.CriteriaForOP.mac}
     axios.post("http://localhost:3992/ActiveActionTypeCall",body)
-
     .then(json =>  {
       if(json.length !=0){
-      //console.log(json["data"]);
-      var index  = json["data"].findIndex(item => item.formStructure ==  "manualOverride");
+        console.log("This is payload Data")
+      console.log(json["data"]);
+     var ClientObj = JSON.parse(sessionStorage.getItem("ClientObj"));
+      let index  = json["data"].findIndex(item => item.formStructure ==  "manualOverride");
       var containerdata = json["data"][index];
       // if(index != null && index != undefined){
       //   json["data"].splice(index,1);
       // }
+      var tempObj = [];
+      for(let i =0; i< json["data"].length; i++ ){
+       var tempIndex = ClientObj.OperatingForms.findIndex(item => item.payloadId ==   json["data"][i].payloadId);
+       console.log(tempIndex);
+       console.log(ClientObj.OperatingForms[tempIndex]);
+       if(tempIndex !== -1 && tempIndex !== undefined){
+        json["data"][i]["name"] = ClientObj.OperatingForms[tempIndex].nameNavigationBar
+        json["data"][i]["position"] = ClientObj.OperatingForms[tempIndex].position
+         tempObj.push(json["data"][i]);
+       }
+      }
+      let newTemp = ClientObj.OperatingForms.filter(item => item.payloadId == "");
+      console.log(newTemp)
+      for(let j = 0 ; j< newTemp.length; j++ ){
+        tempObj.push({"_id": j,"name": newTemp[j].nameNavigationBar,"payloadId":newTemp[j].payloadId ,"formStructure":newTemp[j].formStructure,"position": newTemp[j].position })
+      }
 
-      //console.log(containerdata);
+      console.log(tempObj);
+      tempObj.sort( (a, b)=> a.position - b.position);
       //console.log("this is container data");
-      me.setState({actionTypes:json["data"],tilesPayloaddata:  containerdata})
+      me.setState({actionTypes:tempObj,tilesPayloaddata:  containerdata})
       }
       else{
         me.setState({actionTypes:[]})
@@ -854,7 +879,9 @@ onDeviceinstruction.on('DeviceInstruction',function(data) {
     // .then(json =>  {
     // });
    }
-
+   errorganerator(values){
+    swal ( "Oops" ,  values ,  "error" )
+  }
    fetchClimateControlDevice(){
     axios.post("http://localhost:3992/getActiveDAction",{mac:this.state.CriteriaForOP.mac})
     .then(json =>  {
@@ -1067,7 +1094,9 @@ fetchActiveJob(){
             .then(function (result) {
               var mainActiveJobdata  =   result.data;
               items   =   result.data.executedJob;
+            //  console.log(result)
               me.setState({mAOfInactivejob:items,'total_count':mainActiveJobdata.count,'in_prog':false});
+              // alert("This is Called For  ExecutedJob")
       }).catch(error =>{
         me.setState({mAOfInactivejob:[],'in_prog':false});
       });
@@ -1759,7 +1788,7 @@ inputField =
                 </div>
                <button type= "button" className= "ActivFilterBtn btn btn-sm " onClick= {this.Mfiltrerbtn.bind(this)}>filter</button>
              </div>
-            <p className ="ActiveP">Executed Jobs Command </p>
+            <p className ="ActiveP"> {this.state.filter.TypeOfJobs} Jobs Command </p>
                 <div  className="table-responsive">
                 <Table  className="table table-hover table-sm table-bordered ">
                         <thead className='' style={{background: "gainsboro"}}>
@@ -1871,16 +1900,16 @@ inputField =
         <div className = 'col-lg-12 col-sm-12'>
  <div className= "line3"></div></div>
  <div className= "col-lg-12 margin-topActive">
- <Nav bsStyle="pills colorpills"  activeKey={this.state.selectedAtionType} onSelect={this.handleChange}>
+ <Nav bsStyle="pills colorpills"  activeKey={this.state.selectedevent} onSelect={this.handleChange}>
          { this.state.actionTypes.map(item =>  
-          <NavItem eventKey={item.payloadId} >
-           {item.payloadId}
+          <NavItem eventKey={item.name} >
+           {item.name}
           </NavItem>
          )}
-         <NavItem eventKey="SentCommand" >
+         {/* <NavItem eventKey="SentCommand" >
          SentCommand
           </NavItem>
-          {/* <NavItem eventKey="ActiveCommand" >
+          <NavItem eventKey="ActiveCommand" >
           ActiveCommand
           </NavItem>
           <NavItem eventKey="ExecutedJobs" >
@@ -1888,12 +1917,15 @@ inputField =
           </NavItem>
           <NavItem eventKey="PendingJobs" >
           PendingJobs
-          </NavItem> 
-          <NavItem eventKey="ClimateParameter" >
+          </NavItem>  */}
+          {/* <NavItem eventKey="ClimateParameter" >
           ClimateParameter
           </NavItem>   
           <NavItem eventKey="ClimateControl" >
           ClimateControl
+          </NavItem>    */}
+          {/* <NavItem eventKey="ProgramForm" >
+          Program Form
           </NavItem>    */}
 
         </Nav> 
@@ -1904,7 +1936,6 @@ inputField =
     
       <div className ="paddForm">
       {inputField}
-    
      </div>
    </div>
 

@@ -12,6 +12,7 @@ var urlConn, dbName, dbo;
  function onViewDashboard(socket){
    try {
    gomos.gomosLog(TRACE_DEV,"this is connected OnViewDashboard");
+  var  checkInterval;
     socket.on('lastUpdatedValue', function(data) {
        var spCd = data.spCd;
        var custCd = data.custCd;
@@ -24,8 +25,9 @@ var urlConn, dbName, dbo;
            mac: mac,
           }
      gomos.gomosLog(TRACE_DEBUG,"this data which comming from client",data);
-    setTimeout(function () {lastupdateddata(socket,data)}, 1000)     
-    setInterval(
+    setTimeout(function () {lastupdateddata(socket,data)}, 2000)
+    clearInterval(checkInterval);     
+    checkInterval =  setInterval(
        () =>
       lastupdateddata(socket,criteria),
        30000
@@ -34,7 +36,7 @@ var urlConn, dbName, dbo;
     socket.on('end', function (){
        socket.disconnect(0);
    });
-    socket.on("disconnect", () =>gomos.gomosLog(TRACE_PROD,"Client disconnected on OnViewDashboard")); 
+    socket.on("disconnect", () => { clearInterval(checkInterval);gomos.gomosLog(TRACE_PROD,"Client disconnected on OnViewDashboard")}); 
    } catch (err) {
      gomos.errorCustmHandler(NAMEOFSERVICE,"onViewDashboard","THIS IS TRY CATCH ERROR",'',err);
    } 

@@ -9,13 +9,15 @@ import CPagination from "../layout/Pagination";
 import * as ExcelJs from "exceljs/dist/exceljs.min.js";
 import * as FileSaver from "file-saver";
 import dateFormat  from  "dateformat";
+import swal from 'sweetalert';
 import Spinner from '../layout/Spinner';
+import {NavItem ,Nav} from "react-bootstrap"
 class socketdashbord extends Component {
 constructor(){
   super();
   this.state={
   body: {
-    endpoint: "http://52.212.188.65:4001",
+    endpoint: "http://localhost:4001",
     socket1: {},
     arrData: [],
     arrLabels:[],
@@ -34,11 +36,6 @@ constructor(){
     spDisable:null,
     subCustDisable: null,
     custDisable: null,
-    // spCd: [],
-    // custCd: [],
-    // subCustCd: [],
-    // Assets: [],
-    // Devices: [],
     Sensors: [],
     selectedSensorsType1: '',
     mac: '',
@@ -58,7 +55,13 @@ constructor(){
       criteria: "",
       sensorNm: "",
       shortName: ""
-    }
+    },
+    DeviceIdentifierForSensors: [],
+    sensorsGroups : [],
+    selectedGroups : {},
+   sensorsMainData: [],
+   selectedGroupsitem: "",
+   headerTable: []
   }
   }
   this.changePage     =   this.changePage.bind(this);
@@ -96,11 +99,14 @@ componentDidMount(){
    me.state.body.selectedDeviceName    =     mainData.DeviceName;
    me.state.body.selectedAssets        =     mainData.assetId;
    me.setState({body: me.state.body});
-
+  //  var result1 = this.groupingDataArray();
+  //  console.log(result1)
   this.startFunction()
   }
+   
   startFunction(){
     var me   = this;
+    me.callDeviceIdentifier();
       me.callToSocket();
       var dashboardData = JSON.parse(sessionStorage.getItem("dashboardConfigobj"));
       me.state.body.Assets                =   dashboardData.Assets;
@@ -114,6 +120,22 @@ componentDidMount(){
       me.firstTimeRender();
       me.fetchdata();
   }
+  callDeviceIdentifier(){
+    var me = this;
+    axios.post("http://localhost:3992/getDevicesIdentifier",{mac: this.state.body.mac})
+    .then(json =>  {
+      // console.log("This is device Identifier");
+      // console.log(json);
+      me.state.body.DeviceIdentifierForSensors = json["data"].sensors;
+      var groupedData = this.groupingDataArray(json["data"].sensors)
+      me.state.body.sensorsGroups = groupedData
+      me.state.body.selectedGroups = groupedData[0]
+      me.state.body.selectedGroupsitem = groupedData[0].group
+      // console.log(me.state.body.sensorsGroups);
+      me.setState({ body : me.state.body})
+      // let json1 =[];
+    })
+  }
 DisplayChart(result, valueSensoor ){
 //  console.log(result)
   var me = this;
@@ -124,12 +146,23 @@ DisplayChart(result, valueSensoor ){
     var dataToSend2 = [];
     for (var i = 0; i < result.length; i++) {
       var formattedDate = dateFormat(result[i]["column5"], "dd-mmm HH:MM");
-      dataToSend1.push(result[i]["column4"]);
+    //  var arrayforsend= [];
+    var temp = {};
+      for(var j = 0;j < me.state.body.selectedGroups.devicebusinessNM.length; j++ ){
+       
+        temp[me.state.body.selectedGroups.devicebusinessNM[j]] = result[i][me.state.body.selectedGroups.devicebusinessNM[j]];
+      
+      }
+      dataToSend1.push(temp);
+      // console.log("This Chart data ")
+      // console.log(arrayforsend)
+      // dataToSend1 = arrayforsend;
       dataToSend2.push(
         formattedDate 
       );
     }
-    //console.log(dataToSend1)
+    // console.log("This is log for DataTo Send ");
+    // console.log(dataToSend1)
     //console.log(dataToSend2)
     //console.log(valueSensoor)
     arrData = dataToSend1;
@@ -138,7 +171,7 @@ DisplayChart(result, valueSensoor ){
     var fromDate = new Date();
     var  toDate =  new Date();
     var borderColors =[];
-    for (var i = 0; i <  arrData.length; i++) {
+    // for (var i = 0; i <  arrData.length; i++) {
         borderColors.push(this.getRandomBorColor());
         me.state.body.arrData = arrData;
         me.state.body.arrLabels = arrLabels;
@@ -146,7 +179,7 @@ DisplayChart(result, valueSensoor ){
         me.state.body.fromDate = fromDate;
         me.state.body.borderColors = borderColors;
         this.setState({ body: me.state.body});
-  }
+  // }
   }
   else{
     me.state.body.arrData = undefined;
@@ -176,46 +209,74 @@ DisplayChart(result, valueSensoor ){
     me.setState({body: me.state.body});
     var FdataArray =[];
     var dataArray =[];
-    axios.post("http://52.212.188.65:3992/getdashboard",body)
+    axios.post("http://localhost:3992/getdashboard",body)
     .then(json =>  {
       me.state.body.Spinnerdata = true;
       me.setState({ body: me.state.body})
       let json1 =[];
-      // console.log("this is data");
-      // console.log(json["data"]);
+       // console.log("this is Source of data ");
+       // console.log(json["data"]);
      json1 = json["data"]["finalResult"]
       if(json1 !== 0){
         for (var i = 0; i < json1.length ; i++) {
-          FdataArray.push({
-                  column1: json1[i][0],
-                  column2: json1[i][1],
-                  column3: json1[i][2],
-                  column4: json1[i][3].toFixed(2),
-                  column5: json1[i][4]
+
+          
+        //   FdataArray.push({
+        //           column1: json1[i][0],
+        //           column2: json1[i][1],
+        //           column3: json1[i][2],
+        //           column4: json1[i][3].toFixed(2),
+        //           column5: json1[i][4]
      
-        })
-        dataArray.push({
-          column1: json1[i][0],
-          column2: json1[i][1],
-          column3: json1[i][2],
-          column4: json1[i][3].toFixed(2),
-          column5: dateFormat(json1[i][4], "dd-mmm-yy HH:MM:ss")
-})
+        // })
+        
+
+var jsontemp ={column1: json1[i][0],
+             column2: json1[i][1],
+             column5: dateFormat(json1[i][4], "dd-mmm-yy HH:MM:ss")};
+        // console.log(me.state.body.selectedGroups.devicebusinessNM)
+        var sensorsKeys = me.state.body.selectedGroups.devicebusinessNM;
+ for(var k = 0 ; k< sensorsKeys.length; k++){
+  jsontemp[sensorsKeys[k]]  = json1[i][3][sensorsKeys[k]];
+ } 
+var arrayHeder =["SI","DEVICE NAME"];
+for(var l = 0 ; l< me.state.body.selectedGroups.devicebusinessNM.length; l++){
+
+arrayHeder.push(me.state.body.selectedGroups.devicebusinessNM[l]);
+}
+
+arrayHeder.push("CREATED TIME");
+// console.log(arrayHeder)
+ // console.log(jsontemp)
+ 
+//         dataArray.push({
+//           column1: json1[i][0],
+//           column2: json1[i][1],
+//           column3: json1[i][2],
+//           column4: json1[i][3].toFixed(2),
+//           column5: dateFormat(json1[i][4], "dd-mmm-yy HH:MM:ss")
+// })
+
+dataArray.push(
+  jsontemp
+)
       }
       
       var lastUpdatedTime = dateFormat(json["data"]["lastCreatedTime"] , "dd-mmm-yy HH:MM:ss")
-   //   console.log(dataArray);
+      // console.log("This is dataArray");
+      // console.log(dataArray);
+      me.state.body.headerTable       = arrayHeder
       me.state.body.DataArray         =  dataArray;
       me.state.body.in_prog           =  false;
       me.state.body.total_count       =  json["data"]["data_count"];
       me.state.body.lastupdatedData   =  json["data"]["lastdataObj"];
       me.state.body.lastUpdatedTime   =  lastUpdatedTime;
       me.setState({ body: me.state.body})
-      me.DisplayChart(FdataArray, me.state.body.selectedSensorsName);
+      me.DisplayChart(dataArray, me.state.body.selectedSensorsName);
       }
     }) 
     .catch(error=>{
-      me.DisplayChart(FdataArray, me.state.body.selectedSensorsName);
+      me.DisplayChart(dataArray, me.state.body.selectedSensorsName);
       me.state.body.DataArray     =   [];
       me.state.body.in_prog       =   false;
       me.state.body.total_count   =   0;
@@ -254,31 +315,98 @@ callToSocket(){
   socket.emit('lastUpdatedValue',body);  
   socket.on("onViewDashboard", data =>{
     //console.log("This is socket ");
-    //console.log(data.sensors);
+    // console.log(data.sensors);
+  var dataofSensors = [];
+  if( me.state.body.selectedGroups.devicebusinessNM != undefined &&  me.state.body.selectedGroups.devicebusinessNM !=null &&  me.state.body.selectedGroups.devicebusinessNM.length != 0){
+
+ 
+  for(let i =0; i < me.state.body.selectedGroups.devicebusinessNM.length; i++ ){
+    dataofSensors.push(data.sensors.filter( item => item.devicebusinessNM == me.state.body.selectedGroups.devicebusinessNM[i])[0])
+  }
+  // // console.log(dataofSensors)
+// console.log(this.state.body.selectedGroups);
+me.state.body.selectedSensorsType1 = dataofSensors[0].type;
+me.state.body.selectedSensorsName = dataofSensors[0].devicebusinessNM;
+me.state.body.sensorsMainData   =   data.sensors;  
+// me.setState({body: me.state.body})
     var array = [];
-    // var lastUpdatedTime = dateFormat(data.lastCreatedTime , "dd-mmm-yy HH:MM:ss");
-    for (var i = 0 ; i < data.sensors.length ; i++ ){ 
-      array.push({ "sensorsNM": data.sensors[i].type, 
+    
+    for (var i = 0 ; i < dataofSensors.length ; i++ ){ 
+      array.push({ "sensorsNM":dataofSensors[i].type, 
       "bgClass": arrayofbgClass[i],
-       nameofbsnm : data.sensors[i].devicebusinessNM,
-       valuseS:data.sensors[i].Value , 
-       lastUpdatedTime:  dateFormat(data.sensors[i].dateTime , "dd-mmm-yy HH:MM:ss")});
+       nameofbsnm : dataofSensors[i].devicebusinessNM,
+       valuseS:dataofSensors[i].Value , 
+       lastUpdatedTime:  dateFormat(dataofSensors[i].dateTime , "dd-mmm-yy HH:MM:ss")});
      }
      for(var j =0; j< array.length; j++){
-       if(array[j].lastUpdatedTime != me.state.body.Sensors[j].lastUpdatedTime ){
+       if(array[j].lastUpdatedTime !== me.state.body.Sensors[j].lastUpdatedTime){
         me.state.body.Sensors   =   array;     
-        me.setState({body :me.state.body});
+        me.setState({body : me.state.body});
         break;
        }
      }
+      }
      
   });
+}
+handleGroups = (value) => {
+  try {
+    var me = this;
+    var dashboardData = JSON.parse(sessionStorage.getItem("dashboardConfigobj"));
+    var arrayofbgClass = dashboardData.SensorsBgC;
+    me.state.body.selectedGroupsitem = value;
+    var index = me.state.body.sensorsGroups.findIndex(item => item.group == value);
+  
+    me.state.body.selectedGroups = me.state.body.sensorsGroups[index];
+    // console.log(seletedGroupdata)
+    // console.log(me.state.body.sensorsMainData)
+     alert(value);
+     var dataofSensors = [];
+     for(let i = 0; i <  me.state.body.selectedGroups.devicebusinessNM.length; i++ ){
+       dataofSensors.push(me.state.body.sensorsMainData.filter( item => item.devicebusinessNM ==    me.state.body.selectedGroups.devicebusinessNM[i])[0])
+     }
+     // console.log(dataofSensors[0].type)
+     // console.log(dataofSensors[0].devicebusinessNM)
+     var array = [];
+      
+     for (var i = 0 ; i < dataofSensors.length ; i++ ){ 
+       array.push({ "sensorsNM": dataofSensors[i].type, 
+       "bgClass": arrayofbgClass[i],
+        nameofbsnm : dataofSensors[i].devicebusinessNM,
+        valuseS:dataofSensors[i].Value , 
+        lastUpdatedTime:  dateFormat(dataofSensors[i].dateTime , "dd-mmm-yy HH:MM:ss")});
+      }
+      me.state.body.selectedSensorsType1 = dataofSensors[0].type;
+      me.state.body.selectedSensorsName = dataofSensors[0].devicebusinessNM;
+      me.state.body.Sensors   =   array;
+      me.setState({body : me.state.body})
+      me.fetchdata();
+  } catch (error) {
+    this.errorganerator()
+  }
+ 
+}
+errorganerator(){
+  swal ( "Oops" ,  "Something went wrong From Back End Services!" ,  "error" )
+}
+groupingDataArray(myArray){
+
+var group_to_values = myArray.reduce(function (obj, item) {
+    obj[item.group] = obj[item.group] || [];
+    obj[item.group].push(item.devicebusinessNM);
+    return obj;
+}, {});
+
+var groups = Object.keys(group_to_values).map(function (key) {
+    return {group: key, devicebusinessNM: group_to_values[key]};
+});
+return groups;
 }
 callForlastAlert(custCd,subCustCd, mac){
   var me = this;
   const {endpoint } = this.state.body;
  var body = {custCd,subCustCd,mac}
-  // axios.post("http://52.212.188.65:3992/getdashbordlastalert", body)
+  // axios.post("http://localhost:3992/getdashbordlastalert", body)
   // .then(json =>  {
     var lastError = socketIOClient(endpoint+"/ActivelastError");
     lastError.emit('lastErrorClientEmit',body );
@@ -375,13 +503,26 @@ return color;
       </div>
       </div>
         <div className="row">
+        <div className= "col-lg-12 col-sm-12 col-md-12">
+        <p className= "line2"></p>
+          <div className="width1">
+          <label className="text-center">SELECT GROUP</label>
+           <Nav bsStyle="pills"   activeKey={this.state.body.selectedGroupsitem} onSelect={this.handleGroups}>
+         { this.state.body.sensorsGroups.map(item =>  
+          <NavItem eventKey={item.group} >
+           {item.group}
+          </NavItem>
+         )}
+        </Nav>    
+        </div>
+        </div>
        <div className = "col-lg-9 col-sm-6 col-xs-12">
        <div className= "custmDivSensorUpper">
       
 
        <div className= "wrapperSenSors">
         { this.state.body.Sensors.map(item => 
-            <span className="custmDivSensor">
+            <span className=" custmDivSensor">
                 <Sensors key = {item.nameofbsnm} 
                   bgclass={item.bgClass}
                   label= {"Sensor"+" "+item.nameofbsnm} 
@@ -393,7 +534,7 @@ return color;
                   div_icon_class="icon"
                   heading_class_name=" color12 head"
                   fotter_class ="small-box-footer"
-                  Change ={this.handler.bind(this, item.sensorsNM,item.nameofbsnm)}
+                  // Change ={this.handler.bind(this, item.sensorsNM,item.nameofbsnm)}
                 />
                 </span>
             )}
@@ -412,19 +553,6 @@ return color;
             </div>
             <a href="javascript:void(0)" className= "small-box-footer">&nbsp;</a>
             </div>
-            {/* <Sensors 
-             bgclass="small-box bg-red"
-            label= {lastAlertdata.businessNmValues} 
-            takenClass= "takenclass"
-            P_name_class= "color12 " 
-            dateTime = { dateFormat(lastAlertdata.createdTime, "dd-mmm HH:MM")}
-            heading_class_name=" color12 head"
-            message= {lastAlertdata.shortName} 
-            iconclass="far fa-times-circle"
-            div_icon_class="icon"
-            fotter_class ="small-box-footer"
-            Change ={this.handler.bind(this, "Water-label","#f39c12")}
-             /> */}
             </div>
             </div>
             </section>
@@ -432,6 +560,9 @@ return color;
             <div className ="container">
            
                    <div className="col-lg-10 col-md-10 col-sm-5 col-xs-9">
+                   <button className="btn btn-xs btn-secondary chartbtn" onClick={()=>{
+                      this.props.history.push("/menu")}
+                   }><i class="far fa-file-excel"></i></button>
                    </div>
                    <div className="col-lg-2 col-md-2 col-sm-7 col-xs-3">
                    <span className="spanchart">#ROWS </span>
@@ -445,6 +576,8 @@ return color;
                    {/* <button type="button" onClick={this.downloadToExcel.bind(this)}>downloadToExcel</button>  */}
                    </div>
             </div>
+            <div className="container">
+            <div className= "col-sm-12 col-lg-12 col-xs-12 col-md-12">
             <div className="chart-container" >
         <Chartcom 
         type="line"
@@ -457,6 +590,8 @@ return color;
         borderColors= {borderColors}
         />
         </div>
+        </div>
+        </div>
         {/* <div className= "custNav btn-group">
       
          <button  className="btn btn-sm btn-secondary" onClick={this.downloadToExcel.bind(this)}><i class="far fa-file-excel iconfont"></i></button>
@@ -466,28 +601,33 @@ return color;
         <Table  className="table table-hover table-sm table-bordered cust">
         <thead className='bg' style={{background: "gainsboro"}}>
         <tr>
-        <th className='text-center '> SI</th>
-        <th className='text-center '>Device</th>
-        <th className='text-center '>Device Name</th>
-        <th className='text-center '>Sensors Name</th>
-        <th className='text-center '>Values</th>
-        <th className='text-center '>Created Time</th>
+          {this.state.body.headerTable.map(item => {
+            return <th className='text-center '>{item}</th>
+          })}
+    
       </tr>
         </thead>
         <tbody>
         { state.in_prog && <tr><td colSpan={8} className='text-center'><i className='fa fa-refresh fa-spin'></i> Loading..</td></tr>}
         { !state.in_prog && state.DataArray.length == 0 && <tr><td colSpan={8} className='text-center'> No Data </td></tr>}
         {  !state.in_prog && DataArray.map( (user,i) => {
-              return  <tr key={i}>
+              return  (<tr key={i}>
               <td className='text-center'>{ page_start_index+i + 1}</td>
               
-              <td className='text-center'>{user.column1}</td>
+              {/* <td className='text-center'>{user.column1}</td> */}
               <td className='text-center'>{user.column2}</td>
-              <td className='text-center'>{user.column3}</td>
-              <td className='text-center'>{user.column4}</td>
+              {/* <td> */}
+                {this.state.body.selectedGroups.devicebusinessNM.map(item =>{
+                 return <td className='text-center'>{user[item]}</td>
+                })
+               
+                }
+             
+              {/* </td> */}
+              {/* <td className='text-center'>{user.column4}</td> */}
               <td className='text-center'>{user.column5}</td>
               </tr>
-       
+              )
             })
               }
           </tbody>

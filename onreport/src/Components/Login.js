@@ -57,7 +57,7 @@ import Spinner from '../layout/Spinner';
             var userdata ={email,
                 password};
                 me.setState({ 'Spinnerdata': false});
-        axios.post('http://52.212.188.65:3992/authenticate', {body: userdata
+        axios.post('http://localhost:3992/authenticate', {body: userdata
            
           })
           .then(function (response) {
@@ -67,6 +67,7 @@ import Spinner from '../layout/Spinner';
                 sessionStorage.setItem("userDetails", JSON.stringify(response["data"].userDtls));
                 sessionStorage.setItem("dashboardConfigobj", JSON.stringify(response["data"].dashboardConfigobj));
                 sessionStorage.setItem("configData", JSON.stringify(response["data"].configData));
+                sessionStorage.setItem("ClientObj", JSON.stringify(response["data"].ClientObj));
                 me.setState({ 'Spinnerdata':true});
                 me.props.history.push(response["data"].dashboardConfigobj.Nevigation)
               }

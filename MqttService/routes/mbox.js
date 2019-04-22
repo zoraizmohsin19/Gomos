@@ -340,8 +340,15 @@ function checkCriteria(db,passedAssetId, custId, subCustId,businessNmValues,  ma
             bNmConfig = result[i].configBNm.split(",");//gets all configBNm of particular message from alertsConfig
             var strbusinessNmValues="";
             var shortName =  result[i].shortName;
+          gomos.gomosLog(TRACE_DEV,"This is Criteria alert values 122", bNmConfig)
+          gomos.gomosLog(TRACE_DEV,"This is Criteria alert values", businessNmValues)
+
             for (var k = 0; k < alertsBNm.length; k++) {
+              //eval("var " + alertsBNm[k] + " = " + businessNmValues[bNmConfig[k]]);
+              //
               eval("var " + alertsBNm[k] + " = " + businessNmValues[bNmConfig[k]]);
+              gomos.gomosLog(TRACE_DEV,"This is Criteria", eval(Payload))
+
               // this is done in order to retrieve the actual vlaues of bmNames in the msg to store in Alerts.
               // Later Alerts service will pick this and add it to emails.
               strbusinessNmValues+=alertsBNm[k] + " is " + businessNmValues[bNmConfig[k]];
@@ -353,6 +360,9 @@ function checkCriteria(db,passedAssetId, custId, subCustId,businessNmValues,  ma
           {
             gomos.errorCustmHandler(NAMEOFSERVICE,"checkCriteria",'THIS IS TRY CATCH ERROR',"",err)
           }
+          gomos.gomosLog(TRACE_DEV,"This is Criteria", result[i].criteria)
+
+          gomos.gomosLog(TRACE_DEV,"This is Criteria", eval(result[i].criteria))
             // if criteria is matched the insert the required data into Alerts Collection.
             if (eval(result[i].criteria)) {
               var alertData = {
@@ -368,13 +378,13 @@ function checkCriteria(db,passedAssetId, custId, subCustId,businessNmValues,  ma
                 user: result[i].user,
                 type: result[i].type,
                 criteria: result[i].criteria,
-                alertText: eval(result[i].alertText),
+                alertText:  eval(result[i].alertText),
                 processed: "N",
                 dtTime: result[i].dtTime,
                 createdTime: nowDateTime,
                 updatedTime: nowDateTime
               };
-              gomos.gomosLog(TRACE_DEV,"This is eval(result[i].alertText)",eval(result[i].alertText));
+              gomos.gomosLog(TRACE_DEV,"This is Debug of result[i].alertText", eval(result[i].alertText));
               db.collection("Alerts").insertOne(alertData, function (err, result) {
                 if (err) {
                   gomos.errorCustmHandler(NAMEOFSERVICE,"checkCriteria",'THIS IS INSERTION ERROR','',err)
