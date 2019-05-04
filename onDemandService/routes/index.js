@@ -895,7 +895,7 @@ var mac = body.mac;
       gomos.gomosLog(TRACE_DEBUG,"This is called in Alert"); 
       
 
-        db.collection("DeviceState")
+        db.collection("Devices")
         .find({ mac:mac })
         .toArray(function (err, result) {
           if (err) {
@@ -921,8 +921,9 @@ var mac = body.mac;
          var devicebusinessNM = Object.keys(result[0][deviceStateKey[k]][keyofCode[i]]);
          gomos.gomosLog(TRACE_DEBUG,"this devicebusinessNM",devicebusinessNM);  
              devicebusinessNM.splice(devicebusinessNM.indexOf("dateTime"), 1);
-             ActiveIdentifier["devicebusinessNM"] = devicebusinessNM[0];
+             ActiveIdentifier["devicebusinessNM"] = result[0][deviceStateKey[k]][keyofCode[i]][devicebusinessNM[0]];
              ActiveIdentifier["Value"]    =  result[0][deviceStateKey[k]][keyofCode[i]][devicebusinessNM[0]];
+             ActiveIdentifier["ConfigAndbsName"]    =  {"Bsname": result[0][deviceStateKey[k]][keyofCode[i]][devicebusinessNM[0]],"configNm": result[0][deviceStateKey[k]][keyofCode[i]]["configName"]}
              ActiveIdentifier["dateTime"] =  result[0][deviceStateKey[k]][keyofCode[i]]["dateTime"];
              sensorsArray.push(ActiveIdentifier);
         }
@@ -1593,6 +1594,159 @@ var dateTime = new Date()
       })
   });
 });
+
+router.post("/ActiveProgramRuleUpdate", function (req,res, next){
+  accessPermission(res);
+  var body = req.body;
+  var mac         =   body.mac;
+  var name        =  body.name;
+  var version     =  body.version;
+  var previousState = body.previousState;
+  var currentState = body.currentState;
+  var pendingConfirmation = body.pendingConfirmation;
+
+
+// var messageValue = message;
+// gomos.gomosLog(TRACE_DEBUG,"this is message Value", message);
+MongoClient.connect(
+  urlConn,
+  { useNewUrlParser: true },
+  function (err, connection) {
+    if (err) {
+      next(err);
+    }
+    gomos.gomosLog(TRACE_DEBUG,"This is for Update in Program Details", mac)
+    var db = connection.db(dbName);
+    var dateTime = new Date(new Date().toISOString());
+    
+      db.collection("DeviceInstruction")
+      .updateOne( {"type": "ProgramDetails","mac": mac, "sourceMsg.body.name": name,"sourceMsg.body.version": version},
+       { $set: { "sourceMsg.body.currentState":currentState,"sourceMsg.body.previousState" : previousState,
+       "sourceMsg.body.pendingConfirmation": pendingConfirmation,
+      "updatedTime" :dateTime
+        } 
+      }
+      ,function (err, result) {
+        if (err) {
+      gomos.gomosLog(TRACE_DEBUG,"this err",err);  
+        }
+        gomos.gomosLog(TRACE_DEBUG,"This is device Instruction for ClimateSave", result);
+        res.json(result)
+  });
+});
+});
+
+router.post("/ActiveProgrameSave", function (req,res, next){
+  accessPermission(res);
+  var body = req.body;
+  var message     =   body.dataBody; 
+
+  var mac         =   body.mac;
+var messageValue = message;
+gomos.gomosLog(TRACE_DEBUG,"this is message Value", message);
+MongoClient.connect(
+  urlConn,
+  { useNewUrlParser: true },
+  function (err, connection) {
+    if (err) {
+      next(err);
+    }
+    var db = connection.db(dbName);
+// var dateTime = new Date()
+    gomos.gomosLog(TRACE_DEBUG,"This is called in Alert"); 
+    var dateTime = new Date(new Date().toISOString());
+    db.collection("Instructionindex")
+    .insert({"programKeyIndex": `${mac}-${message.programKey}`},function(err,result){
+      gomos.gomosLog(TRACE_DEBUG,"This is err", err);
+      if(err){
+        res.json("Error");
+      }
+      else{
+      // if(result.length === 0){
+      gomos.gomosLog(TRACE_DEBUG,"This is log for data submit Data",result );
+      db.collection("DeviceInstruction")
+      .insert( {"mac": mac,"type": "ProgramDetails",
+      sourceMsg: {body:message},
+      createdTime: dateTime,
+      updatedTime :dateTime
+    },function (err, result) {
+        if (err) {
+      gomos.gomosLog(TRACE_DEBUG,"this err",err);  
+        }
+        gomos.gomosLog(TRACE_DEBUG,"This is device Instruction for ", result["upserted"]);
+        gomos.gomosLog(TRACE_DEBUG,"This is device Instruction for ",result["CommandResult"]);
+        gomos.gomosLog(TRACE_DEBUG,"This is device Instruction for Program Details", result);
+        res.json(result)
+       });
+      }
+     });
+    });
+});
+router.post("/ActiveProgrameFetch", function (req,res, next){
+  accessPermission(res);
+  var body = req.body;
+  // var message     =   body.dataBody; 
+
+  var mac         =   body.mac;
+MongoClient.connect(
+  urlConn,
+  { useNewUrlParser: true },
+  function (err, connection) {
+    if (err) {
+      next(err);
+    }
+    var db = connection.db(dbName);
+    gomos.gomosLog(TRACE_DEBUG,"THis is MAc", mac)
+      // db.collection("DeviceInstruction")
+      // .find( {"mac":mac,"type": "ProgramDetails"}).toArray(function (err, result) {
+      //   if (err) {
+      // gomos.gomosLog(TRACE_DEBUG,"this err",err);  
+      //   }
+
+        db.collection("DeviceInstruction")
+        .aggregate([{$match: {"mac":mac,"type": "ProgramDetails"}},{ $group : { _id: "$sourceMsg.body.name", version: { $max : "$sourceMsg.body.version" }}}]).toArray(function (err, result){
+          if (err) {
+            gomos.gomosLog(TRACE_DEBUG,"this err",err);  
+              }   
+              let data = result.map(item => `${item._id}-${item.version}`)
+              gomos.gomosLog(TRACE_DEBUG,"This is result of find",data)                
+               db.collection("DeviceInstruction")
+              .find( {"mac":mac,"type": "ProgramDetails","sourceMsg.body.programKey": {$in: data}}).toArray(function (err, result1) {
+                if (err) {
+              gomos.gomosLog(TRACE_DEBUG,"this err",err);  
+                }
+       gomos.gomosLog(TRACE_DEBUG,"This is device Instruction for Program Details", result1);
+        res.json(result1)
+              });
+  });
+ });
+});
+// router.post("/ActiveProgrameDelete", function (req,res, next){
+//   accessPermission(res);
+//   var body = req.body;
+//   // var message     =   body.dataBody; 
+
+//   var mac         =   body.mac;
+//   var name         =   body.name;
+// MongoClient.connect(
+//   urlConn,
+//   { useNewUrlParser: true },
+//   function (err, connection) {
+//     if (err) {
+//       next(err);
+//     }
+//     var db = connection.db(dbName);
+//     gomos.gomosLog(TRACE_DEBUG,"THis is MAc", mac)
+//       db.collection("DeviceInstruction")
+//       .deleteMany( {"mac":mac,"type": "ProgrameDetails", "sourceMsg.body.name": name},function (err, result) {
+//         if (err) {
+//       gomos.gomosLog(TRACE_DEBUG,"this err",err);  
+//         }
+//         gomos.gomosLog(TRACE_DEBUG,"This is device Instruction for Program Details", result);
+//         res.json(result)
+//   });
+//  });
+// });
 router.post("/ActiveClimatesave", function (req,res, next){
   accessPermission(res);
   var body = req.body;

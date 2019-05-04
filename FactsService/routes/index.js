@@ -169,15 +169,9 @@ function processFactMessages() {
                       mac
                     );
                   } else {
-                    var filetredPayloads = dataFromPayload.filter(
-                      item => item.mac == mac
-                    );
+                    var filetredPayloads = dataFromPayload.filter( item => item.mac == mac);
                     gomos.gomosLog(
-                      TRACE_DEBUG,
-                      "processFactMessages - dataFromPayload if mac present - " +
-                        mac,
-                      filetredPayloads
-                    );
+                      TRACE_DEBUG, "processFactMessages - dataFromPayload if mac present - " +mac,filetredPayloads);
                     if (
                       filetredPayloads.filter(
                         item => item.payloadId == payloadId
@@ -359,23 +353,11 @@ function processFactMessages() {
                                   var sensorName = sensorKeys[k];
                                   var businessNmValue = {};
                                   // Key comparisons and value replacements are done here
-                                  for (
-                                    var j = 0;
-                                    j < msgFactsKeys.length;
-                                    j++
-                                  ) {
-                                    if (
-                                      sensorNms[sensorKeys[k]][msgFactsKeys[j]]
-                                    ) {
-                                      var businessNm =
-                                        sensorNms[sensorKeys[k]][
-                                          msgFactsKeys[j]
-                                        ];
-                                      var businessValue =
-                                        result[count][msgFactsKeys[j]];
-                                      businessNmValue[
-                                        businessNm
-                                      ] = businessValue;
+                                  for (var j = 0;j < msgFactsKeys.length;j++) {
+                                    if ( sensorNms[sensorKeys[k]][msgFactsKeys[j]]) {
+                                      var businessNm               = sensorNms[sensorKeys[k]][msgFactsKeys[j]];
+                                      var businessValue            = result[count][msgFactsKeys[j]];
+                                      businessNmValue[businessNm]  = businessValue;
                                     }
                                   }
                                   finalSensors[sensorName] = businessNmValue;
@@ -386,6 +368,7 @@ function processFactMessages() {
                                   finalSensors
                                 );
                                 //modified msg to be inserted MsgFacts collection.
+                                let currentTime = new Date(new Date().toISOString());
                                 dataToInsert = {
                                   payloadId: payloadId,
                                   mac: mac,
@@ -394,60 +377,34 @@ function processFactMessages() {
                                   custCd: custCd,
                                   spCd: spCd,
                                   sensors: finalSensors,
-                                  createdTime: createdTime,
-                                  updatedTime: updatedTime
+                                  createdTime: currentTime,
+                                  updatedTime: currentTime
                                 };
                                 // var index = dataFromPayload.findIndex( item => item.payloadId == dataToInsert.payloadId);
                                 // var payloadObject = dataFromPayload[index];
-                                gomos.gomosLog(
-                                  TRACE_DEBUG,
-                                  "This is  payloadData",
-                                  payloadData
-                                );
+                                gomos.gomosLog(TRACE_PROD,"This is  payloadData",payloadData);
                                 if (payloadData.processByState == "Y") {
                                   activeDevice(dbo, dataToInsert);
                                 }
+                                if(dataToInsert.payloadId === "ProgramLineExecution"){
+                                  gomos.gomosLog(TRACE_PROD,"This is ProgramLineExecution True",result[count]);
+                                  updateDevInstructionActiveJobs(dbo, dataToInsert,result[count])
+                                 }
                                 if (payloadData.AckProcess == "Y") {
                                   if (dataToInsert.payloadId == "GHPStatus") {
-                                    updateDevInstrForRActive(
-                                      dbo,
-                                      dataToInsert,
-                                      result[count].Token
-                                    );
-                                  } else {
-                                    updateDeviceInstruction(
-                                      dbo,
-                                      dataToInsert,
-                                      result[count].Token
-                                    );
+                                    updateDevInstrForRActive(dbo,dataToInsert,result[count].Token);
+                                  } else{
+                                    gomos.gomosLog(TRACE_PROD,"This is Else part of UpdateDeviceInstruction AckProcess")
+                                    updateDeviceInstruction(dbo,dataToInsert,result[count].Token);
                                   }
                                 }
-                                gomos.gomosLog(
-                                  TRACE_DEBUG,
-                                  "processFactMessages -  where dataToInsert ready ",
-                                  dataToInsert
-                                );
-                                dbo
-                                  .collection("MsgFacts")
-                                  .insertOne(dataToInsert, function(
-                                    err,
-                                    result
-                                  ) {
+                                gomos.gomosLog(TRACE_DEBUG,"processFactMessages -  where dataToInsert ready ",dataToInsert);
+                                dbo.collection("MsgFacts").insertOne(dataToInsert, function(err,result) {
                                     if (err) {
-                                      gomos.errorCustmHandler(
-                                        NAMEOFSERVICE,
-                                        "processFactMessages",
-                                        "This Inserting To Msg Fact Error",
-                                        "",
-                                        err
-                                      );
+                                      gomos.errorCustmHandler(NAMEOFSERVICE,"processFactMessages","This Inserting To Msg Fact Error","",err);
                                       process.hasUncaughtExceptionCaptureCallback();
                                     }
-                                    gomos.gomosLog(
-                                      TRACE_TEST,
-                                      "Inserted : IN MsgFacts",
-                                      mac + ":" + payloadId + ":" + createdTime
-                                    );
+                                    gomos.gomosLog(TRACE_TEST,"Inserted : IN MsgFacts",mac + ":" + payloadId + ":" + createdTime);
                                   });
 
                                 //Update processed flag in 'MqttDump'
@@ -457,20 +414,7 @@ function processFactMessages() {
                               } else {
                                 processedFlag = "E";
                                 updateMQTT(objId, dbo, processedFlag);
-                                gomos.gomosLog(
-                                  TRACE_TEST,
-                                  "Something is missing for this record - ",
-                                  "sensors : " +
-                                    sensorNms +
-                                    "assets : " +
-                                    assetsId +
-                                    "subcust : " +
-                                    subCustCd +
-                                    "cust : " +
-                                    custCd +
-                                    "SP : " +
-                                    spCd
-                                );
+                                gomos.gomosLog(TRACE_TEST,"Something is missing for this record - ","sensors : " +sensorNms +"assets : " + assetsId +"subcust : " +subCustCd + "cust : " + custCd +"SP : " +spCd);
                               }
                             }
                           }
@@ -479,13 +423,7 @@ function processFactMessages() {
                     }
                   }
                 } catch (err) {
-                  gomos.errorCustmHandler(
-                    NAMEOFSERVICE,
-                    "processFactMessages",
-                    "This is Genrated From Try Catch Error",
-                    "",
-                    err
-                  );
+                  gomos.errorCustmHandler(NAMEOFSERVICE,"processFactMessages","This is Genrated From Try Catch Error","",err);
                 }
                 count++;
               });
@@ -755,13 +693,76 @@ function activeDevice(dbo, dataToInsert) {
 
   gomos.gomosLog(TRACE_DEBUG, "this is called", dataToInsert);
 }
+function updateDevInstructionActiveJobs(dbo, dataToInsert,sourceMsg) {
+  gomos.gomosLog(TRACE_PROD,"This updateDevInstructionActiveJob Data  ", sourceMsg);
+  let name    = sourceMsg.name;
+  let version = sourceMsg.version;
+  let schNo  = sourceMsg.schNo;
+  let msgFactsKeys = Object.keys(sourceMsg)
+  let keysToRemove = ["payloadId","mac","name","version","schNo","Date","createdTime","updatedTime","_id","processed","Token","topic"];
+  for (var i = 0; i < keysToRemove.length; i++) {
+    if (msgFactsKeys.includes(keysToRemove[i])) {
+       msgFactsKeys.splice(msgFactsKeys.indexOf(keysToRemove[i]),1);
+    }
+  } 
+gomos.gomosLog(TRACE_PROD,"This is Value msgFactsKeys",msgFactsKeys);
 
+let status =  getConfigchannelNameToValue(sourceMsg.mac,msgFactsKeys,sourceMsg)
+
+gomos.gomosLog(TRACE_PROD,"This is Value Of Status From Device",status);
+
+  var criteria = {
+    mac: sourceMsg.mac,
+    type: "ActiveJob",
+    "sourceMsg.body.jobKey":`${name}-${version}-${schNo}`,
+    "sourceMsg.body.ActionType": (status == 0)?"OFFTime":"ONTime"
+  };
+
+  dbo
+    .collection("DeviceInstruction")
+    .find(criteria)
+    .toArray(function(err, result) {
+      if (err) {
+        process.hasUncaughtExceptionCaptureCallback();
+      }
+      if (result.length != 0) {
+        gomos.gomosLog(TRACE_PROD,"This is find Of updateDevInstructionActiveJob result length", result.length);
+        gomos.gomosLog(TRACE_PROD,"This is find Of updateDevInstructionActiveJob", result);
+        gomos.gomosLog(TRACE_PROD,"This is find Of updateDevInstructionActiveJob", result[0].sourceMsg);
+        // for (var i = 0; i < result.length; i++) {
+          let currentTime = new Date(new Date().toISOString())
+           updatedDeviceinstruction(dbo, result[0]);
+           let tempobj = {
+            mac: result[0]["mac"],
+            DeviceName: result[0]["DeviceName"],
+            type: result[0]["type"],
+            sourceMsg: {
+              body: {
+                Channel:result[0]["sourceMsg"]["body"]["Channel"],
+                ActionType: result[0]["sourceMsg"]["body"]["ActionType"],
+                jobKey:result[0]["sourceMsg"]["body"]["jobKey"],
+                ActionValues: "",
+                ActionTime : sourceMsg.Date
+              },
+              referenceToken: result[0]["sourceMsg"].referenceToken,
+              isDailyJob :  result[0]["sourceMsg"].isDailyJob
+            },
+            createdTime: currentTime,
+            updatedTime: currentTime
+           }
+           gomos.gomosLog(TRACE_PROD,"This is dataStructure for tempobj",tempobj)
+           DeviceInstructionInsert(dbo, tempobj);
+        // }
+      }
+      gomos.gomosLog(
+        TRACE_DEV,
+        "This is find Of updateDevInstructionActiveJob",
+        result
+      );
+    });
+}
 function updateDevInstrForRActive(dbo, dataToInsert, Token) {
-  gomos.gomosLog(
-    TRACE_PROD,
-    "This updateDevInstrForRActive Data  " + Token,
-    dataToInsert
-  );
+  gomos.gomosLog(TRACE_PROD,"This updateDevInstrForRActive Data  " + Token, dataToInsert);
   var criteria = {
     mac: dataToInsert.mac,
     type: "ActiveJob",
@@ -776,11 +777,7 @@ function updateDevInstrForRActive(dbo, dataToInsert, Token) {
         process.hasUncaughtExceptionCaptureCallback();
       }
       if (result.length != 0) {
-        gomos.gomosLog(
-          TRACE_DEV,
-          "This is find Of updateDevInstrForRActive",
-          result
-        );
+        gomos.gomosLog(TRACE_DEV,"This is find Of updateDevInstrForRActive", result);
         for (var i = 0; i < result.length; i++) {
           updatedDeviceinstruction(dbo, result[i]);
           DeviceInstructionInsert(dbo, tempobj);
@@ -794,11 +791,7 @@ function updateDevInstrForRActive(dbo, dataToInsert, Token) {
     });
 }
 function updateDeviceInstruction(dbo, dataToInsert, Token) {
-  gomos.gomosLog(
-    TRACE_DEBUG,
-    "This updateDeviceInstruction Data  " + Token,
-    dataToInsert
-  );
+  gomos.gomosLog(TRACE_PROD,"This updateDeviceInstruction Data  " + Token,dataToInsert);
   var criteria = {
     mac: dataToInsert.mac,
     type: "SentInstruction",
@@ -814,28 +807,19 @@ function updateDeviceInstruction(dbo, dataToInsert, Token) {
       }
       if (result.length != 0) {
         gomos.gomosLog(TRACE_DEV, "This is find Of DeviceInstruction", result);
-        if (
-          dataFromPayload.filter(
-            item => item.payloadId == result[0].sourceMsg.ActionType
-          ).length != 0
-        ) {
-          var index = dataFromPayload.findIndex(
-            item => item.payloadId == result[0].sourceMsg.ActionType
-          );
+        if (dataFromPayload.filter(item => item.payloadId == result[0].sourceMsg.ActionType).length != 0) {
+          var index = dataFromPayload.findIndex(item => item.payloadId == result[0].sourceMsg.ActionType);
           var payloadObject = dataFromPayload[index];
           gomos.gomosLog(TRACE_DEV, "This is Debug of payloadId Index", index);
-          gomos.gomosLog(
-            TRACE_DEV,
-            "This is Debug of payloadId Data",
-            payloadObject
-          );
-          gomos.gomosLog(
-            TRACE_DEV,
-            "This is processByActiveJobs checking ",
-            payloadObject.processByActiveJobs
-          );
+          gomos.gomosLog(TRACE_DEV,"This is Debug of payloadId Data",payloadObject);
+          gomos.gomosLog(TRACE_PROD,"This is processByActiveJobs checking ",payloadObject.processByActiveJobs);
+          gomos.gomosLog(TRACE_PROD,"This is payloadObject.formStructure",payloadObject.formStructure)
           if (payloadObject.formStructure == "manualOverride") {
             await manualOverrideProcess(dbo, result[0]);
+          }
+          if (payloadObject.formStructure == "ProgramDetails") {
+            gomos.gomosLog(TRACE_PROD,"This is setProgrameProcess condtion True")
+            await setProgramProcess(dbo, result[0]);
           }
           if (payloadObject.processByActiveJobs == "N") {
             gomos.gomosLog(
@@ -843,15 +827,11 @@ function updateDeviceInstruction(dbo, dataToInsert, Token) {
               "This is processByActiveJobs false ",
               payloadObject.processByActiveJobs
             );
-            deleteinstruction(dbo, result[0]._id);
+             deleteinstruction(dbo, result[0]._id);
           } else if (payloadObject.processByActiveJobs == "Y") {
-            gomos.gomosLog(
-              TRACE_DEV,
-              "This is processByActiveJobs True ",
-              payloadObject.processByActiveJobs
-            );
-            deleteinstruction(dbo, result[0]._id);
-            insertActivejob(dbo, result[0], dataToInsert);
+            gomos.gomosLog(TRACE_DEV,"This is processByActiveJobs True ",payloadObject.processByActiveJobs);
+             deleteinstruction(dbo, result[0]._id);
+             insertActivejob(dbo, result[0], dataToInsert,payloadObject);
           }
         } else {
           gomos.errorCustmHandler(
@@ -876,6 +856,51 @@ function updateDeviceInstruction(dbo, dataToInsert, Token) {
   gomos.gomosLog(TRACE_DEBUG, "this callig after Find Of Deviceinstruction");
 }
 
+async function setProgramProcess(dbo, dataInsruction) {
+  gomos.gomosLog( TRACE_PROD,"This Call ProgrameDetails data");
+
+  dbo
+    .collection("DeviceInstruction")
+    .find({ mac: dataInsruction.mac, type: "ProgramDetails",
+    "sourceMsg.body.name":dataInsruction.sourceMsg.body.name,
+    "sourceMsg.body.version":dataInsruction.sourceMsg.body.version
+
+  })
+    .toArray(function(err, result) {
+      if (err) {
+        process.hasUncaughtExceptionCaptureCallback();
+      }
+      if (result.length != 0) {
+        gomos.gomosLog( TRACE_PROD,"This ProgrameDetails data",result);
+        gomos.gomosLog( TRACE_PROD, "This ProgrameDetails dataInsruction.sourceMsg.body Splite data ito part",dataInsruction.sourceMsg.body);
+        // var keyOfmode = Object.keys(dataInsruction.sourceMsg.body);
+        // var keyOfResult = Object.keys(result[0].sourceMsg.body);
+        // for (let i = 0; i < keyOfmode.length; i++) {
+        //   if (keyOfResult.includes(keyOfmode[i])) {
+            // result[0].sourceMsg.body["pendingConfirmation"] = false;
+          // }
+        // }
+        gomos.gomosLog(TRACE_PROD,"This is ProgrameDetails after asing",result[0].sourceMsg.body);
+        gomos.gomosLog(TRACE_PROD,"This is ProgrameDetails after asing result",result);
+        dbo.collection("DeviceInstruction").updateOne(
+          { _id: result[0]["_id"] },
+          {
+            $set: {
+              "sourceMsg.body.pendingConfirmation": false,
+              updatedTime: new Date(new Date().toISOString())
+            }
+          },
+          function(err, result) {
+            if (err) {
+              gomos.errorCustmHandler( NAMEOFSERVICE,"update For ProgrameDetails Override","This is Updateting Error","", err);
+              process.hasUncaughtExceptionCaptureCallback();
+            }
+            gomos.gomosLog(TRACE_PROD, "update For ProgrameDetails Override ");
+          }
+        );
+      }
+    });
+}
 async function manualOverrideProcess(dbo, dataInsruction) {
   dbo
     .collection("DeviceInstruction")
@@ -885,34 +910,17 @@ async function manualOverrideProcess(dbo, dataInsruction) {
         process.hasUncaughtExceptionCaptureCallback();
       }
       if (result.length != 0) {
-        gomos.gomosLog(
-          TRACE_DEV,
-          "This ManualOverrideProcessFunction data",
-          result
-        );
-        gomos.gomosLog(
-          TRACE_DEV,
-          "This ManualOverrideProcessFun Splite data ito part",
-          result[0].sourceMsg.body
-        );
-        gomos.gomosLog(
-          TRACE_DEV,
-          "This ManualOverrideProcessFun dataInsruction.sourceMsg.body Splite data ito part",
-          dataInsruction.sourceMsg.body
-        );
+        gomos.gomosLog( TRACE_DEV,"This ManualOverrideProcessFunction data",result);
+        gomos.gomosLog(TRACE_DEV,"This ManualOverrideProcessFun Splite data ito part",result[0].sourceMsg.body );
+        gomos.gomosLog( TRACE_DEV, "This ManualOverrideProcessFun dataInsruction.sourceMsg.body Splite data ito part",dataInsruction.sourceMsg.body);
         var keyOfmode = Object.keys(dataInsruction.sourceMsg.body);
         var keyOfResult = Object.keys(result[0].sourceMsg.body);
         for (let i = 0; i < keyOfmode.length; i++) {
           if (keyOfResult.includes(keyOfmode[i])) {
-            result[0].sourceMsg.body[keyOfmode[i]]["activeMode"] =
-              dataInsruction.sourceMsg.body[keyOfmode[i]]["mode"];
+            result[0].sourceMsg.body[keyOfmode[i]]["activeMode"] = dataInsruction.sourceMsg.body[keyOfmode[i]]["mode"];
           }
         }
-        gomos.gomosLog(
-          TRACE_DEV,
-          "This is ManualOverrideProcessFun after asing",
-          result[0].sourceMsg.body
-        );
+        gomos.gomosLog(TRACE_DEV,"This is ManualOverrideProcessFun after asing",result[0].sourceMsg.body);
         dbo.collection("DeviceInstruction").updateOne(
           { _id: result[0]["_id"] },
           {
@@ -938,10 +946,105 @@ async function manualOverrideProcess(dbo, dataInsruction) {
       }
     });
 }
+function convertDateTimeForSetPrograme(time,addMinutes){
+  let date = new Date();
+  let y   = date.getFullYear();
+  let m   = date.getMonth();
+  let d   =  date.getDate();
+var arr =  time.split(":");
+ var d2 = new Date() 
+  var newDate = new Date(y,m,d,arr[0],arr[1]);
+  console.log(newDate);
+  newDate.setMinutes(newDate.getMinutes() + addMinutes);
+return newDate;
+ }
+function convertTochannelBsName(mac,channelName){
+let index = dataFromDevices.findIndex(item => item.mac  === mac );
+let objDevice  = dataFromDevices[index];
+let keyCode = Object.keys(objDevice.channel);
+for(let i =0; i< keyCode.length; i++){
+  gomos.gomosLog(TRACE_PROD,"This is objDevice[keyCode[i]][configName]",objDevice.channel[keyCode[i]])
+  gomos.gomosLog(TRACE_PROD,"This is objDevice[keyCode[i]][configName]",objDevice.channel[keyCode[i]]["configName"])
+  if(objDevice.channel[keyCode[i]]["configName"] === channelName){
+    return objDevice.channel[keyCode[i]].businessName;
+  }
+}
+}
+function getConfigchannelNameToValue(mac,ArraConfigName,ConfigPayloadMsg){
+  let index = dataFromDevices.findIndex(item => item.mac  === mac );
+  let objDevice  = dataFromDevices[index];
+  let keyCode = Object.keys(objDevice.channel);
+  for(let j = 0; j< ArraConfigName.length; j++){
+  for(let i =0; i< keyCode.length; i++){
+    // gomos.gomosLog(TRACE_PROD,"This is objDevice[keyCode[i]][configName]",objDevice.channel[keyCode[i]])
+    // gomos.gomosLog(TRACE_PROD,"This is objDevice[keyCode[i]][configName]",objDevice.channel[keyCode[i]]["configName"])
+    if(objDevice.channel[keyCode[i]]["configName"] === ArraConfigName[j]){
+      gomos.gomosLog(TRACE_DEV,"This is TRue Condtions", ConfigPayloadMsg[ArraConfigName[j]])
+      return ConfigPayloadMsg[ArraConfigName[j]];
+    }
+  }
+}
+  }
 
-function insertActivejob(dbo, dataInsruction, dataToInsert) {
+function insertActivejob(dbo, dataInsruction, dataToInsert,payloadObject) {
   gomos.gomosLog(TRACE_DEBUG, "this is need For Insert", dataInsruction);
   gomos.gomosLog(TRACE_DEBUG, "this is need For Insert", dataToInsert);
+  if (payloadObject.formStructure == "ProgramDetails") {
+    gomos.gomosLog(TRACE_PROD,"This is setProgrameProcess condtion True")
+    // var keysofBNm = Object.keys(dataInsruction.sourceMsg.body);
+    var Token = dataInsruction.sourceMsg["Token"];
+    var startTime = dataInsruction.sourceMsg["body"].startTime;
+    var name = dataInsruction.sourceMsg["body"].name;
+    var version = dataInsruction.sourceMsg["body"].version;
+  for(let i =0 ; i< dataInsruction.sourceMsg.body.schedules.length; i++){
+    let isDailyJob = true
+    let dataTime = new Date(new Date().toISOString());
+    // gomos.gomosLog(TRACE_DEBUG, "this is key", keysofBNm);
+    let channelName = convertTochannelBsName(dataToInsert.mac,dataInsruction.sourceMsg["body"].schedules[i].channel);
+    let OffsetTime  = Number(dataInsruction.sourceMsg["body"].schedules[i].startAt);
+    let duration    =  Number(dataInsruction.sourceMsg["body"].schedules[i].duration);
+    let schNo      = dataInsruction.sourceMsg["body"].schedules[i].schNo;
+    gomos.gomosLog(TRACE_DEBUG,"This is Line data" ,dataInsruction.sourceMsg["body"] )
+    gomos.gomosLog(TRACE_DEBUG,"This is Line Number ",dataInsruction.sourceMsg["body"].schedules[i].schNo )
+
+    let data = {
+      mac: dataToInsert.mac,
+      DeviceName: dataToInsert.DeviceName,
+      type: "ActiveJob",
+      sourceMsg: {
+        body: {
+          Channel: channelName
+        },
+        referenceToken: Token,
+        // "Action": payloadId,
+        isDailyJob: isDailyJob
+      },
+      createdTime: dataTime,
+      updatedTime: dataTime
+    };
+    var dArray = ["ONTime", "OFFTime"];
+ for(let  j =0; j < dArray.length; j++){
+
+ 
+    data["_id"] = uuidv4();
+    data["sourceMsg"]["body"]["ActionType"] = dArray[j];
+    data["sourceMsg"]["body"]["jobKey"] = `${name}-${version}-${schNo}`; 
+    if(dArray[j]=== "ONTime"){
+    data["sourceMsg"]["body"]["ActionValues"] = dateTime.create(convertDateTimeForSetPrograme(startTime,OffsetTime)).format("H:M");
+    data["sourceMsg"]["body"]["ActionTime"] = ""
+    }else{
+      data["sourceMsg"]["body"]["ActionValues"] = dateTime.create(convertDateTimeForSetPrograme(startTime,OffsetTime+duration)).format("H:M");
+      data["sourceMsg"]["body"]["ActionTime"] = ""
+    }
+    gomos.gomosLog(TRACE_PROD,"This is log for Updateing the data base",data)
+    DeviceInstructionInsert(dbo, data);
+ }
+  
+}
+   
+
+ 
+  }else{
   var keysofBNm = Object.keys(dataInsruction.sourceMsg.body);
   var channelName = dataInsruction.sourceMsg["body"]["Channel"];
   var Token = dataInsruction.sourceMsg["Token"];
@@ -991,18 +1094,10 @@ function insertActivejob(dbo, dataInsruction, dataToInsert) {
     }
   } else {
     for (var i = 0; i < keysofBNm.length; i++) {
-      gomos.gomosLog(
-        TRACE_DEBUG,
-        "This is key of DeviceInstruction",
-        dataInsruction.sourceMsg["body"][keysofBNm[i]]
-      );
+      gomos.gomosLog( TRACE_DEBUG,"This is key of DeviceInstruction", dataInsruction.sourceMsg["body"][keysofBNm[i]]);
       var key = keysofBNm[i];
       var value = dataInsruction.sourceMsg["body"][keysofBNm[i]];
-      gomos.gomosLog(
-        TRACE_DEBUG,
-        "This is key of DeviceInstruction",
-        key + value
-      );
+      gomos.gomosLog(TRACE_DEBUG,"This is key of DeviceInstruction",key + value);
 
       arrayBName.push({ bsName: key, value: value });
     }
@@ -1029,32 +1124,12 @@ function insertActivejob(dbo, dataInsruction, dataToInsert) {
     }
   }
 }
+}
 function compareDate(str1) {
   gomos.gomosLog(TRACE_DEBUG, "this what coming Date", str1);
   var arraydate = str1.split(":");
-  gomos.gomosLog(
-    TRACE_DEBUG,
-    "this what coming Date",
-    arraydate[5] +
-      "," +
-      arraydate[4] +
-      "," +
-      arraydate[3] +
-      "," +
-      arraydate[2] +
-      "," +
-      arraydate[1] +
-      "," +
-      arraydate[0]
-  );
-  var date1 = new Date(
-    "20" + arraydate[5],
-    arraydate[4] - 1,
-    arraydate[3],
-    arraydate[2],
-    arraydate[1],
-    arraydate[0]
-  );
+  gomos.gomosLog( TRACE_DEBUG,"this what coming Date",arraydate[5] +"," +arraydate[4] +"," +arraydate[3] +"," +arraydate[2] +"," +arraydate[1] +"," +arraydate[0]);
+  var date1 = new Date("20" + arraydate[5],arraydate[4] - 1,arraydate[3],arraydate[2],arraydate[1],arraydate[0] );
   return date1;
 }
 function DeviceInstructionInsert(dbo, data) {
@@ -1118,7 +1193,7 @@ function updateDeviceState(dbo, _id, devicesStateKeyValue, dateTime) {
 function updatedDeviceinstruction(dbo, updatedData) {
   var id = updatedData["_id"];
   dateTime = new Date(new Date().toISOString());
-
+  gomos.gomosLog(TRACE_PROD,"This is  updatedDeviceinstruction true")
   dbo
     .collection("DeviceInstruction")
     .updateOne(

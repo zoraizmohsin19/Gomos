@@ -518,6 +518,13 @@ td.Acustmtd {
     #containersimg {
         width: 327px ;
     }
+    .ActiveCorner {
+        /* background: rgba(185,249,174,.85); */
+        /* height: 600px; */
+        /* margin: -15px; */
+        height: 342px;
+    }
+
     #wrapper {
         width: 207%;
     }
@@ -538,3 +545,44 @@ td.Acustmtd {
         padding-top: 10px;
     }
   }
+
+
+  .inputFoeldForOffset {
+    width: 36px;
+    height: 30px;
+    padding-top: 0px;
+}
+.inputforProgram {
+    height: 30px;
+    width: 171px;
+    margin: 10px;
+}
+
+.versioninput{
+    width: 30px;
+    margin-left: 0px !important;
+}
+.version{
+    margin-left: 0px !important;
+}
+
+.inputforProgramWef {
+    width: 83px !important;
+    margin-top:10px;
+}
+.ProgramLabel {
+    margin: 13px;
+}
+.smalLine {
+    border: 0.7px solid #ddd;
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+.btn-group-xs>.btn, .btn-xs {
+  
+    height:  22px;
+    /* line-height: 1.428571; */
+}
+.wefDef {
+    display: inline-block;
+}

@@ -26,6 +26,7 @@ class activeDashbord extends Component {
         selectedAtionType: '',
         selectedevent : "",
         deviceName: '',
+        ProgramDetailsListObj : {},
         show: false,
         open: true,
         instrInput1: "",
@@ -36,7 +37,9 @@ class activeDashbord extends Component {
         endDatelimit: "",
         channelFil: "",
         ActionVF: 1,
+        programForIndex: 0,
         sentCommandIndex: "",
+        ChannelConfigAndBsNm: [],
         mAOfInactivejob: [],
         channelArray: [],
         channelAlerrModel:{},
@@ -125,6 +128,43 @@ class activeDashbord extends Component {
       // this.rowClicked = this.rowClicked.bind(this)
       // this. handleChange3 =this.handleChange3.bind(this);
     }
+    convertDateTimeForSetPrograme(time,addMinutes){
+      if(time !== undefined && time !== null&&time !== "" && addMinutes !== undefined && addMinutes !== null && addMinutes !== "")
+      {let date = new Date();
+      let y   = date.getFullYear();
+      let m   = date.getMonth();
+      let d   =  date.getDate();
+    var arr =  time.split(":");
+     var d2 = new Date() 
+      var newDate = new Date(y,m,d,arr[0],arr[1]);
+      // let minute = Number(addMinutes)
+      // console.log(newDate);
+      newDate.setMinutes(newDate.getMinutes() + addMinutes);
+      // console.log(newDate);
+    return moment(newDate.toISOString()).format("HH:mm");
+      }
+      else{
+        return "00:00"
+      }
+     }
+     convertDateTimeForSetProg(time,addMinutes){
+      if(time !== undefined && time !== null&&time !== "" && addMinutes !== undefined && addMinutes !== null && addMinutes !== "")
+      {let date = new Date();
+      let y   = date.getFullYear();
+      let m   = date.getMonth();
+      let d   =  date.getDate();
+     var arr =  time.split(":");
+      var newDate = new Date(y,m,d,arr[0],arr[1]);
+     
+      // console.log(newDate);
+      newDate.setMinutes(newDate.getMinutes() + addMinutes);
+      // console.log(newDate);
+    return newDate
+      }
+      else{
+        return new Date();
+      }
+     }
     onChange = e => this.setState({ [e.target.name]: e.target.value });
     Submit(){
       var me = this;
@@ -239,15 +279,14 @@ if(formStructure == "manualOverride"){
   //console.log("This is manualOverride")
   //console.log(configkeyInputKeyValue)
   //console.log(DefaulaManualOverride)
-
   for(var key =0; key < configkeyInput.length; key++) {
       dataToSendApi[configkeyInput[key]] = configkeyInputKeyValue[configkeyInput[key]]
      } 
       // dataToSendApi[selectedChannelB] = 1; 
-        alert(dataToSendApi)
+        // alert(dataToSendApi)
   
 }
-console.log(dataToSendApi)
+// console.log(dataToSendApi)
     me.state.submitDataObj.payloadId   = selectedAtionType;
     me.state.submitDataObj.dataBody    = dataToSendApi;
     me.state.submitDataObj.isDaillyJob =  configkeyInputKeyValue["toggle"];
@@ -329,6 +368,23 @@ callApiForManoverrideForTiles(){
       //console.log(json)
       });
     }
+    callApiForActionForButtonclick(submitDataObj){
+      var me = this;
+      //console.log(me.state.submitDataObj)
+      //alert(me.state.submitDataObj)
+        axios.post("http://localhost:3992/ActiveDAction",submitDataObj)
+        .then(json =>  {
+        if(json["data"] == "success"){
+         
+          swal("Success!", "You Send Action!", "success");
+        }
+        else{
+          swal("Error!", "You Send Action!", "error");
+           
+        }
+        //console.log(json)
+        });
+      }
   
     handleClose() {
         this.setState({ show: false });
@@ -401,13 +457,14 @@ callApiForManoverrideForTiles(){
         //console.log(objectpayload);
         if(formStructure == "manualOverride"){
           
-         this.manualOverrideProcess( objectpayload,selectedAtionType);
+         this.manualOverrideProcess( objectpayload,selectedAtionType,selectedevent);
         }
         if(keysofObj.length >= 2){
           keysofObj.splice(keysofObj.indexOf("Channel"), 1);
           //console.log(objectpayload.sensors[keysofObj[0]]);
           var  allBusinessName = Object.values(objectpayload.sensors[keysofObj[0]]);
-          //console.log(allBusinessName);
+          console.log("allBusinessName");
+          console.log(allBusinessName);
         
           if(formStructure == "table"){
             var configkeyInputKeyValue = {};
@@ -485,17 +542,331 @@ callApiForManoverrideForTiles(){
               // channelName: arrayOfChannel,
               configkeyInput:allBusinessName,configkeyInputKeyValue:configkeyInputKeyValue});
          }
+         if(formStructure == "ProgramDetails"){
+        
+           this.callApiForProgramFetch(objectpayload,selectedAtionType,selectedevent)
+           me.setState({ selectedAtionType: selectedAtionType,selectedevent: selectedevent})
+        
+         }
         }
-        //alert("this else "+ selectedAtionType);
+      
       
     }     
          //console.log(arrayOfChannel);
     }
-  manualOverrideProcess(objectpayload,selectedAtionType){
+    callApiForProgramFetch(objectpayload,selectedAtionType,selectedevent){
+      var me = this;
+      const {ProgramDetailsListObj} = this.state;
+      this.setState({configkeyInputKeyValue:{}})
+      // console.log(me.state.submitDataObj.mac)
+      // alert(me.state.submitDataObj.mac)
+      // return new Promise((resolve, reject)=>{
+      axios.post("http://localhost:3992/ActiveProgrameFetch",{mac: me.state.submitDataObj.mac})
+      .then(json =>  {
+         // console.log(json["data"]);
+       
+        var  keysofObj = Object.keys(objectpayload.sensors)
+        var  allBusinessName = Object.values(objectpayload.sensors[keysofObj[0]]);
+         // console.log(allBusinessName)
+  // var arForRemove = ["wef","schedules", "startTime"]
+  // for(let l =0 ; l< arForRemove.length ; l++){
+    let index1 =   allBusinessName.findIndex(item =>  item === "schedules");
+    allBusinessName.splice(index1,1);
+  // }
+       
+        // console.log(allBusinessName)
+        var configkeyInputKeyValue = {};
+        var arrayOfProg = [];
+     for(let j =0 ; j < json["data"].length; j++){
+        var progaramObj = {}
+      //  for (var i =0; i< allBusinessName.length; i++) { 
+         progaramObj["name"] =  json["data"][j]["sourceMsg"]["body"]["name"];
+         progaramObj["version"] =  json["data"][j]["sourceMsg"]["body"]["version"]; 
+         progaramObj["versionselected"] =  json["data"][j]["sourceMsg"]["body"]["version"]
+      //  }
+       progaramObj["currentState"] = json["data"][j]["sourceMsg"]["body"]["currentState"]
+       progaramObj["previousState"] = json["data"][j]["sourceMsg"]["body"]["previousState"]
+       progaramObj["pendingConfirmation"] = json["data"][j]["sourceMsg"]["body"]["pendingConfirmation"]
+       progaramObj["startTime"] = moment(json["data"][j]["sourceMsg"]["body"]["startTime"]).format("HH:mm");
+       progaramObj["startTimeselected"] = moment(json["data"][j]["sourceMsg"]["body"]["startTime"]);
+       progaramObj["wef"] = moment(json["data"][j]["sourceMsg"]["body"]["wef"]).format("YY:MM:DD");
+       progaramObj["wefselected"] = moment(json["data"][j]["sourceMsg"]["body"]["wef"]);
+       progaramObj["schedules"] = []
+       progaramObj["nameFlag"] = true;
+       progaramObj["viewFlag"] = true;
+       progaramObj["endTime"] = json["data"][j]["sourceMsg"]["body"]["endTime"];
+   
+       // console.log(json["data"][j]["sourceMsg"]["body"]["schedules"])
+       for(let k = 0 ; k< json["data"][j]["sourceMsg"]["body"]["schedules"].length; k++ ){
+       progaramObj["schedules"].push(json["data"][j]["sourceMsg"]["body"]["schedules"][k])
+       }
+       arrayOfProg.push(progaramObj)
+     }
+  
+       configkeyInputKeyValue["ArrayOfProg"] = arrayOfProg;
+       // console.log(configkeyInputKeyValue)
+       ProgramDetailsListObj["name"] =  ''; 
+       ProgramDetailsListObj["version"] =  1; 
+       ProgramDetailsListObj["startTime"] =  ''; 
+       ProgramDetailsListObj["wef"] =  ''; 
+       ProgramDetailsListObj["nameselected"] =  '';
+       ProgramDetailsListObj["versionselected"] = 1; 
+       ProgramDetailsListObj["startTimeselected"] =  ''; 
+       ProgramDetailsListObj["wefselected"] =  ''; 
+       ProgramDetailsListObj["currentState"] =  "Active"; 
+       ProgramDetailsListObj["previousState"] =  ''; 
+       ProgramDetailsListObj["pendingConfirmation"] =  true;
+       ProgramDetailsListObj["nameFlag"] =  false;
+       ProgramDetailsListObj["viewFlag"] =  false;  
+       ProgramDetailsListObj["endTime"] =  ''; 
+
+    //  }
+    ProgramDetailsListObj["schedules"] = []
+    ProgramDetailsListObj["schedules"].push({"schNo": 0, "channel": "","endTimeProgramListItem":new Date(), "startAt":0 ,"duration": 0,"enabled": false })
+    
+       // alert(arrayOfProg)
+       me.setState({ selectedAtionType: selectedAtionType,selectedevent: selectedevent,programForIndex:0,
+        ProgramDetailsListObj:ProgramDetailsListObj,  configkeyInput:allBusinessName,configkeyInputKeyValue:configkeyInputKeyValue});
+      
+          });
+      
+    }
+    ProgramEdit(item){
+    // console.log("This is Edit ")
+    // console.log(item)
+     let ProgramObj = JSON.parse(JSON.stringify(item));
+       ProgramObj["viewFlag"] = false;
+      ProgramObj["version"] =   ++ ProgramObj["version"];
+      ProgramObj["startTimeselected"] = moment(ProgramObj["startTimeselected"]);
+      ProgramObj["wefselected"] = moment(ProgramObj["wefselected"]);
+      for(let i =0 ; i< ProgramObj["schedules"].length ; i++){
+        ProgramObj["schedules"][i].endTimeProgramListItem =  moment( ProgramObj["schedules"][i].endTimeProgramListItem)
+      }
+      // console.log("ProgramObj")
+      // console.log(ProgramObj)
+     this.setState({ ProgramDetailsListObj:  ProgramObj})
+    }
+
+
+    callApiForProgramSave(){
+      var me = this;
+      const {programForIndex,selectedAtionType,ProgramDetailsListObj, configkeyInput, configkeyInputKeyValue} =this.state;
+     var SendObj= {};
+    var temp ={};
+       
+        temp["name"] = ProgramDetailsListObj["name"]
+        temp["version"] = ProgramDetailsListObj["version"]
+         temp["programKey"] = `${ProgramDetailsListObj["name"]}-${ProgramDetailsListObj["version"]}`
+        //  }
+         temp["currentState"] =  ProgramDetailsListObj["currentState"];
+         temp["previousState"] =  ProgramDetailsListObj["previousState"];
+        //  temp["pendingConfirmation"] =  ProgramDetailsListObj["pendingConfirmation"];
+        temp["pendingConfirmation"] =  true;
+         temp["startTime"] =  ProgramDetailsListObj["startTimeselected"];
+         temp["wef"]       =  ProgramDetailsListObj["wefselected"];
+         temp["endTime"]  = moment(new Date(Math.max.apply(null,ProgramDetailsListObj["schedules"].map(item => item.endTimeProgramListItem)))).format("HH:mm")
+        //  temp["state"]     = "pending"
+         temp["schedules"]     = ProgramDetailsListObj["schedules"]
+        //  array.push(temp)
+        // }
+      //  me.setState({configkeyInputKeyValue: configkeyInputKeyValue})
+        SendObj["mac"] =  me.state.submitDataObj.mac;
+        SendObj["dataBody"] = temp
+      axios.post("http://localhost:3992/ActiveProgrameSave",SendObj)
+      .then(json =>  {
+        // console.log("This is data of save to DeviceIntruction for ProgramDEtails")
+        // console.log(json["data"])
+        if(json["data"] == "Error"){
+        
+          this.errorganerator("Error:  Name Value Already Present .")
+      }
+      else{
+       
+        // configkeyInputKeyValue["ArrayOfProg"][programForIndex]["nameFlag"] = true;
+        // configkeyInputKeyValue["ArrayOfProg"][programForIndex]["viewFlag"] = true;
+        // me.setState({configkeyInputKeyValue: configkeyInputKeyValue})
+        me.callApiForAction();
+        me.handleChange(this.state.selectedevent);
+      }
+    });
+    }
+    AddRowFrProgSubmit(){
+      var dataToSendApi ={};
+      var me = this;
+        const {programForIndex,selectedAtionType,ProgramDetailsListObj, configkeyInput, configkeyInputKeyValue} =this.state;
+      
+         
+      let arraymainKey  =  [...configkeyInput];
+      arraymainKey.splice(arraymainKey.indexOf("version"),1)
+        for(var key =0; key < arraymainKey.length; key++) {
+          if(ProgramDetailsListObj[arraymainKey[key]] == undefined  || ProgramDetailsListObj[arraymainKey[key]] == null ||ProgramDetailsListObj[arraymainKey[key]] == ''){
+    
+              me.errorganerator("Please provide "+arraymainKey[key]+" error")
+              return;
+      }
+   }
+   let keysOfArray = Object.keys(ProgramDetailsListObj["schedules"][0])
+   let keytoRemove = ["endTimeProgramListItem","channelselected"];
+   for(let i =0 ; i< keytoRemove.length; i++) {
+   if(keysOfArray.includes(keytoRemove[i])){
+    keysOfArray.splice(keysOfArray.indexOf(keytoRemove[i]),1);
+   }
+  }
+   let lineNoRemovedKeyArray = [...keysOfArray];
+   lineNoRemovedKeyArray.splice(lineNoRemovedKeyArray.indexOf("schNo"),1);
+   lineNoRemovedKeyArray.splice(lineNoRemovedKeyArray.indexOf("enabled"),1)
+   for(let k = 0; k < ProgramDetailsListObj["schedules"].length; k++ ){
+     for(let p =0 ; p < lineNoRemovedKeyArray.length; p++ ){
+      if(ProgramDetailsListObj["schedules"][k][lineNoRemovedKeyArray[p]]== undefined || ProgramDetailsListObj["schedules"][k][lineNoRemovedKeyArray[p]]== null || ProgramDetailsListObj["schedules"][k][lineNoRemovedKeyArray[p]]== '' ){
+        me.errorganerator("Please provide "+lineNoRemovedKeyArray[p]+" error")
+        return;
+      }
+      if(ProgramDetailsListObj["schedules"][k]["duration"]== 0 ){
+        me.errorganerator("Please provide "+"Duration"+" error")
+        return;
+      }
+      }
+    
+   }
+     
+        
+       //configkeyInputKeyValue["ArrayOfProg"][programForIndex]["versionselected"] =  ++ configkeyInputKeyValue["ArrayOfProg"][programForIndex]["version"];
+        for(var key =0; key < configkeyInput.length; key++) {
+          dataToSendApi[configkeyInput[key]] = ProgramDetailsListObj[configkeyInput[key]]
+           } 
+         
+           dataToSendApi["schedules"] = [];
+           for(let k = 0; k<ProgramDetailsListObj["schedules"].length; k++ ){
+            let temp = {} 
+             for(let p =0 ; p < keysOfArray.length; p++ ){
+             temp[keysOfArray[p]] = ProgramDetailsListObj["schedules"][k][keysOfArray[p]]
+              }
+              dataToSendApi["schedules"].push(temp);
+           }
+          me.state.submitDataObj.payloadId   = selectedAtionType;
+          me.state.submitDataObj.dataBody    = dataToSendApi;
+          me.state.submitDataObj.isDaillyJob = "";
+          me.state.submitDataObj.ChannelName = "";
+          me.setState({submitDataObj :me.state.submitDataObj, configkeyInputKeyValue: configkeyInputKeyValue});
+    
+      // alert("This is Add FroProg Submit");
+     
+      me.callApiForProgramSave();
+
+      // console.log(configkeyInputKeyValue["ArrayOfProg"][programForIndex])
+    }
+    ActionRowfProg(index,name,version,value,Currentstate){
+      var me = this;
+      const { configkeyInputKeyValue} = this.state;
+      // console.log(version);
+      // // console.log(obj);
+      swal({
+        title: "Are you sure?",
+        text: "Once Send, you will not be able to recover this imaginary file!",
+        icon: "warning",
+        buttons: true,
+        dangerMode: true,
+      })
+      .then((willDelete) => {
+        if (willDelete) {
+          var submitObj = {};
+  var temp = configkeyInputKeyValue["ArrayOfProg"][index].currentState;
+  configkeyInputKeyValue["ArrayOfProg"][index].previousState = temp;
+  configkeyInputKeyValue["ArrayOfProg"][index].currentState = Currentstate;
+  configkeyInputKeyValue["ArrayOfProg"][index].pendingConfirmation = true;
+  var obj = {mac :me.state.submitDataObj.mac,
+             name : name,
+             version: version,
+             previousState: configkeyInputKeyValue["ArrayOfProg"][index].previousState,
+             currentState: configkeyInputKeyValue["ArrayOfProg"][index].currentState,
+             pendingConfirmation:  configkeyInputKeyValue["ArrayOfProg"][index].pendingConfirmation
+            }
+  axios.post("http://localhost:3992/ActiveProgramRuleUpdate",obj)
+  .then(json =>  {
+    swal("Poof! Your imaginary file has been sent!", {
+      icon: "success",
+    });
+  });
+  submitObj["mac"] = me.state.submitDataObj.mac;
+  submitObj["subCustCd"] = me.state.submitDataObj.subCustCd;
+  submitObj["CustCd"] = me.state.submitDataObj.CustCd;
+  submitObj["DeviceName"] = me.state.submitDataObj.DeviceName;
+  submitObj["payloadId"] = "SetProgramState"
+  submitObj["dataBody"] = {"name": name,"version":version, "state": value};
+  submitObj["isDaillyJob"] = "";
+  submitObj["ChannelName"] = "";
+  // console.log(configkeyInputKeyValue)
+  me.setState({configkeyInputKeyValue: configkeyInputKeyValue})
+  me.callApiForActionForButtonclick(submitObj)
+          
+        } else {
+          swal("Your imaginary file is not send!");
+        }
+      });
+  
+
+    }
+ 
+    RemoveRowfProgList(index){
+      const {programForIndex,configkeyInputKeyValue,ProgramDetailsListObj} = this.state
+      ProgramDetailsListObj["schedules"].splice(index,1);
+      this.setState({ ProgramDetailsListObj: ProgramDetailsListObj})
+    }
+    AddRowFrProglist(){
+      const {programForIndex,configkeyInputKeyValue,ProgramDetailsListObj} = this.state
+     var index =  ProgramDetailsListObj["schedules"].length;
+     ProgramDetailsListObj["schedules"].push({"schNo": index++, "channel": "","endTimeProgramListItem": ProgramDetailsListObj["startTimeselected"], "startAt":0 ,"duration": 0,"enabled":false })
+      this.setState({ ProgramDetailsListObj: ProgramDetailsListObj})
+    }
+    RemoveRowfProg(){
+      var me  = this;
+     
+      const {programForIndex,configkeyInputKeyValue} = this.state
+      // // alert(programForIndex)
+     if(configkeyInputKeyValue["ArrayOfProg"][programForIndex].version == 0 ){
+      configkeyInputKeyValue["ArrayOfProg"].splice(programForIndex,1);
+    
+     } 
+     me.setState({ configkeyInputKeyValue: configkeyInputKeyValue, programForIndex: configkeyInputKeyValue["ArrayOfProg"].length - 1})
+      
+    }
+    AddRowFrProg(){
+      const {configkeyInput,configkeyInputKeyValue,ProgramDetailsListObj} = this.state
+  
+      var arrayOfProg = [];
+      var programObj = {}
+    //  for (var i =0; i< configkeyInput.length; i++) { 
+      ProgramDetailsListObj["name"] =  ''; 
+      ProgramDetailsListObj["version"] =  1; 
+      ProgramDetailsListObj["startTime"] =  ''; 
+      ProgramDetailsListObj["wef"] =  ''; 
+      ProgramDetailsListObj["nameselected"] =  '';
+       ProgramDetailsListObj["versionselected"] = 1; 
+       ProgramDetailsListObj["startTimeselected"] =  ''; 
+       ProgramDetailsListObj["wefselected"] =  ''; 
+       ProgramDetailsListObj["currentState"] =  "Active"; 
+       ProgramDetailsListObj["previousState"] =  ''; 
+       ProgramDetailsListObj["pendingConfirmation"] =  true;
+       ProgramDetailsListObj["nameFlag"] =  false;
+       ProgramDetailsListObj["viewFlag"] =  false; 
+       ProgramDetailsListObj["endTime"] =  '';  
+       
+    //  }
+    ProgramDetailsListObj["schedules"] = []
+    ProgramDetailsListObj["schedules"].push({"schNo": 0, "channel": "","endTimeProgramListItem": ProgramDetailsListObj["startTimeselected"], "startAt":0 ,"duration": 0,"enabled": false })
+    //  arrayOfProg.push(progaramObj)
+    // ProgramDetailsListObj = programObj;
+     // console.log(ProgramDetailsListObj, )
+     // alert(arrayOfProg)
+      // this.setState({ ProgramDetailsListObj: ProgramDetailsListObj,programForIndex:configkeyInputKeyValue["ArrayOfProg"].length - 1})
+      this.setState({ ProgramDetailsListObj: ProgramDetailsListObj})
+
+    }
+  manualOverrideProcess(objectpayload,selectedAtionType,selectedevent){
     var configkeyInputKeyValue = {};
          
     var  keysofObj = Object.keys(objectpayload.sensors)
-    //console.log(keysofObj);
+    //// console.log(keysofObj);
     //console.log("This is of Data");
     var  allBusinessName = Object.values(objectpayload.sensors[keysofObj[0]]);
       for (let [key, value] of Object.entries(objectpayload.sensors[keysofObj[0]])) {  
@@ -503,7 +874,7 @@ callApiForManoverrideForTiles(){
         configkeyInputKeyValue[value+"toggle"] = (this.state.DefaulaManualOverride[value]["pendingMode"] == 0)? false : true;
 
       }
-    this.setState({ selectedAtionType: selectedAtionType,
+    this.setState({ selectedAtionType: selectedAtionType,selectedevent: selectedevent,
        channelName: [],
        configkeyInput:allBusinessName,configkeyInputKeyValue:configkeyInputKeyValue});
   }
@@ -561,6 +932,13 @@ callApiForManoverrideForTiles(){
       this.setState({rowclickedData: data, sentCommandIndex: index,rowClickedId : id});
         }
    componentDidMount(){
+    Object.prototype.isEmpty = function() {
+      for(var key in this) {
+          if(this.hasOwnProperty(key))
+              return false;
+      }
+      return true;
+  }
      var me = this;
      var mainData = JSON.parse(sessionStorage.getItem("configData"));
      var configPayloadData = JSON.parse(sessionStorage.getItem("dashboardConfigobj"));
@@ -595,13 +973,17 @@ callApiForManoverrideForTiles(){
     .then(json =>  {
       //console.log("this componentDidMount getActiveDashBoardDevice");
       //console.log(json)
+      // console.log("This is json Active device")
+      // console.log(json["data"].channel)
       // if(json.length != 0){
         var channelForfilter = [];
+        var ChannelConfigAndBsNm = [];
         for(var i =0; i< json["data"].channel.length; i++){
           channelForfilter.push(json["data"].channel[i].devicebusinessNM);
+          ChannelConfigAndBsNm.push(json["data"].channel[i].ConfigAndbsName);
         }
         me.setState({
-          channelForfilter: channelForfilter
+          channelForfilter: channelForfilter, ChannelConfigAndBsNm: ChannelConfigAndBsNm
         })    
     });
     const { endpoint } = this.state;
@@ -684,8 +1066,8 @@ onDeviceinstruction.on('DeviceInstruction',function(data) {
     axios.post("http://localhost:3992/ActiveActionTypeCall",body)
     .then(json =>  {
       if(json.length !=0){
-        console.log("This is payload Data")
-      console.log(json["data"]);
+        // console.log("This is payload Data")
+      // console.log(json["data"]);
      var ClientObj = JSON.parse(sessionStorage.getItem("ClientObj"));
       let index  = json["data"].findIndex(item => item.formStructure ==  "manualOverride");
       var containerdata = json["data"][index];
@@ -695,8 +1077,8 @@ onDeviceinstruction.on('DeviceInstruction',function(data) {
       var tempObj = [];
       for(let i =0; i< json["data"].length; i++ ){
        var tempIndex = ClientObj.OperatingForms.findIndex(item => item.payloadId ==   json["data"][i].payloadId);
-       console.log(tempIndex);
-       console.log(ClientObj.OperatingForms[tempIndex]);
+       // console.log(tempIndex);
+       // console.log(ClientObj.OperatingForms[tempIndex]);
        if(tempIndex !== -1 && tempIndex !== undefined){
         json["data"][i]["name"] = ClientObj.OperatingForms[tempIndex].nameNavigationBar
         json["data"][i]["position"] = ClientObj.OperatingForms[tempIndex].position
@@ -704,14 +1086,14 @@ onDeviceinstruction.on('DeviceInstruction',function(data) {
        }
       }
       let newTemp = ClientObj.OperatingForms.filter(item => item.payloadId == "");
-      console.log(newTemp)
+      // console.log(newTemp)
       for(let j = 0 ; j< newTemp.length; j++ ){
         tempObj.push({"_id": j,"name": newTemp[j].nameNavigationBar,"payloadId":newTemp[j].payloadId ,"formStructure":newTemp[j].formStructure,"position": newTemp[j].position })
       }
 
-      console.log(tempObj);
+      // console.log(tempObj);
       tempObj.sort( (a, b)=> a.position - b.position);
-      //console.log("this is container data");
+      //// console.log("this is container data");
       me.setState({actionTypes:tempObj,tilesPayloaddata:  containerdata})
       }
       else{
@@ -931,9 +1313,10 @@ onDeviceinstruction.on('DeviceInstruction',function(data) {
           // //alert("this called");
           var me = this;
           const {channelArray,tilesPayloaddata} = this.state;
-         //alert(this.state.submitDataObj.payloadId);
+            //console.log(tilesPayloaddata)
+         // alert(this.state.submitDataObj.payloadId);
        let age = this.timeDifference(new Date(data.valueChangeAt),new Date(new Date().toISOString()))
-      //  console.log(age)
+       
       // console.log(me.state.submitDataObj.payloadId)
         //alert(tilesPayloaddata.payloadId +"Hello")
         this.state.submitDataObj.payloadId   = tilesPayloaddata.payloadId;
@@ -1247,7 +1630,7 @@ changePage(page){
     render() {
     //console.log(this.state.channelAlerrModel.mode);
       // console.log(this.state.rowClickedId)
-      const {selectedAtionType,formStructure,configkeyInputKeyValue,configkeyInput,sentCommandArray} = this.state;
+      const {programForIndex,selectedAtionType,formStructure,ProgramDetailsListObj,configkeyInputKeyValue,configkeyInput,sentCommandArray} = this.state;
       var state   =   this.state;
       var me          =   this;
       var total_page  =   Math.ceil(this.state.total_count/this.state.filter.page_size);
@@ -1436,6 +1819,260 @@ changePage(page){
            </div>
 
    </div>;
+  }
+  console.log("This is ProgramDetailsListObj:ProgramDetailsListObj")
+  console.log(ProgramDetailsListObj)
+  if(formStructure === "ProgramDetails"){
+    inputField =   <div className="row">
+    <div className="col-lg-10 col-sm-12 col-md-10 col-xs-12">
+    <p className ="ActiveP"> Program</p>
+          <div  className="table-responsive">
+          <Table  className="table table-hover table-sm table-bordered ">
+                  <thead className='' style={{background: "gainsboro"}}>
+                  <tr>
+                  <th className='Acustmtd'> SI</th>
+                  <th className='Acustmtd  '>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Program Name&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</th>
+                  <th className='Acustmtd  '>Version</th>
+                  <th className='Acustmtd  '>WEF</th>
+                  <th className='Acustmtd  '>Start Time</th>
+                  <th className='Acustmtd  '>End Time</th>
+                  <th className='Acustmtd  '></th>
+                  <th className='Acustmtd  '>State</th>
+                  <th className='Acustmtd  '>Device Confirmation</th>
+                  <th className='Acustmtd  '></th>
+                  <th className='Acustmtd  '>Actions</th>
+                  </tr>
+                  </thead>
+                  <tbody>
+                  {   !configkeyInputKeyValue.isEmpty() && configkeyInputKeyValue["ArrayOfProg"].length !== 0 &&configkeyInputKeyValue["ArrayOfProg"].map((item , index) =><tr>
+                    <td className='text-center '>{index + 1}</td>
+                    <td  
+                    onClick= {e => {
+                    // alert(index)
+                    this.state.programForIndex = index
+                    // this.state.configkeyInputKeyValue["ArrayOfProg"][programForIndex]["viewFlag"] = true;
+
+                    this.setState({programForIndex : this.state.programForIndex})
+                  }}
+                    className=''>{item.name}</td>
+                     <td className='text-center '> {item["version"]}</td>
+                     <td className='text-center '> {item.wef}</td>
+                    <td className='text-center '> {item.startTime}</td>
+                    <td className='text-center '> {item.endTime}</td>
+                    <td className='text-center '> </td>
+                    <td className='text-center '> {item["currentState"]}</td>
+                    <td className='text-center '> {(item["pendingConfirmation"])?"Pending": "Confirm" }</td>
+                    <td className='text-center '> </td>
+                      <td className='text-center '>
+                    <div className= "btn-group btn-group-xs" >
+                      
+                     
+                      <button Type ="button" 
+                       disabled = {(item.pendingConfirmation || item.currentState == "Pause")? true: null} 
+                      onClick = {this.ActionRowfProg.bind(this, index,item.name,item.version,(item.currentState == "Stop")? "restart":"stop",(item.currentState == "Stop")? "Active":"Stop")}
+                      className="btn btn-default">{(item.currentState == "Stop")? "Restart":<span>&nbsp;&nbsp;Stop&nbsp;&nbsp;</span>}
+                      </button>
+                     
+                      <button Type ="button"  
+                       disabled = {(item.pendingConfirmation || item.currentState == "Stop")? true: null} 
+                      onClick = {this.ActionRowfProg.bind(this, index,item.name,item.version,(item.currentState == "Pause")? "resume":"pause",(item.currentState == "Pause")?  "Active":"Pause") }
+                      className="btn btn-default">{(item.currentState == "Pause")? "Resume":<span>&nbsp;Pause&nbsp;&nbsp;</span>}
+                      </button>
+                      <button Type ="button" onClick = {this.ProgramEdit.bind(this,item)} 
+                      disabled = {(item.pendingConfirmation)? true: null} 
+                       className="btn  btn-secondery">&nbsp;Edit&nbsp;
+                      </button>
+                       <button Type ="button"
+                       disabled = {(item.pendingConfirmation)? true: null} 
+                      // onClick = {this.RemoveRowfProg.bind(this, index)} 
+                      onClick= {this.ActionRowfProg.bind(this, index,item.name,item.version,"deleted","deleted") }
+                      className="btn btn-danger">Delete
+                      </button>
+                      </div>
+                      </td>
+                    </tr>)}
+                    </tbody>
+                    </Table>
+    </div>
+    <div className="col-lg-12 col-sm-12 col-xs-12">
+    <button className="btn btn-xm btn-default" onClick = {this.AddRowFrProg.bind(this)}>Add Program</button>
+   
+    </div>
+    </div>
+    { !ProgramDetailsListObj.isEmpty() && Object.keys(ProgramDetailsListObj).length !== 0 && <div className="col-lg-12 col-sm-12 col-xs-12">
+    <p className="smalLine"></p>
+    <div className= "col-lg-12 col-md-12 col-sm-12 col-xs-12">
+    { !ProgramDetailsListObj.isEmpty() && Object.keys(ProgramDetailsListObj).length !== 0 && <div className="row">
+    <div className="col-lg-5 col-md-5 col-sm-6 col-xs-12">
+        <label className="">Program Name :</label>
+       <input type="text"
+        disabled = {(ProgramDetailsListObj["nameFlag"])?true: null}
+            onChange={e => {ProgramDetailsListObj.name = e.target.value;
+            this.setState({ ProgramDetailsListObj : ProgramDetailsListObj })}} 
+          name= {ProgramDetailsListObj.name} 
+          value= {ProgramDetailsListObj.name} 
+          className = "inputforProgram"/>
+     
+        <label className=" version">ver.</label>
+       <span>{ProgramDetailsListObj["versionselected"]}</span>
+      
+      </div>
+        <div className= "col-lg-5 col-md-6 col-sm-6 co-xs-12">
+        {/* <div className ="col-sm-7 col-md-6 col-lg-6 col-xs-7">
+        
+       </div> */}
+       <label className="ProgramLabel">W.E.F :</label>
+       {/* <div className="col-sm-5 col-md-6 col-lg-6 col-xs-5"> */}
+       <div className="wefDef">
+            <DatePicker  id = "wef"
+                        selected={ProgramDetailsListObj["wefselected"]}
+                        onChange={e => {ProgramDetailsListObj.wef =e.format("YY:MM:DD");
+                        ProgramDetailsListObj["wefselected"] = e;
+                        this.setState({ ProgramDetailsListObj : ProgramDetailsListObj })}}
+                        showMonthDropdown
+                        showYearDropdown
+                        // isClearable={true}
+                        disabled = {(ProgramDetailsListObj["viewFlag"])?true: null}
+                        className="inputforProgramWef"
+                        // placeholderText="   *  .  *  .  *  .  *  .  *  .  *"
+                         /> 
+                         </div>
+                          {/* <div className="col-sm-7 col-md-7 col-lg-7 col-xs-7"> */}
+        <label className="ProgramLabel" >Start Time :</label>
+        {/* </div>  */}
+        <div className="wefDef">
+              <DatePicker  id = "startTime"
+                        selected={ProgramDetailsListObj["startTimeselected"]}
+                        onChange={e => {ProgramDetailsListObj.startTime =e.format("HH:mm");
+                        ProgramDetailsListObj["startTimeselected"] = e;
+                        this.setState({ ProgramDetailsListObj : ProgramDetailsListObj })}}
+                        showTimeSelect
+                        showTimeSelectOnly
+                        timeIntervals={15}
+                        timeFormat = "HH:mm"
+                         dateFormat="HH:mm"
+                        timeCaption="Time"
+                        disabled = {(ProgramDetailsListObj["viewFlag"])?true: null}                       
+                        className="inputforProgramWef"
+                        // placeholderText="   *  .  *  .  *  .  *  .  *  .  *"
+                         />
+                         </div>
+       </div>
+       {/* <div className="col-lg-3 col-sm-3">
+      
+                       
+      
+
+       </div> */}
+       <div classname="col-lg-2 col-md-2 col-sm-6 co-xs-12">
+        <label className="ProgramLabel">End Time :</label>
+       <span>{moment(new Date(Math.max.apply(null,ProgramDetailsListObj["schedules"].map(item => item.endTimeProgramListItem)))).format("HH:mm")}
+       </span>
+       </div>
+     
+
+   </div>}
+    </div>
+   
+    <div className= "col-lg-12 col-sm-12 col-xs-12 col-md-12">
+    <p className ="ActiveP"> Program</p>
+          <div  className="table-responsive">
+          <Table  className="table table-hover table-sm table-bordered ">
+                  <thead className='' style={{background: "gainsboro"}}>
+                  <tr>
+                  <th className='Acustmtd'> SI</th>
+                  <th className='Acustmtd  '>Channel</th>
+                  <th className='Acustmtd  '>Offset</th>
+                  <th className='Acustmtd  '>Durations</th>
+                  <th className='Acustmtd  '>Start Time</th>
+                  <th className='Acustmtd  '>End Time</th>
+                  <th className='Acustmtd  '>Status</th>
+                  <th className='Acustmtd  '>Actions</th>
+                  </tr>
+                  </thead>
+                  <tbody>
+                  {/* { programForIndex == '' && this.state.configkeyInputKeyValue["ArrayOfProg"][programForIndex]["items"].length == 0 && <tr><td colSpan={8} className='text-center'> No Data </td></tr>} */}
+                  { !ProgramDetailsListObj.isEmpty() && Object.keys(ProgramDetailsListObj).length !==undefined && Object.keys(ProgramDetailsListObj).length !==0 &&   ProgramDetailsListObj["schedules"].map((item , index)=>   <tr>
+                    <td className='text-center '>{index + 1}</td>
+                    <td className='text-center '>
+                    <DropdownButton 
+                        disabled = {(ProgramDetailsListObj["viewFlag"])?true: null}                       
+                     className = "" 
+                     onSelect={value => {ProgramDetailsListObj["schedules"][index].channelselected = value.Bsname;
+                     ProgramDetailsListObj["schedules"][index].channel = value.configNm;
+                     this.setState({ ProgramDetailsListObj : ProgramDetailsListObj })}}
+                      bsStyle={"Awhite"}
+                        title={item.channelselected || "Select Channel"}>
+                        {this.state.ChannelConfigAndBsNm.map( (item1) =>
+                        <MenuItem   eventKey={item1}>{item1.Bsname}</MenuItem>
+                      
+                        )}
+                     </DropdownButton>
+                     </td>
+                    <td className='text-center '><input 
+                        disabled = {(ProgramDetailsListObj["viewFlag"])?true: null}                       
+                    type="number"  min="0" max="1440" value= {item.startAt}
+                     name = {item.startAt}
+                     onChange={e => {ProgramDetailsListObj["schedules"][index].startAt =e.target.value;
+                     ProgramDetailsListObj["schedules"][index].endTimeProgramListItem = this.convertDateTimeForSetProg(ProgramDetailsListObj.startTime,Number(ProgramDetailsListObj["schedules"][index].startAt)+Number(ProgramDetailsListObj["schedules"][index].duration))
+                    this.setState({ ProgramDetailsListObj : ProgramDetailsListObj })}} 
+                    className= "inputFoeldForOffset"/></td>
+                    <td className='text-center '>
+                    <input 
+                        disabled = {(ProgramDetailsListObj["viewFlag"])?true: null}                       
+                    type="number"   min="0" max="1440"  value= {item.duration}
+                      name = {item.duration}
+                      onChange={e => {ProgramDetailsListObj["schedules"][index].duration = e.target.value;
+                     ProgramDetailsListObj["schedules"][index].endTimeProgramListItem = this.convertDateTimeForSetProg(ProgramDetailsListObj.startTime,Number(ProgramDetailsListObj["schedules"][index].startAt)+Number(ProgramDetailsListObj["schedules"][index].duration))
+                     this.setState({ ProgramDetailsListObj : ProgramDetailsListObj })}} 
+                    className= "inputFoeldForOffset"/></td>
+                    <td className='text-center '>{
+                      this.convertDateTimeForSetPrograme(ProgramDetailsListObj.startTime,Number(ProgramDetailsListObj["schedules"][index].startAt))}</td>
+                    <td className='text-center '>{
+                      this.convertDateTimeForSetPrograme(ProgramDetailsListObj.startTime,Number(ProgramDetailsListObj["schedules"][index].startAt)+Number(ProgramDetailsListObj["schedules"][index].duration))}</td>
+                    <td className='text-center '>
+                    <input type="checkbox"   
+                        disabled = {(ProgramDetailsListObj["viewFlag"])?true: null}                                           
+                    value="Text"
+                    checked ={ ProgramDetailsListObj["schedules"][index].enabled}
+                    onChange={e =>{
+                      ProgramDetailsListObj["schedules"][index].enabled = !ProgramDetailsListObj["schedules"][index].enabled
+                      this.setState({ProgramDetailsListObj : ProgramDetailsListObj})}} /></td>
+                    <td className='text-center '>
+                    <div className= "btn-group btn-group-xs" >
+                    <button Type ="button"
+                        disabled = {(ProgramDetailsListObj["viewFlag"])?true: null}                                                           
+                    onClick = {this.RemoveRowfProgList.bind(this, index)} className="btn btn-sm btn-danger">Delete</button>
+                    </div>
+                    </td>
+                    </tr>)}
+                    </tbody>
+                    </Table>
+    </div>
+    </div>
+    {  !ProgramDetailsListObj.isEmpty()  && Object.keys(ProgramDetailsListObj).length !==0 && ProgramDetailsListObj["schedules"].length !==0 && ProgramDetailsListObj["schedules"].length !== 0  && <div className="col-sm-12 col-lg-12 col-md-12 col-xs-12"> 
+    <button className="btn btn-xm btn-default"
+                        disabled = {(ProgramDetailsListObj["viewFlag"])?true: null}                                           
+    
+
+    onClick = {this.AddRowFrProglist.bind(this)}>Add Rule
+    </button>
+    &nbsp; &nbsp;
+    <button 
+                        disabled = {(ProgramDetailsListObj["viewFlag"])?true: null}                                           
+                         
+    
+    className="btn btn-xm btn-danger"  onClick = {this.RemoveRowfProg.bind(this)}>Cancel
+    </button>
+    &nbsp; &nbsp;
+      <button 
+                        disabled = {(ProgramDetailsListObj["viewFlag"])?true: null}                                           
+     
+      className="btn btn-xm btn-default" onClick = {this.AddRowFrProgSubmit.bind(this)}>Submit</button>
+    </div>}
+    </div>}
+    </div>;
+
   }
   if(formStructure == "manualOverride"){
     // console.log(configkeyInputKeyValue);
@@ -1936,7 +2573,9 @@ inputField =
     
       <div className ="paddForm">
       {inputField}
-     </div>
+    
+          </div>
+      
    </div>
 
 

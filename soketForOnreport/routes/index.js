@@ -53,25 +53,30 @@ async  function lastPayloadDataCall(socket,data,tempArray){
       criteria["payloadId"] = Arrayofpayload[i]
          var response = await getlastpayloadData(criteria);
          gomos.gomosLog(TRACE_DEV,"THIS IS RESPONSE",response);
-         if(Object.keys(response).length !== 0 ){
+        //  if(Object.keys(response).length !== 0 ){
+        //   maindata.push(response);
+        //   if(tempArray.length == 0){
+        //     flag == true;
+        //     gomos.gomosLog(TRACE_DEV,"This is check tempArray.length", response);
+        //     tempArray.push(response)
+        //   }
+        //  }
+        if(Object.keys(response).length !== 0 ){
           maindata.push(response);
-          if(tempArray.length == 0){
-            flag == true;
-            gomos.gomosLog(TRACE_DEV,"This is check tempArray.length", response);
-            tempArray.push(response)
-          }
          }
+
     }
-    for(let i = 0 ; i < maindata.length ; i++ ){
-      gomos.gomosLog(TRACE_PROD,"This is check tempArray value", tempArray[i].createdTime);
-      gomos.gomosLog(TRACE_PROD,"This is check maindata value", maindata[i].createdTime);
-       if( maindata[i].createdTime.getTime() !== tempArray[i].createdTime.getTime() || flag == true){
-        tempArray = maindata;
+    // for(let i = 0 ; i < maindata.length ; i++ ){
+      // gomos.gomosLog(TRACE_PROD,"This is check tempArray value", tempArray[i].createdTime);
+      // gomos.gomosLog(TRACE_PROD,"This is check maindata value", maindata[i].createdTime);
+      //  if( maindata[i].createdTime.getTime() !== tempArray[i].createdTime.getTime() || flag == true){
+        // if( maindata[i].createdTime.getTime() == tempArray[i].createdTime.getTime() || flag == true){
+        // tempArray = maindata;
         gomos.gomosLog(TRACE_PROD,"This is lastError data cheacking", maindata);
         socket.emit("lastPayloadServerData", maindata);
-        break;
-       }
-    }
+      //   break;
+      //  }
+    // }
   
   
     
