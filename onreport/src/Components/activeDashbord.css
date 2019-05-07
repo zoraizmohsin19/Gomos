@@ -120,10 +120,12 @@
     background-color: #fff;
     border: 1px solid #ddd;
     border-radius: 15px;
+    cursor: pointer;
     color: #337ab7;
     text-decoration: none;
     
 }
+
 .Acustmborder{
     border: 1px solid red !important;
 }

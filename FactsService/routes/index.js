@@ -538,38 +538,38 @@ function activeDevice(dbo, dataToInsert) {
                         );
                       }
                     }
-                    gomos.gomosLog(
-                      TRACE_DEBUG,
-                      "This Is key of deviceStateKey",
-                      deviceStateKey
-                    );
+                    // gomos.gomosLog(
+                    //   TRACE_DEBUG,
+                    //   "This Is key of deviceStateKey",
+                    //   deviceStateKey
+                    // );
 
                     var sensorsPkey = Object.keys(dataToInsert.sensors);
-                    gomos.gomosLog(
-                      TRACE_DEBUG,
-                      "This Is key of sensorsPkey",
-                      sensorsPkey
-                    );
-                    gomos.gomosLog(
-                      TRACE_DEBUG,
-                      "This Is key of devicesStateKeyValue out Loop",
-                      devicesStateKeyValue
-                    );
+                    // gomos.gomosLog(
+                    //   TRACE_DEBUG,
+                    //   "This Is key of sensorsPkey",
+                    //   sensorsPkey
+                    // );
+                    // gomos.gomosLog(
+                    //   TRACE_DEBUG,
+                    //   "This Is key of devicesStateKeyValue out Loop",
+                    //   devicesStateKeyValue
+                    // );
                     for (var i = 0; i < deviceStateKey.length; i++) {
-                      gomos.gomosLog(
-                        TRACE_DEBUG,
-                        "This Is key of deviceStateKey In Loop",
-                        deviceStateKey
-                      );
+                      // gomos.gomosLog(
+                      //   TRACE_DEBUG,
+                      //   "This Is key of deviceStateKey In Loop",
+                      //   deviceStateKey
+                      // );
 
                       var deviceStatecode = Object.keys(
                         devicesStateKeyValue[deviceStateKey[i]]
                       );
-                      gomos.gomosLog(
-                        TRACE_DEBUG,
-                        "This Is key of deviceStatecode",
-                        deviceStatecode
-                      );
+                      // gomos.gomosLog(
+                      //   TRACE_DEBUG,
+                      //   "This Is key of deviceStatecode",
+                      //   deviceStatecode
+                      // );
 
                       for (var j = 0; j < deviceStatecode.length; j++) {
                         var devicebusinessNM = Object.keys(
@@ -589,23 +589,23 @@ function activeDevice(dbo, dataToInsert) {
                             1
                           );
                         }
-                        gomos.gomosLog(
-                          TRACE_DEBUG,
-                          "this is  deviceStatecode  2 loop ",
-                          devicebusinessNM
-                        );
+                        // gomos.gomosLog(
+                        //   TRACE_DEBUG,
+                        //   "this is  deviceStatecode  2 loop ",
+                        //   devicebusinessNM
+                        // );
 
                         for (var k = 0; k < sensorsPkey.length; k++) {
-                          gomos.gomosLog(
-                            TRACE_DEBUG,
-                            "this is  devicebusinessNM  3 loop ",
-                            devicebusinessNM
-                          );
-                          gomos.gomosLog(
-                            TRACE_DEBUG,
-                            "this is dataToInsert.sensors  3 loop ",
-                            dataToInsert.sensors
-                          );
+                          // gomos.gomosLog(
+                          //   TRACE_DEBUG,
+                          //   "this is  devicebusinessNM  3 loop ",
+                          //   devicebusinessNM
+                          // );
+                          // gomos.gomosLog(
+                          //   TRACE_DEBUG,
+                          //   "this is dataToInsert.sensors  3 loop ",
+                          //   dataToInsert.sensors
+                          // );
                           var Senkey = Object.keys(
                             dataToInsert.sensors[sensorsPkey[k]]
                           );
@@ -647,19 +647,19 @@ function activeDevice(dbo, dataToInsert) {
                               ]["dateTime"] = dateTime;
                             }
 
-                            gomos.gomosLog(
-                              TRACE_DEBUG,
-                              "This Is key of devicesStateKeyValue 1",
-                              devicesStateKeyValue
-                            );
+                            // gomos.gomosLog(
+                            //   TRACE_DEBUG,
+                            //   "This Is key of devicesStateKeyValue 1",
+                            //   devicesStateKeyValue
+                            // );
                           }
                         }
                       }
-                      gomos.gomosLog(
-                        TRACE_DEBUG,
-                        "this is data of DevicesSate",
-                        devicesStateKeyValue
-                      );
+                      // gomos.gomosLog(
+                      //   TRACE_DEBUG,
+                      //   "this is data of DevicesSate",
+                      //   devicesStateKeyValue
+                      // );
                     }
 
                     // if(Token != '' && Token != undefined ){
@@ -693,12 +693,12 @@ function activeDevice(dbo, dataToInsert) {
 
   gomos.gomosLog(TRACE_DEBUG, "this is called", dataToInsert);
 }
-function updateDevInstructionActiveJobs(dbo, dataToInsert,sourceMsg) {
-  gomos.gomosLog(TRACE_PROD,"This updateDevInstructionActiveJob Data  ", sourceMsg);
-  let name    = sourceMsg.name;
-  let version = sourceMsg.version;
-  let schNo  = sourceMsg.schNo;
-  let msgFactsKeys = Object.keys(sourceMsg)
+function updateDevInstructionActiveJobs(dbo, dataToInsert,sourceMsgObj) {
+  gomos.gomosLog(TRACE_PROD,"This updateDevInstructionActiveJob Data  ", sourceMsgObj);
+  let name    = sourceMsgObj.name;
+  let version = sourceMsgObj.version;
+  let schNo  = sourceMsgObj.schNo;
+  let msgFactsKeys = Object.keys(sourceMsgObj)
   let keysToRemove = ["payloadId","mac","name","version","schNo","Date","createdTime","updatedTime","_id","processed","Token","topic"];
   for (var i = 0; i < keysToRemove.length; i++) {
     if (msgFactsKeys.includes(keysToRemove[i])) {
@@ -707,12 +707,12 @@ function updateDevInstructionActiveJobs(dbo, dataToInsert,sourceMsg) {
   } 
 gomos.gomosLog(TRACE_PROD,"This is Value msgFactsKeys",msgFactsKeys);
 
-let status =  getConfigchannelNameToValue(sourceMsg.mac,msgFactsKeys,sourceMsg)
+let status =  getConfigchannelNameToValue(sourceMsgObj.mac,msgFactsKeys,sourceMsgObj)
 
 gomos.gomosLog(TRACE_PROD,"This is Value Of Status From Device",status);
 
   var criteria = {
-    mac: sourceMsg.mac,
+    mac: sourceMsgObj.mac,
     type: "ActiveJob",
     "sourceMsg.body.jobKey":`${name}-${version}-${schNo}`,
     "sourceMsg.body.ActionType": (status == 0)?"OFFTime":"ONTime"
@@ -731,18 +731,21 @@ gomos.gomosLog(TRACE_PROD,"This is Value Of Status From Device",status);
         gomos.gomosLog(TRACE_PROD,"This is find Of updateDevInstructionActiveJob", result[0].sourceMsg);
         // for (var i = 0; i < result.length; i++) {
           let currentTime = new Date(new Date().toISOString())
-           updatedDeviceinstruction(dbo, result[0]);
+          gomos.gomosLog(TRACE_PROD,"this is Action Values in Executed Job",result[0]["sourceMsg"]["body"]["ActionValues"]);
+          // result[0]["sourceMsg"]["body"]["ActionTime"] = compareDate(sourceMsgObj.Date);
+          updatedDevinstWithCrteria(dbo,{_id: result[0]["_id"] },{updatedTime: currentTime });
+          //  updatedDeviceinstruction(dbo, result[0]);
            let tempobj = {
             mac: result[0]["mac"],
             DeviceName: result[0]["DeviceName"],
-            type: result[0]["type"],
+            type: "executedJob",
             sourceMsg: {
               body: {
                 Channel:result[0]["sourceMsg"]["body"]["Channel"],
                 ActionType: result[0]["sourceMsg"]["body"]["ActionType"],
-                jobKey:result[0]["sourceMsg"]["body"]["jobKey"],
-                ActionValues: "",
-                ActionTime : sourceMsg.Date
+                jobKey : result[0]["sourceMsg"]["body"]["jobKey"],
+                ActionValues : result[0]["sourceMsg"]["body"]["ActionValues"],
+                ActionTime :compareDate(sourceMsgObj.executionDate)
               },
               referenceToken: result[0]["sourceMsg"].referenceToken,
               isDailyJob :  result[0]["sourceMsg"].isDailyJob
@@ -1001,9 +1004,9 @@ function insertActivejob(dbo, dataInsruction, dataToInsert,payloadObject) {
     let dataTime = new Date(new Date().toISOString());
     // gomos.gomosLog(TRACE_DEBUG, "this is key", keysofBNm);
     let channelName = convertTochannelBsName(dataToInsert.mac,dataInsruction.sourceMsg["body"].schedules[i].channel);
-    let OffsetTime  = Number(dataInsruction.sourceMsg["body"].schedules[i].startAt);
-    let duration    =  Number(dataInsruction.sourceMsg["body"].schedules[i].duration);
-    let schNo      = dataInsruction.sourceMsg["body"].schedules[i].schNo;
+    let OffsetTime  = dataInsruction.sourceMsg["body"].schedules[i].startAt;
+    let duration    = dataInsruction.sourceMsg["body"].schedules[i].duration;
+    let schNo       = dataInsruction.sourceMsg["body"].schedules[i].schNo;
     gomos.gomosLog(TRACE_DEBUG,"This is Line data" ,dataInsruction.sourceMsg["body"] )
     gomos.gomosLog(TRACE_DEBUG,"This is Line Number ",dataInsruction.sourceMsg["body"].schedules[i].schNo )
 
@@ -1030,10 +1033,10 @@ function insertActivejob(dbo, dataInsruction, dataToInsert,payloadObject) {
     data["sourceMsg"]["body"]["ActionType"] = dArray[j];
     data["sourceMsg"]["body"]["jobKey"] = `${name}-${version}-${schNo}`; 
     if(dArray[j]=== "ONTime"){
-    data["sourceMsg"]["body"]["ActionValues"] = dateTime.create(convertDateTimeForSetPrograme(startTime,OffsetTime)).format("H:M");
+    data["sourceMsg"]["body"]["ActionValues"] = ":*:*:*"+dateTime.create(convertDateTimeForSetPrograme(startTime,OffsetTime)).format("H:M:S");
     data["sourceMsg"]["body"]["ActionTime"] = ""
     }else{
-      data["sourceMsg"]["body"]["ActionValues"] = dateTime.create(convertDateTimeForSetPrograme(startTime,OffsetTime+duration)).format("H:M");
+      data["sourceMsg"]["body"]["ActionValues"] =  ":*:*:*"+dateTime.create(convertDateTimeForSetPrograme(startTime,OffsetTime+duration)).format("H:M:S");
       data["sourceMsg"]["body"]["ActionTime"] = ""
     }
     gomos.gomosLog(TRACE_PROD,"This is log for Updateing the data base",data)
@@ -1129,7 +1132,7 @@ function compareDate(str1) {
   gomos.gomosLog(TRACE_DEBUG, "this what coming Date", str1);
   var arraydate = str1.split(":");
   gomos.gomosLog( TRACE_DEBUG,"this what coming Date",arraydate[5] +"," +arraydate[4] +"," +arraydate[3] +"," +arraydate[2] +"," +arraydate[1] +"," +arraydate[0]);
-  var date1 = new Date("20" + arraydate[5],arraydate[4] - 1,arraydate[3],arraydate[2],arraydate[1],arraydate[0] );
+  var date1 = new Date("20" + arraydate[0],arraydate[1] - 1,arraydate[2],arraydate[3],arraydate[4],arraydate[5] );
   return date1;
 }
 function DeviceInstructionInsert(dbo, data) {
@@ -1145,7 +1148,7 @@ function DeviceInstructionInsert(dbo, data) {
       gomos.gomosLog(TRACE_DEV, "This is error", err);
       process.hasUncaughtExceptionCaptureCallback();
     }
-    gomos.gomosLog(TRACE_DEV, " insert  in DeviceInstructionInsert activeJob");
+    gomos.gomosLog(TRACE_PROD, " insert  in DeviceInstructionInsert");
   });
 }
 function deleteinstruction(dbo, id) {
@@ -1215,6 +1218,28 @@ function updatedDeviceinstruction(dbo, updatedData) {
     );
 }
 
+function updatedDevinstWithCrteria(dbo, criteria,setUpdated) {
+  gomos.gomosLog(TRACE_PROD,"This is  updatedDeviceinstruction true")
+  dbo
+    .collection("DeviceInstruction")
+    .updateOne(
+      criteria,
+      { $set: setUpdated },
+      function(err, result) {
+        if (err) {
+          gomos.errorCustmHandler(
+            NAMEOFSERVICE,
+            "updateDeviceState",
+            "This is Updateing Error",
+            "",
+            err
+          );
+          process.hasUncaughtExceptionCaptureCallback();
+        }
+        gomos.gomosLog(TRACE_DEBUG, "updateDeviceInsruction ",criteria);
+      }
+    );
+}
 async function getAllconfig() {
   factSrvcSchedule = await gomosSchedule.getServiceConfig(
     dbo,

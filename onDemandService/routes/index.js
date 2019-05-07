@@ -1143,15 +1143,15 @@ router.post("/executedJob", function (req, res, next) {
     gomos.gomosLog(TRACE_DEV,"This is Criteria of executedJob", body);
 
       if(body['Fchannel'] != undefined && body['Fchannel'] != null && body['Fchannel'] != ''){
-        criteria["sourceMsg.Channel"]    =   body['Fchannel'];
+        criteria["sourceMsg.body.Channel"]    =   body['Fchannel'];
         }
       if(body['Fdate'] != undefined && body['Fdate'] != null && body['Fdate'] != ''){
-        criteria["sourceMsg.ActionTime"]    =  {
+        criteria["sourceMsg.body.ActionTime"]    =  {
           $gte: new Date(body['Fdate']),
           $lte: new Date(new Date().toISOString())  
       }}
         if(body['Action'] != undefined && body['Action'] != null && body['Action'] != ''){
-          criteria["sourceMsg.ActionType"]    =   body['Action'];
+          criteria["sourceMsg.body.ActionType"]    =   body['Action'];
           }     
         // var page    =   1;
         // if(body['page'] != undefined && body['page'] != null && !isNaN(body['page'])){
@@ -1192,14 +1192,14 @@ router.post("/executedJob", function (req, res, next) {
         if(result.length !=0){
             for(var i =0; i< result.length ; i++){
                   var temObj ={};
-                  temObj["Channel"] =    result[i].sourceMsg.Channel;
+                  temObj["Channel"] =    result[i].sourceMsg.body.Channel;
                   temObj["isDailyJob"] = result[i].sourceMsg.isDailyJob;
-                  temObj["ActionType"] = result[i].sourceMsg.ActionType;
+                  temObj["ActionType"] = result[i].sourceMsg.body.ActionType;
                   if(result[i].sourceMsg.isDailyJob == true){
-                    temObj["ActionTime"]  =  compareDate(result[i].sourceMsg.ActionValues);
+                    temObj["ActionTime"]  =  compareDate(result[i].sourceMsg.body.ActionValues);
                     
                   }else{
-                    temObj["ActionTime"]  =  result[i].sourceMsg.ActionTime;
+                    temObj["ActionTime"]  =  result[i].sourceMsg.body.ActionTime;
                   }
                   InActiveJobs.push(temObj);
               }
@@ -1239,17 +1239,10 @@ router.post("/ActiveJobs", function (req, res, next) {
         type: "ActiveJob"
       }
       criteria["$or"]= [ {"sourceMsg.isDailyJob": true},{
-        "sourceMsg.ActionTime": {
+        "sourceMsg.body.ActionTime": {
           $gte: new Date(startDate),
           $lte: new Date(endDate)  
       }}];
-    
-      // criteria["sourceMsg.ActionTime"] = {
-       
-      //   $gte: new Date(startDate),
-      //   $lte: new Date(endDate)
-     
-      // }
       gomos.gomosLog(TRACE_DEBUG,"This is debug of ActiveJobs",criteria );
       var db = connection.db(dbName);
       db.collection("DeviceInstruction").find(criteria).toArray(function (err, result) {
@@ -1265,22 +1258,20 @@ router.post("/ActiveJobs", function (req, res, next) {
         if(result.length !=0){
          
             for(var i =0; i< result.length ; i++){
-       
-              // if(result[i].type == "ActiveJob"){
                   var temObj ={};
-                  temObj["Channel"] =result[i].sourceMsg.Channel;
+                  temObj["Channel"] =result[i].sourceMsg.body.Channel;
                   temObj["isDailyJob"] = result[i].sourceMsg.isDailyJob;
-                  temObj["ActionType"] = result[i].sourceMsg.ActionType;
+                  temObj["jobKey"] = result[i].sourceMsg.body.jobKey;
+                  temObj["ActionType"] = result[i].sourceMsg.body.ActionType;
                   if(result[i].sourceMsg.isDailyJob == true){
-                    temObj["ActionTime"]  =  compareDate(result[i].sourceMsg.ActionValues);
-                    
+                    gomos.gomosLog(TRACE_DEBUG,"This is Debug of result[i].sourceMsg.body.ActionValues",result[i].sourceMsg.body.ActionValues)
+                    temObj["ActionTime"]  =  compareDate(result[i].sourceMsg.body.ActionValues);
                   }else{
-                    temObj["ActionTime"]  =  result[i].sourceMsg.ActionTime;
+                    temObj["ActionTime"]  =  result[i].sourceMsg.body.ActionTime;
                   }
-                 
                   ActiveJobs.push(temObj);
               }
-            // }
+            gomos.gomosLog(TRACE_DEBUG,"This is debug of Active job Result", ActiveJobs)
            
         json["ActiveJob"] = ActiveJobs;
         // json["count"] = result.length;
@@ -1374,22 +1365,24 @@ function compareDate(str1){
   var yr1
   var mon1
   var dt1
-  if(arraydate[3]=="*" && arraydate[3]=="*" && arraydate[3]=="*" ){
+  if(arraydate[2]=="*" && arraydate[2]=="*" && arraydate[2]=="*" ){
    var dataTime = new Date();
    yr1 = dataTime.getFullYear();
    mon1 = dataTime.getMonth();
    dt1 = dataTime.getDate();
   var date1 = new Date(yr1, mon1, dt1,arraydate[2], arraydate[1], arraydate[0]);
+  gomos.gomosLog(TRACE_DEBUG,"this Date Object if part",date1);
 
   }else{
-    yr1 =  arraydate[5];
-    mon1 =  arraydate[4];
-    dt1 = arraydate[3];
-  var date1 = new Date("20"+yr1, mon1 - 1, dt1,arraydate[2], arraydate[1], arraydate[0]);
+    yr1 =  arraydate[0];
+    mon1 =  arraydate[1];
+    dt1 = arraydate[2];
+  var date1 = new Date("20"+yr1, mon1 - 1, dt1,arraydate[3], arraydate[4], arraydate[5]);
+  gomos.gomosLog(TRACE_DEBUG,"this Date Object elsepart",date1);
 
   }
-  
-  gomos.gomosLog(TRACE_PROD,"this what coming Date",arraydate[5]+"," +arraydate[4]+","+ arraydate[3]+","+arraydate[2]+","+ arraydate[1]+","+ arraydate[0])
+  gomos.gomosLog(TRACE_DEBUG,"this Date Object return",date1);
+  gomos.gomosLog(TRACE_PROD,"this what coming Date 2",arraydate[0]+"," +arraydate[1]+","+ arraydate[2]+","+arraydate[3]+","+ arraydate[4]+","+ arraydate[5])
   return date1;
   }
 router.post("/ActiveActionTypeCall", function (req, res, next) {
@@ -1545,26 +1538,26 @@ var dateTime = new Date()
         temobj = {"Channel":ChannelName}
       }
       gomos.gomosLog(TRACE_DEV,"This is ChannelName", ChannelName);
-      if(payloadId === "ManOverride" && ChannelName == "" || ChannelName == undefined){
-        for (let [key, value] of Object.entries(message)) {  
-          temobj[key]= {"mode": value.pendingMode};
-          messageObj[key]= {"mode": value.pendingMode};
-          gomos.gomosLog(TRACE_DEV,"This is ManOverride", value);
-          gomos.gomosLog(TRACE_DEV,"This is ManOverride",  temobj[key]);
-        }
-      }
-      else{
-        for (let [key, value] of Object.entries(message)) {  
-          temobj[key]= value;
-          messageObj[key]= value;
-        }
-      }
+      // if(payloadId === "ManOverride" && ChannelName == "" || ChannelName == undefined){
+      //   for (let [key, value] of Object.entries(message)) {  
+      //     temobj[key]= {"mode": value.pendingMode};
+      //     messageObj[key]= {"mode": value.pendingMode};
+      //     gomos.gomosLog(TRACE_DEV,"This is ManOverride", value);
+      //     gomos.gomosLog(TRACE_DEV,"This is ManOverride",  temobj[key]);
+      //   }
+      // }
+      // else{
+        // for (let [key, value] of Object.entries(message)) {  
+        //   temobj[key]= value;
+        //   messageObj[key]= value;
+        // }
+      // }
      
        var object = {
         "mac": mac,
         "type": "SentInstruction",
         "sourceMsg": {
-          "body":temobj 
+          "body":message 
         },
         "createdTime": dataTime,
         "updatedTime": dataTime,
@@ -1589,7 +1582,7 @@ var dateTime = new Date()
 //   message[ChannelName] = 1
 // }
       
-      midllelayer.endPointMiddelayerFn(urlConn,dbName,res,CustCd,subCustCd,DeviceName,payloadId,dataTime,messageObj,Token);
+      midllelayer.endPointMiddelayerFn(urlConn,dbName,res,CustCd,subCustCd,DeviceName,payloadId,dataTime,message,Token);
       
       })
   });
