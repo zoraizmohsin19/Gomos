@@ -386,6 +386,10 @@ function processFactMessages() {
                                 if (payloadData.processByState == "Y") {
                                   activeDevice(dbo, dataToInsert);
                                 }
+                                if (payloadData.processByInstructionError == "Y") {
+                                  gomos.gomosLog(TRACE_PROD,"This is processByInstructionError True",result[count]);
+                                  processForInstructionError(dbo, dataToInsert,result[count]);
+                                }
                                 if(dataToInsert.payloadId === "ProgramLineExecution"){
                                   gomos.gomosLog(TRACE_PROD,"This is ProgramLineExecution True",result[count]);
                                   updateDevInstructionActiveJobs(dbo, dataToInsert,result[count])
@@ -793,6 +797,112 @@ function updateDevInstrForRActive(dbo, dataToInsert, Token) {
       );
     });
 }
+
+function  processForInstructionError(dbo, dataToInsert,mainDatapayload){
+  gomos.gomosLog(TRACE_PROD,"This updateDeviceInstruction Data  ",dataToInsert);
+  var criteria = {
+    mac: dataToInsert.mac,
+    type: "SentInstruction",
+    "sourceMsg.Token": mainDatapayload.Token
+  };  
+  dbo
+    .collection("DeviceInstruction")
+    .find(criteria)
+    .toArray(async function(err, result) {
+      if (err) {
+        process.hasUncaughtExceptionCaptureCallback();
+      }
+      if (result.length != 0) {
+        gomos.gomosLog(TRACE_DEV, "This is find Of DeviceInstruction", result);
+        if (dataFromPayload.filter(item => item.payloadId == result[0].sourceMsg.ActionType).length != 0) {
+          var index = dataFromPayload.findIndex(item => item.payloadId == result[0].sourceMsg.ActionType);
+          var payloadObject = dataFromPayload[index];
+          gomos.gomosLog(TRACE_DEV,"This is Debug of payloadId Data",payloadObject);
+          
+          if (payloadObject.payloadId == "SetProgramState") {
+            gomos.gomosLog(TRACE_PROD,"This is setProgrameProcess condtion True")
+            await setProgramStateErrorProcess(dbo, result[0]);
+            deleteinstruction(dbo, result[0]._id);
+          }
+          if (payloadObject.payloadId == "SetProgram") {
+            gomos.gomosLog(TRACE_PROD,"This is setProgrameProcess condtion True");
+            await setProgramErrorProcess(dbo, result[0]);
+            deleteinstruction(dbo, result[0]._id);
+          }
+        }
+    
+    }
+    });
+
+}
+
+ async function  setProgramStateErrorProcess(dbo, dataInsruction){
+  gomos.gomosLog( TRACE_PROD,"This Call ProgrameDetails data");
+  dbo
+    .collection("DeviceInstruction")
+    .find({ mac: dataInsruction.mac, type: "ProgramDetails",
+    "sourceMsg.body.name":dataInsruction.sourceMsg.body.name,
+    "sourceMsg.body.version":dataInsruction.sourceMsg.body.version
+
+  })
+    .toArray(function(err, result) {
+      if (err) {
+        process.hasUncaughtExceptionCaptureCallback();
+      }
+      if (result.length != 0) {
+        gomos.gomosLog( TRACE_PROD,"This ProgrameDetails data",result);
+        gomos.gomosLog( TRACE_PROD, "This ProgrameDetails dataInsruction.sourceMsg.body Splite data ito part",dataInsruction.sourceMsg.body);
+        gomos.gomosLog(TRACE_PROD,"This is ProgrameDetails after asing",result[0].sourceMsg.body);
+        dbo.collection("DeviceInstruction").updateOne(
+          { _id: result[0]["_id"] },
+          {$set: {
+            "sourceMsg.body.currentState": result[0].sourceMsg.body.previousState,
+            "sourceMsg.body.previousState": result[0].sourceMsg.body.currentState,
+            "sourceMsg.body.pendingConfirmation": false,
+            updatedTime: new Date(new Date().toISOString())
+          }
+        }, 
+        function(err, result) {
+            if (err) {
+              gomos.errorCustmHandler( NAMEOFSERVICE,"updated For Programe State in ProgrameDetails   in setProgramStateErrorProcess","This is Updateting Error","", err);
+              process.hasUncaughtExceptionCaptureCallback();
+            }
+            gomos.gomosLog(TRACE_PROD, "updated For Programe State in ProgrameDetails   in setProgramStateErrorProcess");
+          }
+        );
+      }
+    });
+}
+async function  setProgramErrorProcess(dbo, dataInsruction){
+  gomos.gomosLog( TRACE_PROD,"This Call ProgrameDetails data");
+  dbo
+    .collection("DeviceInstruction")
+    .find({ mac: dataInsruction.mac, type: "ProgramDetails",
+    "sourceMsg.body.name":dataInsruction.sourceMsg.body.name,
+    "sourceMsg.body.version":dataInsruction.sourceMsg.body.version
+
+  })
+    .toArray(function(err, result) {
+      if (err) {
+        process.hasUncaughtExceptionCaptureCallback();
+      }
+      if (result.length != 0) {
+        gomos.gomosLog( TRACE_PROD,"This ProgrameDetails data",result);
+        gomos.gomosLog( TRACE_PROD, "This ProgrameDetails dataInsruction.sourceMsg.body Splite data ito part",dataInsruction.sourceMsg.body);
+        gomos.gomosLog(TRACE_PROD,"This is ProgrameDetails after asing",result[0].sourceMsg.body);
+        dbo.collection("DeviceInstruction").deleteOne(
+          { _id: result[0]["_id"] },
+          function(err, result) {
+            if (err) {
+              gomos.errorCustmHandler( NAMEOFSERVICE,"delted For ProgrameDetails Override","This is Updateting Error","", err);
+              process.hasUncaughtExceptionCaptureCallback();
+            }
+            gomos.gomosLog(TRACE_PROD, "deleted For ProgrameDetails Override  in setProgramErrorProcess");
+          }
+        );
+      }
+    });
+}
 function updateDeviceInstruction(dbo, dataToInsert, Token) {
   gomos.gomosLog(TRACE_PROD,"This updateDeviceInstruction Data  " + Token,dataToInsert);
   var criteria = {
@@ -1033,10 +1143,10 @@ function insertActivejob(dbo, dataInsruction, dataToInsert,payloadObject) {
     data["sourceMsg"]["body"]["ActionType"] = dArray[j];
     data["sourceMsg"]["body"]["jobKey"] = `${name}-${version}-${schNo}`; 
     if(dArray[j]=== "ONTime"){
-    data["sourceMsg"]["body"]["ActionValues"] = ":*:*:*"+dateTime.create(convertDateTimeForSetPrograme(startTime,OffsetTime)).format("H:M:S");
+    data["sourceMsg"]["body"]["ActionValues"] = "*:*:*:"+dateTime.create(convertDateTimeForSetPrograme(startTime,OffsetTime)).format("H:M:S");
     data["sourceMsg"]["body"]["ActionTime"] = ""
     }else{
-      data["sourceMsg"]["body"]["ActionValues"] =  ":*:*:*"+dateTime.create(convertDateTimeForSetPrograme(startTime,OffsetTime+duration)).format("H:M:S");
+      data["sourceMsg"]["body"]["ActionValues"] =  "*:*:*:"+dateTime.create(convertDateTimeForSetPrograme(startTime,OffsetTime+duration)).format("H:M:S");
       data["sourceMsg"]["body"]["ActionTime"] = ""
     }
     gomos.gomosLog(TRACE_PROD,"This is log for Updateing the data base",data)

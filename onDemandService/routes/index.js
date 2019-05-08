@@ -1704,7 +1704,10 @@ MongoClient.connect(
               let data = result.map(item => `${item._id}-${item.version}`)
               gomos.gomosLog(TRACE_DEBUG,"This is result of find",data)                
                db.collection("DeviceInstruction")
-              .find( {"mac":mac,"type": "ProgramDetails","sourceMsg.body.programKey": {$in: data}}).toArray(function (err, result1) {
+              .find( {"mac":mac,"type": "ProgramDetails","sourceMsg.body.programKey": {$in: data},
+              $or: [ {"sourceMsg.body.currentState":{$ne :"deleted"}}, {"sourceMsg.body.pendingConfirmation": {$ne:false}} ]
+            
+            }).toArray(function (err, result1) {
                 if (err) {
               gomos.gomosLog(TRACE_DEBUG,"this err",err);  
                 }

@@ -25,22 +25,7 @@ class Chartcom extends Component {
   //     return color;
   //     }
   render(){
-     const{
-    type, arrData, arrLabels, legend, xAxisLbl, yAxisLbl,bgColors,borderColors
-     } = this.props
-    // error
-    // genearteGraphs(type, arrData, arrLabels, legend, xAxisLbl, yAxisLbl) {
-      //  var myChart
-      //  {
-      //   label: legend,
-      //   data: arrData,
-      //   // backgroundColor: {bgColors },
-      //   // borderColor: {borderColors},
-      //   pointBorderWidth: 3,
-      //   pointBorderColor: "red",
-      //   fontSize: 12,
-      //   borderWidth: 2
-      // }
+     const{type, arrData, arrLabels, legend, xAxisLbl, yAxisLbl,bgColors,borderColors } = this.props
     var   backgroundColor = [ 
          'rgba(255, 99, 132, 0.2)',
          'rgba(54, 162, 235, 0.2)',
