@@ -106,7 +106,8 @@ class activeDashbord extends Component {
         sentCommandArrayLenght: "",
         rowClickedId: "",
         age:"",
-        DefaulaManualOverride: {}
+        DefaulaManualOverride: {},
+        DefaulaCopyManualOverride: {}
   
       }
 
@@ -297,23 +298,70 @@ for(var key =0; key < configkeyInput.length; key++) {
  
     // }
 }
+getChannelCurrentvalue(channel){
+ const {channelArray} = this.state;
+ let index = channelArray.findIndex(item => item.devicebusinessNM === channel);
+
+ console.log(channelArray);
+ console.log(channelArray[index].Value); 
+ return channelArray[index].Value;
+}
+manualOverrideCancel(){
+  const {DefaulaCopyManualOverride, configkeyInput,configkeyInputKeyValue} = this.state;
+  let DefaulaManualOverride = JSON.parse(JSON.stringify(DefaulaCopyManualOverride)); 
+    for (let i =0;  i < configkeyInput.length; i++) {  
+      configkeyInputKeyValue[configkeyInput[i]] = DefaulaManualOverride[configkeyInput[i]];
+      configkeyInputKeyValue[configkeyInput[i]+"toggle"] = (DefaulaManualOverride[configkeyInput[i]]["pendingMode"] == 0)? false : true;
+     if(DefaulaManualOverride[configkeyInput[i]]["pendingMode"] !== DefaulaManualOverride[configkeyInput[i]]["activeMode"]){
+      configkeyInputKeyValue[configkeyInput[i]+"confirmation"] = true;
+     }else{
+      configkeyInputKeyValue[configkeyInput[i]+"confirmation"] = false;
+     }
+    }
+    configkeyInputKeyValue["submitflag"] = true;
+  this.setState({
+    configkeyInputKeyValue:configkeyInputKeyValue,
+     DefaulaManualOverride: DefaulaManualOverride});
+
+}
 SubmitFormanualOveride(){
   // var me = this;
   // alert("Hello Takreem ")
+  
   var dataToSendApi ={};
 var me = this;
-  const {selectedAtionType, configkeyInput, configkeyInputKeyValue} =this.state;
+  const {selectedAtionType,channelAlerrModel, channelArray,configkeyInput,DefaulaCopyManualOverride, configkeyInputKeyValue} =this.state;
+  console.log(DefaulaCopyManualOverride);
+  console.log(configkeyInputKeyValue);
   for(var key =0; key < configkeyInput.length; key++) {
-    dataToSendApi[configkeyInput[key]] = { "mode": configkeyInputKeyValue[configkeyInput[key]]["pendingMode"]}
-     } 
+    if(configkeyInputKeyValue[configkeyInput[key]]["pendingMode"] !== DefaulaCopyManualOverride[configkeyInput[key]]["pendingMode"]){
+      configkeyInputKeyValue[configkeyInput[key]+"confirmation"] = true;
+      let jsontemp = { "mode": configkeyInputKeyValue[configkeyInput[key]]["pendingMode"]}
+      if(configkeyInputKeyValue[configkeyInput[key]]["pendingMode"] == 1 && this.getChannelCurrentvalue(configkeyInput[key]) === 1){
+      jsontemp["action"] = 0 ;
+      console.log(channelArray)
+     
+      let index = channelArray.findIndex(item => item.devicebusinessNM === configkeyInput[key]);
+      channelArray[index].ActionCond = 0;
+      // channelArray[channelAlerrModel["index"]].ActionCond = 0;
+      me.setState({channelArray :channelArray}); 
+      }
+      dataToSendApi[configkeyInput[key]] = jsontemp;
+    }else{
+     dataToSendApi[configkeyInput[key]] = { "mode": configkeyInputKeyValue[configkeyInput[key]]["pendingMode"]}
+     }
+     
+    }
+   
+    console.log(dataToSendApi);
     me.state.submitDataObj.payloadId   = selectedAtionType;
     me.state.submitDataObj.dataBody    = dataToSendApi;
     me.state.submitDataObj.isDaillyJob = "";
     me.state.submitDataObj.ChannelName = "";
-    me.setState({submitDataObj :me.state.submitDataObj});
+    me.setState({submitDataObj :me.state.submitDataObj, configkeyInputKeyValue: configkeyInputKeyValue});
 
-  me.callApiForAction();
-  me.callApiForManoverride();
+   me.callApiForAction();
+   me.callApiForManoverride();
 }
 SubmitForParameter(){
   // var me = this;
@@ -364,7 +412,9 @@ let dataToSendApi = {}
   axios.post("http://localhost:3992/ActivesaveForManualOver",Obj)
   .then(json =>  {
   // if(json["data"] == "success"){
-   
+    me.handleChange(this.state.selectedevent)
+    // configkeyInputKeyValue["submitflag"] = true;
+    // me.setState({ configkeyInputKeyValue: configkeyInputKeyValue})
   //   swal("Success!", "You Send Action!", "success");ActivesaveForManualOver
   // 
   //alert("result")
@@ -488,6 +538,7 @@ callApiForManoverrideForTiles(){
         var  keysofObj = Object.keys(objectpayload.sensors)
         //console.log(objectpayload);
         if(formStructure == "manualOverride"){
+          // this.fetchFromManualOverride();
           
          this.manualOverrideProcess( objectpayload,selectedAtionType,selectedevent);
         }
@@ -895,20 +946,35 @@ callApiForManoverrideForTiles(){
 
     }
   manualOverrideProcess(objectpayload,selectedAtionType,selectedevent){
+    const {DefaulaManualOverride} = this.state;
     var configkeyInputKeyValue = {};
-         
-    var  keysofObj = Object.keys(objectpayload.sensors)
-    //// console.log(keysofObj);
-    //console.log("This is of Data");
-    var  allBusinessName = Object.values(objectpayload.sensors[keysofObj[0]]);
-      for (let [key, value] of Object.entries(objectpayload.sensors[keysofObj[0]])) {  
-        configkeyInputKeyValue[value] = this.state.DefaulaManualOverride[value];
-        configkeyInputKeyValue[value+"toggle"] = (this.state.DefaulaManualOverride[value]["pendingMode"] == 0)? false : true;
-
-      }
-    this.setState({ selectedAtionType: selectedAtionType,selectedevent: selectedevent,
-       channelName: [],
-       configkeyInput:allBusinessName,configkeyInputKeyValue:configkeyInputKeyValue});
+     
+    axios.post("http://localhost:3992/getAManualOverride",{mac:this.state.CriteriaForOP.mac})
+    .then(json =>  {
+      var keys1 = Object.keys(json["data"]);
+      var obj={}
+      console.log("This is all json data for getmanualoverride");
+      console.log(json["data"])
+      let DefaulaManualOverride = json["data"]; 
+      var  keysofObj = Object.keys(objectpayload.sensors)
+      var  allBusinessName = Object.values(objectpayload.sensors[keysofObj[0]]);
+        for (let [key, value] of Object.entries(objectpayload.sensors[keysofObj[0]])) {  
+          configkeyInputKeyValue[value] = DefaulaManualOverride[value];
+          configkeyInputKeyValue[value+"toggle"] = (DefaulaManualOverride[value]["pendingMode"] == 0)? false : true;
+         if(DefaulaManualOverride[value]["pendingMode"] !== DefaulaManualOverride[value]["activeMode"]){
+          configkeyInputKeyValue[value+"confirmation"] = true;
+         }else{
+          configkeyInputKeyValue[value+"confirmation"] = false;
+         }
+      
+        }
+        configkeyInputKeyValue["submitflag"] = true;
+      this.setState({ selectedAtionType: selectedAtionType,selectedevent: selectedevent,
+         channelName: [],
+         configkeyInput:allBusinessName,configkeyInputKeyValue:configkeyInputKeyValue,
+         DefaulaManualOverride: DefaulaManualOverride, DefaulaCopyManualOverride: JSON.parse(JSON.stringify(json["data"]))});
+    })
+  
   }
     getStrucOfClimateParam(){
       var sensorsArray = this.state.deviceAllData["sensors"];
@@ -935,23 +1001,27 @@ callApiForManoverrideForTiles(){
        //alert(event)
        if(event === "manual"){
         for (var i = 0 ; i< configkeyInput.length; i++ ) {  
+          if(configkeyInputKeyValue[configkeyInput[i]+'confirmation'] === false){
+            configkeyInputKeyValue["submitflag"] = false;
           configkeyInputKeyValue[configkeyInput[i]]['pendingMode'] =  0;
           configkeyInputKeyValue[configkeyInput[i]+"toggle"] = false;
-
+          }
         }
         //alert("This is  configkeyInputKeyValue")
         //console.log("configkeyInput")
         //console.log(configkeyInput)
-        this.setState({configkeyInputKeyValue:configkeyInputKeyValue});
        }
        else{
         for (var i = 0 ; i< configkeyInput.length; i++ ) {  
+          if(configkeyInputKeyValue[configkeyInput[i]+'confirmation'] === false){
+            configkeyInputKeyValue["submitflag"] = false;
           configkeyInputKeyValue[configkeyInput[i]]["pendingMode"] =  1;
           configkeyInputKeyValue[configkeyInput[i]+"toggle"] = true;
-
+          }
         }
-        this.setState({configkeyInputKeyValue:configkeyInputKeyValue});
        }
+       this.setState({configkeyInputKeyValue:configkeyInputKeyValue});
+
        }
     toggle() {
         this.setState({
@@ -1052,7 +1122,6 @@ this.fetchForClimate();
 this.fetchClimateControlAllData();
 this.fetchClimateControlDevice();
 this.fetchClimateParameter();
-this.fetchFromManualOverride();
 this.callForlastAlert();
 this.callForlastPayload();
 var onDeviceinstruction = socketIOClient(endpoint+"/onDeviceinstruction");
@@ -1323,7 +1392,7 @@ onDeviceinstruction.on('DeviceInstruction',function(data) {
       var obj={}
       console.log("This is all json data for getmanualoverride");
       console.log(json["data"])
-     this.setState({DefaulaManualOverride: json["data"]})
+     this.setState({DefaulaManualOverride: json["data"], DefaulaCopyManualOverride: JSON.parse(JSON.stringify(json["data"]))})
     })
    }
    fetchForClimate(){
@@ -2110,36 +2179,60 @@ changePage(page){
     // console.log(configkeyInputKeyValue);
     // console.log("This I Want See");
   
-      inputField = <form className ="table-responsive" > 
+      inputField = <form className =" margintop table-responsive" > 
       <table className="">
         <thead>
         <tr>
-          <td></td>
-          <td> <button className="btn btn-default btn-xs " type="button" onClick={this.AllSelectionManual.bind(this,"manual")}>All Manual</button> </td>
-          <td></td>
-          <td><button className="btn btn-default btn-xs " type ="button" onClick={this.AllSelectionManual.bind(this,"automatic")}>All Automatic</button></td>
+          <th colspan="6" className="Acustmtd  headermanovr"><span className="PaddingandBorder">Name Of Channel </span></th>
+          <th> &nbsp;  &nbsp; &nbsp;  &nbsp;</th>
+          <th colspan="3" className="Acustmtd headermanovr"><span className="PaddingandBorder1">Channel Mode</span></th>
+          <th> &nbsp;  &nbsp; &nbsp;  &nbsp;</th>
+          <th  className="Acustmtd headermanovr"  ><span className="PaddingandBorder2">Channel Mode Confirmations   </span></th>
+       
         </tr>
         
         </thead>
         <tbody>
+        <tr>
+        <td colspan="6"></td>
+        <td > &nbsp; &nbsp; &nbsp;  &nbsp;</td>
+          <td> <button className="btn btn-default btn-xs " type="button" onClick={this.AllSelectionManual.bind(this,"manual")}>All Manual</button> </td>
+          <td></td>
+          <td><button className="btn btn-default btn-xs " type ="button" onClick={this.AllSelectionManual.bind(this,"automatic")}>All Automatic</button></td>
+          <td > &nbsp; &nbsp; &nbsp;  &nbsp;</td>        
+          <td></td>
+          </tr>
         {this.state.configkeyInput.map(item =>  <tr>
-            <td> <label className ="margincell">{item}</label></td>
+            <td colspan="6"> <label className ="margincell">{item}</label></td>
+            <td > &nbsp; &nbsp; &nbsp;  &nbsp;</td>    
             <td> <span  className={(configkeyInputKeyValue[item+"toggle"])?"maualclass Activefont": "maualclass NotActivefont" }> Manual</span></td>
+             
             <td><label className="switch magintd">
           <input type="checkbox" value = "Text" checked ={ configkeyInputKeyValue[item+"toggle"]}
+          disabled = {configkeyInputKeyValue[item+"confirmation"]}
            onChange={e =>{
+            configkeyInputKeyValue["submitflag"] = false;
             configkeyInputKeyValue[item+"toggle"] = !configkeyInputKeyValue[item+"toggle"]
             configkeyInputKeyValue[item]["pendingMode"] = (configkeyInputKeyValue[item+"toggle"] == true)? 1: 0 
              this.setState({configkeyInputKeyValue : configkeyInputKeyValue})}} />
           <span className="slider round"></span>
         </label> </td>
-            <td><span  className={  (configkeyInputKeyValue[item+"toggle"])?" automaticClas NotActivefont": "automaticClas  Activefont" }> Automatic</span></td>
+          
+            <td ><span  className={  (configkeyInputKeyValue[item+"toggle"])?" automaticClas NotActivefont": "automaticClas  Activefont" }> Automatic</span></td>
+            <td > &nbsp; &nbsp; &nbsp;  &nbsp;</td>     
+            <td className="center"><span  > {(configkeyInputKeyValue[item+"confirmation"])? "Pending": "Confirm"}</span></td>
           </tr>)}
         </tbody>
       </table>
        <div class="form-group"> 
-       <div class="col-sm-offset-2 col-sm-10">
-         <button type="button" class="btn btn-default" onClick = {this.SubmitFormanualOveride.bind(this)}>Submit</button>
+       <div class="col-lg-8 col-md-10 col-sm-12 col-xs-12 text-right">
+       <button type="button" class="btn btn-danger" 
+         onClick = {this.manualOverrideCancel.bind(this)}>Cancel</button>
+         &nbsp;&nbsp;&nbsp;&nbsp;
+         <button type="button" class="btn btn-default" 
+         disabled= { configkeyInputKeyValue["submitflag"]}
+         onClick = {this.SubmitFormanualOveride.bind(this)}>Submit</button>
+        
        </div>
         </div>
        </form>;
