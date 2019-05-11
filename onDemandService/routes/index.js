@@ -185,17 +185,21 @@ router.post("/authenticate", function (req, res, next) {
                   ActiveSensorsName: result1[0].ActiveSensorsName,
                   ActivesesnorsType: result1[0].ActivesesnorsType,
                   ConfADPayload: result1[0].ConfADPayload,
-                  Nevigation : result1[0].Nevigation
+                  Nevigation : result1[0].Nevigation,
+                  DeviceType: result1[0].deviceType
                  }
                   console.log(dashboardConfigobj); 
+                  gomos.gomosLog(TRACE_DEBUG,"This is result1[0].deviceType", result1[0].deviceType)
                  var  configData = {
                   DeviceName: result1[0].ActiveDeviceName,
                   mac:  result1[0].ActiveMac,
                   assetId: result1[0].ActiveAssets,
                   custCd: result1[0].ActiveCustCd,
                   spCd: result1[0].ActiveSpCd,
+                
                   subCustCd: result1[0].ActiveSubCustCd
                  }
+                 gomos.gomosLog(TRACE_DEBUG,"This is Config Data",configData )
                  db.collection("ClientMenuConfig")
                  .find({ clientID: clientID })
                  .toArray(function (err, clientData) {

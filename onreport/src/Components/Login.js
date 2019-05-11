@@ -66,6 +66,7 @@ import Spinner from '../layout/Spinner';
              if (response["data"] != 0) {
                 sessionStorage.setItem("userDetails", JSON.stringify(response["data"].userDtls));
                 sessionStorage.setItem("dashboardConfigobj", JSON.stringify(response["data"].dashboardConfigobj));
+                console.log(JSON.stringify(response["data"].configData))
                 sessionStorage.setItem("configData", JSON.stringify(response["data"].configData));
                 sessionStorage.setItem("ClientObj", JSON.stringify(response["data"].ClientObj));
                 me.setState({ 'Spinnerdata':true});

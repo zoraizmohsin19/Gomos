@@ -798,6 +798,7 @@ callApiForManoverrideForTiles(){
    let lineNoRemovedKeyArray = [...keysOfArray];
    lineNoRemovedKeyArray.splice(lineNoRemovedKeyArray.indexOf("schNo"),1);
    lineNoRemovedKeyArray.splice(lineNoRemovedKeyArray.indexOf("enabled"),1)
+   lineNoRemovedKeyArray.splice(lineNoRemovedKeyArray.indexOf("startAt"),1)
    for(let k = 0; k < ProgramDetailsListObj["schedules"].length; k++ ){
      for(let p =0 ; p < lineNoRemovedKeyArray.length; p++ ){
       if(ProgramDetailsListObj["schedules"][k][lineNoRemovedKeyArray[p]]== undefined || ProgramDetailsListObj["schedules"][k][lineNoRemovedKeyArray[p]]== null || ProgramDetailsListObj["schedules"][k][lineNoRemovedKeyArray[p]]== '' ){

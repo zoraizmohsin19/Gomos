@@ -98,6 +98,8 @@ componentDidMount(){
    me.state.body.mac                   =     mainData.mac;
    me.state.body.selectedDeviceName    =     mainData.DeviceName;
    me.state.body.selectedAssets        =     mainData.assetId;
+   console.log("Device type of View")
+   console.log( mainData.DeviceType)
    me.setState({body: me.state.body});
   //  var result1 = this.groupingDataArray();
   //  console.log(result1)
