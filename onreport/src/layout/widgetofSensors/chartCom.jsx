@@ -24,8 +24,12 @@ class Chartcom extends Component {
   //     }
   //     return color;
   //     }
+  getIdForChart(chartAxis, keysofBsName){
+   let index =  chartAxis.findIndex(item => item.businessName === keysofBsName);
+   return chartAxis[index].axisY
+  }
   render(){
-     const{type, arrData, arrLabels, legend, xAxisLbl, yAxisLbl,bgColors,borderColors } = this.props
+     const{chartAxis,arrData, arrLabels, legend, xAxisLbl, yAxisLbl,bgColors,borderColors } = this.props
     var   backgroundColor = [ 
          'rgba(255, 99, 132, 0.2)',
          'rgba(54, 162, 235, 0.2)',
@@ -67,15 +71,28 @@ class Chartcom extends Component {
     
        if( arrData != undefined && arrData.length != 0 && arrData != null){
         var axisY = ["first-y-axis", "first-y-axis", "second-y-axis"]
+        var labelName = [];
         var keysofBsName = Object.keys(arrData[0])
         // console.log(keysofBsName)
+         var  labelName1 = '';
+         var labelName2 = '';
+         
         for(var i = 0 ; i< keysofBsName.length; i++){
+          console.log(this.getIdForChart(chartAxis,keysofBsName[i]));
+      
+          if(this.getIdForChart(chartAxis,keysofBsName[i]) == "second-y-axis"){
+            labelName1 += keysofBsName[i] + " ; ";
+          }
+          else{
+            labelName2 += keysofBsName[i] + " ; ";
+          }
           var json = {};
           json["label"]  = keysofBsName[i];
           json["data"]  = [];
           // json["fill"]  = false;
           json["backgroundColor"]  =  backgroundColor[i];
-          json["yAxisID"] = (axisY[i])?axisY[i] : '';
+          //json["yAxisID"] = (axisY[i])?axisY[i] : '';
+           json["yAxisID"] = this.getIdForChart(chartAxis,keysofBsName[i])
           json["borderColor"]  =  borderColor[i];
           json["pointBorderWidth"]  = 3;
           // json["pointBorderColor"]  = this.getRandomBackgroundColor();
@@ -88,8 +105,7 @@ class Chartcom extends Component {
           dataArray.push(json)
         }
 // console.log(dataArray)
-
-var me = this;
+var me   = this;
 // console.log(me.state.body.myChart) 
   // console.log(type + "this name of chart");
 
@@ -152,7 +168,7 @@ var me = this;
              id: axisY[0],
              scaleLabel: {
                    display: true,
-                   labelString: axisY[0],
+                   labelString:labelName1.substring(0, labelName1.length - 2),
                    fontSize: 12,
                    fontColor: "red"
                  }
@@ -163,7 +179,7 @@ var me = this;
              id: axisY[axisY.length-1],
              scaleLabel: {
               display: true,
-              labelString: axisY[axisY.length-1],
+              labelString: labelName2.substring(0, labelName2.length - 2),
               fontSize: 12,
               fontColor: "red"
             },

@@ -39,6 +39,8 @@ constructor(){
     Sensors: [],
     selectedSensorsType1: '',
     mac: '',
+    deviceType: "",
+    deviceTypeObj: {},
     selectedAssets: '',
     excelresult: [],
     lastupdatedData:[],
@@ -89,9 +91,19 @@ handler(selectedSensorsType1,selectedSensorsName){
    this.setState({body : me.state.body}); 
    this.fetchdata();
 }
+chartsIdbyDeviceType(deviceType){
+  let tempData = JSON.parse(sessionStorage.getItem("ClientObj"));
+  let obj = tempData.ViewDashBord.deviceTypes[deviceType].map(item  =>    { return {"businessName" : item.businessName , "axisY" : item.axisY} })
+  console.log("This Device type ")
+  console.log(obj)
+  return obj;
+}
 componentDidMount(){
   var me = this;
-  var mainData = JSON.parse(sessionStorage.getItem("configData"));
+  let mainData = JSON.parse(sessionStorage.getItem("configData"));
+  let tempData = JSON.parse(sessionStorage.getItem("dashboardConfigobj"));
+   me.state.body.deviceType            =     tempData.DeviceType;
+   me.state.body.deviceTypeObj         =     this.chartsIdbyDeviceType(tempData.DeviceType);
    me.state.body.selectedSPValue       =     mainData.spCd;
    me.state.body.selectedCustValue     =     mainData.custCd;
    me.state.body.selectedSubCustValue  =     mainData.subCustCd;
@@ -104,6 +116,7 @@ componentDidMount(){
   //  var result1 = this.groupingDataArray();
   //  console.log(result1)
   this.startFunction()
+
   }
    
   startFunction(){
@@ -129,7 +142,11 @@ componentDidMount(){
       // console.log("This is device Identifier");
       // console.log(json);
       me.state.body.DeviceIdentifierForSensors = json["data"].sensors;
-      var groupedData = this.groupingDataArray(json["data"].sensors)
+      let tempArray = (json["data"].sensors).concat(json["data"].channel)
+  
+      console.log("This is TempArray Data ")
+      console.log(tempArray);
+      var groupedData = this.groupingDataArray(tempArray)
       me.state.body.sensorsGroups = groupedData
       me.state.body.selectedGroups = groupedData[0]
       me.state.body.selectedGroupsitem = groupedData[0].group
@@ -216,8 +233,8 @@ DisplayChart(result, valueSensoor ){
       me.state.body.Spinnerdata = true;
       me.setState({ body: me.state.body})
       let json1 =[];
-       // console.log("this is Source of data ");
-       // console.log(json["data"]);
+       console.log("this is Source of data ");
+       console.log(json["data"]);
      json1 = json["data"]["finalResult"]
       if(json1 !== 0){
         for (var i = 0; i < json1.length ; i++) {
@@ -316,8 +333,8 @@ callToSocket(){
   var arrayofbgClass = dashboardData.SensorsBgC;
   socket.emit('lastUpdatedValue',body);  
   socket.on("onViewDashboard", data =>{
-    //console.log("This is socket ");
-    // console.log(data.sensors);
+    console.log("This is socket ");
+    console.log(data.sensors);
   var dataofSensors = [];
   if( me.state.body.selectedGroups.devicebusinessNM !== undefined &&  me.state.body.selectedGroups.devicebusinessNM != null &&  me.state.body.selectedGroups.devicebusinessNM.length !== 0){
 
@@ -325,7 +342,7 @@ callToSocket(){
   for(let i =0; i < me.state.body.selectedGroups.devicebusinessNM.length; i++ ){
     dataofSensors.push(data.sensors.filter( item => item.devicebusinessNM === me.state.body.selectedGroups.devicebusinessNM[i])[0])
   }
-  // // console.log(dataofSensors)
+  // console.log(dataofSensors)
 // console.log(this.state.body.selectedGroups);
 me.state.body.selectedSensorsType1 = dataofSensors[0].type;
 me.state.body.selectedSensorsName = dataofSensors[0].devicebusinessNM;
@@ -461,7 +478,7 @@ return color;
 }
 
   render() {
-    const {arrData, arrLabels, yaxisName,lastAlertData, fromDate ,toDate ,bgColors,selectedSensorsType1, borderColors,DataArray,in_prog,
+    const {arrData,deviceTypeObj, arrLabels, yaxisName,lastAlertData, fromDate ,toDate ,bgColors,selectedSensorsType1, borderColors,DataArray,in_prog,
       selectedSPValue, selectedCustValue,selectedSubCustValue, selectedAssets,selectedDeviceName,selectedSensorsName
     }= this.state.body;
     var state   =   this.state.body;
@@ -562,7 +579,7 @@ return color;
             <div className ="container">
            
                    <div className="col-lg-10 col-md-10 col-sm-5 col-xs-9">
-                   <button className="btn btn-xs btn-secondary chartbtn" onClick={()=>{
+                   <button title= "Download Report In Excel Formate" className="btn btn-xs btn-secondary chartbtn" onClick={()=>{
                       this.props.history.push("/menu")}
                    }><i class="far fa-file-excel"></i></button>
                    </div>
@@ -580,10 +597,15 @@ return color;
             </div>
             <div className="container">
             <div className= "col-sm-12 col-lg-12 col-xs-12 col-md-12">
+            <div className='align-right'>
+{ total_page > 1 && <CPagination  page={state.page} totalpages={total_page} onPageChange={this.changePage}/>}
+        </div>
             <div className="chart-container" >
+            
         <Chartcom 
         type="line"
         arrData ={arrData}
+        chartAxis = {deviceTypeObj}
         arrLabels= {arrLabels}
         legend= {yaxisName}
         xAxisLbl = "Date and Time"

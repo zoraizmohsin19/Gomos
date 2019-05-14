@@ -253,7 +253,10 @@ background: #00C0EF !important;
     margin-bottom: 15px;
 }
 .chartbtn {
-    font-size: 16px !important;
+    font-size: 26px !important;
     padding-left: 8px;
     padding-right: 8px;
+    color: darkgreen;
+    padding-bottom: 37px !important;
+    padding-top: 1px !important;
 }

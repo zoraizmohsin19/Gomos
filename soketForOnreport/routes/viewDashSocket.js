@@ -59,11 +59,12 @@ var urlConn, dbName, dbo;
         }
       }
     var json = {}
+    var sensorsArray= [];
     for(var k =0; k < deviceStateKey.length; k++){
       var name = deviceStateKey[k]
       var keyofCode = Object.keys(result[0][deviceStateKey[k]]);
      gomos.gomosLog(TRACE_DEBUG,"This is SensorsKey",keyofCode);
-    var sensorsArray= [];
+    // var sensorsArray= [];
     for(var i = 0; i< keyofCode.length; i++){
       var ActiveIdentifier = {};
      var devicebusinessNM = Object.keys(result[0][deviceStateKey[k]][keyofCode[i]]);
@@ -82,8 +83,10 @@ var urlConn, dbName, dbo;
          ActiveIdentifier["dateTime"] =  result[0][deviceStateKey[k]][keyofCode[i]]["dateTime"];
          sensorsArray.push(ActiveIdentifier);
     }
-    json[name] = sensorsArray;
+  //  json[name] = sensorsArray;
+  json["sensors"]  = sensorsArray;
   }
+  gomos.gomosLog(TRACE_DEBUG, "This is View Dashboard event Log for state of channel and Sensors", json)
   socket.emit("onViewDashboard", json)
 }
 );       

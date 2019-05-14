@@ -209,7 +209,8 @@ router.post("/authenticate", function (req, res, next) {
 
                   gomos.gomosLog(TRACE_DEV,"This is clientID ",clientData);
                   var ClientObj = {
-                    OperatingForms : clientData[0].activeDashBoard.OperatingForms
+                    OperatingForms : clientData[0].activeDashBoard.OperatingForms,
+                    ViewDashBord : clientData[0].viewDashBoard,
                   }
                   gomos.gomosLog(TRACE_DEV,"This is ClientObj",ClientObj)
                 res.json({userDtls, dashboardConfigobj, configData,ClientObj});
@@ -2312,25 +2313,27 @@ gomos.gomosLog(TRACE_DEBUG,"this is debuging in starting",sensorsBSN+"|"+mac+"|"
             result4 = []
             var finalResult =[];
             //copy all data from the copy of result to remove json with in json.
-            for (var i = 0; i < resultCopy.length; i++) {
+            for (let i = 0; i < resultCopy.length; i++) {
               var sensorNmKeys = Object.keys(resultCopy[i]["sensors"]);
               gomos.gomosLog(TRACE_DEBUG,"this is debuging for resultCopy",i);
-              gomos.gomosLog(TRACE_DEBUG,"this is debuging for sensorNmKeys",sensorNmKeys[i]);
-                if (sensorNmKeys.includes(sensorNm)){
-              gomos.gomosLog(TRACE_DEBUG,"this is debuging for sensorNm pass Condition",sensorNm);
-                  var sensorsBSNkeys = Object.keys(resultCopy[i]["sensors"][sensorNm]);
-              gomos.gomosLog(TRACE_DEBUG,"this is debuging for sensorNm pass Condition sensorsBSNkeys",sensorsBSNkeys);
-                      if(sensorsBSNkeys.includes(sensorsBSN) ){
-                       gomos.gomosLog(TRACE_DEBUG,"this is debuging for  sensorsBSN pass",sensorsBSN);
-                       gomos.gomosLog(TRACE_DEBUG,"this criteria after checking ", resultCopy[i].mac,resultCopy[i].DeviceName, 
-                        resultCopy[i]["sensors"][sensorNm][sensorsBSN], resultCopy[i].createdTime);
+              gomos.gomosLog(TRACE_DEBUG,"this is debuging for sensorNmKeys",sensorNmKeys);
+                // if (sensorNmKeys.includes(sensorNm)){
+                  let  tempArray = {}
+                  for(let j = 0 ;  j< sensorNmKeys.length; j++){
+                    gomos.gomosLog(TRACE_DEBUG,"This is Debug For sensorNmKeys[j]",sensorNmKeys[j]);
+                    gomos.gomosLog(TRACE_DEBUG,"this is debuging for resultCopy[i][sensors][sensorNmKeys[j]]",resultCopy[i]["sensors"][sensorNmKeys[j]]);
+            
+                    for (let [key, value] of Object.entries(resultCopy[i]["sensors"][sensorNmKeys[j]])){
+                      tempArray[key] = value;
+                     
+                    }
+                  
+                    }
                   finalResult.push([resultCopy[i].mac,resultCopy[i].DeviceName,sensorsBSN, 
-                    resultCopy[i]["sensors"][sensorNm], resultCopy[i].createdTime]);
-
-                      }
-                }
+                    tempArray, resultCopy[i].createdTime]);
+                  
             }
-           
+
            db.collection("MsgFacts").find(criteria,{ limit: 1 } ).sort({ createdTime : -1 }).toArray(function (err, result2) {
             if (err) {
               process.hasUncaughtExceptionCaptureCallback();

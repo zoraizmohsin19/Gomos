@@ -705,7 +705,7 @@ callApiForManoverrideForTiles(){
 
     //  }
     ProgramDetailsListObj["schedules"] = []
-    ProgramDetailsListObj["schedules"].push({"schNo": 0, "channel": "","endTimeProgramListItem":new Date(), "startAt":0 ,"duration": 0,"enabled": false })
+    ProgramDetailsListObj["schedules"].push({"schNo": 0, "channel": "","endTimeProgramListItem":'', "startAt":0 ,"duration": 0,"enabled": false })
     
        // alert(arrayOfProg)
        me.setState({ selectedAtionType: selectedAtionType,selectedevent: selectedevent,programForIndex:0,
@@ -949,7 +949,7 @@ callApiForManoverrideForTiles(){
   manualOverrideProcess(objectpayload,selectedAtionType,selectedevent){
     const {DefaulaManualOverride} = this.state;
     var configkeyInputKeyValue = {};
-     
+   
     axios.post("http://localhost:3992/getAManualOverride",{mac:this.state.CriteriaForOP.mac})
     .then(json =>  {
       var keys1 = Object.keys(json["data"]);
@@ -2001,6 +2001,7 @@ changePage(page){
    
     </div>
     </div>
+    <div className="row" >
     { !ProgramDetailsListObj.isEmpty() && Object.keys(ProgramDetailsListObj).length !== 0 && <div className="col-lg-12 col-sm-12 col-xs-12">
     <p className="smalLine"></p>
     <div className= "col-lg-12 col-md-12 col-sm-12 col-xs-12">
@@ -2068,8 +2069,8 @@ changePage(page){
        </div> */}
        <div classname="col-lg-2 col-md-2 col-sm-6 co-xs-12">
         <label className="ProgramLabel">End Time :</label>
-       <span>{moment(new Date(Math.max.apply(null,ProgramDetailsListObj["schedules"].map(item => item.endTimeProgramListItem)))).format("HH:mm")}
-       </span>
+       {!ProgramDetailsListObj["schedules"].isEmpty() && <span>{(ProgramDetailsListObj["schedules"][0].endTimeProgramListItem !== '')?moment(new Date(Math.max.apply(null,ProgramDetailsListObj["schedules"].map(item => item.endTimeProgramListItem)))).format("HH:mm"): ""}
+       </span>}
        </div>
      
 
@@ -2097,6 +2098,7 @@ changePage(page){
                   { !ProgramDetailsListObj.isEmpty() && Object.keys(ProgramDetailsListObj).length !==undefined && Object.keys(ProgramDetailsListObj).length !==0 &&   ProgramDetailsListObj["schedules"].map((item , index)=>   <tr>
                     <td className='text-center '>{index + 1}</td>
                     <td className='text-center '>
+                    <div className="tableDropDown">
                     <DropdownButton 
                         disabled = {(ProgramDetailsListObj["viewFlag"])?true: null}                       
                      className = "" 
@@ -2110,6 +2112,7 @@ changePage(page){
                       
                         )}
                      </DropdownButton>
+                     </div>
                      </td>
                     <td className='text-center '><input 
                         disabled = {(ProgramDetailsListObj["viewFlag"])?true: null}                       
@@ -2173,6 +2176,7 @@ changePage(page){
       className="btn btn-xm btn-default" onClick = {this.AddRowFrProgSubmit.bind(this)}>Submit</button>
     </div>}
     </div>}
+    </div>
     </div>;
 
   }
@@ -2464,7 +2468,7 @@ inputField =
      </div>;
   }
   if(formStructure == "ActiveCommand"){
-    inputField =   <div className ="col-lg-9 col-md-12 col-sm-12 col-xs-12">
+    inputField =  <div className="row"> <div className ="col-lg-9 col-md-12 col-sm-12 col-xs-12">
     <div className= "Activefilterdiv">
     <select onChange={this.selectedChF.bind(this)}  className="form-control ActiveSelection">
     {this.state.channelForfilter.map(item => 
@@ -2509,6 +2513,7 @@ inputField =
            }
                </tbody> 
                </Table>
+       </div> 
        </div> 
    </div>;
     }
