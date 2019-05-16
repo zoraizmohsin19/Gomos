@@ -296,7 +296,8 @@ textarea.ActivetestArea {
     display: inline-block;
 }
 .paddForm {
-    margin: 15px;
+    margin-bottom: 15px;
+    margin-top: 15px;
 }
 .SensorsOuter {
     width: max-content;
@@ -605,3 +606,49 @@ td.Acustmtd {
 /* .tableDropDown {
     position: absolute;
 } */
+.DisplayBloakInMobile {
+    display: inline;
+}
+@media (max-width : 768px){
+    .wefDef {
+      
+        display: block;
+    }
+    .inputforProgramWef {
+        width:100% !important;
+        margin-top: 0px;
+        margin-left: 10px;
+    }
+    .CusttableProgram {
+       
+        overflow-y: auto;
+    }
+    .Acustmfloat {
+        float: none;
+         margin-right: none;
+       
+    }
+    .pagerActive {
+      
+        text-align: center;
+        list-style: none;
+        display: -webkit-inline-box;
+        border: 1px solid #ddd;
+        padding-left: 5px;
+        padding-top: 2px;
+        padding-bottom: 2px;
+        border-radius: 20px;
+        padding-right: 5px;
+        margin-left: 0px;
+        font-size: 11px;
+        float: right;
+    }
+    .paddForm {
+        margin-left: -15px;
+        margin-right: -15px;
+    
+    }
+    .DisplayBloakInMobile {
+        display: flex;
+    }
+  }

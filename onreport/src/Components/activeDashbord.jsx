@@ -673,6 +673,7 @@ callApiForManoverrideForTiles(){
        progaramObj["startTime"] = moment(json["data"][j]["sourceMsg"]["body"]["startTime"]).format("HH:mm");
        progaramObj["startTimeselected"] = moment(json["data"][j]["sourceMsg"]["body"]["startTime"]);
        progaramObj["wef"] = moment(json["data"][j]["sourceMsg"]["body"]["wef"]).format("DD/MM/YYYY");
+       progaramObj["expiryDate"] = moment(json["data"][j]["sourceMsg"]["body"]["expiryDate"]).format("DD/MM/YYYY");
        progaramObj["wefselected"] = moment(json["data"][j]["sourceMsg"]["body"]["wef"]);
        progaramObj["schedules"] = []
        progaramObj["nameFlag"] = true;
@@ -692,6 +693,7 @@ callApiForManoverrideForTiles(){
        ProgramDetailsListObj["version"] =  1; 
        ProgramDetailsListObj["startTime"] =  ''; 
        ProgramDetailsListObj["wef"] =  ''; 
+       ProgramDetailsListObj["expiryDate"] =  ''; 
        ProgramDetailsListObj["nameselected"] =  '';
        ProgramDetailsListObj["versionselected"] = 1; 
        ProgramDetailsListObj["startTimeselected"] =  ''; 
@@ -705,7 +707,7 @@ callApiForManoverrideForTiles(){
 
     //  }
     ProgramDetailsListObj["schedules"] = []
-    ProgramDetailsListObj["schedules"].push({"schNo": 0, "channel": "","endTimeProgramListItem":'', "startAt":0 ,"duration": 0,"enabled": false })
+    ProgramDetailsListObj["schedules"].push({"schNo": 0, "channel": "","endTimeProgramListItem":'', "startAt":0 ,"duration": 0,"enabled": true })
     
        // alert(arrayOfProg)
        me.setState({ selectedAtionType: selectedAtionType,selectedevent: selectedevent,programForIndex:0,
@@ -899,21 +901,10 @@ callApiForManoverrideForTiles(){
     AddRowFrProglist(){
       const {programForIndex,configkeyInputKeyValue,ProgramDetailsListObj} = this.state
      var index =  ProgramDetailsListObj["schedules"].length;
-     ProgramDetailsListObj["schedules"].push({"schNo": index++, "channel": "","endTimeProgramListItem": ProgramDetailsListObj["startTimeselected"], "startAt":0 ,"duration": 0,"enabled":false })
+     ProgramDetailsListObj["schedules"].push({"schNo": index++, "channel": "","endTimeProgramListItem": ProgramDetailsListObj["startTimeselected"], "startAt":0 ,"duration": 0,"enabled":true })
       this.setState({ ProgramDetailsListObj: ProgramDetailsListObj})
     }
-    RemoveRowfProg(){
-      var me  = this;
-     
-      const {programForIndex,configkeyInputKeyValue} = this.state
-      // // alert(programForIndex)
-     if(configkeyInputKeyValue["ArrayOfProg"][programForIndex].version == 0 ){
-      configkeyInputKeyValue["ArrayOfProg"].splice(programForIndex,1);
-    
-     } 
-     me.setState({ configkeyInputKeyValue: configkeyInputKeyValue, programForIndex: configkeyInputKeyValue["ArrayOfProg"].length - 1})
-      
-    }
+
     AddRowFrProg(){
       const {configkeyInput,configkeyInputKeyValue,ProgramDetailsListObj} = this.state
   
@@ -937,7 +928,7 @@ callApiForManoverrideForTiles(){
        
     //  }
     ProgramDetailsListObj["schedules"] = []
-    ProgramDetailsListObj["schedules"].push({"schNo": 0, "channel": "","endTimeProgramListItem": ProgramDetailsListObj["startTimeselected"], "startAt":0 ,"duration": 0,"enabled": false })
+    ProgramDetailsListObj["schedules"].push({"schNo": 0, "channel": "","endTimeProgramListItem": ProgramDetailsListObj["startTimeselected"], "startAt":0 ,"duration": 0,"enabled": true })
     //  arrayOfProg.push(progaramObj)
     // ProgramDetailsListObj = programObj;
      // console.log(ProgramDetailsListObj, )
@@ -2002,7 +1993,7 @@ changePage(page){
     </div>
     </div>
     <div className="row" >
-    { !ProgramDetailsListObj.isEmpty() && Object.keys(ProgramDetailsListObj).length !== 0 && <div className="col-lg-12 col-sm-12 col-xs-12">
+    { !ProgramDetailsListObj.isEmpty() && Object.keys(ProgramDetailsListObj).length !== 0 && <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12">
     <p className="smalLine"></p>
     <div className= "col-lg-12 col-md-12 col-sm-12 col-xs-12">
     { !ProgramDetailsListObj.isEmpty() && Object.keys(ProgramDetailsListObj).length !== 0 && <div className="row">
@@ -2079,7 +2070,7 @@ changePage(page){
    
     <div className= "col-lg-12 col-sm-12 col-xs-12 col-md-12">
     <p className ="ActiveP"> Program</p>
-          <div  className="table-responsive">
+          <div  className="table-responsive CusttableProgram">
           <Table  className="table table-hover table-sm table-bordered ">
                   <thead className='' style={{background: "gainsboro"}}>
                   <tr>
@@ -2167,7 +2158,7 @@ changePage(page){
                         disabled = {(ProgramDetailsListObj["viewFlag"])?true: null}                                           
                          
     
-    className="btn btn-xm btn-danger"  onClick = {this.RemoveRowfProg.bind(this)}>Cancel
+    className="btn btn-xm btn-danger"  onClick = {this.AddRowFrProg.bind(this)}>Cancel
     </button>
     &nbsp; &nbsp;
       <button 
@@ -2479,11 +2470,13 @@ inputField =
         <option className="selectcolor"value="-1" >descending</option>
       </select>
       <button type= "button" className= "ActivFilterBtn btn btn-sm " onClick= {this.filtermethod.bind(this)}>filter</button>
+     <div className=" DisplayBloakInMobile">
       <ul class="pagerActive">
        <li><a  onClick= {this.nevigation.bind(this,-4)}>Prev</a></li>
        <li className='ActiveList'>4 hrs</li>
        <li><a  onClick= {this.nevigation.bind(this,4)}>Next</a></li>
        </ul>
+       </div>
     </div>
    <p className ="ActiveP">Active Command 
    <span className= "Acustmfloat"> {dateFormat(this.state.startDate, "HH:MM dd-mmm")+" / "+ dateFormat(this.state.endDate, "HH:MM dd-mmm")}</span></p>

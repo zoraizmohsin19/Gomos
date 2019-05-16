@@ -17,7 +17,7 @@ constructor(){
   super();
   this.state={
   body: {
-    endpoint: "http://localhost:4001",
+    endpoint: "http://34.244.151.117:4001",
     socket1: {},
     arrData: [],
     arrLabels:[],
@@ -137,7 +137,7 @@ componentDidMount(){
   }
   callDeviceIdentifier(){
     var me = this;
-    axios.post("http://localhost:3992/getDevicesIdentifier",{mac: this.state.body.mac})
+    axios.post("http://34.244.151.117:3992/getDevicesIdentifier",{mac: this.state.body.mac})
     .then(json =>  {
       // console.log("This is device Identifier");
       // console.log(json);
@@ -228,7 +228,7 @@ DisplayChart(result, valueSensoor ){
     me.setState({body: me.state.body});
     var FdataArray =[];
     var dataArray =[];
-    axios.post("http://localhost:3992/getdashboard",body)
+    axios.post("http://34.244.151.117:3992/getdashboard",body)
     .then(json =>  {
       me.state.body.Spinnerdata = true;
       me.setState({ body: me.state.body})
@@ -425,7 +425,7 @@ callForlastAlert(custCd,subCustCd, mac){
   var me = this;
   const {endpoint } = this.state.body;
  var body = {custCd,subCustCd,mac}
-  // axios.post("http://localhost:3992/getdashbordlastalert", body)
+  // axios.post("http://34.244.151.117:3992/getdashbordlastalert", body)
   // .then(json =>  {
     var lastError = socketIOClient(endpoint+"/ActivelastError");
     lastError.emit('lastErrorClientEmit',body );
