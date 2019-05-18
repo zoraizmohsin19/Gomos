@@ -1029,15 +1029,7 @@ var mac = body.mac;
         console.log(change);
         gomos.gomosLog(TRACE_DEV,"This is Our Data ",change)
         res.json(change);
-      });
-
-         
-     
-    
-
-      
-        
-       
+      });  
     
     }
   );
@@ -1237,6 +1229,7 @@ router.post("/ActiveJobs", function (req, res, next) {
       var body = req.body;
       var startDate = body.startDate;
       // var startDate = "2019-02-13T08:13:28.393Z";
+    
       var endDate = body.endDate;
       var mac = body.mac;
       var criteria = {
@@ -1248,6 +1241,7 @@ router.post("/ActiveJobs", function (req, res, next) {
           $gte: new Date(startDate),
           $lte: new Date(endDate)  
       }}];
+      gomos.gomosLog(TRACE_DEV,"This is start and end time of Active jobs", startDate + endDate);
       gomos.gomosLog(TRACE_DEBUG,"This is debug of ActiveJobs",criteria );
       var db = connection.db(dbName);
       db.collection("DeviceInstruction").find(criteria).toArray(function (err, result) {
@@ -1267,6 +1261,7 @@ router.post("/ActiveJobs", function (req, res, next) {
                   temObj["Channel"] =result[i].sourceMsg.body.Channel;
                   temObj["isDailyJob"] = result[i].sourceMsg.isDailyJob;
                   temObj["jobKey"] = result[i].sourceMsg.body.jobKey;
+                  temObj["State"] = result[i].sourceMsg.body.State;
                   temObj["ActionType"] = result[i].sourceMsg.body.ActionType;
                   if(result[i].sourceMsg.isDailyJob == true){
                     gomos.gomosLog(TRACE_DEBUG,"This is Debug of result[i].sourceMsg.body.ActionValues",result[i].sourceMsg.body.ActionValues)
@@ -1375,7 +1370,7 @@ function compareDate(str1){
    yr1 = dataTime.getFullYear();
    mon1 = dataTime.getMonth();
    dt1 = dataTime.getDate();
-  var date1 = new Date(yr1, mon1, dt1,arraydate[2], arraydate[1], arraydate[0]);
+  var date1 = new Date(yr1, mon1, dt1,arraydate[3], arraydate[4], arraydate[5]);
   gomos.gomosLog(TRACE_DEBUG,"this Date Object if part",date1);
 
   }else{
@@ -1700,17 +1695,18 @@ MongoClient.connect(
       //   if (err) {
       // gomos.gomosLog(TRACE_DEBUG,"this err",err);  
       //   }
-
+ 
         db.collection("DeviceInstruction")
         .aggregate([{$match: {"mac":mac,"type": "ProgramDetails"}},{ $group : { _id: "$sourceMsg.body.name", version: { $max : "$sourceMsg.body.version" }}}]).toArray(function (err, result){
           if (err) {
             gomos.gomosLog(TRACE_DEBUG,"this err",err);  
               }   
               let data = result.map(item => `${item._id}-${item.version}`)
+              let currentDate = new Date(new Date().toISOString());
               gomos.gomosLog(TRACE_DEBUG,"This is result of find",data)                
                db.collection("DeviceInstruction")
-              .find( {"mac":mac,"type": "ProgramDetails","sourceMsg.body.programKey": {$in: data},
-              $or: [ {"sourceMsg.body.currentState":{$ne :"deleted"}}, {"sourceMsg.body.pendingConfirmation": {$ne:false}} ]
+              .find( {"mac":mac,"type": "ProgramDetails","sourceMsg.body.programKey": {$in: data} ,
+              $or: [ {"sourceMsg.body.currentState":{$ne :"delete"}}, {"sourceMsg.body.pendingConfirmation": {$ne:false}}, {"sourceMsg.body.expiryDate": {$gte: currentDate}} ]
             
             }).toArray(function (err, result1) {
                 if (err) {

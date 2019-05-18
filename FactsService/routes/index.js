@@ -590,6 +590,7 @@ gomos.gomosLog(TRACE_DEBUG,"This is Value Of Status From Device",status);
                 Channel:result[0]["sourceMsg"]["body"]["Channel"],
                 ActionType: result[0]["sourceMsg"]["body"]["ActionType"],
                 jobKey : result[0]["sourceMsg"]["body"]["jobKey"],
+                State : result[0]["sourceMsg"]["body"]["State"],
                 ActionValues : result[0]["sourceMsg"]["body"]["ActionValues"],
                 ActionTime :compareDate(sourceMsgObj.executionDate)
               },
@@ -739,7 +740,7 @@ async function  setProgramErrorProcess(dbo, dataInsruction){
               gomos.errorCustmHandler( NAMEOFSERVICE,"delted For ProgrameDetails Override","This is Updateting Error","", err);
               process.hasUncaughtExceptionCaptureCallback();
             }
-            gomos.gomosLog(TRACE_DEBUG, "deleted For ProgrameDetails Override  in setProgramErrorProcess");
+            gomos.gomosLog(TRACE_DEBUG, " For ProgrameDetails Override  in setProgramErrorProcess");
           }
         );
       }
@@ -773,8 +774,9 @@ function updateDeviceInstruction(dbo, dataToInsert, Token) {
             await manualOverrideProcess(dbo, result[0]);
           }
           if (payloadObject.formStructure == "ProgramDetails") {
-            gomos.gomosLog(TRACE_DEBUG,"This is setProgrameProcess condtion True")
-            await setProgramProcess(dbo, result[0]);
+            gomos.gomosLog(TRACE_DEBUG, "This is setProgrameProcess condtion True")
+            let response = await setProgramProcess(dbo, result[0]);
+            gomos.gomosLog(TRACE_DEV, "This is response SetProgram Process", response);
           }
           if (payloadObject.processByActiveJobs == "N") {
             gomos.gomosLog(TRACE_DEV,"This is processByActiveJobs false ",payloadObject.processByActiveJobs);
@@ -808,6 +810,7 @@ function updateDeviceInstruction(dbo, dataToInsert, Token) {
 }
 
 async function setProgramProcess(dbo, dataInsruction) {
+  return new Promise((resolve, reject) => {
   gomos.gomosLog( TRACE_DEBUG,"This Call ProgrameDetails data");
 
   dbo
@@ -820,17 +823,12 @@ async function setProgramProcess(dbo, dataInsruction) {
     .toArray(function(err, result) {
       if (err) {
         process.hasUncaughtExceptionCaptureCallback();
+        reject(err)
       }
       if (result.length != 0) {
         gomos.gomosLog( TRACE_DEBUG,"This ProgrameDetails data",result);
         gomos.gomosLog( TRACE_DEBUG, "This ProgrameDetails dataInsruction.sourceMsg.body Splite data ito part",dataInsruction.sourceMsg.body);
-        // var keyOfmode = Object.keys(dataInsruction.sourceMsg.body);
-        // var keyOfResult = Object.keys(result[0].sourceMsg.body);
-        // for (let i = 0; i < keyOfmode.length; i++) {
-        //   if (keyOfResult.includes(keyOfmode[i])) {
-            // result[0].sourceMsg.body["pendingConfirmation"] = false;
-          // }
-        // }
+    
         gomos.gomosLog(TRACE_DEBUG,"This is ProgrameDetails after asing",result[0].sourceMsg.body);
         gomos.gomosLog(TRACE_DEBUG,"This is ProgrameDetails after asing result",result);
         dbo.collection("DeviceInstruction").updateOne(
@@ -841,16 +839,71 @@ async function setProgramProcess(dbo, dataInsruction) {
               updatedTime: new Date(new Date().toISOString())
             }
           },
-          function(err, result) {
+         async function(err, result) {
             if (err) {
+              reject(err)
               gomos.errorCustmHandler( NAMEOFSERVICE,"update For ProgrameDetails Override","This is Updateting Error","", err);
               process.hasUncaughtExceptionCaptureCallback();
             }
-            gomos.gomosLog(TRACE_DEBUG, "update For ProgrameDetails Override ");
+            var response2 = {}; 
+            if(dataInsruction.sourceMsg.ActionType == "SetProgramState" && dataInsruction.sourceMsg.body.state == "delete"){
+              response2 =  await deleteActiveJob(dbo, dataInsruction);
+            }
+            else if(dataInsruction.sourceMsg.ActionType == "SetProgramState" && dataInsruction.sourceMsg.body.state != "" ) {
+              response2 =  await updateActiveJobState(dbo, dataInsruction);
+            }
+            else {
+              response2 =   await  updateProgramDetailsForExpiryDate(dbo, dataInsruction);
+            gomos.gomosLog(TRACE_DEV,"This is DEBUG OF RESponse updateActiveJForExpiryJob", response2);
+            gomos.gomosLog(TRACE_DEV, "update For ProgrameDetails Override ");
+         
+            }
+            resolve(response2)
           }
         );
       }
     });
+  });
+}
+function updateActiveJobState(dbo, dataInsruction) {
+  return new Promise((resolve, reject) => {
+    let currentTime = new Date(new Date().toISOString());
+    dbo.collection("DeviceInstruction").updateMany(
+      { mac: dataInsruction.mac, type: "ActiveJob", "sourceMsg.body.jobKey": { "$regex": `${dataInsruction.sourceMsg.body.name}-${dataInsruction.sourceMsg.body.version}` } },
+      {$set: {
+        "sourceMsg.body.State":dataInsruction.sourceMsg.body.state, 
+        updatedTime: currentTime
+      }},
+      function (err, res) {
+        if (err) {
+          gomos.errorCustmHandler(NAMEOFSERVICE, "deleteActiveJob", "This is Updateting Error", "", err);
+          reject(err);
+          process.hasUncaughtExceptionCaptureCallback();
+        }
+        gomos.gomosLog(TRACE_DEBUG, "updateActiveJobState ", res.result);
+        resolve({"updatedItem":  res.result.n})
+      }
+    );
+  }
+  );
+}
+function deleteActiveJob(dbo, dataInsruction) {
+  return new Promise((resolve, reject) => {
+    dbo.collection("DeviceInstruction").deleteMany(
+      { mac: dataInsruction.mac, type: "ActiveJob", "sourceMsg.body.jobKey": { "$regex": `${dataInsruction.sourceMsg.body.name}-${dataInsruction.sourceMsg.body.version}` } }
+      ,
+      function (err, res) {
+        if (err) {
+          gomos.errorCustmHandler(NAMEOFSERVICE, "deleteActiveJob", "This is Updateting Error", "", err);
+          reject(err)
+          process.hasUncaughtExceptionCaptureCallback();
+        }
+        gomos.gomosLog(TRACE_DEBUG, "deleteActiveJob ", res.result.n);
+        resolve({"deleteItem":  res.result.n})
+      }
+    );
+  }
+  );
 }
 async function manualOverrideProcess(dbo, dataInsruction) {
   dbo
@@ -937,7 +990,7 @@ function getConfigchannelNameToValue(mac,ArraConfigName,ConfigPayloadMsg){
 }
   }
 
-function insertActivejob(dbo, dataInsruction, dataToInsert,payloadObject) {
+async function insertActivejob(dbo, dataInsruction, dataToInsert,payloadObject) {
   gomos.gomosLog(TRACE_DEBUG, "this is need For Insert", dataInsruction);
   gomos.gomosLog(TRACE_DEBUG, "this is need For Insert", dataToInsert);
   if (payloadObject.formStructure == "ProgramDetails") {
@@ -947,6 +1000,8 @@ function insertActivejob(dbo, dataInsruction, dataToInsert,payloadObject) {
     var startTime = dataInsruction.sourceMsg["body"].startTime;
     var name = dataInsruction.sourceMsg["body"].name;
     var version = dataInsruction.sourceMsg["body"].version;
+  let response =  await updateActiveJForExpiryJob(dbo, dataInsruction);
+  gomos.gomosLog(TRACE_DEV,"This is DEBUG OF RESponse of updateActiveJForExpiryJob", response);
   for(let i =0 ; i< dataInsruction.sourceMsg.body.schedules.length; i++){
     let isDailyJob = true
     let dataTime = new Date(new Date().toISOString());
@@ -973,11 +1028,13 @@ function insertActivejob(dbo, dataInsruction, dataToInsert,payloadObject) {
       createdTime: dataTime,
       updatedTime: dataTime
     };
+  
     var dArray = ["ONTime", "OFFTime"];
  for(let  j =0; j < dArray.length; j++){ 
     data["_id"] = uuidv4();
     data["sourceMsg"]["body"]["ActionType"] = dArray[j];
     data["sourceMsg"]["body"]["jobKey"] = `${name}-${version}-${schNo}`; 
+    data["sourceMsg"]["body"]["State"] =  "Active"; 
     if(dArray[j]=== "ONTime"){
     data["sourceMsg"]["body"]["ActionValues"] = "*:*:*:"+dateTime.create(convertDateTimeForSetPrograme(startTime,OffsetTime)).format("H:M:S");
     data["sourceMsg"]["body"]["ActionTime"] = ""
@@ -985,8 +1042,9 @@ function insertActivejob(dbo, dataInsruction, dataToInsert,payloadObject) {
       data["sourceMsg"]["body"]["ActionValues"] =  "*:*:*:"+dateTime.create(convertDateTimeForSetPrograme(startTime,OffsetTime+duration)).format("H:M:S");
       data["sourceMsg"]["body"]["ActionTime"] = ""
     }
+    data["sourceMsg"]["body"]["expiryDate"] = ""
     gomos.gomosLog(TRACE_DEBUG,"This is log for Updateing the data base",data)
-    DeviceInstructionInsert(dbo, data);
+   await DeviceInstructionInsert(dbo, data);
  }
   
 }
@@ -1078,6 +1136,70 @@ function compareDate(str1) {
   var date1 = new Date("20" + arraydate[0],arraydate[1] - 1,arraydate[2],arraydate[3],arraydate[4],arraydate[5] );
   return date1;
 }
+function convertDateObj(date,time,h) {
+  gomos.gomosLog(TRACE_DEBUG, "this what coming Date",date+ time);
+  let arraydate = date.split(":");
+  let arraydate2 = time.split(":");
+  gomos.gomosLog( TRACE_DEBUG,"this what coming Date" +"," +arraydate[2] +"," +arraydate[1] +"," +arraydate[0]);
+  let date1 = new Date("20" + arraydate[0],arraydate[1] - 1,arraydate[2],arraydate2[0],arraydate2[1] );
+  date1.setDate(date1.getDate()+h);
+  return date1;
+}
+
+function updateActiveJForExpiryJob(dbo, data) {
+  return new Promise((resolve, reject) => {
+    let currentTime = new Date(new Date().toISOString());
+    gomos.gomosLog(TRACE_DEV, "This is Date Object", data.sourceMsg["body"].wef);
+    gomos.gomosLog(TRACE_DEV, "This is Date Object", convertDateObj(data.sourceMsg["body"].wef, data.sourceMsg["body"].startTime, -1));
+
+    dbo.collection("DeviceInstruction").updateMany({ mac: data.mac, type: "ActiveJob", "sourceMsg.body.expiryDate": "" },
+      {
+        $set: {
+          "sourceMsg.body.expiryDate": convertDateObj(data.sourceMsg["body"].wef, data.sourceMsg["body"].startTime, -1),
+          updatedTime: currentTime
+        }
+      },
+      function (err, res) {
+        if (err) {
+          gomos.errorCustmHandler(NAMEOFSERVICE, "DeviceInstruction", "This Query Error", "", err);
+          reject(err)
+          gomos.gomosLog(TRACE_DEV, "This is error update In Active Job  in DeviceInstructionInsert", err);
+          process.hasUncaughtExceptionCaptureCallback();
+        }
+        gomos.gomosLog(TRACE_DEV, " update In Active Job  in DeviceInstructionInsert", res.result.nModified);
+        resolve({ "modified": res.result.nModified })
+      }
+    );
+  });
+}
+function updateProgramDetailsForExpiryDate(dbo, data) {
+  return new Promise((resolve, reject) => {
+    let currentTime = new Date(new Date().toISOString());
+    gomos.gomosLog(TRACE_DEV, "This is Date Object", data.sourceMsg["body"].wef);
+    gomos.gomosLog(TRACE_DEV, "This is Date Object", convertDateObj(data.sourceMsg["body"].wef, data.sourceMsg["body"].startTime, -1));
+    let key = `${data.sourceMsg["body"].name}-${data.sourceMsg["body"].version}`
+    gomos.gomosLog(TRACE_DEV, "This is Debug Of Key", key);
+    dbo.collection("DeviceInstruction").updateMany({ mac: data.mac, type: "ProgramDetails", "sourceMsg.body.programKey": { $ne: key }, "sourceMsg.body.expiryDate": "" },
+      {
+        $set: {
+          "sourceMsg.body.expiryDate": convertDateObj(data.sourceMsg["body"].wef, data.sourceMsg["body"].startTime, -1),
+          updatedTime: currentTime
+        }
+      },
+      function (err, res) {
+        if (err) {
+          gomos.errorCustmHandler(NAMEOFSERVICE, "DeviceInstruction", "This Query Error", "", err);
+          reject(err)
+          gomos.gomosLog(TRACE_DEV, "This is error update In updateProgramDetailsForExpiryDate Job  in DeviceInstructionInsert", err);
+          process.hasUncaughtExceptionCaptureCallback();
+        }
+        gomos.gomosLog(TRACE_DEV, " update In updateProgramDetailsForExpiryDate Job  in DeviceInstructionInsert", res.result.nModified);
+        resolve({ "modified": res.result.nModified })
+      }
+    );
+  });
+}
+
 function DeviceInstructionInsert(dbo, data) {
   dbo.collection("DeviceInstruction").insertOne(data, function(err, result) {
     if (err) {

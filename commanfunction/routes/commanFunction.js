@@ -23,12 +23,12 @@ exports.gomosLog = function(x){
     var DateTime = new Date().toISOString();
     let writeStream = fs.createWriteStream("../unWantedLogCommanlog-" +  formattedDate+ ".json", { flags: "a" });
  var json ={DateTime,functionName ,message}
- var jsonStrring = JSON.stringify(json)
+//  var jsonStrring = JSON.stringify(json)
 
   // write some data with a base64 encoding
   writeStream.write(
 
-    jsonStrring +
+    json +
     "\n"
   );
   

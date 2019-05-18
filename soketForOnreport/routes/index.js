@@ -258,7 +258,7 @@ function onConnection(socket) {
       setInterval(
         () =>
        getApiAndEmit(socket,data),
-       30000
+       10000
       );
    });
     socket.on("disconnect", () => { clearInterval(checkInterval);  gomos.gomosLog(TRACE_DEV,"Client disconnected")});
