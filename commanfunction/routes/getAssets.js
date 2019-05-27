@@ -6,7 +6,7 @@ const TRACE_DEV   = 4;
 const TRACE_DEBUG = 5;
 var  gomos = require("./commanFunction");
 
-exports.getAssets =  function(db,NAMEOFSERVICE){
+exports.getAssets =  function(db,NAMEOFSERVICE,logger,gConsole){
    return new Promise((resolve, reject)=> {
     db.collection("Assets")
         .find()
@@ -21,7 +21,7 @@ exports.getAssets =  function(db,NAMEOFSERVICE){
               dataFromAssets.push(result[i]);
             }
             resolve(dataFromAssets);
-            gomos.gomosLog(TRACE_PROD,"getAssets - No. of assets read from collection", dataFromAssets.length);
+            gomos.gomosLog(logger,gConsole,TRACE_PROD,"getAssets - No. of assets read from collection", dataFromAssets.length);
           }
           catch(err){
             gomos.errorCustmHandler(NAMEOFSERVICE,"getAssets","This is generated From Try Catch error","",err);            

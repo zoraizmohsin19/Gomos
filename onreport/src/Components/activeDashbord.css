@@ -525,7 +525,7 @@ td.Acustmtd {
         /* background: rgba(185,249,174,.85); */
         /* height: 600px; */
         /* margin: -15px; */
-        height: 342px;
+        height: 580px;
     }
 
     #wrapper {
@@ -652,3 +652,14 @@ td.Acustmtd {
         display: flex;
     }
   }
+
+  .tableDropDown> .dropdown  > .dropdown-menu{
+      position: relative !important;
+  }
+  .hiddenClass {
+ display: none;
+  }
+  .setDeviceTime {
+    font-weight: 800;
+    text-decoration: underline;
+}

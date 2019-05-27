@@ -33,7 +33,9 @@ class NevMenu extends Component {
             custDisable: null,
             subCustDisable: null,
             assetDisable: null,
-            deviceDisable: null
+            deviceDisable: null,
+            ActiveDashBoardEnable:Boolean,
+            OpratingDashBoardEnable: Boolean
           }
         }
         
@@ -47,6 +49,7 @@ componentDidMount() {
   var mainData = JSON.parse(sessionStorage.getItem("userDetails"));
   var sessionData = mainData[0].serviceProviders.split(",");
   var ActiveData = JSON.parse(sessionStorage.getItem("configData"));
+  var dashboardConfigobjData = JSON.parse(sessionStorage.getItem("dashboardConfigobj"));
   var AspCd = ActiveData.spCd;
   var AcustCd = ActiveData.custCd;
   var AsubCustCd = ActiveData.subCustCd;
@@ -58,6 +61,8 @@ componentDidMount() {
   this.state.Menu.selectedAssetValue = Aasset;
   this.state.Menu.selectedDeviceValue = ActiveData.DeviceName;
   this.state.Menu.selectedMac = ActiveData.mac;
+  this.state.Menu.ActiveDashBoardEnable = dashboardConfigobjData.ActiveDashBoardEnable;
+  this.state.Menu.OpratingDashBoardEnable =  dashboardConfigobjData.OpratingDashBoardEnable
   this.setState({Menu : this.state.Menu});
 
    
@@ -549,14 +554,15 @@ else{
                   <div className="col-sm-12 col-lg-12">
                      <div className="pull-right">
                      {/* <div class="btn-group btn-group-sm"> */}
-                     <button  className="btn btn-success ml-1 " onClick={() =>{ 
+                    {(this.state.Menu.ActiveDashBoardEnable)? <button   className="btn btn-success ml-1 "onClick={() =>{ 
                          this.props.history.push("/socketdashbord")
                             
-                           }}>View Dashboard</button>
-                           <button  className="btn btn-success ml-1 " onClick={() =>{ 
+                           }} hidden>View Dashboard</button>: ""}
+                         {(this.state.Menu.OpratingDashBoardEnable)?  <button  className="btn btn-success ml-1 " onClick={() =>{ 
                          this.props.history.push("/activeDashbord")
                             
                            }}>Operating Dashboard</button>
+                          : ""}
                            {/* </div> */}
                          
                      </div>

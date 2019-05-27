@@ -17,6 +17,19 @@ const TRACE_DEBUG = 5;
 var  gomos = require("../../commanFunction/routes/commanFunction");
 var midllelayer = require("../../EndPointMiddlelayer/routes/middlelayer");
 var urlConn, dbName;
+var  gomos = require("../../commanFunction/routes/commanFunction");
+var fs = require("fs");
+let dateTime = require("node-datetime");
+var dt = dateTime.create();
+var formattedDate = dt.format('Y-m-d');
+const output = fs.createWriteStream(`./mqqtSvrStd${formattedDate}.log`, { flags: "a" });
+const errorOutput = fs.createWriteStream(`./mqqtSvrErr${formattedDate}.log`, { flags: "a" });
+var logger = gomos.createConsole(output,errorOutput);
+const SERVICE_VALUE = 1;
+var gConsole = false;
+if(process.argv[4] == SERVICE_VALUE ){
+  gConsole = true;
+}
 
 /* GET home page. */
 router.get("/", function (req, res, next) {
@@ -83,7 +96,7 @@ router.post("/dummy", function (req, res, next){
 router.delete("/deleteSentCommand", function (req, res, next) {
   var query = url.parse(req.url, true).query;
   // var query = req.body;
-  gomos.gomosLog(TRACE_DEV,"This is id",query.id);
+  gomos.gomosLog( logger,gConsole,TRACE_DEV,"This is id",query.id);
   var id = query.id;
 
   accessPermission(res);
@@ -97,7 +110,7 @@ router.delete("/deleteSentCommand", function (req, res, next) {
       var db = connection.db(dbName);
       db.collection("DeviceInstruction")
       .deleteOne({_id:ObjectId(id)},function (err,result) {  
-        gomos.gomosLog(TRACE_DEV,"This is result",result);
+        gomos.gomosLog( logger,gConsole,TRACE_DEV,"This is result",result);
         res.json(result)
   
         });
@@ -186,10 +199,12 @@ router.post("/authenticate", function (req, res, next) {
                   ActivesesnorsType: result1[0].ActivesesnorsType,
                   ConfADPayload: result1[0].ConfADPayload,
                   Nevigation : result1[0].Nevigation,
-                  DeviceType: result1[0].deviceType
+                  DeviceType: result1[0].deviceType,
+                  ActiveDashBoardEnable: result1[0].ActiveDashBoardEnable,
+                  OpratingDashBoardEnable: result1[0].OpratingDashBoardEnable
                  }
                   console.log(dashboardConfigobj); 
-                  gomos.gomosLog(TRACE_DEBUG,"This is result1[0].deviceType", result1[0].deviceType)
+                  gomos.gomosLog( logger,gConsole,TRACE_DEBUG,"This is result1[0].deviceType", result1[0].deviceType)
                  var  configData = {
                   DeviceName: result1[0].ActiveDeviceName,
                   mac:  result1[0].ActiveMac,
@@ -199,7 +214,7 @@ router.post("/authenticate", function (req, res, next) {
                 
                   subCustCd: result1[0].ActiveSubCustCd
                  }
-                 gomos.gomosLog(TRACE_DEBUG,"This is Config Data",configData )
+                 gomos.gomosLog( logger,gConsole,TRACE_DEBUG,"This is Config Data",configData )
                  db.collection("ClientMenuConfig")
                  .find({ clientID: clientID })
                  .toArray(function (err, clientData) {
@@ -207,12 +222,12 @@ router.post("/authenticate", function (req, res, next) {
                      process.hasUncaughtExceptionCaptureCallback();
                    } 
 
-                  gomos.gomosLog(TRACE_DEV,"This is clientID ",clientData);
+                  gomos.gomosLog( logger,gConsole,TRACE_DEV,"This is clientID ",clientData);
                   var ClientObj = {
                     OperatingForms : clientData[0].activeDashBoard.OperatingForms,
                     ViewDashBord : clientData[0].viewDashBoard,
                   }
-                  gomos.gomosLog(TRACE_DEV,"This is ClientObj",ClientObj)
+                  gomos.gomosLog( logger,gConsole,TRACE_DEV,"This is ClientObj",ClientObj)
                 res.json({userDtls, dashboardConfigobj, configData,ClientObj});
               });
             });
@@ -897,18 +912,18 @@ var mac = body.mac;
       }
       var db = connection.db(dbName);
       var query = url.parse(req.url, true).query;
-      gomos.gomosLog(TRACE_DEBUG,"This is called in Alert"); 
+      gomos.gomosLog( logger,gConsole,TRACE_DEBUG,"This is called in Alert"); 
       
 
         db.collection("Devices")
         .find({ mac:mac })
         .toArray(function (err, result) {
           if (err) {
-        gomos.gomosLog(TRACE_DEBUG,"this err",err);  
+        gomos.gomosLog( logger,gConsole,TRACE_DEBUG,"this err",err);  
           }
           var deviceStateKey = Object.keys(result[0]);
           var keysToRemove2 = ["_id", "mac", "DeviceName","updatedTime","createdTime"];
-          gomos.gomosLog(TRACE_DEV,"This Is key of identifire 1 Place",deviceStateKey);  
+          gomos.gomosLog( logger,gConsole,TRACE_DEV,"This Is key of identifire 1 Place",deviceStateKey);  
           for (var l = 0; l < keysToRemove2.length; l++) {
             if (deviceStateKey.includes(keysToRemove2[l])) {
               deviceStateKey.splice(deviceStateKey.indexOf(keysToRemove2[l]), 1);
@@ -918,13 +933,13 @@ var mac = body.mac;
         for(var k =0; k < deviceStateKey.length; k++){
           var name = deviceStateKey[k]
           var keyofCode = Object.keys(result[0][deviceStateKey[k]]);
-         gomos.gomosLog(TRACE_DEBUG,"This is SensorsKey",keyofCode);
+         gomos.gomosLog( logger,gConsole,TRACE_DEBUG,"This is SensorsKey",keyofCode);
         var sensorsArray= [];
         for(var i = 0; i< keyofCode.length; i++){
           var ActiveIdentifier = {};
          ActiveIdentifier['type'] = keyofCode[i];
          var devicebusinessNM = Object.keys(result[0][deviceStateKey[k]][keyofCode[i]]);
-         gomos.gomosLog(TRACE_DEBUG,"this devicebusinessNM",devicebusinessNM);  
+         gomos.gomosLog( logger,gConsole,TRACE_DEBUG,"this devicebusinessNM",devicebusinessNM);  
              devicebusinessNM.splice(devicebusinessNM.indexOf("dateTime"), 1);
              ActiveIdentifier["devicebusinessNM"] = result[0][deviceStateKey[k]][keyofCode[i]][devicebusinessNM[0]];
              ActiveIdentifier["Value"]    =  result[0][deviceStateKey[k]][keyofCode[i]][devicebusinessNM[0]];
@@ -955,18 +970,18 @@ var mac = body.mac;
       }
       var db = connection.db(dbName);
       var query = url.parse(req.url, true).query;
-      gomos.gomosLog(TRACE_DEBUG,"This is called in Alert"); 
+      gomos.gomosLog( logger,gConsole,TRACE_DEBUG,"This is called in Alert"); 
       
 
         db.collection("Devices")
         .find({ mac:mac })
         .toArray(function (err, result) {
           if (err) {
-        gomos.gomosLog(TRACE_DEBUG,"this err",err);  
+        gomos.gomosLog( logger,gConsole,TRACE_DEBUG,"this err",err);  
           }
           var deviceStateKey = Object.keys(result[0]);
           var keysToRemove2 = ["_id", "mac", "DeviceName","updatedTime","createdTime","assetId","deviceTemplate"];
-          gomos.gomosLog(TRACE_DEV,"This Is key of identifire 1 Place",deviceStateKey);  
+          gomos.gomosLog( logger,gConsole,TRACE_DEV,"This Is key of identifire 1 Place",deviceStateKey);  
           for (var l = 0; l < keysToRemove2.length; l++) {
             if (deviceStateKey.includes(keysToRemove2[l])) {
               deviceStateKey.splice(deviceStateKey.indexOf(keysToRemove2[l]), 1);
@@ -976,7 +991,7 @@ var mac = body.mac;
         for(var k =0; k < deviceStateKey.length; k++){
           var name = deviceStateKey[k]
           var keyofCode = Object.keys(result[0][deviceStateKey[k]]);
-         gomos.gomosLog(TRACE_DEBUG,"This is SensorsKey",keyofCode);
+         gomos.gomosLog( logger,gConsole,TRACE_DEBUG,"This is SensorsKey",keyofCode);
         var sensorsArray= [];
         for(var i = 0; i< keyofCode.length; i++){
           var ActiveIdentifier = {};
@@ -989,7 +1004,7 @@ var mac = body.mac;
         //      devicebusinessNM.splice(devicebusinessNM.indexOf(keysToRemove3[l]), 1);
         //    }
         //  } 
-        //  gomos.gomosLog(TRACE_DEBUG,"this devicebusinessNM",devicebusinessNM);  
+        //  gomos.gomosLog( logger,gConsole,TRACE_DEBUG,"this devicebusinessNM",devicebusinessNM);  
             //  devicebusinessNM.splice(devicebusinessNM.indexOf("dateTime"), 1);
              ActiveIdentifier["devicebusinessNM"] = result[0][deviceStateKey[k]][keyofCode[i]]["businessName"];
              ActiveIdentifier["configName"] = result[0][deviceStateKey[k]][keyofCode[i]]["configName"];
@@ -1020,14 +1035,14 @@ var mac = body.mac;
       }
       var db = connection.db(dbName);
       var query = url.parse(req.url, true).query;
-      gomos.gomosLog(TRACE_DEBUG,"This is called in Alert"); 
+      gomos.gomosLog( logger,gConsole,TRACE_DEBUG,"This is called in Alert"); 
       
 
       const collection = db.collection("DeviceState")
       const changeStream = collection.watch({"mac": mac});
       changeStream.on("change", function(change) {
         console.log(change);
-        gomos.gomosLog(TRACE_DEV,"This is Our Data ",change)
+        gomos.gomosLog( logger,gConsole,TRACE_DEV,"This is Our Data ",change)
         res.json(change);
       });  
     
@@ -1058,7 +1073,7 @@ router.post("/PendingJob", function (req, res, next) {
         mac: mac,
         type: "ActiveJob"
       }
-    gomos.gomosLog(TRACE_DEV,"This is Criteria of executedJob", body);
+    gomos.gomosLog( logger,gConsole,TRACE_DEV,"This is Criteria of executedJob", body);
 
       if(body['Fchannel'] != undefined && body['Fchannel'] != null && body['Fchannel'] != ''){
         criteria["sourceMsg.Channel"]    =   body['Fchannel'];
@@ -1072,7 +1087,7 @@ router.post("/PendingJob", function (req, res, next) {
           criteria["sourceMsg.ActionType"]    =   body['Action'];
           }     
      
-      gomos.gomosLog(TRACE_DEV,"This is debug of executedJob",criteria );
+      gomos.gomosLog( logger,gConsole,TRACE_DEV,"This is debug of executedJob",criteria );
       var db = connection.db(dbName);
       var data_count = 0;
       db.collection("DeviceInstruction")
@@ -1084,12 +1099,12 @@ router.post("/PendingJob", function (req, res, next) {
       db.collection("DeviceInstruction").find(criteria).toArray(function (err, result) {
         if (err) {
           gomos.errorCustmHandler(NAMEOFSERVICE,"DeviceInstruction","THis is DEvice Instruction","",err);
-          gomos.gomosLog(TRACE_PROD,"This is error",err);
+          gomos.gomosLog( logger,gConsole,TRACE_PROD,"This is error",err);
           process.hasUncaughtExceptionCaptureCallback();
         }
         var InActiveJobs = [];
         var json = {};
-        gomos.gomosLog(TRACE_DEBUG,"This is DeviceInstruction", result);
+        gomos.gomosLog( logger,gConsole,TRACE_DEBUG,"This is DeviceInstruction", result);
         if(result.length !=0){
             for(var i =0; i< result.length ; i++){
                   var temObj ={};
@@ -1113,7 +1128,7 @@ router.post("/PendingJob", function (req, res, next) {
                     else
                     { 
                       json["PendingJob"] = InActiveJobs;
-                      gomos.gomosLog(TRACE_DEV,"This is DeviceInstruction ",json);
+                      gomos.gomosLog( logger,gConsole,TRACE_DEV,"This is DeviceInstruction ",json);
                       res.json(json)
                     }
       });
@@ -1137,7 +1152,7 @@ router.post("/executedJob", function (req, res, next) {
         mac: mac,
         type: "executedJob"
       }
-    gomos.gomosLog(TRACE_DEV,"This is Criteria of executedJob", body);
+    gomos.gomosLog( logger,gConsole,TRACE_DEV,"This is Criteria of executedJob", body);
 
       if(body['Fchannel'] != undefined && body['Fchannel'] != null && body['Fchannel'] != ''){
         criteria["sourceMsg.body.Channel"]    =   body['Fchannel'];
@@ -1167,7 +1182,7 @@ router.post("/executedJob", function (req, res, next) {
 
      
      
-      gomos.gomosLog(TRACE_DEV,"This is debug of executedJob",criteria );
+      gomos.gomosLog( logger,gConsole,TRACE_DEV,"This is debug of executedJob",criteria );
       var db = connection.db(dbName);
       var data_count = 0;
       db.collection("DeviceInstruction")
@@ -1180,12 +1195,12 @@ router.post("/executedJob", function (req, res, next) {
       db.collection("DeviceInstruction").find(criteria).toArray(function (err, result) {
         if (err) {
           gomos.errorCustmHandler(NAMEOFSERVICE,"DeviceInstruction","","",err);
-          gomos.gomosLog(TRACE_PROD,"This is error",err);
+          gomos.gomosLog( logger,gConsole,TRACE_PROD,"This is error",err);
           process.hasUncaughtExceptionCaptureCallback();
         }
         var InActiveJobs = [];
         var json = {};
-        gomos.gomosLog(TRACE_DEBUG,"This is DeviceInstruction", result);
+        gomos.gomosLog( logger,gConsole,TRACE_DEBUG,"This is DeviceInstruction", result);
         if(result.length !=0){
             for(var i =0; i< result.length ; i++){
                   var temObj ={};
@@ -1209,7 +1224,7 @@ router.post("/executedJob", function (req, res, next) {
                     else
                     { 
                       json["executedJob"] = InActiveJobs;
-                      gomos.gomosLog(TRACE_DEV,"This is DeviceInstruction ",json);
+                      gomos.gomosLog( logger,gConsole,TRACE_DEV,"This is DeviceInstruction ",json);
                       res.json(json)
                     }
       });
@@ -1241,19 +1256,19 @@ router.post("/ActiveJobs", function (req, res, next) {
           $gte: new Date(startDate),
           $lte: new Date(endDate)  
       }}];
-      gomos.gomosLog(TRACE_DEV,"This is start and end time of Active jobs", startDate + endDate);
-      gomos.gomosLog(TRACE_DEBUG,"This is debug of ActiveJobs",criteria );
+      gomos.gomosLog( logger,gConsole,TRACE_DEV,"This is start and end time of Active jobs", startDate + endDate);
+      gomos.gomosLog( logger,gConsole,TRACE_DEBUG,"This is debug of ActiveJobs",criteria );
       var db = connection.db(dbName);
       db.collection("DeviceInstruction").find(criteria).toArray(function (err, result) {
         if (err) {
           gomos.errorCustmHandler(NAMEOFSERVICE,"DeviceInstruction","","",err);
-          gomos.gomosLog(TRACE_PROD,"This is error",err);
+          gomos.gomosLog( logger,gConsole,TRACE_PROD,"This is error",err);
           process.hasUncaughtExceptionCaptureCallback();
         }
         // res.json(result)
         var ActiveJobs = [];
         var json = {};
-        gomos.gomosLog(TRACE_DEBUG,"This is DeviceInstruction", result);
+        gomos.gomosLog( logger,gConsole,TRACE_DEBUG,"This is DeviceInstruction", result);
         if(result.length !=0){
          
             for(var i =0; i< result.length ; i++){
@@ -1264,14 +1279,14 @@ router.post("/ActiveJobs", function (req, res, next) {
                   temObj["State"] = result[i].sourceMsg.body.State;
                   temObj["ActionType"] = result[i].sourceMsg.body.ActionType;
                   if(result[i].sourceMsg.isDailyJob == true){
-                    gomos.gomosLog(TRACE_DEBUG,"This is Debug of result[i].sourceMsg.body.ActionValues",result[i].sourceMsg.body.ActionValues)
+                    gomos.gomosLog( logger,gConsole,TRACE_DEBUG,"This is Debug of result[i].sourceMsg.body.ActionValues",result[i].sourceMsg.body.ActionValues)
                     temObj["ActionTime"]  =  compareDate(result[i].sourceMsg.body.ActionValues);
                   }else{
                     temObj["ActionTime"]  =  result[i].sourceMsg.body.ActionTime;
                   }
                   ActiveJobs.push(temObj);
               }
-            gomos.gomosLog(TRACE_DEBUG,"This is debug of Active job Result", ActiveJobs)
+            gomos.gomosLog( logger,gConsole,TRACE_DEBUG,"This is debug of Active job Result", ActiveJobs)
            
         json["ActiveJob"] = ActiveJobs;
         // json["count"] = result.length;
@@ -1283,7 +1298,7 @@ router.post("/ActiveJobs", function (req, res, next) {
           res.json(json)
         }
         
-        // gomos.gomosLog(TRACE_PROD," insert  in DeleteDeviceState activeJob");
+        // gomos.gomosLog( logger,gConsole,TRACE_PROD," insert  in DeleteDeviceState activeJob");
       
       });
 
@@ -1314,7 +1329,7 @@ router.post("/ActiveJobs", function (req, res, next) {
         db.collection("DeviceInstruction").find({ mac : "5ccf7f0015bc", type: "SentInstruction"}).toArray(function (err, result) {
           if (err) {
             gomos.errorCustmHandler(NAMEOFSERVICE,"DeviceInstruction","","",err);
-            gomos.gomosLog(TRACE_PROD,"This is error",err);
+            gomos.gomosLog( logger,gConsole,TRACE_PROD,"This is error",err);
             process.hasUncaughtExceptionCaptureCallback();
           }
           // res.json(result)
@@ -1349,7 +1364,7 @@ router.post("/ActiveJobs", function (req, res, next) {
       
           }
           res.json(json)
-          gomos.gomosLog(TRACE_PROD," insert  in DeleteDeviceState activeJob");
+          gomos.gomosLog( logger,gConsole,TRACE_PROD," insert  in DeleteDeviceState activeJob");
         
         }
   
@@ -1359,7 +1374,7 @@ router.post("/ActiveJobs", function (req, res, next) {
   });
   
 function compareDate(str1){
-  gomos.gomosLog(TRACE_PROD,"this what coming Date", str1)
+  gomos.gomosLog( logger,gConsole,TRACE_PROD,"this what coming Date", str1)
   var arraydate = str1.split(":")
 
   var yr1
@@ -1371,25 +1386,25 @@ function compareDate(str1){
    mon1 = dataTime.getMonth();
    dt1 = dataTime.getDate();
   var date1 = new Date(yr1, mon1, dt1,arraydate[3], arraydate[4], arraydate[5]);
-  gomos.gomosLog(TRACE_DEBUG,"this Date Object if part",date1);
+  gomos.gomosLog( logger,gConsole,TRACE_DEBUG,"this Date Object if part",date1);
 
   }else{
     yr1 =  arraydate[0];
     mon1 =  arraydate[1];
     dt1 = arraydate[2];
   var date1 = new Date("20"+yr1, mon1 - 1, dt1,arraydate[3], arraydate[4], arraydate[5]);
-  gomos.gomosLog(TRACE_DEBUG,"this Date Object elsepart",date1);
+  gomos.gomosLog( logger,gConsole,TRACE_DEBUG,"this Date Object elsepart",date1);
 
   }
-  gomos.gomosLog(TRACE_DEBUG,"this Date Object return",date1);
-  gomos.gomosLog(TRACE_PROD,"this what coming Date 2",arraydate[0]+"," +arraydate[1]+","+ arraydate[2]+","+arraydate[3]+","+ arraydate[4]+","+ arraydate[5])
+  gomos.gomosLog( logger,gConsole,TRACE_DEBUG,"this Date Object return",date1);
+  gomos.gomosLog( logger,gConsole,TRACE_PROD,"this what coming Date 2",arraydate[0]+"," +arraydate[1]+","+ arraydate[2]+","+arraydate[3]+","+ arraydate[4]+","+ arraydate[5])
   return date1;
   }
 router.post("/ActiveActionTypeCall", function (req, res, next) {
   accessPermission(res);
   var body1 = req.body;
   var mac = body1.mac;
-gomos.gomosLog(TRACE_DEV,"THis is body", req.body);
+gomos.gomosLog( logger,gConsole,TRACE_DEV,"THis is body", req.body);
   MongoClient.connect(
     urlConn,
     { useNewUrlParser: true },
@@ -1398,7 +1413,7 @@ gomos.gomosLog(TRACE_DEV,"THis is body", req.body);
         next(err);
       }
       var db = connection.db(dbName);
-      gomos.gomosLog(TRACE_DEBUG,"This is called in Alert"); 
+      gomos.gomosLog( logger,gConsole,TRACE_DEBUG,"This is called in Alert"); 
       // var temp = "sensors.Channel."+ value
       var  vari = { mac: mac};
         // vari[temp] = { "$exists": true };
@@ -1409,9 +1424,9 @@ gomos.gomosLog(TRACE_DEV,"THis is body", req.body);
         .find(vari )
         .toArray(function (err, result) {
           if (err) {
-        gomos.gomosLog(TRACE_DEBUG,"this err",err);  
+        gomos.gomosLog( logger,gConsole,TRACE_DEBUG,"this err",err);  
           }
-        gomos.gomosLog(TRACE_DEV,"this result",result);  
+        gomos.gomosLog( logger,gConsole,TRACE_DEV,"this result",result);  
             res.json(result)
         
         });
@@ -1426,7 +1441,7 @@ router.post("/getAllClimateControl", function (req, res, next) {
   var body = req.body;
   var subCustCd = body.subCustCd;
   var custCd = body.custCd;
-// gomos.gomosLog(TRACE_DEV,"THis is body", req.body);
+// gomos.gomosLog( logger,gConsole,TRACE_DEV,"THis is body", req.body);
   MongoClient.connect(
     urlConn,
     { useNewUrlParser: true },
@@ -1440,9 +1455,9 @@ router.post("/getAllClimateControl", function (req, res, next) {
         "subCustCd": subCustCd} )
         .toArray(function (err, result) {
           if (err) {
-        gomos.gomosLog(TRACE_DEBUG,"this err",err);  
+        gomos.gomosLog( logger,gConsole,TRACE_DEBUG,"this err",err);  
           }
-        gomos.gomosLog(TRACE_DEV,"this result",result);  
+        gomos.gomosLog( logger,gConsole,TRACE_DEV,"this result",result);  
         var arr = [];
         for(var i =0 ; i < result.length; i++){
          arr.push(result[i].sourceMsg);
@@ -1468,12 +1483,12 @@ router.post("/getActiveDAction", function (req, res, next) {
         next(err);
       }
       var db = connection.db(dbName);
-      gomos.gomosLog(TRACE_DEBUG,"This is called in Alert"); 
+      gomos.gomosLog( logger,gConsole,TRACE_DEBUG,"This is called in Alert"); 
         db.collection("Devices")
         .find({ mac: mac})
         .toArray(function (err, result) {
           if (err) {
-        gomos.gomosLog(TRACE_DEBUG,"this err",err);  
+        gomos.gomosLog( logger,gConsole,TRACE_DEBUG,"this err",err);  
           }
           var keyofdata = Object.keys(result[0]);
           keysToRemove = ["DeviceName","mac","assetId","deviceTemplate","_id"];
@@ -1494,7 +1509,7 @@ router.post("/getActiveDAction", function (req, res, next) {
             json["displayPosition"] =    result[0][keyofdata[j]][keyOfChannel[i]].displayPosition;
             temp.push(json);
           }
-          gomos.gomosLog(TRACE_DEV,"this result",result);  
+          gomos.gomosLog( logger,gConsole,TRACE_DEV,"this result",result);  
             arrayofChennel[keyofdata[j]] = temp;
           }
       
@@ -1504,89 +1519,117 @@ router.post("/getActiveDAction", function (req, res, next) {
     }
   );
 });
-router.post("/ActiveDAction", function (req,res, next){
+router.post("/ActiveDAction", function (req, res, next) {
   accessPermission(res);
   var body = req.body;
-  var message     =   body.dataBody; 
-  var payloadId   =   body.payloadId;
-  var isDaillyJob =   body.isDaillyJob;
-  var ChannelName =   body.ChannelName;
-  var CustCd      =   body.CustCd;
-  var subCustCd   =   body.subCustCd; 
-  var DeviceName  =   body.DeviceName;
-  var mac         =   body.mac;
-  var messageObj = {}
-  //messageObj["payloadId"] = payloadId;
-var messageValue = message;
-gomos.gomosLog(TRACE_DEBUG,"this is message Value", message);
-MongoClient.connect(
-  urlConn,
-  { useNewUrlParser: true },
-  function (err, connection) {
-    if (err) {
-      next(err);
-    }
-    var db = connection.db(dbName);
-var dateTime = new Date()
-    gomos.gomosLog(TRACE_DEBUG,"This is called in Alert"); 
-    var dataTime = new Date(new Date().toISOString());
-      var Token = uuidv4();
-
-      var temobj={}
-      gomos.gomosLog(TRACE_DEV,"This is Cheacking payloadId", payloadId)
-      if(ChannelName  != '' && ChannelName != undefined && ChannelName != null){
-        temobj = {"Channel":ChannelName}
+  var message = body.dataBody;
+  var payloadId = body.payloadId;
+  var isDaillyJob = body.isDaillyJob;
+  var ChannelName = body.ChannelName;
+  var CustCd = body.CustCd;
+  var subCustCd = body.subCustCd;
+  var DeviceName = body.DeviceName;
+  var mac = body.mac;
+  gomos.gomosLog( logger,gConsole,TRACE_DEBUG, "this is message Value", message);
+  MongoClient.connect(
+    urlConn,
+    { useNewUrlParser: true },
+    function (err, connection) {
+      if (err) {
+        next(err);
       }
-      gomos.gomosLog(TRACE_DEV,"This is ChannelName", ChannelName);
-      // if(payloadId === "ManOverride" && ChannelName == "" || ChannelName == undefined){
-      //   for (let [key, value] of Object.entries(message)) {  
-      //     temobj[key]= {"mode": value.pendingMode};
-      //     messageObj[key]= {"mode": value.pendingMode};
-      //     gomos.gomosLog(TRACE_DEV,"This is ManOverride", value);
-      //     gomos.gomosLog(TRACE_DEV,"This is ManOverride",  temobj[key]);
-      //   }
-      // }
-      // else{
-        // for (let [key, value] of Object.entries(message)) {  
-        //   temobj[key]= value;
-        //   messageObj[key]= value;
-        // }
-      // }
-     
-       var object = {
+      var db = connection.db(dbName);
+      gomos.gomosLog( logger,gConsole,TRACE_DEBUG, "This is called in Alert");
+      var dataTime = new Date(new Date().toISOString());
+      var Token = uuidv4();
+      gomos.gomosLog( logger,gConsole,TRACE_DEV, "This is Cheacking payloadId", payloadId)
+      if (ChannelName != '' && ChannelName != undefined && ChannelName != null) {
+        temobj = { "Channel": ChannelName }
+      }
+      gomos.gomosLog( logger,gConsole,TRACE_DEV, "This is ChannelName", ChannelName);
+      var object = {
         "mac": mac,
         "type": "SentInstruction",
         "sourceMsg": {
-          "body":message 
+          "body": message
         },
         "createdTime": dataTime,
         "updatedTime": dataTime,
-     
-       } ;
-  
-       object["sourceMsg"]["Token"]  = Token;
-       object["sourceMsg"]["ActionType"]  = payloadId;
-       if( isDaillyJob != "" && isDaillyJob !=undefined && isDaillyJob != null){
+
+      };
+      object["sourceMsg"]["Token"] = Token;
+      object["sourceMsg"]["ActionType"] = payloadId;
+      if (isDaillyJob != "" && isDaillyJob != undefined && isDaillyJob != null) {
         object["sourceMsg"]["body"]["isDailyJob"] = isDaillyJob;
-       }
-     
-       gomos.gomosLog(TRACE_DEV,"This is log for data submit Data",object );
+      }
+      gomos.gomosLog( logger,gConsole,TRACE_DEV, "This is log for data submit Data", object);
       db.collection("DeviceInstruction")
-      .insertOne( object
-      ,function (err, result) {
-        if (err) {
-      gomos.gomosLog(TRACE_DEBUG,"this err",err);  
-        }
-  gomos.gomosLog(TRACE_DEBUG,"this is message Value 2", message);
-// if(ChannelName !=0 && ChannelName != ""  && ChannelName != undefined){
-//   message[ChannelName] = 1
-// }
-      
-      midllelayer.endPointMiddelayerFn(urlConn,dbName,res,CustCd,subCustCd,DeviceName,payloadId,dataTime,message,Token);
-      
-      })
-  });
+        .insertOne(object
+          , function (err, result) {
+            if (err) {
+              gomos.gomosLog( logger,gConsole,TRACE_DEBUG, "this err", err);
+            }
+            gomos.gomosLog( logger,gConsole,TRACE_DEBUG, "this is message Value 2", message);
+            midllelayer.endPointMiddelayerFn(urlConn, dbName, res, CustCd, subCustCd, DeviceName, payloadId, dataTime, message, Token);
+          })
+    });
 });
+router.post("/ActiveAPiForLevel4", function (req, res, next) {
+  accessPermission(res);
+  var body = req.body;
+  var message = body.dataBody;
+  var payloadId = body.payloadId;
+  var isDaillyJob = body.isDaillyJob;
+  var ChannelName = body.ChannelName;
+  var CustCd = body.CustCd;
+  var subCustCd = body.subCustCd;
+  var DeviceName = body.DeviceName;
+  var mac = body.mac;
+  gomos.gomosLog( logger,gConsole,TRACE_DEBUG, "this is message Value", message);
+  MongoClient.connect(
+    urlConn,
+    { useNewUrlParser: true },
+    function (err, connection) {
+      if (err) {
+        next(err);
+      }
+      var db = connection.db(dbName);
+      gomos.gomosLog( logger,gConsole,TRACE_DEBUG, "This is called in Alert");
+      var dataTime = new Date(new Date().toISOString());
+      var Token = uuidv4();
+      gomos.gomosLog( logger,gConsole,TRACE_DEV, "This is Cheacking payloadId", payloadId)
+      if (ChannelName != '' && ChannelName != undefined && ChannelName != null) {
+        temobj = { "Channel": ChannelName }
+      }
+      gomos.gomosLog( logger,gConsole,TRACE_DEV, "This is ChannelName", ChannelName);
+      var object = {
+        "mac": mac,
+        "type": "SentInstruction",
+        "sourceMsg": {
+          "body": message
+        },
+        "createdTime": dataTime,
+        "updatedTime": dataTime,
+
+      };
+      object["sourceMsg"]["Token"] = Token;
+      object["sourceMsg"]["ActionType"] = payloadId;
+      if (isDaillyJob != "" && isDaillyJob != undefined && isDaillyJob != null) {
+        object["sourceMsg"]["body"]["isDailyJob"] = isDaillyJob;
+      }
+      gomos.gomosLog( logger,gConsole,TRACE_DEV, "This is log for data submit Data", object);
+      db.collection("DeviceInstruction")
+        .insertOne(object
+          , function (err, result) {
+            if (err) {
+              gomos.gomosLog( logger,gConsole,TRACE_DEBUG, "this err", err);
+            }
+            gomos.gomosLog( logger,gConsole,TRACE_DEBUG, "this is message Value 2", message);
+            midllelayer.endPointMiddelayerFnWithRemark(urlConn, dbName, res, CustCd, subCustCd, DeviceName, payloadId, dataTime, message, Token,body.remark);
+          })
+    });
+});
+
 
 router.post("/ActiveProgramRuleUpdate", function (req,res, next){
   accessPermission(res);
@@ -1600,7 +1643,7 @@ router.post("/ActiveProgramRuleUpdate", function (req,res, next){
 
 
 // var messageValue = message;
-// gomos.gomosLog(TRACE_DEBUG,"this is message Value", message);
+// gomos.gomosLog( logger,gConsole,TRACE_DEBUG,"this is message Value", message);
 MongoClient.connect(
   urlConn,
   { useNewUrlParser: true },
@@ -1608,7 +1651,7 @@ MongoClient.connect(
     if (err) {
       next(err);
     }
-    gomos.gomosLog(TRACE_DEBUG,"This is for Update in Program Details", mac)
+    gomos.gomosLog( logger,gConsole,TRACE_DEBUG,"This is for Update in Program Details", mac)
     var db = connection.db(dbName);
     var dateTime = new Date(new Date().toISOString());
     
@@ -1621,9 +1664,9 @@ MongoClient.connect(
       }
       ,function (err, result) {
         if (err) {
-      gomos.gomosLog(TRACE_DEBUG,"this err",err);  
+      gomos.gomosLog( logger,gConsole,TRACE_DEBUG,"this err",err);  
         }
-        gomos.gomosLog(TRACE_DEBUG,"This is device Instruction for ClimateSave", result);
+        gomos.gomosLog( logger,gConsole,TRACE_DEBUG,"This is device Instruction for ClimateSave", result);
         res.json(result)
   });
 });
@@ -1636,7 +1679,7 @@ router.post("/ActiveProgrameSave", function (req,res, next){
 
   var mac         =   body.mac;
 var messageValue = message;
-gomos.gomosLog(TRACE_DEBUG,"this is message Value", message);
+gomos.gomosLog( logger,gConsole,TRACE_DEBUG,"this is message Value", message);
 MongoClient.connect(
   urlConn,
   { useNewUrlParser: true },
@@ -1646,17 +1689,17 @@ MongoClient.connect(
     }
     var db = connection.db(dbName);
 // var dateTime = new Date()
-    gomos.gomosLog(TRACE_DEBUG,"This is called in Alert"); 
+    gomos.gomosLog( logger,gConsole,TRACE_DEBUG,"This is called in Alert"); 
     var dateTime = new Date(new Date().toISOString());
     db.collection("Instructionindex")
     .insert({"programKeyIndex": `${mac}-${message.programKey}`},function(err,result){
-      gomos.gomosLog(TRACE_DEBUG,"This is err", err);
+      gomos.gomosLog( logger,gConsole,TRACE_DEBUG,"This is err", err);
       if(err){
         res.json("Error");
       }
       else{
       // if(result.length === 0){
-      gomos.gomosLog(TRACE_DEBUG,"This is log for data submit Data",result );
+      gomos.gomosLog( logger,gConsole,TRACE_DEBUG,"This is log for data submit Data",result );
       db.collection("DeviceInstruction")
       .insert( {"mac": mac,"type": "ProgramDetails",
       sourceMsg: {body:message},
@@ -1664,11 +1707,11 @@ MongoClient.connect(
       updatedTime :dateTime
     },function (err, result) {
         if (err) {
-      gomos.gomosLog(TRACE_DEBUG,"this err",err);  
+      gomos.gomosLog( logger,gConsole,TRACE_DEBUG,"this err",err);  
         }
-        gomos.gomosLog(TRACE_DEBUG,"This is device Instruction for ", result["upserted"]);
-        gomos.gomosLog(TRACE_DEBUG,"This is device Instruction for ",result["CommandResult"]);
-        gomos.gomosLog(TRACE_DEBUG,"This is device Instruction for Program Details", result);
+        gomos.gomosLog( logger,gConsole,TRACE_DEBUG,"This is device Instruction for ", result["upserted"]);
+        gomos.gomosLog( logger,gConsole,TRACE_DEBUG,"This is device Instruction for ",result["CommandResult"]);
+        gomos.gomosLog( logger,gConsole,TRACE_DEBUG,"This is device Instruction for Program Details", result);
         res.json(result)
        });
       }
@@ -1689,30 +1732,30 @@ MongoClient.connect(
       next(err);
     }
     var db = connection.db(dbName);
-    gomos.gomosLog(TRACE_DEBUG,"THis is MAc", mac)
+    gomos.gomosLog( logger,gConsole,TRACE_DEBUG,"THis is MAc", mac)
       // db.collection("DeviceInstruction")
       // .find( {"mac":mac,"type": "ProgramDetails"}).toArray(function (err, result) {
       //   if (err) {
-      // gomos.gomosLog(TRACE_DEBUG,"this err",err);  
+      // gomos.gomosLog( logger,gConsole,TRACE_DEBUG,"this err",err);  
       //   }
  
         db.collection("DeviceInstruction")
         .aggregate([{$match: {"mac":mac,"type": "ProgramDetails"}},{ $group : { _id: "$sourceMsg.body.name", version: { $max : "$sourceMsg.body.version" }}}]).toArray(function (err, result){
           if (err) {
-            gomos.gomosLog(TRACE_DEBUG,"this err",err);  
+            gomos.gomosLog( logger,gConsole,TRACE_DEBUG,"this err",err);  
               }   
               let data = result.map(item => `${item._id}-${item.version}`)
               let currentDate = new Date(new Date().toISOString());
-              gomos.gomosLog(TRACE_DEBUG,"This is result of find",data)                
+              gomos.gomosLog( logger,gConsole,TRACE_DEBUG,"This is result of find",data)                
                db.collection("DeviceInstruction")
               .find( {"mac":mac,"type": "ProgramDetails","sourceMsg.body.programKey": {$in: data} ,
-              $or: [ {"sourceMsg.body.currentState":{$ne :"delete"}}, {"sourceMsg.body.pendingConfirmation": {$ne:false}}, {"sourceMsg.body.expiryDate": {$gte: currentDate}} ]
+              $and: [ {$or: [ {"sourceMsg.body.currentState":{$ne :"delete"}}, {"sourceMsg.body.pendingConfirmation": {$ne:false}} ]}, {$or: [{"sourceMsg.body.expiryDate": {$gte: currentDate}},{"sourceMsg.body.expiryDate": "" }] } ]
             
             }).toArray(function (err, result1) {
                 if (err) {
-              gomos.gomosLog(TRACE_DEBUG,"this err",err);  
+              gomos.gomosLog( logger,gConsole,TRACE_DEBUG,"this err",err);  
                 }
-       gomos.gomosLog(TRACE_DEBUG,"This is device Instruction for Program Details", result1);
+       gomos.gomosLog( logger,gConsole,TRACE_DEBUG,"This is device Instruction for Program Details", result1);
         res.json(result1)
               });
   });
@@ -1733,17 +1776,99 @@ MongoClient.connect(
 //       next(err);
 //     }
 //     var db = connection.db(dbName);
-//     gomos.gomosLog(TRACE_DEBUG,"THis is MAc", mac)
+//     gomos.gomosLog( logger,gConsole,TRACE_DEBUG,"THis is MAc", mac)
 //       db.collection("DeviceInstruction")
 //       .deleteMany( {"mac":mac,"type": "ProgrameDetails", "sourceMsg.body.name": name},function (err, result) {
 //         if (err) {
-//       gomos.gomosLog(TRACE_DEBUG,"this err",err);  
+//       gomos.gomosLog( logger,gConsole,TRACE_DEBUG,"this err",err);  
 //         }
-//         gomos.gomosLog(TRACE_DEBUG,"This is device Instruction for Program Details", result);
+//         gomos.gomosLog( logger,gConsole,TRACE_DEBUG,"This is device Instruction for Program Details", result);
 //         res.json(result)
 //   });
 //  });
 // });
+
+
+router.post("/ActiveProgramerevert", function (req,res, next){
+  accessPermission(res);
+  var reqData = req.body;
+  // var message     =   body.dataBody; 
+
+  // var mac         =   body.mac;
+  // var name         =   body.name;
+  gomos.gomosLog( logger,gConsole,TRACE_DEV,"This is ActiveProgramrevert");
+MongoClient.connect(
+  urlConn,
+  { useNewUrlParser: true },
+  function (err, connection) {
+    if (err) {
+      next(err);
+    }
+    var dbo = connection.db(dbName);
+    gomos.gomosLog( logger,gConsole,TRACE_DEV,"This is ActiveProgramrevert", reqData);
+    dbo
+    .collection("DeviceInstruction")
+    .find({ mac: reqData.mac, type: "ProgramDetails",
+    "sourceMsg.body.name":reqData.sourceMsg.name,
+    "sourceMsg.body.version":reqData.sourceMsg.version
+
+  })
+    .toArray(function(err, resultMain) {
+      if (err) {
+        process.hasUncaughtExceptionCaptureCallback();
+      }
+      if (resultMain.length != 0) {
+        gomos.gomosLog( logger,gConsole, TRACE_DEBUG,"This ProgrameDetails data",resultMain);
+        gomos.gomosLog( logger,gConsole, TRACE_DEBUG, "This ProgrameDetails dataInsruction.sourceMsg.body Splite data ito part",reqData.sourceMsg);
+        gomos.gomosLog( logger,gConsole,TRACE_DEBUG,"This is ProgrameDetails after asing",resultMain[0].sourceMsg.body);
+        if(reqData.ActionType === "SetProgramState"){
+        dbo.collection("DeviceInstruction").updateOne(
+          { _id: resultMain[0]["_id"],$or : [{"sourceMsg.body.pendingConfirmation":{ $ne : false}}]  },
+          {$set: {
+            "sourceMsg.body.currentState": resultMain[0].sourceMsg.body.previousState,
+            "sourceMsg.body.previousState": resultMain[0].sourceMsg.body.currentState,
+            "sourceMsg.body.pendingConfirmation": false,
+            updatedTime: new Date(new Date().toISOString())
+          }
+        }, 
+        function(err, result1) {
+            if (err) {
+              gomos.errorCustmHandler( NAMEOFSERVICE,"updated For Programe State in ProgrameDetails   in setProgramStateErrorProcess","This is Updateting Error","", err);
+              res.send("Some Things Error .");
+              process.hasUncaughtExceptionCaptureCallback();
+            }
+            gomos.gomosLog( logger,gConsole,TRACE_DEBUG, "updated For Programe State in ProgrameDetails   in setProgramStateErrorProcess",result1);
+            res.json(result1)
+          }
+        );
+      }
+    
+    else if( reqData.ActionType ===  "SetProgram"){
+      gomos.gomosLog( logger,gConsole, TRACE_DEBUG, "This ProgrameDetails dataInsruction.sourceMsg.body Splite data ito part",reqData.sourceMsg);
+      gomos.gomosLog( logger,gConsole,TRACE_DEBUG,"This is ProgrameDetails after asing",resultMain[0].sourceMsg.body);
+      dbo.collection("DeviceInstruction").deleteOne(
+        { _id: resultMain[0]["_id"] ,$or : [{"sourceMsg.body.pendingConfirmation":{ $ne : false}}] },
+        function(err, result) {
+          if (err) {
+            gomos.errorCustmHandler( NAMEOFSERVICE,"delted For ProgrameDetails Override","This is Updateting Error","", err);
+            res.send("Some Things Error .");
+            process.hasUncaughtExceptionCaptureCallback();
+          }
+          gomos.gomosLog( logger,gConsole,TRACE_DEBUG, " For ProgrameDetails Override  in setProgramErrorProcess");
+          res.json(result)
+        }
+      );
+    }
+    }
+    else{
+      res.send("No Record Found .");
+    }
+    
+      
+    }
+    );
+ });
+});
 router.post("/ActiveClimatesave", function (req,res, next){
   accessPermission(res);
   var body = req.body;
@@ -1751,7 +1876,7 @@ router.post("/ActiveClimatesave", function (req,res, next){
 
   var mac         =   body.mac;
 var messageValue = message;
-gomos.gomosLog(TRACE_DEBUG,"this is message Value", message);
+gomos.gomosLog( logger,gConsole,TRACE_DEBUG,"this is message Value", message);
 MongoClient.connect(
   urlConn,
   { useNewUrlParser: true },
@@ -1761,7 +1886,7 @@ MongoClient.connect(
     }
     var db = connection.db(dbName);
 var dateTime = new Date()
-    gomos.gomosLog(TRACE_DEBUG,"This is called in Alert"); 
+    gomos.gomosLog( logger,gConsole,TRACE_DEBUG,"This is called in Alert"); 
     var dataTime = new Date(new Date().toISOString());
       var temobj={}
       for (let [key, value] of Object.entries(message)) {  
@@ -1778,7 +1903,7 @@ var dateTime = new Date()
        } ;
       //  object["sourceMsg"]["ActionType"]  = payloadId;
       
-       gomos.gomosLog(TRACE_DEBUG,"This is log for data submit Data",object );
+       gomos.gomosLog( logger,gConsole,TRACE_DEBUG,"This is log for data submit Data",object );
       db.collection("DeviceInstruction")
       .updateOne( {"type": "SentClimateParameter","mac": mac},
        { $set: { "sourceMsg.body":temobj,
@@ -1787,9 +1912,9 @@ var dateTime = new Date()
       }
       ,function (err, result) {
         if (err) {
-      gomos.gomosLog(TRACE_DEBUG,"this err",err);  
+      gomos.gomosLog( logger,gConsole,TRACE_DEBUG,"this err",err);  
         }
-        gomos.gomosLog(TRACE_DEBUG,"This is device Instruction for ClimateSave", result);
+        gomos.gomosLog( logger,gConsole,TRACE_DEBUG,"This is device Instruction for ClimateSave", result);
         res.json(result)
   });
 });
@@ -1800,7 +1925,7 @@ router.post("/ActivesaveForManualOverForTiles", function (req,res, next){
   var message     =   body.dataBody; 
 
   var mac         =   body.mac;
-gomos.gomosLog(TRACE_DEBUG,"this is message Value ActivesaveForManualOverForTiles", message);
+gomos.gomosLog( logger,gConsole,TRACE_DEBUG,"this is message Value ActivesaveForManualOverForTiles", message);
 MongoClient.connect(
   urlConn,
   { useNewUrlParser: true },
@@ -1810,7 +1935,7 @@ MongoClient.connect(
     }
     var db = connection.db(dbName);
 var dateTime = new Date()
-    gomos.gomosLog(TRACE_DEBUG,"This is called in Alert"); 
+    gomos.gomosLog( logger,gConsole,TRACE_DEBUG,"This is called in Alert"); 
     var dataTime = new Date(new Date().toISOString());
       var temobj={}
       
@@ -1828,16 +1953,16 @@ var dateTime = new Date()
      
        } ;
        temobj[`sourceMsg.body.${businessNameKey[0]}.pendingMode`] = message[businessNameKey[0]]["mode"]; 
-       gomos.gomosLog(TRACE_DEBUG,"This is log for data submit Data ActivesaveForManualOverForTiles",temobj );
+       gomos.gomosLog( logger,gConsole,TRACE_DEBUG,"This is log for data submit Data ActivesaveForManualOverForTiles",temobj );
       db.collection("DeviceInstruction")
       .updateOne( {"type": "SentManOverride","mac": mac},
        { $set: temobj 
       }
       ,function (err, result) {
         if (err) {
-      gomos.gomosLog(TRACE_DEBUG,"this err",err);  
+      gomos.gomosLog( logger,gConsole,TRACE_DEBUG,"this err",err);  
         }
-        gomos.gomosLog(TRACE_DEBUG,"This is device Instruction for ClimateSave", result);
+        gomos.gomosLog( logger,gConsole,TRACE_DEBUG,"This is device Instruction for ClimateSave", result);
         res.json(result)
   });
 });
@@ -1848,7 +1973,7 @@ router.post("/ActivesaveForManualOver", function (req,res, next){
   var message     =   body.dataBody; 
 
   var mac         =   body.mac;
-gomos.gomosLog(TRACE_DEBUG,"this is message Value", message);
+gomos.gomosLog( logger,gConsole,TRACE_DEBUG,"this is message Value", message);
 MongoClient.connect(
   urlConn,
   { useNewUrlParser: true },
@@ -1858,7 +1983,7 @@ MongoClient.connect(
     }
     var db = connection.db(dbName);
 var dateTime = new Date()
-    gomos.gomosLog(TRACE_DEBUG,"This is called in Alert"); 
+    gomos.gomosLog( logger,gConsole,TRACE_DEBUG,"This is called in Alert"); 
     var dataTime = new Date(new Date().toISOString());
       var temobj={}
       for (let [key, value] of Object.entries(message)) {  
@@ -1875,7 +2000,7 @@ var dateTime = new Date()
        } ;
       //  object["sourceMsg"]["ActionType"]  = payloadId;
       
-       gomos.gomosLog(TRACE_DEBUG,"This is log for data submit Data",object );
+       gomos.gomosLog( logger,gConsole,TRACE_DEBUG,"This is log for data submit Data",object );
       db.collection("DeviceInstruction")
       .updateOne( {"type": "SentManOverride","mac": mac},
        { $set: { "sourceMsg.body":temobj,
@@ -1884,9 +2009,9 @@ var dateTime = new Date()
       }
       ,function (err, result) {
         if (err) {
-      gomos.gomosLog(TRACE_DEBUG,"this err",err);  
+      gomos.gomosLog( logger,gConsole,TRACE_DEBUG,"this err",err);  
         }
-        gomos.gomosLog(TRACE_DEBUG,"This is device Instruction for ClimateSave", result);
+        gomos.gomosLog( logger,gConsole,TRACE_DEBUG,"This is device Instruction for ClimateSave", result);
         res.json(result)
   });
 });
@@ -1896,8 +2021,8 @@ router.post("/getAClimateparameter", function (req,res, next){
   var body = req.body;
   var message     =   body.dataBody; 
   var mac         =   body.mac;
-// gomos.gomosLog(TRACE_TEST,"this is message Value", message);
-gomos.gomosLog(TRACE_TEST,"this is message Value", mac);
+// gomos.gomosLog( logger,gConsole,TRACE_TEST,"this is message Value", message);
+gomos.gomosLog( logger,gConsole,TRACE_TEST,"this is message Value", mac);
 MongoClient.connect(
   urlConn,
   { useNewUrlParser: true },
@@ -1910,9 +2035,9 @@ MongoClient.connect(
       .findOne( {"type": "SentClimateParameter","mac": mac}
       ,function (err, result) {
         if (err) {
-      gomos.gomosLog(TRACE_TEST,"this err",err);  
+      gomos.gomosLog( logger,gConsole,TRACE_TEST,"this err",err);  
         }
-        gomos.gomosLog(TRACE_TEST,"This is device Instruction for ClimateSave", result);
+        gomos.gomosLog( logger,gConsole,TRACE_TEST,"This is device Instruction for ClimateSave", result);
         try {
           res.json(result["sourceMsg"]["body"]);
         } catch (error) {
@@ -1929,8 +2054,8 @@ router.post("/getAManualOverride", function (req,res, next){
   var body = req.body;
   var message     =   body.dataBody; 
   var mac         =   body.mac;
-// gomos.gomosLog(TRACE_TEST,"this is message Value", message);
-gomos.gomosLog(TRACE_TEST,"this is message Value", mac);
+// gomos.gomosLog( logger,gConsole,TRACE_TEST,"this is message Value", message);
+gomos.gomosLog( logger,gConsole,TRACE_TEST,"this is message Value", mac);
 MongoClient.connect(
   urlConn,
   { useNewUrlParser: true },
@@ -1943,9 +2068,9 @@ MongoClient.connect(
       .findOne( {"type": "SentManOverride","mac": mac}
       ,function (err, result) {
         if (err) {
-      gomos.gomosLog(TRACE_TEST,"this err",err);  
+      gomos.gomosLog( logger,gConsole,TRACE_TEST,"this err",err);  
         }
-        gomos.gomosLog(TRACE_TEST,"This is device Instruction for ClimateSave", result);
+        gomos.gomosLog( logger,gConsole,TRACE_TEST,"This is device Instruction for ClimateSave", result);
         try {
           res.json(result["sourceMsg"]["body"]);
         } catch (error) {
@@ -2088,7 +2213,7 @@ function fileWriter(count,data){
   
   // the finish event is emitted when all data has been flushed from the stream
   writeStream.on('finish', () => {  
-    // gomos.gomosLog(TRACE_PROD,"wrote all data to file For Error"); 
+    // gomos.gomosLog( logger,gConsole,TRACE_PROD,"wrote all data to file For Error"); 
     console.log("wrote all data to file For Error"); 
   });
   
@@ -2228,14 +2353,14 @@ router.post("/getdashboard", function (req, res, next) {
   accessPermission(res);
 
   var body = req.body;
-  gomos.gomosLog(TRACE_DEBUG,"THIS IS DEBUG OF GET DASHBOARD", body);
+  gomos.gomosLog( logger,gConsole,TRACE_DEBUG,"THIS IS DEBUG OF GET DASHBOARD", body);
   var sensorNm = body.sensorNm;
   var spCd = body.spCd;
   var custCd = body.custCd;
   var subCustCd = body.subCustCd;
    var mac = body.mac;
   var sensorsBSN = body.sensorsBSN;
-gomos.gomosLog(TRACE_DEBUG,"this is debuging in starting",sensorsBSN+"|"+mac+"|"
+gomos.gomosLog( logger,gConsole,TRACE_DEBUG,"this is debuging in starting",sensorsBSN+"|"+mac+"|"
 +subCustCd+"|"+custCd+"|"+spCd+"|"+sensorNm);
   
     var page    =   1;
@@ -2311,13 +2436,13 @@ gomos.gomosLog(TRACE_DEBUG,"this is debuging in starting",sensorsBSN+"|"+mac+"|"
             //copy all data from the copy of result to remove json with in json.
             for (let i = 0; i < resultCopy.length; i++) {
               var sensorNmKeys = Object.keys(resultCopy[i]["sensors"]);
-              gomos.gomosLog(TRACE_DEBUG,"this is debuging for resultCopy",i);
-              gomos.gomosLog(TRACE_DEBUG,"this is debuging for sensorNmKeys",sensorNmKeys);
+              gomos.gomosLog( logger,gConsole,TRACE_DEBUG,"this is debuging for resultCopy",i);
+              gomos.gomosLog( logger,gConsole,TRACE_DEBUG,"this is debuging for sensorNmKeys",sensorNmKeys);
                 // if (sensorNmKeys.includes(sensorNm)){
                   let  tempArray = {}
                   for(let j = 0 ;  j< sensorNmKeys.length; j++){
-                    gomos.gomosLog(TRACE_DEBUG,"This is Debug For sensorNmKeys[j]",sensorNmKeys[j]);
-                    gomos.gomosLog(TRACE_DEBUG,"this is debuging for resultCopy[i][sensors][sensorNmKeys[j]]",resultCopy[i]["sensors"][sensorNmKeys[j]]);
+                    gomos.gomosLog( logger,gConsole,TRACE_DEBUG,"This is Debug For sensorNmKeys[j]",sensorNmKeys[j]);
+                    gomos.gomosLog( logger,gConsole,TRACE_DEBUG,"this is debuging for resultCopy[i][sensors][sensorNmKeys[j]]",resultCopy[i]["sensors"][sensorNmKeys[j]]);
             
                     for (let [key, value] of Object.entries(resultCopy[i]["sensors"][sensorNmKeys[j]])){
                       tempArray[key] = value;
@@ -2358,7 +2483,7 @@ gomos.gomosLog(TRACE_DEBUG,"this is debuging in starting",sensorsBSN+"|"+mac+"|"
           .then(function (data) {
           var data_count = data
             var json= {finalResult, data_count, lastdataObj, lastCreatedTime}
-            gomos.gomosLog(TRACE_DEBUG,"This is All Data OF json in getDashBoard", json);
+            gomos.gomosLog( logger,gConsole,TRACE_DEBUG,"This is All Data OF json in getDashBoard", json);
             res.json(json);
           })
           })
@@ -2394,29 +2519,29 @@ router.post("/getDevicesIdentifier", function (req, res, next) {
           }
           var deviceStateKey = Object.keys(result[0]);
           var keysToRemove2 = ["_id", "mac","deviceTemplate","active","assetId", "DeviceName",];
-          gomos.gomosLog(TRACE_DEV,"This Is key of identifire 1 Place",deviceStateKey);  
+          gomos.gomosLog( logger,gConsole,TRACE_DEV,"This Is key of identifire 1 Place",deviceStateKey);  
           for (var l = 0; l < keysToRemove2.length; l++) {
             if (deviceStateKey.includes(keysToRemove2[l])) {
               deviceStateKey.splice(deviceStateKey.indexOf(keysToRemove2[l]), 1);
             }
           }
-          gomos.gomosLog(TRACE_DEV,"This is key left in result",deviceStateKey );
+          gomos.gomosLog( logger,gConsole,TRACE_DEV,"This is key left in result",deviceStateKey );
           var json = {}
           for(var k =0; k < deviceStateKey.length; k++){
             var name = deviceStateKey[k]
             var keyofCode = Object.keys(result[0][deviceStateKey[k]]);
-           gomos.gomosLog(TRACE_DEBUG,"This is SensorsKey",keyofCode);
+           gomos.gomosLog( logger,gConsole,TRACE_DEBUG,"This is SensorsKey",keyofCode);
           var sensorsArray= [];
           for(var i = 0; i< keyofCode.length; i++){
             var ActiveIdentifier = {};
-           gomos.gomosLog(TRACE_DEBUG,"this devicebusinessNM"); 
+           gomos.gomosLog( logger,gConsole,TRACE_DEBUG,"this devicebusinessNM"); 
                ActiveIdentifier["devicebusinessNM"] = result[0][deviceStateKey[k]][keyofCode[i]]["businessName"];
                ActiveIdentifier["group"]    =  result[0][deviceStateKey[k]][keyofCode[i]]["group"];
                sensorsArray.push(ActiveIdentifier);
           }
           json[name] = sensorsArray;
         }
-        gomos.gomosLog(TRACE_DEV,"This is json which i want send to front end", json);
+        gomos.gomosLog( logger,gConsole,TRACE_DEV,"This is json which i want send to front end", json);
             res.json(json)
         
         });
@@ -2462,7 +2587,7 @@ router.get("/getFacts", function (req, res, next) {
           $lte: new Date(endDate)
         }
       };
-gomos.gomosLog(TRACE_DEBUG,"This is gomos get messageFact",  criteria);
+gomos.gomosLog( logger,gConsole,TRACE_DEBUG,"This is gomos get messageFact",  criteria);
       // if (operation) {
       //   if (query.equalsFacts) {
       //     equalsFacts = parseFloat(query.equalsFacts);
@@ -2543,7 +2668,7 @@ function factsOperations(db, sensorNm, startFactValue, endFactValue, connection,
         //   var allkey = Object.keys(resultCopy[i]);
         //   // This is with an assumtion that "_id" always comes first, if not, change the code to 
         //   // specifically look out for "_id".
-        //   gomos.gomosLog(TRACE_DEBUG,"THis is Debug of getMessageFact for check result",sensorNmKeys[0]);
+        //   gomos.gomosLog( logger,gConsole,TRACE_DEBUG,"THis is Debug of getMessageFact for check result",sensorNmKeys[0]);
         //   if (sensorNmKeys[0]=="_id"){
         //     result.push(resultCopy[i]._id);
         //   }
@@ -2584,7 +2709,7 @@ function factsOperations(db, sensorNm, startFactValue, endFactValue, connection,
           }
           if (finalResult.length != 0) {
             finalResult.push([ltdttm, 0, 0]);
-            gomos.gomosLog(TRACE_DEBUG,"This is Final result of GetFact", finalResult);
+            gomos.gomosLog( logger,gConsole,TRACE_DEBUG,"This is Final result of GetFact", finalResult);
             res.json(finalResult);
           }
           else {
@@ -2677,7 +2802,7 @@ else {
     for (var j = 0; j < sensorNmKeys.length; j++) {
       //comparing the businessNm values(sensor's BusinessNm) with the passed range of value
       if (result[i]._id[sensorNmKeys[j]] >= startFactValue && result[i]._id[sensorNmKeys[j]] <= endFactValue) {
-        // gomos.gomosLog(TRACE_DEV,"This is Debug of Menu", result);
+        // gomos.gomosLog( logger,gConsole,TRACE_DEV,"This is Debug of Menu", result);
         temp[sensorNmKeys[j]] = result[i]._id[sensorNmKeys[j]]
         // finalResult.push([result[i].mac,result[i].name, sensorNmKeys[j], result[i]._id[sensorNmKeys[j]], formattedDate]);
       }

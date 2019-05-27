@@ -6,7 +6,7 @@ const TRACE_DEV   = 4;
 const TRACE_DEBUG = 5;
 var  gomos = require("./commanFunction");
 
-exports.getSubCustomers =  function(db,NAMEOFSERVICE){
+exports.getSubCustomers =  function(db,NAMEOFSERVICE,logger,gConsole){
    return new Promise((resolve, reject)=> {
     db.collection("SubCustomers")
     .find()
@@ -22,7 +22,7 @@ exports.getSubCustomers =  function(db,NAMEOFSERVICE){
         }
         resolve(dataFromSubCust);
 
-        gomos.gomosLog(TRACE_PROD,"getSubCustomers - No. of subeCustomer read from collection", dataFromSubCust.length);
+        gomos.gomosLog(logger,gConsole,TRACE_PROD,"getSubCustomers - No. of subeCustomer read from collection", dataFromSubCust.length);
       }
       catch(err){
         gomos.errorCustmHandler(NAMEOFSERVICE,"getSubCustomers","This is Try catch Of getting All Sub Custmoer",err);    

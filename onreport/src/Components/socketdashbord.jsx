@@ -323,7 +323,12 @@ callToSocket(){
     // console.log(socket1);
   }
  
-  const socket = socketIOClient(endpoint+"/onViewDashboard");
+  const socket = socketIOClient(endpoint+"/onViewDashboard" , {
+    reconnection: true,
+    reconnectionDelay: 1000,
+    reconnectionDelayMax : 5000,
+    reconnectionAttempts: 99999
+});
   // console.log("This is log of socket");
   // console.log(socket)
   me.state.body.socket1   =   socket;
@@ -427,7 +432,12 @@ callForlastAlert(custCd,subCustCd, mac){
  var body = {custCd,subCustCd,mac}
   // axios.post("http://34.244.151.117:3992/getdashbordlastalert", body)
   // .then(json =>  {
-    var lastError = socketIOClient(endpoint+"/ActivelastError");
+    var lastError = socketIOClient(endpoint+"/ActivelastError", {
+      reconnection: true,
+      reconnectionDelay: 1000,
+      reconnectionDelayMax : 5000,
+      reconnectionAttempts: 99999
+  });
     lastError.emit('lastErrorClientEmit',body );
     lastError.on('lastErrorServerEmit',function(data) {
       // console.log(data);

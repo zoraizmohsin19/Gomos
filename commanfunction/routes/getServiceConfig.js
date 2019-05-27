@@ -6,7 +6,7 @@ const TRACE_DEV   = 4;
 const TRACE_DEBUG = 5;
 var  gomos = require("./commanFunction");
 
-exports.getServiceConfig =  function(db,NAMEOFSERVICE,serviceKey){
+exports.getServiceConfig =  function(db,NAMEOFSERVICE,serviceKey,logger,gConsole){
    return new Promise((resolve, reject)=> {
           db.collection("ServiceSchedules")
             .find()
@@ -20,7 +20,7 @@ exports.getServiceConfig =  function(db,NAMEOFSERVICE,serviceKey){
                   var keys = Object.keys(result[0]);
                   if (keys.includes(serviceKey)) {
                     resolve(result[0][serviceKey]);
-                    gomos.gomosLog(TRACE_PROD,"ServiceConfig freq. of Fact srvcs",result[0][serviceKey]); 
+                    gomos.gomosLog(logger,gConsole,TRACE_PROD,"ServiceConfig freq. of Fact srvcs",result[0][serviceKey]); 
                   }
                 }
                 catch(err){

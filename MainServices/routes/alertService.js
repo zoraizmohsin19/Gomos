@@ -23,6 +23,15 @@ const TRACE_STAGE = 2;
 const TRACE_TEST = 3;
 const TRACE_DEV = 4;
 const TRACE_DEBUG = 5;
+var dt = dateTime.create();
+var formattedDate = dt.format('Y-m-d');
+const output = fs.createWriteStream(`./alertStd${formattedDate}.log`,  { flags: "a" });
+const errorOutput = fs.createWriteStream(`./alertErr${formattedDate}.log` ,{ flags: "a" });
+var logger = gomos.createConsole(output,errorOutput);
+const SERVICE_VALUE = 2;
+var gConsole = false;
+
+
 var transporter = nodemailer.createTransport({
   service: 'gmail',
   pool: true,
@@ -53,12 +62,12 @@ function processAlerts() {
     sec = "";
   }
   else {
-    gomos.gomosLog(
+     gomos.gomosLog( logger,gConsole,
       TRACE_PROD,
       "Scheduling issues, Can not proceed : It can only support Seconds, Minutes up to 59",
       alertSrvcSchedule
     );
-    gomos.gomosLog(
+     gomos.gomosLog( logger,gConsole,
       TRACE_PROD,
       "Scheduling issues, Can not proceed : It can only support Seconds, Minutes up to 59",
       factSrvcSchedule
@@ -75,7 +84,7 @@ function processAlerts() {
 
   // var tempSchedule = scheduleTemp.scheduleJob("*/30 * * * * *", function () {
     var tempSchedule = scheduleTemp.scheduleJob(schPattern, function () {
-    gomos.gomosLog(TRACE_PROD, "Processing Started - Processing Level 1 Alerts ");
+     gomos.gomosLog( logger,gConsole,TRACE_PROD, "Processing Started - Processing Level 1 Alerts ");
 
    
       // dbo = connection.db(dbName);
@@ -89,11 +98,11 @@ function processAlerts() {
             }
             try {
               if(result.length > 0){
-                gomos.gomosLog(TRACE_DEV,"This Is result length", result.length);
+                 gomos.gomosLog( logger,gConsole,TRACE_DEV,"This Is result length", result.length);
               for (var i = 0; i < result.length; i++) {
-                gomos.gomosLog(TRACE_DEV,"This is response of getRecipientMail");
+                 gomos.gomosLog( logger,gConsole,TRACE_DEV,"This is response of getRecipientMail");
                 let response = await getRecipientMail(dbo, result[i]); 
-                 gomos.gomosLog(TRACE_DEV,"This is response of getRecipientMail",response);
+                  gomos.gomosLog( logger,gConsole,TRACE_DEV,"This is response of getRecipientMail",response);
                 sendAlertMail(result[i].DeviceName, result[i].alertText, result[i].type,
                   result[i].subCustCd, result[i]._id, dbo, result[i].businessNm,
                   result[i].businessNmValues, response.emailRecipient);
@@ -110,7 +119,7 @@ function processAlerts() {
 }
 
 function getRecipientMail(dbo, data){
-  gomos.gomosLog(TRACE_DEV,"This is call of getRecipient", data.referenceConfig);
+   gomos.gomosLog( logger,gConsole,TRACE_DEV,"This is call of getRecipient", data.referenceConfig);
   return new Promise((resolve, reject)=> { 
 
    dbo.collection("Devices")
@@ -139,7 +148,7 @@ function getRecipientMail(dbo, data){
         }
 
       }
-    gomos.gomosLog(TRACE_DEV,"This log of email of recipient ", emails);
+     gomos.gomosLog( logger,gConsole,TRACE_DEV,"This log of email of recipient ", emails);
       resolve({emailRecipient: emails.substring(0, emails.length - 1)
       });
     }
@@ -179,9 +188,9 @@ function sendAlertMail(DeviceName, strText, level, custCode, objId, dbo, busines
     transporter.sendMail(mailOptions, (err, info) => {
       if (err) {
         gomos.errorCustmHandler(NAMEOFSERVICE,"sendAlertMail","",err); 
-        return gomos.gomosLog(TRACE_PROD,"this is sendMail Error",err);
+        return  gomos.gomosLog( logger,gConsole,TRACE_PROD,"this is sendMail Error",err);
       }
-      gomos.gomosLog(TRACE_PROD,"This is Message Sent", info.messageId)
+       gomos.gomosLog( logger,gConsole,TRACE_PROD,"This is Message Sent", info.messageId)
       //Update processed flag in 'Alerts'
       updateAlerts(objId, dbo);
     }); 
@@ -195,7 +204,7 @@ async function getAllconfig() {
   alertSrvcSchedule = await gomosSchedule.getServiceConfig(
     dbo,
     NAMEOFSERVICE,
-    "alertSrvc"
+    "alertSrvc",logger,gConsole
   );
 
 }
@@ -224,6 +233,11 @@ module.exports = function (app) {
   });
   setTimeout(function () {
   //getServiceConfig();
+  if(process.argv[4] == SERVICE_VALUE ){
+    console.log(process.argv[4]);
+    gConsole = true;
+    console.log(gConsole)
+  }
   getAllconfig()
   setTimeout(function () {
     alertSrvc = app;

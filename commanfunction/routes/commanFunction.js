@@ -3,21 +3,57 @@ var dateTime = require("node-datetime");
 var fs = require("fs");
 var dt = dateTime.create();
 var formattedDate = dt.format("Y-m-d");
+const { Console } = require('console');
+
+// Custom simple logger
+// const logger = new Console({ stdout: output, stderr: errorOutput });
+exports.createConsole = function(output,errorOutput){
+  return  new Console({ stdout: output, stderr: errorOutput });
+}
+
 exports.gomosLog = function(x){
-    if(process.argv[3] >= arguments[0]){
-       var  currTime = new Date();
-      if(arguments[2] instanceof Object){
-        console.log(currTime.getHours()+":"+currTime.getMinutes()+":"+currTime.getSeconds()+"."+currTime.getMilliseconds()+"-"+arguments[1]);
-        console.log(arguments[2]);
-      }else if(arguments.length == 2){
-        console.log( currTime.getHours()+":"+currTime.getMinutes()+":"+currTime.getSeconds()+"."+currTime.getMilliseconds()+"-"+arguments[1]);
+  if(process.argv[3] >= arguments[2]){
+     let  currTime = new Date();
+     let logger = arguments[0];
+     let logToGlobalConsole  =   arguments[1];
+    if(arguments[4] instanceof Object){
+      logger.log(currTime.getHours()+":"+currTime.getMinutes()+":"+currTime.getSeconds()+"."+currTime.getMilliseconds()+"-"+arguments[3]);
+      logger.log(arguments[4]);
+      if(logToGlobalConsole == true){
+        console.log(currTime.getHours()+":"+currTime.getMinutes()+":"+currTime.getSeconds()+"."+currTime.getMilliseconds()+"-"+arguments[3]);
+        console.log(arguments[4])
       }
-      else{
-        console.log( currTime.getHours()+":"+currTime.getMinutes()+":"+currTime.getSeconds()+"."+currTime.getMilliseconds()+"-"+arguments[1]+" ["+arguments[2]+ "]");
+    }else if(arguments.length == 4){
+      logger.log( currTime.getHours()+":"+currTime.getMinutes()+":"+currTime.getSeconds()+"."+currTime.getMilliseconds()+"-"+arguments[3]);
+      if(logToGlobalConsole == true){
+      console.log( currTime.getHours()+":"+currTime.getMinutes()+":"+currTime.getSeconds()+"."+currTime.getMilliseconds()+"-"+arguments[3]);        
       }
-   
     }
+    else{
+      logger.log( currTime.getHours()+":"+currTime.getMinutes()+":"+currTime.getSeconds()+"."+currTime.getMilliseconds()+"-"+arguments[3]+" ["+arguments[4]+ "]");
+      if(logToGlobalConsole == true){
+        console.log( currTime.getHours()+":"+currTime.getMinutes()+":"+currTime.getSeconds()+"."+currTime.getMilliseconds()+"-"+arguments[3]+" ["+arguments[4]+ "]");
+      }
+    }
+ 
   }
+}
+
+// exports.gomosLog = function(x){
+//     if(process.argv[3] >= arguments[0]){
+//        var  currTime = new Date();
+//       if(arguments[2] instanceof Object){
+//         console.log(currTime.getHours()+":"+currTime.getMinutes()+":"+currTime.getSeconds()+"."+currTime.getMilliseconds()+"-"+arguments[1]);
+//         console.log(arguments[2]);
+//       }else if(arguments.length == 2){
+//         console.log( currTime.getHours()+":"+currTime.getMinutes()+":"+currTime.getSeconds()+"."+currTime.getMilliseconds()+"-"+arguments[1]);
+//       }
+//       else{
+//         console.log( currTime.getHours()+":"+currTime.getMinutes()+":"+currTime.getSeconds()+"."+currTime.getMilliseconds()+"-"+arguments[1]+" ["+arguments[2]+ "]");
+//       }
+   
+//     }
+//   }
  
   exports.unWantedLog = function(functionName,message){
     var DateTime = new Date().toISOString();

@@ -80,7 +80,7 @@ class Chartcom extends Component {
         for(var i = 0 ; i< keysofBsName.length; i++){
           console.log(this.getIdForChart(chartAxis,keysofBsName[i]));
       
-          if(this.getIdForChart(chartAxis,keysofBsName[i]) == "second-y-axis"){
+          if(this.getIdForChart(chartAxis,keysofBsName[i]) === "second-y-axis"){
             labelName1 += keysofBsName[i] + " ; ";
           }
           else{

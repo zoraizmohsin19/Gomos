@@ -7,21 +7,32 @@ const TRACE_DEBUG = 5;
 var  gomos = require("../../commanFunction/routes/commanFunction");
 var MongoClient = require("mongodb").MongoClient;
 var urlConn, dbName, dbo;
-
+var fs = require("fs");
+let dateTime = require("node-datetime");
+var dt = dateTime.create();
+var formattedDate = dt.format('Y-m-d');
+const output = fs.createWriteStream(`./mqqtSvrStd${formattedDate}.log`, { flags: "a" });
+const errorOutput = fs.createWriteStream(`./mqqtSvrErr${formattedDate}.log`, { flags: "a" });
+var logger = gomos.createConsole(output,errorOutput);
+const SERVICE_VALUE = 1;
+var gConsole = false;
+if(process.argv[4] == SERVICE_VALUE ){
+  gConsole = true;
+}
 function LastPayloadDataFn(socket){
 try {
- // gomos.gomosLog(TRACE_PROD,"New client connected  lastPayloadData comming");
+ //gomos.gomosLog( logger,gConsole,TRACE_PROD,"New client connected  lastPayloadData comming");
   var checkInterval;
   socket.on('lastPayloadClient', function(data) {
     var tempArray = [];
-    gomos.gomosLog(TRACE_PROD,"This is lastPayloadClient",data);
+   gomos.gomosLog( logger,gConsole,TRACE_PROD,"This is lastPayloadClient",data);
     setTimeout(function () {lastPayloadDataCall(socket,data,tempArray)}, 1000); 
     clearInterval(checkInterval);
     
     checkInterval =  setInterval(
       () =>
         // socket.on("disconnect", () => {clearInterval(checkInterval)
-        //   gomos.gomosLog(TRACE_TEST,"Client disconnected on onDeviceinstruction")
+        //  gomos.gomosLog( logger,gConsole,TRACE_TEST,"Client disconnected on onDeviceinstruction")
         // }),
 
       lastPayloadDataCall(socket,data,tempArray),
@@ -52,12 +63,12 @@ async  function lastPayloadDataCall(socket,data,tempArray){
       }
       criteria["payloadId"] = Arrayofpayload[i]
          var response = await getlastpayloadData(criteria);
-         gomos.gomosLog(TRACE_DEV,"THIS IS RESPONSE",response);
+        gomos.gomosLog( logger,gConsole,TRACE_DEV,"THIS IS RESPONSE",response);
         //  if(Object.keys(response).length !== 0 ){
         //   maindata.push(response);
         //   if(tempArray.length == 0){
         //     flag == true;
-        //     gomos.gomosLog(TRACE_DEV,"This is check tempArray.length", response);
+        //    gomos.gomosLog( logger,gConsole,TRACE_DEV,"This is check tempArray.length", response);
         //     tempArray.push(response)
         //   }
         //  }
@@ -67,12 +78,12 @@ async  function lastPayloadDataCall(socket,data,tempArray){
 
     }
     // for(let i = 0 ; i < maindata.length ; i++ ){
-      // gomos.gomosLog(TRACE_PROD,"This is check tempArray value", tempArray[i].createdTime);
-      // gomos.gomosLog(TRACE_PROD,"This is check maindata value", maindata[i].createdTime);
+      //gomos.gomosLog( logger,gConsole,TRACE_PROD,"This is check tempArray value", tempArray[i].createdTime);
+      //gomos.gomosLog( logger,gConsole,TRACE_PROD,"This is check maindata value", maindata[i].createdTime);
       //  if( maindata[i].createdTime.getTime() !== tempArray[i].createdTime.getTime() || flag == true){
         // if( maindata[i].createdTime.getTime() == tempArray[i].createdTime.getTime() || flag == true){
         // tempArray = maindata;
-        gomos.gomosLog(TRACE_PROD,"This is lastError data cheacking", maindata);
+       gomos.gomosLog( logger,gConsole,TRACE_PROD,"This is lastError data cheacking", maindata);
         socket.emit("lastPayloadServerData", maindata);
       //   break;
       //  }
@@ -95,7 +106,7 @@ async function getlastpayloadData(criteria){
           reject(err);
         }
         let object1 = {};
-        gomos.gomosLog(TRACE_DEV,"This is resultqwqw", result);
+       gomos.gomosLog( logger,gConsole,TRACE_DEV,"This is resultqwqw", result);
         if(result.length > 0){
            object1 = {
             payloadId : result[0].payloadId,
@@ -114,10 +125,10 @@ async function getlastpayloadData(criteria){
 }
 function ActivelastError(socket){
   try {
-    gomos.gomosLog(TRACE_TEST,"New client connected  ActivelastError");
+   gomos.gomosLog( logger,gConsole,TRACE_TEST,"New client connected  ActivelastError");
     var checkInterval;
     socket.on('lastErrorClientEmit', function(data) {
-      gomos.gomosLog(TRACE_TEST,"This is LastErrorClientEmit",data);
+     gomos.gomosLog( logger,gConsole,TRACE_TEST,"This is LastErrorClientEmit",data);
       setTimeout(function () {ActivelastErrorEmiter(socket,data)}, 1000)
       clearInterval(checkInterval);
       checkInterval = setInterval(
@@ -127,7 +138,7 @@ function ActivelastError(socket){
       );
   });
     socket.on("disconnect", () =>{   clearInterval(checkInterval);
-      gomos.gomosLog(TRACE_TEST,"Client disconnected on onDeviceinstruction")}); 
+     gomos.gomosLog( logger,gConsole,TRACE_TEST,"Client disconnected on onDeviceinstruction")}); 
   } catch (err) {
     gomos.errorCustmHandler(NAMEOFSERVICE,"ActivelastError"," THIS IS TRY CATCH ERROR",'',err)
   }
@@ -149,7 +160,7 @@ try {
   }else{
   var alertObj ={};
   if(result.length !=0){
-    gomos.gomosLog(TRACE_TEST,"THis is Data Which I sending To Last Error",result )
+   gomos.gomosLog( logger,gConsole,TRACE_TEST,"THis is Data Which I sending To Last Error",result )
     alertObj["sensorNm"] = result[0].sensorNm;
     alertObj["businessNm"] = result[0].businessNm;
     alertObj["shortName"] = result[0].shortName;
@@ -157,11 +168,11 @@ try {
     alertObj["criteria"] = result[0].criteria;
     alertObj["createdTime"] = result[0].createdTime;
     alertObj["alertText"] = result[0].alertText;
-    gomos.gomosLog(TRACE_TEST,"THis is Data Which I sending To Last Error",alertObj )
+   gomos.gomosLog( logger,gConsole,TRACE_TEST,"THis is Data Which I sending To Last Error",alertObj )
     socket.emit("lastErrorServerEmit", alertObj);
   }
   // else{
-  //   gomos.gomosLog(TRACE_TEST,"THis is Data Which I sending To Last Error",alertObj )
+  //  gomos.gomosLog( logger,gConsole,TRACE_TEST,"THis is Data Which I sending To Last Error",alertObj )
   //   socket.emit("lastErrorServerEmit", alertObj);
   // }
 }
@@ -173,10 +184,10 @@ try {
 
 function onDeviceinstruction(socket){
   try {
-    gomos.gomosLog(TRACE_DEBUG,"New client connected  onDeviceinstruction");
+   gomos.gomosLog( logger,gConsole,TRACE_DEBUG,"New client connected  onDeviceinstruction");
     var checkInterval;
     socket.on('onDeviceinstructionClientEvent', function(data) {
-      gomos.gomosLog(TRACE_DEBUG,"This is onDeviceinstructionClientEvent Data",data);
+     gomos.gomosLog( logger,gConsole,TRACE_DEBUG,"This is onDeviceinstructionClientEvent Data",data);
       setTimeout(function () {DeviceinstructionEmiter(socket,data)}, 1000)
       clearInterval(checkInterval);
       checkInterval = setInterval(
@@ -185,7 +196,7 @@ function onDeviceinstruction(socket){
         5000
       );
     });
-      socket.on("disconnect", () =>{ clearInterval(checkInterval); gomos.gomosLog(TRACE_PROD,"Client disconnected on onDeviceinstruction")}); 
+      socket.on("disconnect", () =>{ clearInterval(checkInterval);gomos.gomosLog( logger,gConsole,TRACE_PROD,"Client disconnected on onDeviceinstruction")}); 
   } catch (err) {
   gomos.errorCustmHandler(NAMEOFSERVICE,"onDeviceinstruction"," THIS IS TRY CATCH ERROR",'',err)
   }
@@ -197,8 +208,8 @@ function DeviceinstructionEmiter(socket,data){
       mac : data.mac,
       type: data.type
     }
-   gomos.gomosLog(TRACE_DEBUG,"this is second DeviceInstruction");
-    dbo.collection("DeviceInstruction").find(criteria).toArray(function (err, result) {
+  gomos.gomosLog( logger,gConsole,TRACE_DEBUG,"this is second DeviceInstruction");
+    dbo.collection("DeviceInstruction").find(criteria).sort({"createdTime": -1}).toArray(function (err, result) {
       if (err) {
         gomos.errorCustmHandler(NAMEOFSERVICE,"DeviceinstructionEmiter"," THIS IS QUERY ERROR ",'',err)
         // process.hasUncaughtExceptionCaptureCallback();
@@ -211,7 +222,7 @@ function DeviceinstructionEmiter(socket,data){
         var DeviceInstructionArray = [];
           for(var i =0; i< result.length ; i++){
             if(result[i].type == "SentInstruction"){
-              gomos.gomosLog(TRACE_PROD,"This is result data For sentInstruction",result[i]);
+             gomos.gomosLog( logger,gConsole,TRACE_PROD,"This is result data For sentInstruction",result[i]);
               var sentcommand= {};
               var channelName =result[i].sourceMsg.body.Channel;
               var ActionType =result[i].sourceMsg.ActionType;
@@ -220,6 +231,7 @@ function DeviceinstructionEmiter(socket,data){
               sentcommand["Channel"] = channelName;
               sentcommand["ActionType"] = ActionType;
               sentcommand["createdTime"] = createdTime;
+              sentcommand["referencekey"] = result[i].sourceMsg.Token;
               sentcommand["sourceMsg"]= {};
               var keysofJson = Object.keys(result[i].sourceMsg["body"]);
               var keysNeedToRemove = ["Channel"];
@@ -231,6 +243,7 @@ function DeviceinstructionEmiter(socket,data){
               for(var k =0; k< keysofJson.length; k++){
                 sentcommand["sourceMsg"][keysofJson[k]]  =   result[i].sourceMsg.body[keysofJson[k]];
               }
+             
               DeviceInstructionArray.push(sentcommand);
               json["DeviceInstruction"] = DeviceInstructionArray
             }
@@ -252,7 +265,7 @@ function onConnection(socket) {
   try{
     var checkInterval;
     socket.on('clientEvent', function(data) {
-    gomos.gomosLog(TRACE_DEV,"This is ClientsData",data);
+   gomos.gomosLog( logger,gConsole,TRACE_DEV,"This is ClientsData",data);
     setTimeout(function () {getApiAndEmit(socket,data)}, 1000)
     checkInterval = clearInterval(checkInterval);
       setInterval(
@@ -261,7 +274,7 @@ function onConnection(socket) {
        10000
       );
    });
-    socket.on("disconnect", () => { clearInterval(checkInterval);  gomos.gomosLog(TRACE_DEV,"Client disconnected")});
+    socket.on("disconnect", () => { clearInterval(checkInterval); gomos.gomosLog( logger,gConsole,TRACE_DEV,"Client disconnected")});
   }
   catch(err){
 gomos.errorCustmHandler(NAMEOFSERVICE,"onConnection","THIS IS Try Catch OF Function","",err);
@@ -271,10 +284,10 @@ gomos.errorCustmHandler(NAMEOFSERVICE,"onConnection","THIS IS Try Catch OF Funct
 
   const getApiAndEmit =  async function(socket,data){ 
     try{
-      gomos.gomosLog(TRACE_DEBUG,"This is getApiAndEmit Function");   
+     gomos.gomosLog( logger,gConsole,TRACE_DEBUG,"This is getApiAndEmit Function");   
       var mac = data.mac;
       var ObjectofModeData = await getmode({mac: mac,type: "SentManOverride"});
-      gomos.gomosLog(TRACE_DEV, "This is debug for ObjectofModeData",ObjectofModeData)
+     gomos.gomosLog( logger,gConsole,TRACE_DEV, "This is debug for ObjectofModeData",ObjectofModeData)
 
        dbo.collection("DeviceState")
        .find({ mac: mac})
@@ -284,7 +297,7 @@ gomos.errorCustmHandler(NAMEOFSERVICE,"onConnection","THIS IS Try Catch OF Funct
          }else{
          var deviceStateKey = Object.keys(result[0]);
          var keysToRemove2 = ["_id", "mac", "DeviceName","updatedTime","createdTime"];
-         // gomos.gomosLog(TRACE_DEV,"This Is key of identifire 1 Place",deviceStateKey);  
+         //gomos.gomosLog( logger,gConsole,TRACE_DEV,"This Is key of identifire 1 Place",deviceStateKey);  
          for (var l = 0; l < keysToRemove2.length; l++) {
            if (deviceStateKey.includes(keysToRemove2[l])) {
              deviceStateKey.splice(deviceStateKey.indexOf(keysToRemove2[l]), 1);
@@ -295,13 +308,13 @@ gomos.errorCustmHandler(NAMEOFSERVICE,"onConnection","THIS IS Try Catch OF Funct
         for(var k =0; k < deviceStateKey.length; k++){
           var name = deviceStateKey[k]
           var keyofCode = Object.keys(result[0][deviceStateKey[k]]);
-          gomos.gomosLog(TRACE_DEBUG,"This is SensorsKey",keyofCode);
+         gomos.gomosLog( logger,gConsole,TRACE_DEBUG,"This is SensorsKey",keyofCode);
           var sensorsArray= [];
           for(var i = 0; i< keyofCode.length; i++){
             var ActiveIdentifier = {};
             ActiveIdentifier['type'] = keyofCode[i];
           var devicebusinessNM = Object.keys(result[0][deviceStateKey[k]][keyofCode[i]]);
-          gomos.gomosLog(TRACE_DEBUG,"this devicebusinessNM",devicebusinessNM); 
+         gomos.gomosLog( logger,gConsole,TRACE_DEBUG,"this devicebusinessNM",devicebusinessNM); 
           var keysToRemove3 = ["sortName","displayPosition","valueChangeAt","dateTime","Type"];
             for (var l = 0; l < keysToRemove3.length; l++) {
               if (deviceStateKey.includes(keysToRemove2[l])) {
@@ -337,13 +350,13 @@ gomos.errorCustmHandler(NAMEOFSERVICE,"onConnection","THIS IS Try Catch OF Funct
  
   async  function getmode(criteria){
     try{
-      gomos.gomosLog(TRACE_DEV,"Cheacking Criteria",criteria )
+     gomos.gomosLog( logger,gConsole,TRACE_DEV,"Cheacking Criteria",criteria )
 return new Promise((resolve, reject)=>{
   dbo.collection("DeviceInstruction").find(criteria).toArray(function (err, result) {
     if (err) {
       reject(err);
     }
-    gomos.gomosLog(TRACE_DEV,"This is for ManulaOverride", result);
+   gomos.gomosLog( logger,gConsole,TRACE_DEV,"This is for ManulaOverride", result);
     if(result.length > 0){ 
 
        var  data = result[0].sourceMsg.body; 
@@ -371,7 +384,7 @@ function dbConnection(){
 }
 var mBoxApp = null;
 module.exports = function (app) {
- gomos.gomosLog(TRACE_PROD,"this started For Operating DashBoard");
+gomos.gomosLog( logger,gConsole,TRACE_PROD,"this started For Operating DashBoard");
   urlConn = app.locals.urlConn;
   dbName = app.locals.dbName;
   

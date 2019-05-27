@@ -224,7 +224,7 @@ background: #00C0EF !important;
 }
 .navright {
     display: inline;
-    /* float: right; */
+    float: right;
 }
 .spanNev {
     padding: 7px;

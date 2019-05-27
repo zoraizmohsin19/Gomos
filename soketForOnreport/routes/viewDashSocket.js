@@ -7,11 +7,22 @@ const TRACE_DEBUG = 5;
 var  gomos = require("../../commanFunction/routes/commanFunction");
 var MongoClient = require("mongodb").MongoClient;
 var urlConn, dbName, dbo;
-
+var fs = require("fs");
+let dateTime = require("node-datetime");
+var dt = dateTime.create();
+var formattedDate = dt.format('Y-m-d');
+const output = fs.createWriteStream(`./mqqtSvrStd${formattedDate}.log`, { flags: "a" });
+const errorOutput = fs.createWriteStream(`./mqqtSvrErr${formattedDate}.log`, { flags: "a" });
+var logger = gomos.createConsole(output,errorOutput);
+const SERVICE_VALUE = 1;
+var gConsole = false;
+if(process.argv[4] == SERVICE_VALUE ){
+  gConsole = true;
+}
 
  function onViewDashboard(socket){
    try {
-   gomos.gomosLog(TRACE_DEV,"this is connected OnViewDashboard");
+  gomos.gomosLog( logger,gConsole,TRACE_DEV,"this is connected OnViewDashboard");
   var  checkInterval;
     socket.on('lastUpdatedValue', function(data) {
        var spCd = data.spCd;
@@ -24,7 +35,7 @@ var urlConn, dbName, dbo;
            subCustCd: subCustCd,
            mac: mac,
           }
-     gomos.gomosLog(TRACE_DEBUG,"this data which comming from client",data);
+    gomos.gomosLog( logger,gConsole,TRACE_DEBUG,"this data which comming from client",data);
     setTimeout(function () {lastupdateddata(socket,data)}, 2000)
     clearInterval(checkInterval);     
     checkInterval =  setInterval(
@@ -44,7 +55,7 @@ var urlConn, dbName, dbo;
 
  function lastupdateddata(socket,criteria){
    try {
-    gomos.gomosLog(TRACE_DEBUG,"this is called ");
+   gomos.gomosLog( logger,gConsole,TRACE_DEBUG,"this is called ");
     dbo.collection("DeviceState")
     .find({ mac: criteria.mac})
     .toArray(function (err, result) {
@@ -52,7 +63,7 @@ var urlConn, dbName, dbo;
       }
       var deviceStateKey = Object.keys(result[0]);
       var keysToRemove2 = ["_id", "mac", "DeviceName","updatedTime","createdTime"];
-      gomos.gomosLog(TRACE_DEV,"This Is key of identifire 1 Place",deviceStateKey);  
+     gomos.gomosLog( logger,gConsole,TRACE_DEV,"This Is key of identifire 1 Place",deviceStateKey);  
       for (var l = 0; l < keysToRemove2.length; l++) {
         if (deviceStateKey.includes(keysToRemove2[l])) {
           deviceStateKey.splice(deviceStateKey.indexOf(keysToRemove2[l]), 1);
@@ -63,12 +74,12 @@ var urlConn, dbName, dbo;
     for(var k =0; k < deviceStateKey.length; k++){
       var name = deviceStateKey[k]
       var keyofCode = Object.keys(result[0][deviceStateKey[k]]);
-     gomos.gomosLog(TRACE_DEBUG,"This is SensorsKey",keyofCode);
+    gomos.gomosLog( logger,gConsole,TRACE_DEBUG,"This is SensorsKey",keyofCode);
     // var sensorsArray= [];
     for(var i = 0; i< keyofCode.length; i++){
       var ActiveIdentifier = {};
      var devicebusinessNM = Object.keys(result[0][deviceStateKey[k]][keyofCode[i]]);
-     gomos.gomosLog(TRACE_DEBUG,"this devicebusinessNM",devicebusinessNM); 
+    gomos.gomosLog( logger,gConsole,TRACE_DEBUG,"this devicebusinessNM",devicebusinessNM); 
     var keysToRemove3 = ["sortName","displayPosition","valueChangeAt","dateTime","Type"];
     for (var l = 0; l < keysToRemove3.length; l++) {
       if (deviceStateKey.includes(keysToRemove2[l])) {
@@ -86,7 +97,7 @@ var urlConn, dbName, dbo;
   //  json[name] = sensorsArray;
   json["sensors"]  = sensorsArray;
   }
-  gomos.gomosLog(TRACE_DEBUG, "This is View Dashboard event Log for state of channel and Sensors", json)
+ gomos.gomosLog( logger,gConsole,TRACE_DEBUG, "This is View Dashboard event Log for state of channel and Sensors", json)
   socket.emit("onViewDashboard", json)
 }
 );       
@@ -115,7 +126,7 @@ var urlConn, dbName, dbo;
   }
 
 module.exports = function (app) {
-    gomos.gomosLog(TRACE_PROD,"This started For View Dashboard  ");
+   gomos.gomosLog( logger,gConsole,TRACE_PROD,"This started For View Dashboard  ");
     urlConn = app.locals.urlConn;
     dbName = app.locals.dbName;
     dbConnection();

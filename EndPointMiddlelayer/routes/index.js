@@ -16,7 +16,16 @@ const TRACE_TEST  = 3;
 const TRACE_DEV   = 4;
 const TRACE_DEBUG = 5;
 var  gomos = require("../../commanFunction/routes/commanFunction");
-
+var dt = dateTime.create();
+var formattedDate = dt.format('Y-m-d');
+const output = fs.createWriteStream(`./midllelayerAPIStd${formattedDate}.log`, { flags: "a" });
+const errorOutput = fs.createWriteStream(`./midllelayerAPIErr${formattedDate}.log`, { flags: "a" });
+var logger = gomos.createConsole(output,errorOutput);
+const SERVICE_VALUE = 1;
+var gConsole = false;
+if(process.argv[4] == SERVICE_VALUE ){
+  gConsole = true;
+}
 /* GET home page. */
 router.get("/", function (req, res, next) {
   res.render("index", { title: "Express" });
@@ -43,7 +52,7 @@ router.post("/sendto", function (req, res, next) {
   var Date =  body.Date;
  // var assetId = body.assetId;
   var message = body.message;
-  gomos.gomosLog(TRACE_DEBUG,"Post method hit by endpoint thier value"+ ":"+DeviceName+":"+payloadId+":"+subCustCd+":"+payloadId+":"+DeviceName+":"+custCd,message ); 
+  gomos.gomosLog( logger,gConsole,TRACE_DEBUG,"Post method hit by endpoint thier value"+ ":"+DeviceName+":"+payloadId+":"+subCustCd+":"+payloadId+":"+DeviceName+":"+custCd,message ); 
   MongoClient.connect(
     urlConn,
     { useNewUrlParser: true },
@@ -59,13 +68,13 @@ router.post("/sendto", function (req, res, next) {
       .toArray(function (err,result){
         var SubCustomersValidation = '';
             if (result.length > 0) {  
-            gomos.gomosLog(TRACE_TEST,"SubCustomers Validation  true ", result.length); 
+            gomos.gomosLog( logger,gConsole,TRACE_TEST,"SubCustomers Validation  true ", result.length); 
               // db.collection("Assets")
               // .find({subCustCd:subCustCd})
               // .toArray(function (err,result){
               //   var SubCustomersValidation = '';
               // if (result.length > 0) {
-            gomos.gomosLog(TRACE_TEST,"assetId Validation  true ", result.length); 
+            gomos.gomosLog( logger,gConsole,TRACE_TEST,"assetId Validation  true ", result.length); 
             db.collection("Devices")
             .find({DeviceName: DeviceName})
               .toArray(function (err, result) {
@@ -78,7 +87,7 @@ router.post("/sendto", function (req, res, next) {
                   if (result.length > 0) { 
                     var mac = result[0].mac;
                     var assetId = result[0].assetId;
-                  gomos.gomosLog(TRACE_TEST,"Devices Validation  true "+mac , result.length); 
+                  gomos.gomosLog( logger,gConsole,TRACE_TEST,"Devices Validation  true "+mac , result.length); 
                     db.collection("Payloads")
                     .find({mac: mac, payloadId: payloadId })
                       .toArray(function (err, result) {
@@ -89,11 +98,11 @@ router.post("/sendto", function (req, res, next) {
                       //  console.log(result);
                       try {
                         if (result.length > 0) {
-                        gomos.gomosLog(TRACE_TEST,"Payloads Validation  true "+payloadId, result.length); 
+                        gomos.gomosLog( logger,gConsole,TRACE_TEST,"Payloads Validation  true "+payloadId, result.length); 
                           var sensorNms;
                           sensorNms = result[0].sensors;
                       if (sensorNms != undefined) {
-                            gomos.gomosLog(TRACE_DEBUG,"sensorNms Not Undefined",sensorNms); 
+                            gomos.gomosLog( logger,gConsole,TRACE_DEBUG,"sensorNms Not Undefined",sensorNms); 
                             sensorKeys = Object.keys(sensorNms); //conatins only the sensor names.
                           var ConvertedSensors = {};
 
@@ -111,7 +120,7 @@ router.post("/sendto", function (req, res, next) {
                             }
                             
                           }
-                          gomos.gomosLog(TRACE_DEBUG,"ConvertedSensors  sensors key value",ConvertedSensors); 
+                          gomos.gomosLog( logger,gConsole,TRACE_DEBUG,"ConvertedSensors  sensors key value",ConvertedSensors); 
                           translateMethod(ConvertedSensors,message, DeviceName,payloadId,subCustCd, custCd, Date,db, res,mac,assetId);
                         }       
                       }
@@ -165,7 +174,7 @@ router.post("/sendto", function (req, res, next) {
             finalSensors[key] = value;
           }
       }
-      gomos.gomosLog(TRACE_TEST,"translateMeg key value",finalSensors);      
+      gomos.gomosLog( logger,gConsole,TRACE_TEST,"translateMeg key value",finalSensors);      
       if(sensorsNotFound.length == 0 ){
         successUpdate(DeviceName,payloadId,subCustCd, custCd,Date, message, finalSensors,res,db,"success",mac,assetId)
             }
@@ -204,7 +213,7 @@ function successUpdate(DeviceName,payloadId,subCustCd, custCd,DateTime, message,
         gomos.errorCustmHandler(NAMEOFSERVICE,"successUpdate",'THIS IS INSERTING ERROR','',err)
         process.hasUncaughtExceptionCaptureCallback();
       } else {
-        gomos.gomosLog(TRACE_PROD,"Entry saved in Alert With Translated Msg Collection");
+        gomos.gomosLog( logger,gConsole,TRACE_PROD,"Entry saved in Alert With Translated Msg Collection");
         res.json(responseTosend);
 
       }

@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import "./activeDashbord.css"
-import { Table, DropdownButton, ButtonToolbar, MenuItem, Button, Modal, NavItem, Nav } from 'react-bootstrap';
+import { Table, DropdownButton, MenuItem, Modal, NavItem, Nav } from 'react-bootstrap';
 import SensorsActive from "../layout/widgetofSensors/sensorsForActive";
 import axios from "axios";
 import moment from 'moment';
@@ -17,7 +17,7 @@ class activeDashbord extends Component {
     super();
     this.state = {
       value: { min: 2, max: 10 },
-      endpoint: "http://34.244.151.117:4001",
+      endpoint: "http://localhost:4001",
       channelName: [],
       actionTypes: [],
       formStructure: '',
@@ -107,7 +107,10 @@ class activeDashbord extends Component {
       rowClickedId: "",
       age: "",
       DefaulaManualOverride: {},
-      DefaulaCopyManualOverride: {}
+      DefaulaCopyManualOverride: {},
+      OpratingDashBoardEnable: Boolean,
+      ActiveDashBoardEnable : Boolean,
+      selectcteDeviceTime : moment(new Date())
 
     }
 
@@ -136,7 +139,7 @@ class activeDashbord extends Component {
       let m = date.getMonth();
       let d = date.getDate();
       var arr = time.split(":");
-      var d2 = new Date()
+  
       var newDate = new Date(y, m, d, arr[0], arr[1]);
       // let minute = Number(addMinutes)
       // console.log(newDate);
@@ -169,9 +172,9 @@ class activeDashbord extends Component {
   onChange = e => this.setState({ [e.target.name]: e.target.value });
   Submit() {
     var me = this;
-    const { configkeyInput, configkeyInputKeyValue, selectedAtionType, selectedChannelB, formStructure, DefaulaManualOverride } = this.state;
+    const { configkeyInput, configkeyInputKeyValue, selectedAtionType, selectedChannelB, formStructure } = this.state;
     var dataToSendApi = {};
-    if (formStructure == "table") {
+    if (formStructure === "table") {
       var tempArray = ["ON", "OFF"];
       for (var i = 0; i < 2; i++) {
         for (var key = 0; key < configkeyInput.length; key++) {
@@ -179,9 +182,9 @@ class activeDashbord extends Component {
           me.setState({ configkeyInputKeyValue: configkeyInputKeyValue })
         };
       }
-      for (var i = 0; i < 2; i++) {
-        for (var key = 0; key < configkeyInput.length; key++) {
-          if (configkeyInputKeyValue[tempArray[i] + configkeyInput[key]] == undefined || configkeyInputKeyValue[tempArray[i] + configkeyInput[key]] == null || configkeyInputKeyValue[tempArray[i] + configkeyInput[key]] == '') {
+      for (let i = 0; i < 2; i++) {
+        for (let key = 0; key < configkeyInput.length; key++) {
+          if (configkeyInputKeyValue[tempArray[i] + configkeyInput[key]] === undefined || configkeyInputKeyValue[tempArray[i] + configkeyInput[key]] == null || configkeyInputKeyValue[tempArray[i] + configkeyInput[key]] === '') {
             configkeyInputKeyValue[tempArray[i] + configkeyInput[key] + "error"] = "Please provide" + tempArray[i] + " : " + configkeyInput[key] + " error";
             me.setState({ configkeyInputKeyValue: configkeyInputKeyValue })
             // alert(tempArray[i]+key);
@@ -193,20 +196,20 @@ class activeDashbord extends Component {
         }
       }
 
-      for (var key = 0; key < configkeyInput.length; key++) {
+      for (let key = 0; key < configkeyInput.length; key++) {
         dataToSendApi[configkeyInput[key]] = dateFormat(configkeyInputKeyValue["ON" + configkeyInput[key]], "ss:MM:HH:dd:mm:yy") + "," + dateFormat(configkeyInputKeyValue["OFF" + configkeyInput[key]], "ss:MM:HH:dd:mm:yy");
       };
       //  dataToSendApi[selectedChannelB] = 1; 
       ////console.log(dataToSendApi)
     }
-    if (formStructure == "1-input") {
-      for (var key = 0; key < configkeyInput.length; key++) {
+    if (formStructure === "1-input") {
+      for (let key = 0; key < configkeyInput.length; key++) {
         configkeyInputKeyValue[configkeyInput[key] + "error"] = "";
         me.setState({ configkeyInputKeyValue: configkeyInputKeyValue })
       }
 
-      for (var key = 0; key < configkeyInput.length; key++) {
-        if (configkeyInputKeyValue[configkeyInput[key]] == undefined || configkeyInputKeyValue[configkeyInput[key]] == null || configkeyInputKeyValue[configkeyInput[key]] == '') {
+      for (let key = 0; key < configkeyInput.length; key++) {
+        if (configkeyInputKeyValue[configkeyInput[key]] === undefined || configkeyInputKeyValue[configkeyInput[key]] == null || configkeyInputKeyValue[configkeyInput[key]] === '') {
           configkeyInputKeyValue[configkeyInput[key] + "error"] = "Please provide : " + configkeyInput[key] + " error";
           me.setState({ configkeyInputKeyValue: configkeyInputKeyValue })
           // alert(tempArray[i]+key);
@@ -214,40 +217,40 @@ class activeDashbord extends Component {
           return;
         }
       }
-      for (var key = 0; key < configkeyInput.length; key++) {
+      for (let key = 0; key < configkeyInput.length; key++) {
         dataToSendApi[configkeyInput[key]] = configkeyInputKeyValue[configkeyInput[key]];
       }
       // this.callApiForAction("Schedule",dataToSendApi);
       //alert(dataToSendApi)
       //console.log(dataToSendApi)
     }
-    if (formStructure == "2-input") {
-      for (var key = 0; key < configkeyInput.length; key++) {
-        configkeyInputKeyValue[configkeyInput[key] + "date" + "error"] = "";
-        configkeyInputKeyValue[configkeyInput[key] + "hour" + "error"] = "";
-        configkeyInputKeyValue[configkeyInput[key] + "min" + "error"] = "";
+    if (formStructure === "2-input") {
+      for (let key = 0; key < configkeyInput.length; key++) {
+        configkeyInputKeyValue[configkeyInput[key] + "dateerror"] = "";
+        configkeyInputKeyValue[configkeyInput[key] + "hourerror"] = "";
+        configkeyInputKeyValue[configkeyInput[key] + "minerror"] = "";
         // configkeyInputKeyValue[key+"Meridiem"+"error"] ="";
         me.setState({ configkeyInputKeyValue: configkeyInputKeyValue })
       }
-      for (var key = 0; key < configkeyInput.length; key++) {
-        if (configkeyInputKeyValue["toggle"] == false) {
-          if (configkeyInputKeyValue[configkeyInput[key] + "date"] == undefined || configkeyInputKeyValue[configkeyInput[key] + "date"] == null || configkeyInputKeyValue[configkeyInput[key] + "date"] == '') {
-            configkeyInputKeyValue[configkeyInput[key] + "date" + "error"] = "Please provide : " + configkeyInput[key] + "date" + " error";
+      for (let key = 0; key < configkeyInput.length; key++) {
+        if (configkeyInputKeyValue["toggle"] === false) {
+          if (configkeyInputKeyValue[configkeyInput[key] + "date"] === undefined || configkeyInputKeyValue[configkeyInput[key] + "date"] === null || configkeyInputKeyValue[configkeyInput[key] + "date"] === '') {
+            configkeyInputKeyValue[configkeyInput[key] + "dateerror"] = "Please provide : " + configkeyInput[key] + "dateerror";
             me.setState({ configkeyInputKeyValue: configkeyInputKeyValue })
             // alert(tempArray[i]+key);
             // document.getElementById(key+"date").focus();
             return;
           }
         }
-        if (configkeyInputKeyValue[configkeyInput[key] + "hour"] == undefined || configkeyInputKeyValue[configkeyInput[key] + "hour"] == null || configkeyInputKeyValue[configkeyInput[key] + "hour"] == '') {
-          configkeyInputKeyValue[configkeyInput[key] + "hour" + "error"] = "Please provide : " + configkeyInput[key] + "hour" + " error";
+        if (configkeyInputKeyValue[configkeyInput[key] + "hour"] === undefined || configkeyInputKeyValue[configkeyInput[key] + "hour"] === null || configkeyInputKeyValue[configkeyInput[key] + "hour"] === '') {
+          configkeyInputKeyValue[configkeyInput[key] + "hourerror"] = "Please provide : " + configkeyInput[key] + "hourerror";
           me.setState({ configkeyInputKeyValue: configkeyInputKeyValue })
           document.getElementById(configkeyInput[key] + "hour").focus();
           return;
         }
 
-        if (configkeyInputKeyValue[configkeyInput[key] + "min"] == undefined || configkeyInputKeyValue[configkeyInput[key] + "min"] == null || configkeyInputKeyValue[configkeyInput[key] + "min"] == '') {
-          configkeyInputKeyValue[configkeyInput[key] + "min" + "error"] = "Please provide : " + configkeyInput[key] + "min" + " error";
+        if (configkeyInputKeyValue[configkeyInput[key] + "min"] === undefined || configkeyInputKeyValue[configkeyInput[key] + "min"] === null || configkeyInputKeyValue[configkeyInput[key] + "min"] === '') {
+          configkeyInputKeyValue[configkeyInput[key] + "minerror"] = "Please provide : " + configkeyInput[key] + "minerror";
           me.setState({ configkeyInputKeyValue: configkeyInputKeyValue })
           document.getElementById(configkeyInput[key] + "min").focus();
           return;
@@ -255,9 +258,9 @@ class activeDashbord extends Component {
 
       }
 
-      for (var key = 0; key < configkeyInput.length; key++) {
-        if (configkeyInputKeyValue["toggle"] == true) {
-          dataToSendApi[configkeyInput[key]] = "00:" + configkeyInputKeyValue[configkeyInput[key] + "hour"] + ":" + configkeyInputKeyValue[configkeyInput[key] + "min"] + ":" + "*:*:*";
+      for (let key = 0; key < configkeyInput.length; key++) {
+        if (configkeyInputKeyValue["toggle"] === true) {
+          dataToSendApi[configkeyInput[key]] = "00:" + configkeyInputKeyValue[configkeyInput[key] + "hour"] + ":" + configkeyInputKeyValue[configkeyInput[key] + "min"] + ":*:*:*";
         }
         else {
           dataToSendApi[configkeyInput[key]] = "00:" + configkeyInputKeyValue[configkeyInput[key] + "hour"] + ":" + configkeyInputKeyValue[configkeyInput[key] + "min"] + ":" + dateFormat(configkeyInputKeyValue[configkeyInput[key] + "date"], "dd:mm:yy");
@@ -269,8 +272,8 @@ class activeDashbord extends Component {
     //alert(this.state.channelName)
 
     //console.log(this.state.channelName)
-    if (this.state.channelName.length != 0) {
-      if (this.state.selectedChannelB == "") {
+    if (this.state.channelName.length !== 0) {
+      if (this.state.selectedChannelB === "") {
         //alert("please Select Channel Name");
         this.errorganerator("Please Select Channel Name !")
         return;
@@ -312,7 +315,7 @@ class activeDashbord extends Component {
     let DefaulaManualOverride = JSON.parse(JSON.stringify(DefaulaCopyManualOverride));
     for (let i = 0; i < configkeyInput.length; i++) {
       configkeyInputKeyValue[configkeyInput[i]] = DefaulaManualOverride[configkeyInput[i]];
-      configkeyInputKeyValue[configkeyInput[i] + "toggle"] = (DefaulaManualOverride[configkeyInput[i]]["pendingMode"] == 0) ? false : true;
+      configkeyInputKeyValue[configkeyInput[i] + "toggle"] = (DefaulaManualOverride[configkeyInput[i]]["pendingMode"] === 0) ? false : true;
       if (DefaulaManualOverride[configkeyInput[i]]["pendingMode"] !== DefaulaManualOverride[configkeyInput[i]]["activeMode"]) {
         configkeyInputKeyValue[configkeyInput[i] + "confirmation"] = true;
       } else {
@@ -332,14 +335,14 @@ class activeDashbord extends Component {
 
     var dataToSendApi = {};
     var me = this;
-    const { selectedAtionType, channelAlerrModel, channelArray, configkeyInput, DefaulaCopyManualOverride, configkeyInputKeyValue } = this.state;
+    const { selectedAtionType,  channelArray, configkeyInput, DefaulaCopyManualOverride, configkeyInputKeyValue } = this.state;
     console.log(DefaulaCopyManualOverride);
     console.log(configkeyInputKeyValue);
     for (var key = 0; key < configkeyInput.length; key++) {
       if (configkeyInputKeyValue[configkeyInput[key]]["pendingMode"] !== DefaulaCopyManualOverride[configkeyInput[key]]["pendingMode"]) {
         configkeyInputKeyValue[configkeyInput[key] + "confirmation"] = true;
         let jsontemp = { "mode": configkeyInputKeyValue[configkeyInput[key]]["pendingMode"] }
-        if (configkeyInputKeyValue[configkeyInput[key]]["pendingMode"] == 1 && this.getChannelCurrentvalue(configkeyInput[key]) === 1) {
+        if (configkeyInputKeyValue[configkeyInput[key]]["pendingMode"] === 1 && this.getChannelCurrentvalue(configkeyInput[key]) === 1) {
           jsontemp["action"] = 0;
           console.log(channelArray)
 
@@ -361,9 +364,9 @@ class activeDashbord extends Component {
     me.state.submitDataObj.isDaillyJob = "";
     me.state.submitDataObj.ChannelName = "";
     me.setState({ submitDataObj: me.state.submitDataObj, configkeyInputKeyValue: configkeyInputKeyValue });
-
-    me.callApiForAction();
     me.callApiForManoverride();
+    me.callApiForAction();
+    
   }
   SubmitForParameter() {
     // var me = this;
@@ -385,7 +388,7 @@ class activeDashbord extends Component {
   }
   callApiForClimateSave() {
     var me = this;
-    axios.post("http://34.244.151.117:3992/ActiveClimatesave", me.state.submitDataObj)
+    axios.post("http://localhost:3992/ActiveClimatesave", me.state.submitDataObj)
       .then(json => {
         // if(json["data"] == "success"){
 
@@ -397,6 +400,8 @@ class activeDashbord extends Component {
   }
   callApiForManoverride() {
     var me = this;
+    let dataToSendApi = {}
+    const { selectedAtionType, configkeyInput, configkeyInputKeyValue } = this.state;
     let Obj = {
       subCustCd: me.state.submitDataObj.subCustCd,
       CustCd: me.state.submitDataObj.CustCd,
@@ -406,13 +411,12 @@ class activeDashbord extends Component {
       isDaillyJob: "",
       ChannelName: ""
     };
-    let dataToSendApi = {}
-    const { selectedAtionType, configkeyInput, configkeyInputKeyValue } = this.state;
+   
     for (var key = 0; key < configkeyInput.length; key++) {
       dataToSendApi[configkeyInput[key]] = configkeyInputKeyValue[configkeyInput[key]]
     }
     Obj.dataBody = dataToSendApi;
-    axios.post("http://34.244.151.117:3992/ActivesaveForManualOver", Obj)
+    axios.post("http://localhost:3992/ActivesaveForManualOver", Obj)
       .then(json => {
         // if(json["data"] == "success"){
         me.handleChange(this.state.selectedevent)
@@ -426,7 +430,7 @@ class activeDashbord extends Component {
   }
   callApiForManoverrideForTiles() {
     var me = this;
-    axios.post("http://34.244.151.117:3992/ActivesaveForManualOverForTiles", me.state.submitDataObj)
+    axios.post("http://localhost:3992/ActivesaveForManualOverForTiles", me.state.submitDataObj)
       .then(json => {
         // if(json["data"] == "success"){
 
@@ -438,28 +442,42 @@ class activeDashbord extends Component {
   }
   callApiForAction() {
     var me = this;
-    //console.log(me.state.submitDataObj)
-    //alert(me.state.submitDataObj)
-    axios.post("http://34.244.151.117:3992/ActiveDAction", me.state.submitDataObj)
+    axios.post("http://localhost:3992/ActiveDAction", me.state.submitDataObj)
       .then(json => {
-        if (json["data"] == "success") {
+        if (json["data"] === "success") {
 
-          swal("Success!", "You Send Action!", "success");
+          swal("Success!", "Command Sent!", "success");
         }
         else {
-          swal("Error!", "You Send Action!", "error");
+          swal("Error!", "Command Sent!", "error");
 
         }
         //console.log(json)
       });
   }
-  callApiForActionForButtonclick(submitDataObj) {
+  callApiForLevel4(remark) {
     var me = this;
-    //console.log(me.state.submitDataObj)
-    //alert(me.state.submitDataObj)
-    axios.post("http://34.244.151.117:3992/ActiveDAction", submitDataObj)
+    let temp = {};
+    temp = JSON.parse(JSON.stringify(me.state.submitDataObj));
+    temp.remark = remark
+    console.log("This is callApiLevel4");
+    console.log(temp)
+    axios.post("http://localhost:3992/ActiveAPiForLevel4", temp)
       .then(json => {
-        if (json["data"] == "success") {
+        if (json["data"] === "success") {
+
+          swal("Success!", "Command Sent!", "success");
+        }
+        else {
+          swal("Error!", "Command Sent!", "error");
+
+        }
+      });
+  }
+  callApiForActionForButtonclick(submitDataObj) {
+    axios.post("http://localhost:3992/ActiveDAction", submitDataObj)
+      .then(json => {
+        if (json["data"] === "success") {
 
           swal("Success!", "You Send Action!", "success");
         }
@@ -476,42 +494,43 @@ class activeDashbord extends Component {
   }
   handleShowExecuted() {
     var me = this;
-    this.state.filter.TypeOfJobs = "ExecutedJob"
-    me.setState({ filter: this.state.filter });
+    me.state.filter.TypeOfJobs = "ExecutedJob"
+    me.setState({ filter: me.state.filter });
     me.fetch();
   }
   handleShowPending() {
     var me = this;
-    this.state.filter.TypeOfJobs = "PendingJob"
-    me.setState({ filter: this.state.filter });
+    me.state.filter.TypeOfJobs = "PendingJob"
+    me.setState({ filter: me.state.filter });
     this.fetch();
   }
   MdateFilter(value) {
-    this.state.filter.Fdate = value;
+    var me = this;
+    me.state.filter.Fdate = value;
 
-    this.setState({ filter: this.state.filter });
+    me.setState({ filter: me.state.filter });
     // //alert(value);
   }
   handleChange(selectedevent) {
     //alert(selectedAtionType);
     var me = this;
-    var index = this.state.actionTypes.findIndex(element => element.name == selectedevent);
+    var index = this.state.actionTypes.findIndex(element => element.name === selectedevent);
     var objectpayload = this.state.actionTypes[index];
     var formStructure = objectpayload.formStructure;
     var selectedAtionType = objectpayload.payloadId
-    if (formStructure == "SentCommand" ||
-      formStructure == "ActiveCommand" ||
-      formStructure == "ExecutedJobs" ||
-      formStructure == "PendingJobs" ||
-      formStructure == "ClimateParameter" ||
-      formStructure == "ClimateControl"
+    if (formStructure === "SentCommand" ||
+      formStructure === "ActiveCommand" ||
+      formStructure === "ExecutedJobs" ||
+      formStructure === "PendingJobs" ||
+      formStructure === "ClimateParameter" ||
+      formStructure === "ClimateControl"
     ) {
       me.setState({ formStructure: formStructure, selectedevent: selectedevent, selectedAtionType: selectedAtionType });
-      if (formStructure == "ExecutedJobs") {
+      if (formStructure === "ExecutedJobs") {
         this.setState({ formStructure: "ActiveAndPending" });
         this.handleShowExecuted()
       }
-      if (formStructure == "ActiveCommand") {
+      if (formStructure === "ActiveCommand") {
         this.fetchActiveJob();
         this.setState({ formStructure: "ActiveCommand" });
        
@@ -521,7 +540,7 @@ class activeDashbord extends Component {
       //   this.setState({formStructure: "ClimateParameter"});
 
       // }
-      if (formStructure == "PendingJobs") {
+      if (formStructure === "PendingJobs") {
         this.setState({ formStructure: "ActiveAndPending" });
         this.handleShowPending()
       }
@@ -545,7 +564,7 @@ class activeDashbord extends Component {
 
         var keysofObj = Object.keys(objectpayload.sensors)
         //console.log(objectpayload);
-        if (formStructure == "manualOverride") {
+        if (formStructure === "manualOverride") {
           // this.fetchFromManualOverride();
 
           this.manualOverrideProcess(objectpayload, selectedAtionType, selectedevent);
@@ -557,9 +576,9 @@ class activeDashbord extends Component {
           console.log("allBusinessName");
           console.log(allBusinessName);
 
-          if (formStructure == "table") {
-            var configkeyInputKeyValue = {};
-            var tempArray = ["ON", "OFF"];
+          if (formStructure === "table") {
+            let configkeyInputKeyValue = {};
+            let tempArray = ["ON", "OFF"];
             for (var i = 0; i < 2; i++) {
               for (let [key, value] of Object.entries(objectpayload.sensors[keysofObj[0]])) {
                 configkeyInputKeyValue[tempArray[i] + value] = "";
@@ -572,17 +591,17 @@ class activeDashbord extends Component {
               channelName: arrayOfChannel, selectedevent: selectedevent,
               configkeyInput: allBusinessName, configkeyInputKeyValue: configkeyInputKeyValue
             });
-          } else if (formStructure == "2-input") {
-            var configkeyInputKeyValue = {};
+          } else if (formStructure === "2-input") {
+            let configkeyInputKeyValue = {};
             //alert("this else of 2-input");
             configkeyInputKeyValue["toggle"] = false;
             for (let [key, value] of Object.entries(objectpayload.sensors[keysofObj[0]])) {
               configkeyInputKeyValue[value + "date"] = "";
               configkeyInputKeyValue[value + "hour"] = "";
               configkeyInputKeyValue[value + "min"] = "";
-              configkeyInputKeyValue[value + "date" + "error"] = "";
-              configkeyInputKeyValue[value + "hour" + "error"] = "";
-              configkeyInputKeyValue[value + "min" + "error"] = "";
+              configkeyInputKeyValue[value + "dateerror"] = "";
+              configkeyInputKeyValue[value + "hourerror"] = "";
+              configkeyInputKeyValue[value + "minerror"] = "";
             }
             this.setState({
               selectedAtionType: selectedAtionType,
@@ -602,12 +621,12 @@ class activeDashbord extends Component {
       else {
         this.setState({ selectedChannelB: "", selectedChannelCn: "" });
 
-        if (formStructure == "1-input") {
+        if (formStructure === "1-input") {
 
-          var configkeyInputKeyValue = {};
+          let configkeyInputKeyValue = {};
 
-          var keysofObj = Object.keys(objectpayload.sensors)
-          var allBusinessName = Object.values(objectpayload.sensors[keysofObj[0]]);
+          let keysofObj = Object.keys(objectpayload.sensors)
+          let allBusinessName = Object.values(objectpayload.sensors[keysofObj[0]]);
           for (let [key, value] of Object.entries(objectpayload.sensors[keysofObj[0]])) {
             configkeyInputKeyValue[value] = "";
             configkeyInputKeyValue[value + "error"] = "";
@@ -620,13 +639,13 @@ class activeDashbord extends Component {
           });
         }
 
-        if (formStructure == "SetParameter") {
-          var configkeyInputKeyValue = {};
-          var allBusinessName = [];
-          var keysofObj = Object.keys(objectpayload.sensors)
-          var obj = this.getStrucOfClimateParam();
+        if (formStructure === "SetParameter") {
+          let configkeyInputKeyValue = {};
+          let allBusinessName = [];
+        //  let keysofObj = Object.keys(objectpayload.sensors)
+          let obj = this.getStrucOfClimateParam();
           allBusinessName = obj.businessName;
-          for (var i = 0; i < obj.businessName.length; i++) {
+          for (let i = 0; i < obj.businessName.length; i++) {
             configkeyInputKeyValue[obj.businessName[i]] = '';
             configkeyInputKeyValue[obj.businessName[i] + "Lower"] = this.state.Defaultparameter[obj.businessName[i] + "Lower"];
             configkeyInputKeyValue[obj.businessName[i] + "higher"] = this.state.Defaultparameter[obj.businessName[i] + "higher"];
@@ -643,7 +662,7 @@ class activeDashbord extends Component {
             configkeyInput: allBusinessName, configkeyInputKeyValue: configkeyInputKeyValue
           });
         }
-        if (formStructure == "ProgramDetails") {
+        if (formStructure === "ProgramDetails") {
 
           this.callApiForProgramFetch(objectpayload, selectedAtionType, selectedevent)
           me.setState({ selectedAtionType: selectedAtionType, selectedevent: selectedevent })
@@ -662,7 +681,7 @@ class activeDashbord extends Component {
     // console.log(me.state.submitDataObj.mac)
     // alert(me.state.submitDataObj.mac)
     // return new Promise((resolve, reject)=>{
-    axios.post("http://34.244.151.117:3992/ActiveProgrameFetch", { mac: me.state.submitDataObj.mac })
+    axios.post("http://localhost:3992/ActiveProgrameFetch", { mac: me.state.submitDataObj.mac })
       .then(json => {
         // console.log(json["data"]);
 
@@ -690,7 +709,7 @@ class activeDashbord extends Component {
           progaramObj["pendingConfirmation"] = json["data"][j]["sourceMsg"]["body"]["pendingConfirmation"]
           progaramObj["startTime"] = moment(json["data"][j]["sourceMsg"]["body"]["startTime"]).format("HH:mm");
           progaramObj["startTimeselected"] = moment(json["data"][j]["sourceMsg"]["body"]["startTime"]);
-          progaramObj["wef"] = moment(json["data"][j]["sourceMsg"]["body"]["wef"]).format("DD/MM/YYYY");
+          progaramObj["wef"] = moment(json["data"][j]["sourceMsg"]["body"]["wef"]).format("YY:MM:DD");
           progaramObj["expiryDate"] = moment(json["data"][j]["sourceMsg"]["body"]["expiryDate"]).format("DD/MM/YYYY");
           progaramObj["wefselected"] = moment(json["data"][j]["sourceMsg"]["body"]["wef"]);
           progaramObj["schedules"] = []
@@ -755,10 +774,10 @@ class activeDashbord extends Component {
 
   callApiForProgramSave() {
     var me = this;
-    const { programForIndex, selectedAtionType, ProgramDetailsListObj, configkeyInput, configkeyInputKeyValue } = this.state;
+    const {  ProgramDetailsListObj, configkeyInputKeyValue } = this.state;
     var SendObj = {};
     var temp = {};
-
+  if(configkeyInputKeyValue["ArrayOfProg"].length < 3){
     temp["name"] = ProgramDetailsListObj["name"]
     temp["version"] = ProgramDetailsListObj["version"]
     temp["programKey"] = `${ProgramDetailsListObj["name"]}-${ProgramDetailsListObj["version"]}`
@@ -777,11 +796,11 @@ class activeDashbord extends Component {
     //  me.setState({configkeyInputKeyValue: configkeyInputKeyValue})
     SendObj["mac"] = me.state.submitDataObj.mac;
     SendObj["dataBody"] = temp
-    axios.post("http://34.244.151.117:3992/ActiveProgrameSave", SendObj)
+    axios.post("http://localhost:3992/ActiveProgrameSave", SendObj)
       .then(json => {
         // console.log("This is data of save to DeviceIntruction for ProgramDEtails")
         // console.log(json["data"])
-        if (json["data"] == "Error") {
+        if (json["data"] === "Error") {
 
           this.errorganerator("Error:  Name Value Already Present .")
         }
@@ -794,17 +813,33 @@ class activeDashbord extends Component {
           me.handleChange(this.state.selectedevent);
         }
       });
+    }
+    else{
+      this.errorganerator("Error:  You Exceeded Maximum Limit Of Program .")
+    }
+  }
+  updateSetEndTimeProgram(){
+    const {ProgramDetailsListObj} = this.state;
+  var me = this;
+  console.log("This is updateSetEndTime")
+  for(let item=0; item< me.state.ProgramDetailsListObj["schedules"].length; item++){
+    me.state.ProgramDetailsListObj["schedules"][item].endTimeProgramListItem = me.convertDateTimeForSetProg(me.state.ProgramDetailsListObj.startTime, me.state.ProgramDetailsListObj["schedules"][item].startAt + me.state.ProgramDetailsListObj["schedules"][item].duration)
+  }
+  //   ProgramDetailsListObj["schedules"]["endTime"] = moment(new Date(Math.max.apply(null, ProgramDetailsListObj["schedules"].map(item => item.endTimeProgramListItem))));
+  // 
+    console.log( ProgramDetailsListObj)
+  me.setState({ProgramDetailsListObj: me.state.ProgramDetailsListObj})
   }
   AddRowFrProgSubmit() {
     var dataToSendApi = {};
     var me = this;
-    const { programForIndex, selectedAtionType, ProgramDetailsListObj, configkeyInput, configkeyInputKeyValue } = this.state;
+    const {  selectedAtionType, ProgramDetailsListObj, configkeyInput, configkeyInputKeyValue } = this.state;
 
 
     let arraymainKey = [...configkeyInput];
     arraymainKey.splice(arraymainKey.indexOf("version"), 1)
     for (var key = 0; key < arraymainKey.length; key++) {
-      if (ProgramDetailsListObj[arraymainKey[key]] == undefined || ProgramDetailsListObj[arraymainKey[key]] == null || ProgramDetailsListObj[arraymainKey[key]] == '') {
+      if (ProgramDetailsListObj[arraymainKey[key]] === undefined || ProgramDetailsListObj[arraymainKey[key]] === null || ProgramDetailsListObj[arraymainKey[key]] === '') {
 
         me.errorganerator("Please provide " + arraymainKey[key] + " error")
         return;
@@ -823,12 +858,12 @@ class activeDashbord extends Component {
     lineNoRemovedKeyArray.splice(lineNoRemovedKeyArray.indexOf("startAt"), 1)
     for (let k = 0; k < ProgramDetailsListObj["schedules"].length; k++) {
       for (let p = 0; p < lineNoRemovedKeyArray.length; p++) {
-        if (ProgramDetailsListObj["schedules"][k][lineNoRemovedKeyArray[p]] == undefined || ProgramDetailsListObj["schedules"][k][lineNoRemovedKeyArray[p]] == null || ProgramDetailsListObj["schedules"][k][lineNoRemovedKeyArray[p]] == '') {
+        if (ProgramDetailsListObj["schedules"][k][lineNoRemovedKeyArray[p]] === undefined || ProgramDetailsListObj["schedules"][k][lineNoRemovedKeyArray[p]] === null || ProgramDetailsListObj["schedules"][k][lineNoRemovedKeyArray[p]] === '') {
           me.errorganerator("Please provide " + lineNoRemovedKeyArray[p] + " error")
           return;
         }
-        if (ProgramDetailsListObj["schedules"][k]["duration"] == 0) {
-          me.errorganerator("Please provide " + "Duration" + " error")
+        if (ProgramDetailsListObj["schedules"][k]["duration"] === 0) {
+          me.errorganerator("Please provide  Duration error")
           return;
         }
       }
@@ -837,7 +872,7 @@ class activeDashbord extends Component {
 
 
     //configkeyInputKeyValue["ArrayOfProg"][programForIndex]["versionselected"] =  ++ configkeyInputKeyValue["ArrayOfProg"][programForIndex]["version"];
-    for (var key = 0; key < configkeyInput.length; key++) {
+    for (let key = 0; key < configkeyInput.length; key++) {
       dataToSendApi[configkeyInput[key]] = ProgramDetailsListObj[configkeyInput[key]]
     }
 
@@ -888,7 +923,7 @@ class activeDashbord extends Component {
             currentState: configkeyInputKeyValue["ArrayOfProg"][index].currentState,
             pendingConfirmation: configkeyInputKeyValue["ArrayOfProg"][index].pendingConfirmation
           }
-          axios.post("http://34.244.151.117:3992/ActiveProgramRuleUpdate", obj)
+          axios.post("http://localhost:3992/ActiveProgramRuleUpdate", obj)
             .then(json => {
               swal("Poof! Your imaginary file has been sent!", {
                 icon: "success",
@@ -915,23 +950,19 @@ class activeDashbord extends Component {
   }
 
   RemoveRowfProgList(index) {
-    const { programForIndex, configkeyInputKeyValue, ProgramDetailsListObj } = this.state
+    const {  ProgramDetailsListObj } = this.state
     ProgramDetailsListObj["schedules"].splice(index, 1);
     this.setState({ ProgramDetailsListObj: ProgramDetailsListObj })
   }
   AddRowFrProglist() {
-    const { programForIndex, configkeyInputKeyValue, ProgramDetailsListObj } = this.state
+    const {  ProgramDetailsListObj } = this.state
     var index = ProgramDetailsListObj["schedules"].length;
     ProgramDetailsListObj["schedules"].push({ "schNo": index++, "channel": "", "endTimeProgramListItem": ProgramDetailsListObj["startTimeselected"], "startAt": 0, "duration": 0, "enabled": true })
     this.setState({ ProgramDetailsListObj: ProgramDetailsListObj })
   }
 
   AddRowFrProg() {
-    const { configkeyInput, configkeyInputKeyValue, ProgramDetailsListObj } = this.state
-
-    var arrayOfProg = [];
-    var programObj = {}
-    //  for (var i =0; i< configkeyInput.length; i++) { 
+    const { ProgramDetailsListObj } = this.state
     ProgramDetailsListObj["name"] = '';
     ProgramDetailsListObj["version"] = 1;
     ProgramDetailsListObj["startTime"] = '';
@@ -959,13 +990,10 @@ class activeDashbord extends Component {
 
   }
   manualOverrideProcess(objectpayload, selectedAtionType, selectedevent) {
-    const { DefaulaManualOverride } = this.state;
     var configkeyInputKeyValue = {};
 
-    axios.post("http://34.244.151.117:3992/getAManualOverride", { mac: this.state.CriteriaForOP.mac })
+    axios.post("http://localhost:3992/getAManualOverride", { mac: this.state.CriteriaForOP.mac })
       .then(json => {
-        var keys1 = Object.keys(json["data"]);
-        var obj = {}
         console.log("This is all json data for getmanualoverride");
         console.log(json["data"])
         let DefaulaManualOverride = json["data"];
@@ -973,7 +1001,7 @@ class activeDashbord extends Component {
         var allBusinessName = Object.values(objectpayload.sensors[keysofObj[0]]);
         for (let [key, value] of Object.entries(objectpayload.sensors[keysofObj[0]])) {
           configkeyInputKeyValue[value] = DefaulaManualOverride[value];
-          configkeyInputKeyValue[value + "toggle"] = (DefaulaManualOverride[value]["pendingMode"] == 0) ? false : true;
+          configkeyInputKeyValue[value + "toggle"] = (DefaulaManualOverride[value]["pendingMode"] === 0) ? false : true;
           if (DefaulaManualOverride[value]["pendingMode"] !== DefaulaManualOverride[value]["activeMode"]) {
             configkeyInputKeyValue[value + "confirmation"] = true;
           } else {
@@ -993,7 +1021,7 @@ class activeDashbord extends Component {
   }
   getStrucOfClimateParam() {
     var sensorsArray = this.state.deviceAllData["sensors"];
-    var data = sensorsArray.filter(item => item.climateControl.flag == "Y");
+    var data = sensorsArray.filter(item => item.climateControl.flag === "Y");
     var allBusinessName = data.map(item => item.configName);
     var businessName = data.map(item => item.businessName);
     var max = data.map(item => item.climateControl.max);
@@ -1003,7 +1031,7 @@ class activeDashbord extends Component {
   }
   handleChange1(value) {
     //alert(value);
-    var index = this.state.channelName.findIndex(element => element.configName == value);
+    var index = this.state.channelName.findIndex(element => element.configName === value);
     var businessName = this.state.channelName[index].businessName;
     this.setState({ selectedChannelB: businessName, selectedChannelCn: value });
     this.callForActionType(value, this.state.deviceName);
@@ -1027,7 +1055,7 @@ class activeDashbord extends Component {
       //console.log(configkeyInput)
     }
     else {
-      for (var i = 0; i < configkeyInput.length; i++) {
+      for (let i = 0; i < configkeyInput.length; i++) {
         if (configkeyInputKeyValue[configkeyInput[i] + 'confirmation'] === false) {
           configkeyInputKeyValue["submitflag"] = false;
           configkeyInputKeyValue[configkeyInput[i]]["pendingMode"] = 1;
@@ -1061,21 +1089,23 @@ class activeDashbord extends Component {
     var configPayloadData = JSON.parse(sessionStorage.getItem("dashboardConfigobj"));
     //  //console.log("This Is I want to See");
     //  //console.log(AryfPayloadfromConfig);
-    this.state.AryfPayloadfromConfig = configPayloadData.ConfADPayload.split(",");
+    me.state.AryfPayloadfromConfig = configPayloadData.ConfADPayload.split(",");
     // //console.log(mainData)
-    this.state.CriteriaForOP.spCd = mainData.spCd;
-    this.state.CriteriaForOP.subCustCd = mainData.subCustCd;
-    this.state.CriteriaForOP.CustCd = mainData.custCd;
-    this.state.CriteriaForOP.DeviceName = mainData.DeviceName;
-    this.state.CriteriaForOP.mac = mainData.mac;
-    this.state.CriteriaForOP.assetId = mainData.assetId;
-    this.state.submitDataObj.mac = mainData.mac;
-    this.state.submitDataObj.subCustCd = mainData.subCustCd;
-    this.state.submitDataObj.CustCd = mainData.custCd;
-    this.state.submitDataObj.DeviceName = mainData.DeviceName;
-    this.setState({
-      CriteriaForOP: this.state.CriteriaForOP,
-      submitDataObj: this.state.submitDataObj
+    me.state.CriteriaForOP.spCd = mainData.spCd;
+    me.state.CriteriaForOP.subCustCd = mainData.subCustCd;
+    me.state.CriteriaForOP.CustCd = mainData.custCd;
+    me.state.CriteriaForOP.DeviceName = mainData.DeviceName;
+    me.state.CriteriaForOP.mac = mainData.mac;
+    me.state.CriteriaForOP.assetId = mainData.assetId;
+    me.state.submitDataObj.mac = mainData.mac;
+    me.state.submitDataObj.subCustCd = mainData.subCustCd;
+    me.state.submitDataObj.CustCd = mainData.custCd;
+    me.state.submitDataObj.DeviceName = mainData.DeviceName;
+    me.state.ActiveDashBoardEnable = configPayloadData.ActiveDashBoardEnable 
+    me.state.OpratingDashBoardEnable = configPayloadData.OpratingDashBoardEnable 
+    me.setState({
+      CriteriaForOP: me.state.CriteriaForOP,
+      submitDataObj: me.state.submitDataObj
     })
     Date.prototype.addHours = function (h) {
       this.setHours(this.getHours() + h);
@@ -1085,8 +1115,8 @@ class activeDashbord extends Component {
       this.setDate(this.getDate() + h);
       return this;
     }
-    var ActiveJobsArray = [];
-    axios.post("http://34.244.151.117:3992/getActiveDashBoardDevice", { mac: this.state.CriteriaForOP.mac })
+
+    axios.post("http://localhost:3992/getActiveDashBoardDevice", { mac: this.state.CriteriaForOP.mac })
 
       .then(json => {
         //console.log("this componentDidMount getActiveDashBoardDevice");
@@ -1116,9 +1146,9 @@ class activeDashbord extends Component {
       //console.log(data);
       var tempArrayFC = [];
       for (var i = 0; i < data.channel.length; i++) {
-        if (this.state.channelArray[i] != undefined && this.state.channelArray[i] != null) {
+        if (this.state.channelArray[i] !== undefined && this.state.channelArray[i] !== null) {
 
-          if (this.state.channelArray[i].Value != this.state.channelArray[i].ActionCond) {
+          if (this.state.channelArray[i].Value !== this.state.channelArray[i].ActionCond) {
             data.channel[i]["ActionCond"] = this.state.channelArray[i].ActionCond;
           }
           else {
@@ -1145,7 +1175,13 @@ class activeDashbord extends Component {
     this.fetchClimateParameter();
     this.callForlastAlert();
     this.callForlastPayload();
-    var onDeviceinstruction = socketIOClient(endpoint + "/onDeviceinstruction");
+    var onDeviceinstruction = socketIOClient(endpoint + "/onDeviceinstruction"
+    , {
+      reconnection: true,
+      reconnectionDelay: 1000,
+      reconnectionDelayMax : 5000,
+      reconnectionAttempts: 99999
+  });
     onDeviceinstruction.emit('onDeviceinstructionClientEvent', { mac: this.state.CriteriaForOP.mac, type: "SentInstruction" });
     onDeviceinstruction.on('DeviceInstruction', function (data) {
       //console.log("this is second")
@@ -1158,7 +1194,7 @@ class activeDashbord extends Component {
         //   // break;
         // // }
         // }
-        let value = data["DeviceInstruction"].find((item) => item._id == me.state.rowClickedId)
+        let value = data["DeviceInstruction"].find((item) => item._id === me.state.rowClickedId)
         // console.log("Value");
         // console.log(value)
         if (value === undefined) {
@@ -1185,20 +1221,20 @@ class activeDashbord extends Component {
   fetchPayload() {
     var me = this;
     var body = { mac: this.state.CriteriaForOP.mac }
-    axios.post("http://34.244.151.117:3992/ActiveActionTypeCall", body)
+    axios.post("http://localhost:3992/ActiveActionTypeCall", body)
       .then(json => {
-        if (json.length != 0) {
+        if (json.length !== 0) {
           // console.log("This is payload Data")
           // console.log(json["data"]);
           var ClientObj = JSON.parse(sessionStorage.getItem("ClientObj"));
-          let index = json["data"].findIndex(item => item.formStructure == "manualOverride");
+          let index = json["data"].findIndex(item => item.formStructure === "manualOverride");
           var containerdata = json["data"][index];
           // if(index != null && index != undefined){
           //   json["data"].splice(index,1);
           // }
           var tempObj = [];
           for (let i = 0; i < json["data"].length; i++) {
-            var tempIndex = ClientObj.OperatingForms.findIndex(item => item.payloadId == json["data"][i].payloadId);
+            var tempIndex = ClientObj.OperatingForms.findIndex(item => item.payloadId === json["data"][i].payloadId);
             // console.log(tempIndex);
             // console.log(ClientObj.OperatingForms[tempIndex]);
             if (tempIndex !== -1 && tempIndex !== undefined) {
@@ -1207,7 +1243,7 @@ class activeDashbord extends Component {
               tempObj.push(json["data"][i]);
             }
           }
-          let newTemp = ClientObj.OperatingForms.filter(item => item.payloadId == "");
+          let newTemp = ClientObj.OperatingForms.filter(item => item.payloadId === "");
           // console.log(newTemp)
           for (let j = 0; j < newTemp.length; j++) {
             tempObj.push({ "_id": j, "name": newTemp[j].nameNavigationBar, "payloadId": newTemp[j].payloadId, "formStructure": newTemp[j].formStructure, "position": newTemp[j].position })
@@ -1222,9 +1258,9 @@ class activeDashbord extends Component {
           me.setState({ actionTypes: [] })
         }
       });
-    var dataTime = new Date().addDay(-1);
-    this.state.filter.Fdate = moment(dataTime);
-    this.setState({ filter: this.state.filter })
+    let dataTime = new Date().addDay(-1);
+    me.state.filter.Fdate = moment(dataTime);
+    this.setState({ filter: me.state.filter })
   }
   timeDifference(date1, date2) {
     var oneDay = 24 * 60 * 60; // hours*minutes*seconds
@@ -1268,7 +1304,12 @@ class activeDashbord extends Component {
       subCustCd: this.state.CriteriaForOP.subCustCd,
       mac: this.state.CriteriaForOP.mac
     }
-    var lastError = socketIOClient(endpoint + "/ActivelastError");
+    var lastError = socketIOClient(endpoint + "/ActivelastError", {
+      reconnection: true,
+      reconnectionDelay: 1000,
+      reconnectionDelayMax : 5000,
+      reconnectionAttempts: 99999
+  });
     lastError.emit('lastErrorClientEmit', body);
     lastError.on('lastErrorServerEmit', function (data) {
       lastAlertData.alertText = data.alertText;
@@ -1281,7 +1322,7 @@ class activeDashbord extends Component {
       me.setState({ lastAlertData: lastAlertData });
       //console.log(data)
     });
-    // axios.post("http://34.244.151.117:3992/getdashbordlastalert", body)
+    // axios.post("http://localhost:3992/getdashbordlastalert", body)
     // .then(json =>  {
     //   // alert("This is last Alert Object Data ");
     //   //console.log("This is log of Alert Object ")
@@ -1306,10 +1347,16 @@ class activeDashbord extends Component {
 
     }
     var me = this;
-    var payloadData = socketIOClient(endpoint + "/LastPayloadData");
+    var payloadData = socketIOClient(endpoint + "/LastPayloadData"
+    , {
+      reconnection: true,
+      reconnectionDelay: 1000,
+      reconnectionDelayMax : 5000,
+      reconnectionAttempts: 99999
+  });
     payloadData.emit('lastPayloadClient', body);
     payloadData.on('lastPayloadServerData', function (data) {
-      // axios.post("http://34.244.151.117:3992/lastpayloadTime",body)
+      // axios.post("http://localhost:3992/lastpayloadTime",body)
       // .then(json =>  {
       if (data.length > 0) {
         var datedata = [];
@@ -1328,17 +1375,17 @@ class activeDashbord extends Component {
         let minutes1 = "";
         let seconds1 = "";
         let hours1 = "";
-        if (tempValue.hours.toString().length == 1) {
+        if (tempValue.hours.toString().length === 1) {
           hours1 = "0" + tempValue.hours;
         } else {
           hours1 = tempValue.hours;
         }
-        if (tempValue.minutes.toString().length == 1) {
+        if (tempValue.minutes.toString().length === 1) {
           minutes1 = "0" + tempValue.minutes;
         } else {
           minutes1 = tempValue.minutes;
         }
-        if (tempValue.seconds.toString().length == 1) {
+        if (tempValue.seconds.toString().length === 1) {
           seconds1 = "0" + tempValue.seconds;
         } else {
           seconds1 = tempValue.seconds;
@@ -1359,7 +1406,8 @@ class activeDashbord extends Component {
       // //console.log(json["data"]);
     });
   }
-  rowDelete(id) {
+  rowDelete(data) {
+   var me = this;
     swal({
       title: "Are you sure ?",
       text: "Once deleted, you will not be able to recover this SentCommand Info!",
@@ -1369,32 +1417,125 @@ class activeDashbord extends Component {
     })
       .then((willDelete) => {
         if (willDelete) {
-          axios.delete("http://34.244.151.117:3992/deleteSentCommand?id=" + id)
-            .then(json => {
-              swal("Poof! Your SentCommand  Info has been deleted!", {
-                icon: "success",
+        if(data.ActionType === "SetProgramState" || data.ActionType === "SetProgram"){
+          let Obj = {};
+          Obj = JSON.parse(JSON.stringify(data));
+          Obj.mac = me.state.submitDataObj.mac;
+          axios.post("http://localhost:3992/ActiveProgramerevert",Obj)
+          .then(json => {
+            // console.log(json.data.n)
+            if(json.data.n > 0){
+              me.deleteDeviceSentInstruction(data);
+            }
+            else{
+              console.log(json)
+              swal("Some Things Error .", {
+                icon: "warning",
               });
-            });
+            }
+          });
         }
-        // } else {
-        //   swal("Your sentCommand  Info is safe!");
-        // }
+        else{
+       
+          me.deleteDeviceSentInstruction(data);
+        }
+      }
+    
       });
-    // axios.delete("http://34.244.151.117:3992/deleteSentCommand?id="+ id)
-    // .then(json =>  {
-    // });
+  
+  
+  }
+  deleteDeviceSentInstruction(data){
+    axios.delete("http://localhost:3992/deleteSentCommand?id=" + data._id)
+    .then(json => {
+      swal("Poof! Your SentCommand  Info has been deleted!", {
+        icon: "success",
+      });
+    });
+  }
+  sentCommandResent(dataToResand){
+    var me = this;
+
+console.log(dataToResand);
+
+  swal({
+    title: "Are you sure ?",
+    text: "Resending program!",
+    icon: "warning",
+    buttons: true,
+    // dangerMode: true,
+  })
+    .then((willDelete) => {
+      if (willDelete) {
+        me.state.submitDataObj.payloadId = dataToResand.ActionType;
+        me.state.submitDataObj.dataBody = dataToResand.sourceMsg;
+        me.state.submitDataObj.isDaillyJob = "";
+        me.state.submitDataObj.ChannelName = "";
+        me.setState({submitDataObj : me.state.submitDataObj})
+        let remark =`This is resend of  referecnce key ${dataToResand.referencekey}`;
+        me.callApiForLevel4(remark)
+            swal("Poof! Your SentCommand  Info has been Sent!", {
+              icon: "success",
+          });
+          // axios.delete("http://localhost:3992/deleteSentCommand?id=" + dataToResand._id)
+          // .then(json => 
+          //  console.log(json)
+          // );
+          this.deleteDeviceSentInstruction(dataToResand);
+        }
+      })
+
+// }
+// else{
+//   alert(dataToResand.ActionType)
+// }
+  }
+  setTime(){
+    var me = this;
+    swal({
+      title: "Are you sure ?",
+      text: "Device Set Time !",
+      icon: "warning",
+      buttons: true,
+      // dangerMode: true,
+    })
+      .then((willDelete) => {
+        me.state.submitDataObj.payloadId = "SetTime";
+      let tempdate = moment(me.state.selectcteDeviceTime).format("YYYY:MM:DD:HH:mm");
+      let arrayObDate = tempdate.split(":");
+      console.log(arrayObDate)
+      let obj = {
+        YYYY : arrayObDate[0],
+        MM   : arrayObDate[1],
+        DD : arrayObDate[2],
+        hh : arrayObDate[3],
+        mm : arrayObDate[4],
+        ss : "00"
+
+      }
+console.log(obj)
+        me.state.submitDataObj.dataBody =  obj;
+        me.state.submitDataObj.isDaillyJob = "";
+        me.state.submitDataObj.ChannelName = "";
+        me.setState({submitDataObj : me.state.submitDataObj})
+        let remark = "";
+        me.callApiForLevel4(remark)
+            swal("Poof! Your SentCommand  Info has been Sent!", {
+              icon: "success",
+          });
+      })
   }
   errorganerator(values) {
     swal("Oops", values, "error")
   }
   fetchClimateControlDevice() {
-    axios.post("http://34.244.151.117:3992/getActiveDAction", { mac: this.state.CriteriaForOP.mac })
+    axios.post("http://localhost:3992/getActiveDAction", { mac: this.state.CriteriaForOP.mac })
       .then(json => {
         this.setState({ deviceAllData: json["data"] })
       })
   }
   fetchClimateParameter() {
-    axios.post("http://34.244.151.117:3992/getAClimateparameter", { mac: this.state.CriteriaForOP.mac })
+    axios.post("http://localhost:3992/getAClimateparameter", { mac: this.state.CriteriaForOP.mac })
       .then(json => {
         var keys1 = Object.keys(json["data"]);
         var obj = {}
@@ -1408,10 +1549,8 @@ class activeDashbord extends Component {
       })
   }
   fetchFromManualOverride() {
-    axios.post("http://34.244.151.117:3992/getAManualOverride", { mac: this.state.CriteriaForOP.mac })
+    axios.post("http://localhost:3992/getAManualOverride", { mac: this.state.CriteriaForOP.mac })
       .then(json => {
-        var keys1 = Object.keys(json["data"]);
-        var obj = {}
         console.log("This is all json data for getmanualoverride");
         console.log(json["data"])
         this.setState({ DefaulaManualOverride: json["data"], DefaulaCopyManualOverride: JSON.parse(JSON.stringify(json["data"])) })
@@ -1421,7 +1560,7 @@ class activeDashbord extends Component {
     var me = this;
     //alert("Hello This Working")
     //  THIS IS GETING SENSORNAME BASED ON SPCD,CUSTCD,SUBCUSTCD
-    fetch("http://34.244.151.117:3992/getSensorNames?spCode=" + this.state.CriteriaForOP.spCd +
+    fetch("http://localhost:3992/getSensorNames?spCode=" + this.state.CriteriaForOP.spCd +
       "&&custCd=" + this.state.CriteriaForOP.CustCd + "&&subCustCd=" + this.state.CriteriaForOP.subCustCd)
       .then(response => response.json())
       .then(json => {
@@ -1433,20 +1572,18 @@ class activeDashbord extends Component {
   }
 
   ActionOnChanel(data, index) {
-    // //alert("this called");
-    var me = this;
+
     const { channelArray, tilesPayloaddata } = this.state;
-    //console.log(tilesPayloaddata)
-    // alert(this.state.submitDataObj.payloadId);
+    var me = this;
     let age = this.timeDifference(new Date(data.valueChangeAt), new Date(new Date().toISOString()))
 
     // console.log(me.state.submitDataObj.payloadId)
     //alert(tilesPayloaddata.payloadId +"Hello")
-    this.state.submitDataObj.payloadId = tilesPayloaddata.payloadId;
+    me.state.submitDataObj.payloadId = tilesPayloaddata.payloadId;
     //alert(this.state.submitDataObj.payloadId)
-    this.state.submitDataObj.isDaillyJob = false;
-    this.state.submitDataObj.ChannelName = data.devicebusinessNM;
-    if (this.state.channelArray[index].ActionCond == this.state.channelArray[index].Value) {
+    me.state.submitDataObj.isDaillyJob = false;
+    me.state.submitDataObj.ChannelName = data.devicebusinessNM;
+    if (me.state.channelArray[index].ActionCond === me.state.channelArray[index].Value) {
 
       // if(channelArray[index].ActionCond == 0){
       var obj = {}
@@ -1456,12 +1593,12 @@ class activeDashbord extends Component {
       obj["age"] = age.hours + ":" + age.minutes;
       obj["UpdatedTime"] = dateFormat(data.dateTime, "dd-mmm HH:MM");
       obj["index"] = index;
-      this.state.channelAlerrModel = obj;
-      this.setState({
+      me.state.channelAlerrModel = obj;
+      me.setState({
         show: true,
-        channelArray: this.state.channelArray,
-        channelAlerrModel: this.state.channelAlerrModel,
-        submitDataObj: this.state.submitDataObj
+        channelArray: me.state.channelArray,
+        channelAlerrModel: me.state.channelAlerrModel,
+        submitDataObj: me.state.submitDataObj
       })
     }
     else {
@@ -1479,7 +1616,7 @@ class activeDashbord extends Component {
     }
     //console.log("hello")
     ////console.log(channelArray[channelAlerrModel["index"]].ActionCond )
-    if (channelArray[channelAlerrModel["index"]].ActionCond == 1) {
+    if (channelArray[channelAlerrModel["index"]].ActionCond === 1) {
       //alert(submitDataObj.dataBody[channelAlerrModel["channelName"]])
       //console.log(submitDataObj)
       //alert("1")
@@ -1523,7 +1660,7 @@ class activeDashbord extends Component {
       }
       return temp;
     }
-    axios.post("http://34.244.151.117:3992/getAllClimateControl", { subCustCd: this.state.CriteriaForOP.subCustCd, custCd: this.state.CriteriaForOP.CustCd })
+    axios.post("http://localhost:3992/getAllClimateControl", { subCustCd: this.state.CriteriaForOP.subCustCd, custCd: this.state.CriteriaForOP.CustCd })
       .then(json => {
         //console.log("This fetchClimateControlAllData");
         var temp = [];
@@ -1568,10 +1705,10 @@ class activeDashbord extends Component {
       startDate: this.state.startDatelimit,
       endDate: this.state.endDatelimit,
     }
-    axios.post("http://34.244.151.117:3992/ActiveJobs", ActiveBody)
+    axios.post("http://localhost:3992/ActiveJobs", ActiveBody)
       .then(json => {
         var ActiveJobsArray = json["data"]["ActiveJob"];
-        if (json["data"]["ActiveJob"].length != 0) {
+        if (json["data"]["ActiveJob"].length !== 0) {
           me.setState({
             mainActiveJobsArray: json["data"]["ActiveJob"],
           }
@@ -1597,9 +1734,9 @@ class activeDashbord extends Component {
       mac: this.state.CriteriaForOP.mac,
       filter: this.state.filter
     };
-    if (this.state.filter.TypeOfJobs == "ExecutedJob") {
+    if (this.state.filter.TypeOfJobs === "ExecutedJob") {
 
-      axios.post("http://34.244.151.117:3992/executedJob", body)
+      axios.post("http://localhost:3992/executedJob", body)
         .then(function (result) {
           var mainActiveJobdata = result.data;
           items = result.data.executedJob;
@@ -1609,8 +1746,8 @@ class activeDashbord extends Component {
         }).catch(error => {
           me.setState({ mAOfInactivejob: [], 'in_prog': false });
         });
-    } else if (this.state.filter.TypeOfJobs == "PendingJob") {
-      axios.post("http://34.244.151.117:3992/PendingJob", body)
+    } else if (this.state.filter.TypeOfJobs === "PendingJob") {
+      axios.post("http://localhost:3992/PendingJob", body)
         .then(function (result) {
           var mainActiveJobdata = result.data;
           items = result.data.PendingJob;
@@ -1623,9 +1760,10 @@ class activeDashbord extends Component {
 
   }
   changePage(page) {
-    this.state.filter.page = page;
+    var me =this;
+    me.state.filter.page = page;
     // //alert(page);
-    this.setState({ "filter": this.state.filter });
+    me.setState({ "filter": me.state.filter });
     // this.fetch();
   }
 
@@ -1646,7 +1784,7 @@ class activeDashbord extends Component {
   nevigation(value) {
     var me = this;
     var sStartdate = this.state.startDate
-    if (Math.sign(value) == 1) {
+    if (Math.sign(value) === 1) {
       //  //alert("this is sign for pluse");
 
       var startDate = new Date(sStartdate).addHours(value).toISOString();
@@ -1666,11 +1804,11 @@ class activeDashbord extends Component {
       }
     }
     else {
-      var startDate = new Date(sStartdate).addHours(value).toISOString();
-      var endDate = sStartdate;
+      let startDate = new Date(sStartdate).addHours(value).toISOString();
+      let endDate = sStartdate;
       if (me.state.startDatelimit > startDate) {
-        var startDatelimit = new Date(me.state.startDatelimit).addDay(-1).toISOString();
-        var endDatelimit = new Date(me.state.endDatelimit).addDay(-1).toISOString();
+        let startDatelimit = new Date(me.state.startDatelimit).addDay(-1).toISOString();
+        let endDatelimit = new Date(me.state.endDatelimit).addDay(-1).toISOString();
         me.setState({ startDatelimit: startDatelimit, endDatelimit: endDatelimit, startDate: startDate, endDate: endDate, ActionVF: 1 })
         me.fetchActiveJob();
       }
@@ -1688,7 +1826,7 @@ class activeDashbord extends Component {
     //alert("console is print");
     //console.log("this is result data ");
     //console.log(resultdata);
-    if (ActionVF == 1) {
+    if (ActionVF === 1) {
       resultdata.sort(function (a, b) {
         a = new Date(a.ActionTime);
         b = new Date(b.ActionTime);
@@ -1716,21 +1854,22 @@ class activeDashbord extends Component {
   }
   FselectAction(value) {
     //alert(value);
-    this.state.filter.Action = value;
-    this.setState({ filter: this.state.filter });
+    var me =this;
+    me.state.filter.Action = value;
+    me.setState({ filter: me.state.filter });
   }
   filterByChExe(value) {
-    // var me = this;
+    var me = this;
     //alert(value);
     //console.log(value);
-    this.state.filter.Fchannel = value;
-    this.setState({ filter: this.state.filter });
+    me.state.filter.Fchannel = value;
+    me.setState({ filter: me.state.filter });
   }
   filterClimateFun(value) {
     var me = this;
     //alert(value)
-    this.state.Climate.selectedfilter = value;
-    this.setState({ selectedfilFSensor: value })
+    me.state.Climate.selectedfilter = value;
+    me.setState({ selectedfilFSensor: value })
   }
   Mfiltrerbtn() {
     const { filter } = this.state;
@@ -1738,16 +1877,17 @@ class activeDashbord extends Component {
     this.fetch();
   }
   filtermethod() {
-    const { channelFil, ActionVF, startDate, endDate } = this.state;
+    const { channelFil, startDate, endDate } = this.state;
     var me = this;
     //alert(channelFil+ " ://"+ ActionVF);
 
-    var arrayofActive = this.state.mainActiveJobsArray.filter(item => item.Channel == channelFil);
+    var arrayofActive = me.state.mainActiveJobsArray.filter(item => item.Channel === channelFil);
     me.filterdata(arrayofActive, startDate, endDate);
   }
   handleChechBox() {
-    this.state.configkeyInputKeyValue["toggle"] = !this.state.configkeyInputKeyValue["toggle"]
-    this.setState({ configkeyInputKeyValue: this.state.configkeyInputKeyValue });
+    var me = this;
+    me.state.configkeyInputKeyValue["toggle"] = !me.state.configkeyInputKeyValue["toggle"]
+    me.setState({ configkeyInputKeyValue: me.state.configkeyInputKeyValue });
   }
   handelMExpression() {
     this.setState({ MExpression: false })
@@ -1758,7 +1898,6 @@ class activeDashbord extends Component {
     // console.log(this.state.rowClickedId)
     const { programForIndex, selectedAtionType, formStructure, ProgramDetailsListObj, configkeyInputKeyValue, configkeyInput, sentCommandArray } = this.state;
     var state = this.state;
-    var me = this;
     var total_page = Math.ceil(this.state.total_count / this.state.filter.page_size);
     const indexOfLastTodo = state.filter.page * state.filter.page_size;
     const indexOfFirstTodo = indexOfLastTodo - state.filter.page_size;
@@ -1768,19 +1907,19 @@ class activeDashbord extends Component {
     // //alert(this.state.filter.Fchannel)
     var inputField = null;
     var className12 = {}
-    if (formStructure == "2-input") {
+    if (formStructure === "2-input") {
       configkeyInput.forEach(function (key) {
-        className12[key + "date" + "Classerror"] = "";
-        if (configkeyInputKeyValue[key + "date" + "error"].length != 0) {
-          className12[key + "date" + "Classerror"] = "Acustmborder";
+        className12[key + "dateClasserror"] = "";
+        if (configkeyInputKeyValue[key + "dateerror"].length !== 0) {
+          className12[key + "dateClasserror"] = "Acustmborder";
         }
-        className12[key + "hour" + "Classerror"] = "";
-        if (configkeyInputKeyValue[key + "hour" + "error"].length != 0) {
-          className12[key + "hour" + "Classerror"] = "Acustmborder";
+        className12[key + "hourClasserror"] = "";
+        if (configkeyInputKeyValue[key + "hourerror"].length !== 0) {
+          className12[key + "hourClasserror"] = "Acustmborder";
         }
-        className12[key + "min" + "Classerror"] = "";
-        if (configkeyInputKeyValue[key + "min" + "error"].length != 0) {
-          className12[key + "min" + "Classerror"] = "Acustmborder";
+        className12[key + "minClasserror"] = "";
+        if (configkeyInputKeyValue[key + "minerror"].length !== 0) {
+          className12[key + "minClasserror"] = "Acustmborder";
         }
         // className12[key+"Meridiem"+"Classerror"]   =   "";
         // if(configkeyInputKeyValue[key+"Meridiem"+"error"].length != 0){
@@ -1793,7 +1932,7 @@ class activeDashbord extends Component {
           <div className="dropDown">
             <label>Channel Setup :</label>
             <DropdownButton className="AcDropS" onSelect={this.handleChange1}
-              disabled={this.state.channelName.length == 0 ? true : null}
+              disabled={this.state.channelName.length === 0 ? true : null}
               bsStyle={"Awhite"}
               title={this.state.selectedChannelB || "Select Channel"}>
               {this.state.channelName.map((item) =>
@@ -1837,15 +1976,15 @@ class activeDashbord extends Component {
 
               <span className="Acolon"> :</span>
               <span className="inhour">
-                <input type="number" id={item + "min"} className={"hourmin  " + className12[item + "min" + "Classerror"]} name={configkeyInputKeyValue[item + "min"]} maxLength="2" value={configkeyInputKeyValue[item + "min"]}
+                <input type="number" id={item + "min"} className={"hourmin  " + className12[item + "minClasserror"]} name={configkeyInputKeyValue[item + "min"]} maxLength="2" value={configkeyInputKeyValue[item + "min"]}
                   onChange={e => {
                   configkeyInputKeyValue[item + "min"] = e.target.value;
                     this.setState({ configkeyInputKeyValue: configkeyInputKeyValue })
                   }} placeholder="MM" />
               </span>
-              {configkeyInputKeyValue[item + "dateerror"].length != 0 && <div className='text-danger Acfontsize'>{configkeyInputKeyValue[item + "dateerror"]}</div>}
-              {configkeyInputKeyValue[item + "hourerror"].length != 0 && <div className='text-danger Acfontsize'>{configkeyInputKeyValue[item + "hourerror"]}</div>}
-              {configkeyInputKeyValue[item + "minerror"].length != 0 && <div className='text-danger Acfontsize'>{configkeyInputKeyValue[item + "minerror"]}</div>}
+              {configkeyInputKeyValue[item + "dateerror"].length !== 0 && <div className='text-danger Acfontsize'>{configkeyInputKeyValue[item + "dateerror"]}</div>}
+              {configkeyInputKeyValue[item + "hourerror"].length !== 0 && <div className='text-danger Acfontsize'>{configkeyInputKeyValue[item + "hourerror"]}</div>}
+              {configkeyInputKeyValue[item + "minerror"].length !== 0 && <div className='text-danger Acfontsize'>{configkeyInputKeyValue[item + "minerror"]}</div>}
 
             </div>
           </div>)}
@@ -1857,7 +1996,7 @@ class activeDashbord extends Component {
         </div>
       </form>;
     }
-    if (formStructure == "ClimateControl") {
+    if (formStructure === "ClimateControl") {
       inputField = <div className="col-sm-12">
         <table>
           <tr>
@@ -1941,7 +2080,7 @@ class activeDashbord extends Component {
               <tr key={i}>
                 <td> <label>{item.key}</label></td>
                 <td> <label className="switch ActiveSinput">
-                  <input type="checkbox" checked={(item.value == 1) ? true : false} value="Text" onChange={this.handleChechBox.bind(this)} disabled />
+                  <input type="checkbox" checked={(item.value === 1) ? true : false} value="Text" onChange={this.handleChechBox.bind(this)} disabled />
                   <span className="slider round"></span>
                 </label>
                 </td>
@@ -1981,14 +2120,15 @@ class activeDashbord extends Component {
                   <td
                     onClick={e => {
                       // alert(index)
-                      this.state.programForIndex = index
+                      let me = this;
+                      me.state.programForIndex = index
                       // this.state.configkeyInputKeyValue["ArrayOfProg"][programForIndex]["viewFlag"] = true;
 
-                      this.setState({ programForIndex: this.state.programForIndex })
+                      me.setState({ programForIndex: me.state.programForIndex })
                     }}
                     className=''>{item.name}</td>
                   <td className='text-center '> {item["version"]}</td>
-                  <td className='text-center '> {item.wef}</td>
+                  <td className='text-center '> {item.wefselected.format("DD/MM/YYYY")}</td>
                   <td className='text-center '> {item.startTime}</td>
                   <td className='text-center '> {item.endTime}</td>
                   <td className='text-center '> </td>
@@ -2000,15 +2140,15 @@ class activeDashbord extends Component {
 
 
                       <button Type="button"
-                        disabled={(item.pendingConfirmation || item.currentState == "Pause") ? true : null}
-                        onClick={this.ActionRowfProg.bind(this, index, item.name, item.version, (item.currentState == "Stop") ? "restart" : "stop", (item.currentState == "Stop") ? "Active" : "Stop")}
-                        className="btn btn-default">{(item.currentState == "Stop") ? "Restart" : <span>&nbsp;&nbsp;Stop&nbsp;&nbsp;</span>}
+                        disabled={(item.pendingConfirmation || item.currentState === "Pause") ? true : null}
+                        onClick={this.ActionRowfProg.bind(this, index, item.name, item.version, (item.currentState === "Stop") ? "restart" : "stop", (item.currentState === "Stop") ? "Active" : "Stop")}
+                        className="btn btn-default">{(item.currentState === "Stop") ? "Restart" : <span>&nbsp;&nbsp;Stop&nbsp;&nbsp;</span>}
                       </button>
 
                       <button Type="button"
-                        disabled={(item.pendingConfirmation || item.currentState == "Stop") ? true : null}
-                        onClick={this.ActionRowfProg.bind(this, index, item.name, item.version, (item.currentState == "Pause") ? "resume" : "pause", (item.currentState == "Pause") ? "Active" : "Pause")}
-                        className="btn btn-default">{(item.currentState == "Pause") ? "Resume" : <span>&nbsp;Pause&nbsp;&nbsp;</span>}
+                        disabled={(item.pendingConfirmation || item.currentState === "Stop") ? true : null}
+                        onClick={this.ActionRowfProg.bind(this, index, item.name, item.version, (item.currentState === "Pause") ? "resume" : "pause", (item.currentState === "Pause") ? "Active" : "Pause")}
+                        className="btn btn-default">{(item.currentState === "Pause") ? "Resume" : <span>&nbsp;Pause&nbsp;&nbsp;</span>}
                       </button>
                       <button Type="button" onClick={this.ProgramEdit.bind(this, item)}
                         disabled={(item.pendingConfirmation) ? true : null}
@@ -2035,18 +2175,19 @@ class activeDashbord extends Component {
           {!ProgramDetailsListObj.isEmpty() && Object.keys(ProgramDetailsListObj).length !== 0 && <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12">
             <p className="smalLine"></p>
             <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-              {!ProgramDetailsListObj.isEmpty() && Object.keys(ProgramDetailsListObj).length !== 0 && <div className="row">
-                <div className="col-lg-5 col-md-5 col-sm-6 col-xs-12">
+              {!ProgramDetailsListObj.isEmpty() && Object.keys(ProgramDetailsListObj).length !== 0 && <div className="">
+                <div className="col-lg-5 col-md-5 col-sm-6 ">
                   <label className="">Program Name :</label>
                   <input type="text"
-                    disabled={(ProgramDetailsListObj["nameFlag"]) ? true : null}
+                  id ={ProgramDetailsListObj.name}
+                     disabled={(ProgramDetailsListObj["nameFlag"]) ? true : null}
                     onChange={e => {
                     ProgramDetailsListObj.name = e.target.value;
                       this.setState({ ProgramDetailsListObj: ProgramDetailsListObj })
                     }}
                     name={ProgramDetailsListObj.name}
                     value={ProgramDetailsListObj.name}
-                    className="inputforProgram" />
+                    className="inputforProgram " />
 
                   <label className=" version">ver.</label>
                   <span>{ProgramDetailsListObj["versionselected"]}</span>
@@ -2064,11 +2205,13 @@ class activeDashbord extends Component {
                       onChange={e => {
                       ProgramDetailsListObj.wef = e.format("YY:MM:DD");
                         ProgramDetailsListObj["wefselected"] = e;
+                  
                         this.setState({ ProgramDetailsListObj: ProgramDetailsListObj })
                       }}
                       showMonthDropdown
                       showYearDropdown
                       minDate={new Date()}
+                      dateFormat="DD/MM/YYYY"
                       // isClearable={true}
                       disabled={(ProgramDetailsListObj["viewFlag"]) ? true : null}
                       className="inputforProgramWef"
@@ -2084,11 +2227,12 @@ class activeDashbord extends Component {
                       onChange={e => {
                       ProgramDetailsListObj.startTime = e.format("HH:mm");
                         ProgramDetailsListObj["startTimeselected"] = e;
+                        this.updateSetEndTimeProgram()
                         this.setState({ ProgramDetailsListObj: ProgramDetailsListObj })
                       }}
                       showTimeSelect
                       showTimeSelectOnly
-                      timeIntervals={15}
+                      timeIntervals={1}
                       timeFormat="HH:mm"
                       dateFormat="HH:mm"
                       timeCaption="Time"
@@ -2159,7 +2303,8 @@ class activeDashbord extends Component {
                         name={item.startAt}
                         onChange={e => {
                         ProgramDetailsListObj["schedules"][index].startAt = Number(e.target.value);
-                          ProgramDetailsListObj["schedules"][index].endTimeProgramListItem = this.convertDateTimeForSetProg(ProgramDetailsListObj.startTime, ProgramDetailsListObj["schedules"][index].startAt + ProgramDetailsListObj["schedules"][index].duration)
+                         ProgramDetailsListObj["schedules"][index].endTimeProgramListItem = this.convertDateTimeForSetProg(ProgramDetailsListObj.startTime, ProgramDetailsListObj["schedules"][index].startAt + ProgramDetailsListObj["schedules"][index].duration)
+                         // this.updateSetEndTimeProgram()
                           this.setState({ ProgramDetailsListObj: ProgramDetailsListObj })
                         }}
                         className="inputFoeldForOffset" /></td>
@@ -2170,8 +2315,9 @@ class activeDashbord extends Component {
                           name={item.duration}
                           onChange={e => {
                           ProgramDetailsListObj["schedules"][index].duration = Number(e.target.value);
-                            ProgramDetailsListObj["schedules"][index].endTimeProgramListItem = this.convertDateTimeForSetProg(ProgramDetailsListObj.startTime, ProgramDetailsListObj["schedules"][index].startAt + ProgramDetailsListObj["schedules"][index].duration)
-                            this.setState({ ProgramDetailsListObj: ProgramDetailsListObj })
+                           ProgramDetailsListObj["schedules"][index].endTimeProgramListItem = this.convertDateTimeForSetProg(ProgramDetailsListObj.startTime, ProgramDetailsListObj["schedules"][index].startAt + ProgramDetailsListObj["schedules"][index].duration)
+                      //  this.updateSetEndTimeProgram()  
+                        this.setState({ ProgramDetailsListObj: ProgramDetailsListObj })
                           }}
                           className="inputFoeldForOffset" /></td>
                       <td className='text-center '>{
@@ -2204,7 +2350,7 @@ class activeDashbord extends Component {
                 disabled={(ProgramDetailsListObj["viewFlag"]) ? true : null}
 
 
-                onClick={this.AddRowFrProglist.bind(this)}>Add Rule
+                onClick={this.AddRowFrProglist.bind(this)}>Add Channel
     </button>
               &nbsp; &nbsp;
     <button
@@ -2224,7 +2370,7 @@ class activeDashbord extends Component {
       </div>;
 
     }
-    if (formStructure == "manualOverride") {
+    if (formStructure === "manualOverride") {
       // console.log(configkeyInputKeyValue);
       // console.log("This I Want See");
 
@@ -2262,7 +2408,7 @@ class activeDashbord extends Component {
                   onChange={e => {
                     configkeyInputKeyValue["submitflag"] = false;
                     configkeyInputKeyValue[item + "toggle"] = !configkeyInputKeyValue[item + "toggle"]
-                    configkeyInputKeyValue[item]["pendingMode"] = (configkeyInputKeyValue[item + "toggle"] == true) ? 1 : 0
+                    configkeyInputKeyValue[item]["pendingMode"] = (configkeyInputKeyValue[item + "toggle"] === true) ? 1 : 0
                     this.setState({ configkeyInputKeyValue: configkeyInputKeyValue })
                   }} />
                 <span className="slider round"></span>
@@ -2287,7 +2433,7 @@ class activeDashbord extends Component {
         </div>
       </form>;
     }
-    if (formStructure == "SetParameter") {
+    if (formStructure === "SetParameter") {
       inputField = <div className="">
         <div className="row">
           {this.state.configkeyInput.map(item => <div>
@@ -2344,10 +2490,10 @@ class activeDashbord extends Component {
       </div>
     }
 
-    if (formStructure == "1-input") {
+    if (formStructure === "1-input") {
       configkeyInput.forEach(function (key) {
         className12[key + "Classerror"] = "";
-        if (configkeyInputKeyValue[key + "error"].length != 0) {
+        if (configkeyInputKeyValue[key + "error"].length !== 0) {
           className12[key + "Classerror"] = "Acustmborder";
         }
       });
@@ -2367,7 +2513,7 @@ class activeDashbord extends Component {
                 }}
 
               />
-              {configkeyInputKeyValue[item + "error"].length != 0 && <div className='text-danger Acfontsize'>{configkeyInputKeyValue[item + "error"]}</div>}
+              {configkeyInputKeyValue[item + "error"].length !== 0 && <div className='text-danger Acfontsize'>{configkeyInputKeyValue[item + "error"]}</div>}
 
             </div>
           </div>)}
@@ -2380,13 +2526,13 @@ class activeDashbord extends Component {
       </form>;
     }
 
-    if (formStructure == "table") {
+    if (formStructure === "table") {
       var tempArray = ["ON", "OFF"];
       configkeyInput.forEach(function (key) {
         for (var i = 0; i < 2; i++) {
 
           className12[tempArray[i] + key + "Classerror"] = "";
-          if (configkeyInputKeyValue[tempArray[i] + key + "error"].length != 0) {
+          if (configkeyInputKeyValue[tempArray[i] + key + "error"].length !== 0) {
             className12[tempArray[i] + key + "Classerror"] = "Acustmborder";
           }
         }
@@ -2398,7 +2544,7 @@ class activeDashbord extends Component {
             <div className="dropDown">
               <label>Channel Setup :</label>
               <DropdownButton className="AcDropS" onSelect={this.handleChange1}
-                disabled={this.state.channelName.length == 0 ? true : null}
+                disabled={this.state.channelName.length === 0 ? true : null}
                 bsStyle={"Awhite"}
                 title={this.state.selectedChannelB || "Select Channel"}>
                 {this.state.channelName.map((item) =>
@@ -2422,7 +2568,7 @@ class activeDashbord extends Component {
                       <tr>
                         <td className=' ActiveTableinput'> {item}</td>
                         <td className='ActiveTableinput '>
-                          {configkeyInputKeyValue["ON" + item + "error"].length != 0 && <div className=' text-danger Acfontsize'>{configkeyInputKeyValue["ON" + item + "error"]}</div>}
+                          {configkeyInputKeyValue["ON" + item + "error"].length !== 0 && <div className=' text-danger Acfontsize'>{configkeyInputKeyValue["ON" + item + "error"]}</div>}
                           <DatePicker id={"ON" + item}
                             selected={configkeyInputKeyValue["ON" + item]}
                             onChange={e => {
@@ -2440,7 +2586,7 @@ class activeDashbord extends Component {
                             placeholderText="Please Select Start Date"
                           /></td>
                         <td className=' ActiveTableinput' >
-                          {configkeyInputKeyValue["OFF" + item + "error"].length != 0 && <div className=' text-danger Acfontsize'>{configkeyInputKeyValue["OFF" + item + "error"]}</div>}
+                          {configkeyInputKeyValue["OFF" + item + "error"].length !== 0 && <div className=' text-danger Acfontsize'>{configkeyInputKeyValue["OFF" + item + "error"]}</div>}
                           <DatePicker id={"OFF" + item}
                             selected={configkeyInputKeyValue["OFF" + item]}
                             onChange={e => {
@@ -2473,7 +2619,7 @@ class activeDashbord extends Component {
           </div>
         </form>;
     }
-    if (formStructure == "SentCommand") {
+    if (formStructure === "SentCommand") {
       inputField = <div className="row">
         <div className="col-lg-7  col-md-7 col-sm-12 col-xs-12">
           <div className="tableactuter">
@@ -2499,10 +2645,8 @@ class activeDashbord extends Component {
                       <td className=" btn-group">
                         <button onClick={this.rowClicked.bind(this, item, 1 + i, item._id)}
                           className="btn color1  btn-xs" > View</button>
-                        {/* <button onClick={() => {
-
-                        }} className="btn color2  btn-xs" > Edit</button> */}
-                        <button onClick={this.rowDelete.bind(this, item._id)} className="btn color3  btn-xs" > Delete</button>
+                        <button onClick={this.sentCommandResent.bind(this, item)} className="btn color2  btn-xs" > Resend</button>
+                        <button onClick={this.rowDelete.bind(this, item)} className="btn color3  btn-xs" > Revert</button>
                       </td>
                     </tr>
                   )}
@@ -2519,7 +2663,7 @@ class activeDashbord extends Component {
         </div>
       </div>;
     }
-    if (formStructure == "ActiveCommand") {
+    if (formStructure === "ActiveCommand") {
       inputField = <div className="row"> <div className="col-lg-9 col-md-12 col-sm-12 col-xs-12">
         <div className="Activefilterdiv">
           <select onChange={this.selectedChF.bind(this)} className="form-control ActiveSelection">
@@ -2533,9 +2677,9 @@ class activeDashbord extends Component {
           <button type="button" className="ActivFilterBtn btn btn-sm " onClick={this.filtermethod.bind(this)}>filter</button>
           <div className=" DisplayBloakInMobile">
             <ul class="pagerActive">
-              <li><a onClick={this.nevigation.bind(this, -4)}>Prev</a></li>
+              <li><a href="javascript:void(0)" onClick={this.nevigation.bind(this, -4)}>Prev</a></li>
               <li className='ActiveList'>4 hrs</li>
-              <li><a onClick={this.nevigation.bind(this, 4)}>Next</a></li>
+              <li><a href="javascript:void(0)" onClick={this.nevigation.bind(this, 4)}>Next</a></li>
             </ul>
           </div>
         </div>
@@ -2573,7 +2717,7 @@ class activeDashbord extends Component {
       </div>
       </div>;
     }
-    if (formStructure == "ActiveAndPending") {
+    if (formStructure === "ActiveAndPending") {
       inputField = <div className="">
         <div className="Activefilterdiv">
           {/* <div className= "col-lg-12">
@@ -2628,7 +2772,7 @@ class activeDashbord extends Component {
             </thead>
             <tbody>
               {state.in_prog && <tr><td colSpan={8} className='text-center'><i className='fa fa-refresh fa-spin'></i> Loading..</td></tr>}
-              {!state.in_prog && ExecutedJobs.length == 0 && <tr><td colSpan={8} className='text-center'> No Data </td></tr>}
+              {!state.in_prog && ExecutedJobs.length === 0 && <tr><td colSpan={8} className='text-center'> No Data </td></tr>}
               {!state.in_prog && ExecutedJobs.map((item, i) =>
 
                 <tr key={i}>
@@ -2663,20 +2807,21 @@ class activeDashbord extends Component {
 
                   <div className=" col-lg-8 col-md-7 col-sm-6">
                     <div className="spanBredDiv">
-                      <span className="spanBredcum">{(this.state.CriteriaForOP.CustCd != "") ? this.state.CriteriaForOP.CustCd : ""} </span><span className="spanBredcumslash">/</span>
-                      <span className="spanBredcum"> {(this.state.CriteriaForOP.subCustCd != "") ? this.state.CriteriaForOP.subCustCd : ""}</span> <span className="spanBredcumslash">/</span>
-                      <span className="spanBredcum">{(this.state.CriteriaForOP.assetId != "") ? this.state.CriteriaForOP.assetId : ""} </span> <span className="spanBredcumslash">/</span>
-                      <span className="spanBredcum">{(this.state.CriteriaForOP.DeviceName != "") ? this.state.CriteriaForOP.DeviceName : ""}</span>
+                      <span className="spanBredcum">{(this.state.CriteriaForOP.CustCd !== "") ? this.state.CriteriaForOP.CustCd : ""} </span><span className="spanBredcumslash">/</span>
+                      <span className="spanBredcum"> {(this.state.CriteriaForOP.subCustCd !== "") ? this.state.CriteriaForOP.subCustCd : ""}</span> <span className="spanBredcumslash">/</span>
+                      <span className="spanBredcum">{(this.state.CriteriaForOP.assetId !== "") ? this.state.CriteriaForOP.assetId : ""} </span> <span className="spanBredcumslash">/</span>
+                      <span className="spanBredcum">{(this.state.CriteriaForOP.DeviceName !== "") ? this.state.CriteriaForOP.DeviceName : ""}</span>
                     </div>
                   </div>
                   <div className=" col-lg-4 col-md-5 col-sm-6">
                     <div className="navright">
+                    {(this.state.ActiveDashBoardEnable)?<button type="button" className="spanNev btn" onClick={() => {
+                        this.props.history.push("/socketdashbord")
+                      }}>View Dashboard</button>: ""}
                       <button type="button" className="spanNev btn" onClick={() => {
                         this.props.history.push("/NevMenu")
                       }}>Device Menu</button>
-                      <button type="button" className="spanNev btn" onClick={() => {
-                        this.props.history.push("/socketdashbord")
-                      }}>View Dashboard</button>
+                   
                     </div>
                   </div>
                   {/* </div> */}
@@ -2707,13 +2852,13 @@ class activeDashbord extends Component {
                   <div className="SensorsOuter pointer1">
                     {this.state.channelArray.map((item, i) => <div onClick={this.ActionOnChanel.bind(this, item, i)} className="sensorsDive">
                       <SensorsActive key={item._id}
-                        bgclass={(item.OldValue != item.Value) ? " small-boxDActive ChannelBGColortransition" : (item.ActionCond != item.Value) ? "small-boxDActive  ChannelBGColorYellow " : "small-boxDActive" &&
-                          (item.Value == 1) ? " small-boxDActive onbackground" : "small-boxDActive "}
+                        bgclass={(item.OldValue !== item.Value) ? " small-boxDActive ChannelBGColortransition" : (item.ActionCond !== item.Value) ? "small-boxDActive  ChannelBGColorYellow " : "small-boxDActive" &&
+                          (item.Value === 1) ? " small-boxDActive onbackground" : "small-boxDActive "}
                         label={item.sortName}
                         takenClass="ActivedateTime"
                         P_name_class="ActivePclass"
                         heading_class_name=" ActiveSheading"
-                        message={(item.Value == 1) ? "ON" : "OFF"}
+                        message={(item.Value === 1) ? "ON" : "OFF"}
                         div_icon_class=" fontsizeicon12"
                         iconclass={item.mode}
                         dateTime={dateFormat(item.dateTime, "dd-mmm HH:MM")}
@@ -2805,18 +2950,38 @@ class activeDashbord extends Component {
                   </div>
                   <a href="javascript:void(0)" className="small-box-footer">&nbsp;</a>
                 </div>
+                <br />
+                <br />
+              </div>
+              <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12 ">
+                <p className="line2"></p>
+                <br />
+                <lable className="fonsizename setDeviceTime"> Set Device Time</lable>
+                <br />
+                <br />
+                <div class="form-group">
+
+                  <DatePicker id="SetTime"
+                  selected= {this.state.selectcteDeviceTime}
+                  onChange={e =>{
+                    this.setState({selectcteDeviceTime: e})
+                  }}
+                    showMonthDropdown
+                    showYearDropdown
+                    showTimeSelect
+                   
+                    timeFormat="HH:mm"
+                    timeIntervals={1}
+                    dateFormat="LLL"
+                    timeCaption="time"
+                    className="form-control"
+                  />
+                </div>
+                <button className="btn btn-default" onClick={this.setTime.bind(this)}>Submit</button>
+
               </div>
 
-              {/* <div className="col-lg-12">
-                <ul class="nav nav-pills nav-stacked">
-                  <li><a className=" " onClick={() =>{ 
-                         this.props.history.push("/socketdashbord")
-                           }}>View Dashboard</a></li>
-                  <li><a className=" " onClick={() =>{ 
-                         this.props.history.push("/NevMenu")
-                           }}> Device Menu</a></li>
-                </ul> 
-                </div> */}
+           
 
             </div>
 
@@ -2831,25 +2996,25 @@ class activeDashbord extends Component {
           </Modal.Header>
           <Modal.Body>
             <div className="row">
-              <div className="col-xs-12">
+              <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12">
                 <label>Channel Name :</label> <span>{this.state.channelAlerrModel.channelName}</span>
               </div>
-              <div className="col-xs-5">
-                <label>Current Status :</label> <span>{(this.state.channelAlerrModel.currentStatus == 1) ? "ON" : "OFF"}</span>
+              <div className="col-lg-5 col-md-5 col-sm-5 col-xs-12">
+                <label>Current Status :</label> <span>{(this.state.channelAlerrModel.currentStatus === 1) ? "ON" : "OFF"}</span>
               </div>
-              <div className="col-xs-7">
+              <div className="col-lg-7 col-md-7 col-sm-7 col-xs-12">
                 <label> Last Updated Time :</label> <span>{this.state.channelAlerrModel.UpdatedTime}</span>
               </div>
-              <div className="col-xs-7">
-                <label>Channel is  {(this.state.channelAlerrModel.currentStatus == 1) ? "ON" : "OFF"} since :</label> <span>{this.state.channelAlerrModel.age} hrs.</span>
+              <div className="col-lg-7 col-md-7 col-sm-7 col-xs-12">
+                <label>Channel is  {(this.state.channelAlerrModel.currentStatus === 1) ? "ON" : "OFF"} since :</label> <span>{this.state.channelAlerrModel.age} hrs.</span>
               </div>
-              <div className="col-xs-12">
-                <label>Current Mode :</label> <span>{(this.state.channelAlerrModel.mode == 1) ? "Automatic" : "Manual"}</span>
+              <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12 col-xs-12">
+                <label>Current Mode :</label> <span>{(this.state.channelAlerrModel.mode === 1) ? "Automatic" : "Manual"}</span>
               </div>
             </div>
           </Modal.Body>
           <Modal.Footer>
-            <label className="Mlabel">Action Requested: <u> Switch {(this.state.channelAlerrModel.currentStatus == 1) ? "OFF" : "ON"}</u> And <u>Manual</u> Please Confirm ?</label>
+            <label className="Mlabel">Action Requested: <u> Switch {(this.state.channelAlerrModel.currentStatus === 1) ? "OFF" : "ON"}</u> And <u>Manual</u> Please Confirm ?</label>
             <button className="btn btn-sm " onClick={this.handleClose}>Cancel</button>
             <button className="btn btn-sm btn-success" onClick={this.handleSubmit} >Submit</button>
           </Modal.Footer>

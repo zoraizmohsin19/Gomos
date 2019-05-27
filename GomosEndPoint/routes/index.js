@@ -18,6 +18,17 @@ const TRACE_DEV   = 4;
 const TRACE_DEBUG = 5;
 var  gomos = require("../../commanFunction/routes/commanFunction");
 var midllelayer = require("../../EndPointMiddlelayer/routes/middlelayer");
+var fs = require("fs");
+var dt = dateTime.create();
+var formattedDate = dt.format('Y-m-d');
+const output = fs.createWriteStream(`./gomosEndPointStd${formattedDate}.log`, { flags: "a" });
+const errorOutput = fs.createWriteStream(`./gomosEndPointErr${formattedDate}.log`, { flags: "a" });
+var logger = gomos.createConsole(output,errorOutput);
+const SERVICE_VALUE = 1;
+var gConsole = false;
+if(process.argv[4] == SERVICE_VALUE ){
+  gConsole = true;
+}
 
 /* GET home page. */
 router.get("/", function (req, res, next) {
@@ -51,7 +62,7 @@ router.post("/sendto/plateform", function (req, res, next) {
   var Token = identifier.Token; 
   // var assetId = identifier.assetId;
   var Date = identifier.Date;
-  gomos.gomosLog(TRACE_DEBUG,"post method and getting following data ",userId+":"+password+":"+payloadId+":"+DeviceName+":"+custCd+":"+subCustCd); 
+  gomos.gomosLog( logger,gConsole,TRACE_DEBUG,"post method and getting following data ",userId+":"+password+":"+payloadId+":"+DeviceName+":"+custCd+":"+subCustCd); 
   }
   catch(err){
     gomos.errorCustmHandler(NAMEOFSERVICE,"/sendto/plateform",'THIS IS TRY CATCH ERROR','',err);
@@ -73,7 +84,7 @@ router.post("/sendto/plateform", function (req, res, next) {
             process.hasUncaughtExceptionCaptureCallback();
           }
           if (result.length > 0) {
-                gomos.gomosLog(TRACE_DEBUG,"userId and password validation ",userId+":"+password);     
+                gomos.gomosLog( logger,gConsole,TRACE_DEBUG,"userId and password validation ",userId+":"+password);     
                 // dataToStore = {
                 //           payloadId,
                 //           DeviceName,
@@ -83,13 +94,13 @@ router.post("/sendto/plateform", function (req, res, next) {
                 //           Date,
                 //           message
                 //             }
-                // gomos.gomosLog(TRACE_DEBUG," After userId and password validation dataToStore sendToMidlelayer",dataToStore);     
+                // gomos.gomosLog( logger,gConsole,TRACE_DEBUG," After userId and password validation dataToStore sendToMidlelayer",dataToStore);     
                 // asyncPostData(res,dataToStore);  
            midllelayer.endPointMiddelayerFn(urlConn,dbName,res,custCd,subCustCd,DeviceName,payloadId,dateTime,message,Token);
           
           }
           else{
-            gomos.gomosLog(TRACE_PROD,"UserId and password not validate");     
+            gomos.gomosLog( logger,gConsole,TRACE_PROD,"UserId and password not validate");     
             res.json("UserId and password not validate");
           }
   
@@ -99,7 +110,7 @@ router.post("/sendto/plateform", function (req, res, next) {
 // async function asyncPostData(res,dataToStore) {
 //   try {
 //     const response = await axios.post('http://localhost:3996/sendto', {body: dataToStore});
-//     gomos.gomosLog(TRACE_PROD,"success in endPoint and response value come from middlelayer :", response["data"]);     
+//     gomos.gomosLog( logger,gConsole,TRACE_PROD,"success in endPoint and response value come from middlelayer :", response["data"]);     
 //     res.json(response["data"])
 //       } catch(err) {
 //         gomos.errorCustmHandler(NAMEOFSERVICE,"asyncPostData",'THIS IS TRY CATCH ERROR','',err)

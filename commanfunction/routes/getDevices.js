@@ -6,7 +6,7 @@ const TRACE_DEV   = 4;
 const TRACE_DEBUG = 5;
 var  gomos = require("./commanFunction");
 
-exports.getDevices =  function(db,NAMEOFSERVICE){
+exports.getDevices =  function(db,NAMEOFSERVICE,logger,gConsole){
    return new Promise((resolve, reject)=> {
     db.collection("Devices")
     .find()
@@ -21,7 +21,7 @@ exports.getDevices =  function(db,NAMEOFSERVICE){
           dataFromDevices.push(result[i]);
         }
         resolve(dataFromDevices);
-        gomos.gomosLog(TRACE_PROD,"getDevices - No. of devices a read from collection", dataFromDevices.length);
+        gomos.gomosLog(logger,gConsole,TRACE_PROD,"getDevices - No. of devices a read from collection", dataFromDevices.length);
       }
       catch(err){
         gomos.errorCustmHandler(NAMEOFSERVICE,"getDevices","THis IS Error From Try Catch Some","",err);

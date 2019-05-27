@@ -6,7 +6,7 @@ const TRACE_DEV   = 4;
 const TRACE_DEBUG = 5;
 var  gomos = require("./commanFunction");
 
-exports.getPayloads =  function(db,NAMEOFSERVICE){
+exports.getPayloads =  function(db,NAMEOFSERVICE,logger,gConsole){
    return new Promise((resolve, reject)=> {
     db.collection("Payloads")
     .find()
@@ -21,7 +21,7 @@ exports.getPayloads =  function(db,NAMEOFSERVICE){
           dataFromPayload.push(result[i]);
         }
         resolve(dataFromPayload)
-        gomos.gomosLog(TRACE_PROD,"getPayload - No. of payload read from collection", dataFromPayload.length);
+        gomos.gomosLog(logger,gConsole,TRACE_PROD,"getPayload - No. of payload read from collection", dataFromPayload.length);
       }
       catch(err){
         gomos.errorCustmHandler(NAMEOFSERVICE,"getPayloads","This Is Try Catch Of Getting All Payload","",err);  
