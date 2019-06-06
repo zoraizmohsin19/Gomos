@@ -4,6 +4,13 @@ const TRACE_STAGE = 2;
 const TRACE_TEST  = 3;
 const TRACE_DEV   = 4;
 const TRACE_DEBUG = 5;
+const ERROR_RUNTIME      = "runTimeError";
+const ERROR_APPLICATION  =  "ApplicationError";
+const ERROR_DATABASE     = "DataBaseError";
+const EXIT_TRUE  = true;
+const EXIT_FALSE = false;
+const ERROR_TRUE = true;
+const ERROR_FALSE = false;
 var  gomos = require("./commanFunction");
 
 exports.getServiceConfig =  function(db,NAMEOFSERVICE,serviceKey,logger,gConsole){
@@ -12,8 +19,7 @@ exports.getServiceConfig =  function(db,NAMEOFSERVICE,serviceKey,logger,gConsole
             .find()
             .toArray(function (err, result) {
               if (err) {
-            gomos.errorCustmHandler(NAMEOFSERVICE,"getServiceConfig","This Query Error","",err);  
-                process.hasUncaughtExceptionCaptureCallback();
+                gomos.errorCustmHandler(NAMEOFSERVICE,"getServiceConfig",'This is query for getServiceConfig',``,err,ERROR_DATABASE,ERROR_TRUE,EXIT_TRUE);
               }
               if (result.length > 0) {
                 try{
@@ -24,7 +30,7 @@ exports.getServiceConfig =  function(db,NAMEOFSERVICE,serviceKey,logger,gConsole
                   }
                 }
                 catch(err){
-                  gomos.errorCustmHandler(NAMEOFSERVICE,"getServiceConfig","This is Try catch Error","",err);
+                 gomos.errorCustmHandler(NAMEOFSERVICE,"getServiceConfig",'This is query for getServiceConfig Try catch',``,err,ERROR_RUNTIME,ERROR_TRUE,EXIT_TRUE);
                 }
                
               }

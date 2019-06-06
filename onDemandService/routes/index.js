@@ -47,43 +47,6 @@ function accessPermission(res) {
 var count = 0;
 router.post("/dummy", function (req, res, next){
   var body = req.body.body;
-  // var name = body.CustName;
-  // var custCd = body.custCd ;
-  // var spCd = body.selectedSPValue ;
-  // var address = body.address ;
-  // var phone = body.Phone ;
-  // var email  = body.email;
-  // var servicesTaken  = body.servicesTaken;
-  // var mqttClient  = body.mqttClient;
- 
-  // var description  = body.description;
-  // var status  = body.status;
-  // var userId = '';
-  // var Timestamp = new Date().toISOString();
-
-  // var topics = {
-    
-  //     topic1 : body.topic1,
-  //     topic2 : body.topic2
-
-  // }
-  // objOfsp = {
-  //  name,
-  //  custCd,
-  //   spCd,
-  //   address,
-  //   phone,
-  //   email,
-  //   servicesTaken,
-  //   mqttClient,
-  //   topics,
-  //   description,
-  //   status ,
-  //   userId,
-  //   Timestamp
-  // } 
-
- 
   
   console.log(body);
   console.log("this called "+ count);
@@ -117,6 +80,114 @@ router.delete("/deleteSentCommand", function (req, res, next) {
       }
     );
     });
+router.get("/flashPrograms", function (req, res, next) {
+  var query = url.parse(req.url, true).query;
+  var mac = query.mac;
+  gomos.gomosLog(logger, gConsole, TRACE_DEV, "This is mac");
+
+  if (mac != undefined && mac != "") {
+    accessPermission(res);
+    MongoClient.connect(
+      urlConn,
+      { useNewUrlParser: true },
+      function (err, connection) {
+        if (err) {
+          process.hasUncaughtExceptionCaptureCallback();
+        }
+        //"ProgramDetails","ActiveJob"
+        var db = connection.db(dbName);
+        db.collection("DeviceInstruction")
+          .deleteMany({ mac: mac, type: { $in: ["SentInstruction", "ProgramDetails", "ActiveJob","executedJob"] } }, function (err, result) {
+            if(err){
+              res.json(err)
+            }
+            gomos.gomosLog(logger, gConsole, TRACE_DEV, "This is result", result);
+            // res.json(result)
+            db.collection("DeviceInstruction")
+              .find({ mac: mac, type: "SentManOverride" })
+              .toArray(function (err, result) {
+                if (err) {
+                  res.json(err)
+                }
+                if (result.length > 0) {
+
+                  gomos.gomosLog(logger, gConsole, TRACE_DEV, "this is log for SentManOverride", result);
+                  var temObj = {};
+                  let keys = Object.keys(result[0].sourceMsg.body);
+                  let obj = {}
+                  for (let [key, value] of Object.entries(result[0].sourceMsg.body)) {
+                    temObj[key] = { "activeMode": 0, "pendingMode": 0 };
+                  }
+                  gomos.gomosLog(logger, gConsole, TRACE_DEV, "This is Log of Object")
+                  db.collection("DeviceInstruction")
+                    .updateOne({ "type": "SentManOverride", "mac": mac },
+                      {
+                        $set: { "sourceMsg.body": temObj }
+                      }
+                      , function (err, result) {
+                        if (err) {
+                          gomos.gomosLog(logger, gConsole, TRACE_DEBUG, "this err", err);
+                          res.json(err)
+                        }
+                          // if(result.result.nModified > 0){
+                        db.collection("DeviceState")
+                          .find({ mac: mac })
+                          .toArray(function (err, result2) {
+                            if (err) {
+                              gomos.gomosLog(logger, gConsole, TRACE_DEBUG, "This is Device State Error", err);
+                              res.json(err)
+                            }
+                            if (result2.length > 0) {
+                              let deviceStatecode = Object.keys(result2[0].channel);
+                              for (let i = 0; i < deviceStatecode.length; i++) {
+                                var devicebusinessNM = Object.keys(result2[0].channel[deviceStatecode[i]]);
+                                var keyForRemove1 = ["sortName", "displayPosition", "Type", "valueChangeAt", "dateTime"];
+                                for (var n = 0; n < keyForRemove1.length; n++) {
+                                  devicebusinessNM.splice(devicebusinessNM.indexOf(keyForRemove1[n]), 1);
+                                }
+                                result2[0].channel[deviceStatecode[i]][devicebusinessNM[0]] = 0;
+
+                              }
+                              gomos.gomosLog(logger, gConsole, TRACE_DEV, "this is log of DEvice State Flas", result2);
+                              db.collection("DeviceState")
+                                .updateOne({ "mac": mac, _id: result2[0]._id },
+                                  {
+                                    $set: result2[0]
+                                  }
+                                  , function (err, result) {
+                                    if (err) {
+                                      gomos.gomosLog(logger, gConsole, TRACE_DEBUG, "this err", err);
+                                      res.json(err)
+                                    }
+                                    gomos.gomosLog(logger, gConsole, TRACE_DEBUG, "This is log of DeviceState Update", result);
+                                    res.send(`successfully Flase PlateForm For Programs ${result.result.nModified}`)
+
+                                  });
+                            }
+                            else{
+                              res.send("Some Things Wrong 2")
+                            }
+                          });
+                        // }
+                        // else{
+                        //   res.send("Some Things Wrong 2")
+                        // }
+                      });
+
+                }
+                else{
+                  res.send("Some Things Wrong 1")
+                }
+
+              });
+          });
+      }
+    );
+  }
+  else {
+    res.send("mac not present")
+  }
+});
 router.post("/dummy1", function (req, res, next){
   accessPermission(res);
   MongoClient.connect(

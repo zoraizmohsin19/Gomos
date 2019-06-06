@@ -23,6 +23,13 @@ const TRACE_STAGE = 2;
 const TRACE_TEST = 3;
 const TRACE_DEV = 4;
 const TRACE_DEBUG = 5;
+const ERROR_RUNTIME      = "runTimeError";
+const ERROR_APPLICATION  =  "ApplicationError";
+const ERROR_DATABASE     = "DataBaseError";
+const EXIT_TRUE  = true;
+const EXIT_FALSE = false;
+const ERROR_TRUE = true;
+const ERROR_FALSE = false;
 var dt = dateTime.create();
 var formattedDate = dt.format('Y-m-d');
 const output = fs.createWriteStream(`./alertStd${formattedDate}.log`,  { flags: "a" });
@@ -62,64 +69,52 @@ function processAlerts() {
     sec = "";
   }
   else {
-     gomos.gomosLog( logger,gConsole,
-      TRACE_PROD,
-      "Scheduling issues, Can not proceed : It can only support Seconds, Minutes up to 59",
-      alertSrvcSchedule
-    );
-     gomos.gomosLog( logger,gConsole,
-      TRACE_PROD,
-      "Scheduling issues, Can not proceed : It can only support Seconds, Minutes up to 59",
-      factSrvcSchedule
-    );
-    gomos.errorCustmHandler(
-      NAMEOFSERVICE,
-      "processAlerts",
-      "Scheduling issues, Can not proceed : It can only support Seconds, Minutes up to 59"
-    );
-   
-    process.exit(0);
+     gomos.gomosLog( logger,gConsole, TRACE_PROD,"Scheduling issues, Can not proceed : It can only support Seconds, Minutes up to 59", alertSrvcSchedule);
+     gomos.errorCustmHandler(NAMEOFSERVICE,"processAlerts",'Scheduling issues, Can not proceed : It can only support Seconds, Minutes up to 59',`alertSrvcSchedule : ${alertSrvcSchedule} `,'',ERROR_APPLICATION,ERROR_FALSE,EXIT_TRUE);
   }
   var schPattern = sec + min + "* * * *";
 
   // var tempSchedule = scheduleTemp.scheduleJob("*/30 * * * * *", function () {
     var tempSchedule = scheduleTemp.scheduleJob(schPattern, function () {
      gomos.gomosLog( logger,gConsole,TRACE_PROD, "Processing Started - Processing Level 1 Alerts ");
-
-   
-      // dbo = connection.db(dbName);
         dbo.collection("Alerts")
           .find({ processed: "N", type: "level1" })
           .toArray(
            async function (err, result) {
             if (err) {
-              gomos.errorCustmHandler(NAMEOFSERVICE,"processAlerts","",err);
-              process.hasUncaughtExceptionCaptureCallback();
+               gomos.errorCustmHandler(NAMEOFSERVICE,"processAlerts",'This is Database Error Level1 ',``,err,ERROR_DATABASE,ERROR_TRUE,EXIT_TRUE);
             }
             try {
               if(result.length > 0){
                  gomos.gomosLog( logger,gConsole,TRACE_DEV,"This Is result length", result.length);
               for (var i = 0; i < result.length; i++) {
-                 gomos.gomosLog( logger,gConsole,TRACE_DEV,"This is response of getRecipientMail");
-                let response = await getRecipientMail(dbo, result[i]); 
-                  gomos.gomosLog( logger,gConsole,TRACE_DEV,"This is response of getRecipientMail",response);
-                sendAlertMail(result[i].DeviceName, result[i].alertText, result[i].type,
-                  result[i].subCustCd, result[i]._id, dbo, result[i].businessNm,
-                  result[i].businessNmValues, response.emailRecipient);
+                gomos.gomosLog(logger,gConsole,TRACE_DEV,"This Is result length", result[i])
+               
+                try {
+                  gomos.gomosLog( logger,gConsole,TRACE_DEV,"This is response of getRecipientMail");
+                  let response = await getRecipientMail(dbo, result[i]); 
+                    gomos.gomosLog( logger,gConsole,TRACE_DEV,"This is response of getRecipientMail",response);
+                  sendAlertMail(result[i].DeviceName, result[i].alertText, result[i].type,
+                    result[i].subCustCd, result[i]._id, dbo, result[i].businessNm,
+                    result[i].businessNmValues, response.emailRecipient);
+                } catch (err) {
+                  gomos.gomosLog(logger,gConsole,TRACE_DEV,"This is Error Try catch in index level",result[i])
+                  updateAlertsForError(result[i]._id, dbo);
+                  gomos.errorCustmHandler(NAMEOFSERVICE,"processAlerts",'This is Try Catch Error',result[i],err,ERROR_RUNTIME,ERROR_TRUE,EXIT_FALSE);
+                }
+               
               }
             }
             } catch (err) {
-             gomos.errorCustmHandler(NAMEOFSERVICE,"processAlerts","",err);           
+             gomos.errorCustmHandler(NAMEOFSERVICE,"processAlerts",'This is Try Catch Error','',err,ERROR_RUNTIME,ERROR_TRUE,EXIT_FALSE);
             }
-            
-        
       }
     );
   });
 }
 
 function getRecipientMail(dbo, data){
-   gomos.gomosLog( logger,gConsole,TRACE_DEV,"This is call of getRecipient", data.referenceConfig);
+   gomos.gomosLog( logger,gConsole,TRACE_DEV,"This is call of getRecipient", data.emailRecipientRole);
   return new Promise((resolve, reject)=> { 
 
    dbo.collection("Devices")
@@ -127,28 +122,32 @@ function getRecipientMail(dbo, data){
   .toArray(
    async function (err, result1) {
     if (err) {
-      gomos.errorCustmHandler(NAMEOFSERVICE,"processAlerts","",err);
-      process.hasUncaughtExceptionCaptureCallback();
+      gomos.errorCustmHandler(NAMEOFSERVICE,"getRecipientMail",'This is query error from Device',`mac ${mac}`,err,ERROR_DATABASE,ERROR_TRUE,EXIT_TRUE);
       reject(err)
     }
     if(result1.length > 0){
-      let emailRecipientRole = data.emailRecipientRole;
-      var emails = "";
-      if(emailRecipientRole !== "ALL"){
-       
-        for(let i =0 ; i< emailRecipientRole.length; i++){
-          emails += result1[0].roles[emailRecipientRole[i]] +",";
+      try {
+        let emailRecipientRole = data.emailRecipientRole;
+        var emails = "";
+        if(emailRecipientRole !== "ALL"){
+         
+          for(let i =0 ; i< emailRecipientRole.length; i++){
+            emails += result1[0].roles[emailRecipientRole[i]] +",";
+          }
+         
         }
-       
-      }
-      else{
-        let arrayOfemailrecipientRole = Object.keys(result1[0].roles);
-        for(let i = 0; i< arrayOfemailrecipientRole.length ; i++){
-          emails += result1[0].roles[arrayOfemailrecipientRole[i]] +",";
+        else{
+          let arrayOfemailrecipientRole = Object.keys(result1[0].roles);
+          for(let i = 0; i< arrayOfemailrecipientRole.length ; i++){
+            emails += result1[0].roles[arrayOfemailrecipientRole[i]] +",";
+          }
+  
         }
-
+       gomos.gomosLog( logger,gConsole,TRACE_DEV,"This log of email of recipient ", emails);
+      } catch (err) {
+        reject(err)
       }
-     gomos.gomosLog( logger,gConsole,TRACE_DEV,"This log of email of recipient ", emails);
+   
       resolve({emailRecipient: emails.substring(0, emails.length - 1)
       });
     }
@@ -162,8 +161,19 @@ function updateAlerts(objId, dbo) {
     { $set: { processed: "Y" } },
     function (err, result) {
       if (err) {
-        gomos.errorCustmHandler("updateAlerts",err); 
-        process.hasUncaughtExceptionCaptureCallback();
+        gomos.errorCustmHandler(NAMEOFSERVICE,"updateAlerts",'This is Updateing Error in Database',`Id ${objId}`,err,ERROR_DATABASE,ERROR_TRUE,EXIT_TRUE);
+      }
+    }
+  );
+}
+//method to update Alerts collection For Error
+function updateAlertsForError(objId, dbo) {
+  dbo.collection("Alerts").updateOne(
+    { _id: objId },
+    { $set: { processed: "E" } },
+    function (err, result) {
+      if (err) {
+        gomos.errorCustmHandler(NAMEOFSERVICE,"updateAlertsForError",'This is Updateing Error in Database',`Id ${objId}`,err,ERROR_DATABASE,ERROR_TRUE,EXIT_TRUE);
       }
     }
   );
@@ -187,7 +197,8 @@ function sendAlertMail(DeviceName, strText, level, custCode, objId, dbo, busines
     // send mail with defined transport object
     transporter.sendMail(mailOptions, (err, info) => {
       if (err) {
-        gomos.errorCustmHandler(NAMEOFSERVICE,"sendAlertMail","",err); 
+        updateAlertsForError(objId, dbo);
+        gomos.errorCustmHandler(NAMEOFSERVICE,"sendAlertMail",'This is Sending mail Error',`mailOption ${mailOptions}`,err,ERROR_APPLICATION,ERROR_TRUE,EXIT_FALSE);        
         return  gomos.gomosLog( logger,gConsole,TRACE_PROD,"this is sendMail Error",err);
       }
        gomos.gomosLog( logger,gConsole,TRACE_PROD,"This is Message Sent", info.messageId)
@@ -195,7 +206,9 @@ function sendAlertMail(DeviceName, strText, level, custCode, objId, dbo, busines
       updateAlerts(objId, dbo);
     }); 
   } catch (err) {
-    gomos.errorCustmHandler(NAMEOFSERVICE,"sendAlertMail","",err); 
+    updateAlertsForError(objId, dbo);
+    gomos.errorCustmHandler(NAMEOFSERVICE,"sendAlertMail",'This is Sending mail Error',`Id ${objId}`,err,ERROR_APPLICATION,ERROR_TRUE,EXIT_FALSE);        
+
   }
 
 }
@@ -219,15 +232,7 @@ module.exports = function (app) {
     connection
   ) {
     if (err) {
-      // console.log(err);
-      gomos.errorCustmHandler(
-        NAMEOFSERVICE,
-        "handleMqttMessage",
-        "THIS IS MONGO CLIENT CONNECTION ERROR",
-        "",
-        err
-      );
-      process.hasUncaughtExceptionCaptureCallback();
+    gomos.errorCustmHandler(NAMEOFSERVICE,"module.exports",'THIS IS MONGO CLIENT CONNECTION ERROR',``,err,ERROR_DATABASE,ERROR_TRUE,EXIT_TRUE);        
     }
     dbo = connection.db(dbName);
   });

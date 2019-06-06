@@ -4,6 +4,13 @@ const TRACE_STAGE = 2;
 const TRACE_TEST  = 3;
 const TRACE_DEV   = 4;
 const TRACE_DEBUG = 5;
+const ERROR_RUNTIME      = "runTimeError";
+const ERROR_APPLICATION  =  "ApplicationError";
+const ERROR_DATABASE     = "DataBaseError";
+const EXIT_TRUE  = true;
+const EXIT_FALSE = false;
+const ERROR_TRUE = true;
+const ERROR_FALSE = false;
 var  gomos = require("./commanFunction");
 
 exports.getPayloads =  function(db,NAMEOFSERVICE,logger,gConsole){
@@ -12,8 +19,8 @@ exports.getPayloads =  function(db,NAMEOFSERVICE,logger,gConsole){
     .find()
     .toArray(function (err, result) {
       if (err) {
-        gomos.errorCustmHandler(NAMEOFSERVICE,"getPayloads","This Is Getting All PayloadId","",err);  
-        process.hasUncaughtExceptionCaptureCallback();
+        gomos.errorCustmHandler(NAMEOFSERVICE,"getPayloads",'This Is Getting All PayloadId',``,err,ERROR_DATABASE,ERROR_TRUE,EXIT_TRUE);
+
       }
       try{
           var dataFromPayload = [];
@@ -24,7 +31,7 @@ exports.getPayloads =  function(db,NAMEOFSERVICE,logger,gConsole){
         gomos.gomosLog(logger,gConsole,TRACE_PROD,"getPayload - No. of payload read from collection", dataFromPayload.length);
       }
       catch(err){
-        gomos.errorCustmHandler(NAMEOFSERVICE,"getPayloads","This Is Try Catch Of Getting All Payload","",err);  
+        gomos.errorCustmHandler(NAMEOFSERVICE,"getPayloads",'This Is Try Catch Of Getting All Payload',``,err,ERROR_RUNTIME,ERROR_TRUE,EXIT_TRUE);
       }
     });
       

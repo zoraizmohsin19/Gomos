@@ -16,6 +16,13 @@ const TRACE_STAGE = 2;
 const TRACE_TEST  = 3;
 const TRACE_DEV   = 4;
 const TRACE_DEBUG = 5;
+const ERROR_RUNTIME      = "runTimeError";
+const ERROR_APPLICATION  =  "ApplicationError";
+const ERROR_DATABASE     = "DataBaseError";
+const EXIT_TRUE  = true;
+const EXIT_FALSE = false;
+const ERROR_TRUE = true;
+const ERROR_FALSE = false;
 var  gomos = require("../../commanFunction/routes/commanFunction");
 var midllelayer = require("../../EndPointMiddlelayer/routes/middlelayer");
 var fs = require("fs");
@@ -65,39 +72,26 @@ router.post("/sendto/plateform", function (req, res, next) {
   gomos.gomosLog( logger,gConsole,TRACE_DEBUG,"post method and getting following data ",userId+":"+password+":"+payloadId+":"+DeviceName+":"+custCd+":"+subCustCd); 
   }
   catch(err){
-    gomos.errorCustmHandler(NAMEOFSERVICE,"/sendto/plateform",'THIS IS TRY CATCH ERROR','',err);
+    gomos.errorCustmHandler(NAMEOFSERVICE,"/sendto/plateform",'THIS IS TRY CATCH ERROR for parsing Data ',req.body,err,ERROR_RUNTIME,ERROR_TRUE,EXIT_FALSE);
+
   }
   MongoClient.connect(
     urlConn,
     { useNewUrlParser: true },
     function (err, connection) {
       if (err) {
-        gomos.errorCustmHandler(NAMEOFSERVICE,"/sendto/plateform",'THIS IS MONGO CLIENT CONNECTION ERROR','',err)
-        process.hasUncaughtExceptionCaptureCallback();
+       gomos.errorCustmHandler(NAMEOFSERVICE,"/sendto/plateform",'THIS IS MONGO CLIENT CONNECTION ERROR ','',ERROR_DATABASE,ERROR_TRUE,EXIT_TRUE);
       }
       var db = connection.db(dbName);
       db.collection("Users")
         .find({ userId: userId, password: password })
         .toArray(function (err, result) {
           if (err) {
-            gomos.errorCustmHandler(NAMEOFSERVICE,"/sendto/plateform",'THIS IS QUERY ERROR','',err)
-            process.hasUncaughtExceptionCaptureCallback();
+            gomos.errorCustmHandler(NAMEOFSERVICE,"/sendto/plateform",'THIS IS QUERY ERROR From Users For Validation',`userId :${userId} and password :${password}`,ERROR_DATABASE,ERROR_TRUE,EXIT_TRUE);
           }
           if (result.length > 0) {
-                gomos.gomosLog( logger,gConsole,TRACE_DEBUG,"userId and password validation ",userId+":"+password);     
-                // dataToStore = {
-                //           payloadId,
-                //           DeviceName,
-                //           subCustCd,
-                //           custCd,
-                //           // assetId,
-                //           Date,
-                //           message
-                //             }
-                // gomos.gomosLog( logger,gConsole,TRACE_DEBUG," After userId and password validation dataToStore sendToMidlelayer",dataToStore);     
-                // asyncPostData(res,dataToStore);  
-           midllelayer.endPointMiddelayerFn(urlConn,dbName,res,custCd,subCustCd,DeviceName,payloadId,dateTime,message,Token);
-          
+                gomos.gomosLog( logger,gConsole,TRACE_DEBUG,"userId and password validation ",userId+":"+password);       
+                midllelayer.endPointMiddelayerFn(urlConn,dbName,res,custCd,subCustCd,DeviceName,payloadId,dateTime,message,Token);
           }
           else{
             gomos.gomosLog( logger,gConsole,TRACE_PROD,"UserId and password not validate");     
@@ -107,17 +101,6 @@ router.post("/sendto/plateform", function (req, res, next) {
    });
   });
 });
-// async function asyncPostData(res,dataToStore) {
-//   try {
-//     const response = await axios.post('http://localhost:3996/sendto', {body: dataToStore});
-//     gomos.gomosLog( logger,gConsole,TRACE_PROD,"success in endPoint and response value come from middlelayer :", response["data"]);     
-//     res.json(response["data"])
-//       } catch(err) {
-//         gomos.errorCustmHandler(NAMEOFSERVICE,"asyncPostData",'THIS IS TRY CATCH ERROR','',err)
-//         res.json("somthing wrong");
-//       }
-
-// }
 module.exports = function (app) {
   //DB Name and the url for database connection is from appConfig file in app.js
   urlConn = app.locals.urlConn;

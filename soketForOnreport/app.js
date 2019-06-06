@@ -11,6 +11,7 @@ var userViewDashboard = require('./routes/viewDashSocket');
 var app = express();
 var dt = dateTime.create();
 var formattedDate = dt.format("Y-m-d");
+var  gomos = require("../commanFunction/routes/commanFunction");
 
 //creates the file to write all errors that occurs,which will be usefull for debugging.
 var log_file_err = fs.createWriteStream(
@@ -75,22 +76,26 @@ app.use(function (error, req, res, next) {
     error.statusCode = 500;
   }
   console.log("Error handler: ", error.message, error.statusCode);
-  log_file_err.write(
-    "Error handler: " +
-    "Error Code:" +
-    error.statusCode +
-    "  " +
-    error.stack +
-    "\n"
-  );
+  // log_file_err.write(
+  //   "Error handler: " +
+  //   "Error Code:" +
+  //   error.statusCode +
+  //   "  " +
+  //   error.stack +
+  //   "\n"
+  // );
+  gomos.errorCustmHandler("soketForOnreport","Error Handling",'Error Handling','',err,"runTimeError",true,true)
+
   res.status(500).json({ error: error.message });
 });
 
 //uncaught exception handling
 process.on("uncaughtException", function (err) {
   console.log("Caught exception: " + err);
-  log_file_err.write("Caught exception: " + err.stack + "\n");
-  process.exit();
+  // log_file_err.write("Caught exception: " + err.stack + "\n");
+  // process.exit();
+  gomos.errorCustmHandler("soketForOnreport","uncaughtException",'uncaughtException error','',err,"runTimeError",true,true)
+
 });
 
 // error handler

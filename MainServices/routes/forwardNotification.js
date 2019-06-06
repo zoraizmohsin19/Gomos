@@ -23,6 +23,13 @@ const TRACE_STAGE = 2;
 const TRACE_TEST  = 3;
 const TRACE_DEV   = 4;
 const TRACE_DEBUG = 5;
+const ERROR_RUNTIME      = "runTimeError";
+const ERROR_APPLICATION  =  "ApplicationError";
+const ERROR_DATABASE     = "DataBaseError";
+const EXIT_TRUE  = true;
+const EXIT_FALSE = false;
+const ERROR_TRUE = true;
+const ERROR_FALSE = false;
 var  gomos = require("../../commanFunction/routes/commanFunction");
 var mqtt = require("mqtt");
 var dbo;
@@ -63,8 +70,8 @@ function processStartEvent() {
   }
   else {
     gomos.gomosLog( logger,gConsole,TRACE_PROD,"Scheduling issues, Can not proceed : It can only support Seconds, Minutes up to 59");
-    gomos.errorCustmHandler(NAMEOFSERVICE,"processStartEvent","Scheduling issues, Can not proceed : It can only support Seconds, Minutes up to 59");               
-    process.exit(0);
+    gomos.errorCustmHandler(NAMEOFSERVICE,"processStartEvent",'Scheduling issues, Can not proceed : It can only support Seconds, Minutes up to 59',``,'',ERROR_APPLICATION,ERROR_FALSE,EXIT_TRUE);
+
   }
   var schPattern = sec + min + "* * * *";
   var tempSchedule = scheduleTemp.scheduleJob(schPattern, function () {
@@ -83,8 +90,7 @@ function processStartEvent() {
      }])
         .toArray(function (err, result) {
           if (err) {
-            gomos.errorCustmHandler(NAMEOFSERVICE,"processStartEvent","THIS IS QUERY ERROR",'',err);            
-            process.hasUncaughtExceptionCaptureCallback();
+            gomos.errorCustmHandler(NAMEOFSERVICE,"processStartEvent",'THIS IS QUERY for level 3 nd level4 ERROR',``,err,ERROR_DATABASE,ERROR_TRUE,EXIT_TRUE);
           }
           if(result.length > 0){
           // // // console.log(result.length);
@@ -116,29 +122,14 @@ function processStartEvent() {
                   }
                   else if(result[count].type === "level4"){
                     gomos.gomosLog( logger,gConsole,TRACE_TEST,"Going to process For Level4",result[count]);
-                    sendToDevice(result[count],dbo,mac);
+                    sendToDevice(result[count],dbo,result[count].mac);
                     
                   }
                    count++;
               })  
               } catch (err) {
-                 gomos.errorCustmHandler(NAMEOFSERVICE,"processStartEvent",'THIS IS TRY CATCH ERROR','',err);            
-                
+                gomos.errorCustmHandler(NAMEOFSERVICE,"processStartEvent",'THIS IS TRY CATCH ERROR level 3 nd level4 ERROR',``,err,ERROR_RUNTIME,ERROR_TRUE,EXIT_TRUE);
               }
-
-               
-              // Refreshing the collections for the next run
-            //       // // console.log("hello")
-            // if(i == result.length - 1){
-            //   getServiceConfig();
-            //   getDevices();
-            //   getAssets();
-            //   getCustomer();
-            //   getPayloads();
-              
-            //   // // console.log("Refreshed the collections for the next run!")
-            //   // // console.log("Processing Ended - ForwardNotification Messages - " + new Date());
-            // }
            }
           } 
         });
@@ -155,8 +146,7 @@ function sendToDevice(data,dbo,mac){
  .find({custCd})
    .toArray(function (err, result) {
      if (err) {
-       gomos.errorCustmHandler(NAMEOFSERVICE,"sendToDevice",'THIS IS QUERY ERROR','',err);            
-       process.hasUncaughtExceptionCaptureCallback();
+       gomos.errorCustmHandler(NAMEOFSERVICE,"sendToDevice",`THIS IS QUERY ERROR  for this mac :${mac}`,data,err,ERROR_DATABASE,ERROR_TRUE,EXIT_TRUE);
      }
    
      if (result.length > 0) { 
@@ -168,9 +158,8 @@ function sendToDevice(data,dbo,mac){
         alertToDevice(topic,mqttClient,translatedMsg,dbo,id);
        }
        catch(err){
-        gomos.errorCustmHandler(NAMEOFSERVICE,"sendToDevice",'THIS IS TRY CATCH ERROR','',err);     
+        gomos.errorCustmHandler(NAMEOFSERVICE,"sendToDevice",`THIS IS TRY CATCH ERROR for this mac :${mac}`,data,err,ERROR_RUNTIME,ERROR_TRUE,EXIT_TRUE);
        }
-      
      }
     });
 
@@ -192,14 +181,14 @@ function sendToDevice(data,dbo,mac){
           });
           client.publish(SubTopic, MessageToSend, function (err, result){
               if(err){
-                 process.hasUncaughtExceptionCaptureCallback();
+                 gomos.errorCustmHandler(NAMEOFSERVICE,"alertToDevice",`THIS IS ALERT SEND To device`,`SubTopic: ${SubTopic} message : ${Message} And Id : ${id}`,err,ERROR_DATABASE,ERROR_TRUE,EXIT_TRUE);
               }
               gomos.gomosLog( logger,gConsole,TRACE_DEBUG,"This is Db for level 4",dbo);
                 updateAlerts(id, dbo)
 
                 });
               }catch(err){
-                gomos.errorCustmHandler(NAMEOFSERVICE,"alertToDevice",'THIS IS TRY CATCH ERROR','',err);
+                gomos.errorCustmHandler(NAMEOFSERVICE,"alertToDevice",`THIS IS TRY CATCH ERROR ALERT SEND To device`,`SubTopic: ${SubTopic} message : ${Message} And Id : ${id}`,err,ERROR_RUNTIME,ERROR_TRUE,EXIT_TRUE);
               }
   }
 
@@ -226,13 +215,15 @@ function sendToDevice(data,dbo,mac){
   //of particular mac.
     gomos.gomosLog( logger,gConsole,TRACE_TEST,"Going to process in asyncPostData method with where translatedMsg undefined",result1[i]);  
   if (dataFromPayload.filter(item => item.mac == mac).length == 0) {
-     gomos.gomosLog( logger,gConsole,TRACE_TEST,"Payloads Not Present : Please associate with - ",mac);  
+     gomos.gomosLog( logger,gConsole,TRACE_TEST,"Payloads Not Present : Please associate with - ",mac); 
+     gomos.errorCustmHandler(NAMEOFSERVICE,"asyncPostData",`Payloads Not Present : Please associate with - `,` this Mac ${mac}`,'',ERROR_APPLICATION,ERROR_FALSE,EXIT_FALSE);
      }
   else { 
     var filetredPayloads = dataFromPayload.filter(item => item.mac == mac);
     if (filetredPayloads.filter(item => item.payloadId == payloadId).length == 0) {
          gomos.gomosLog( logger,gConsole,TRACE_TEST,"Payloads Not Present : Please associate with  -  ",mac+ ":" + payloadId);  
-    }
+         gomos.errorCustmHandler(NAMEOFSERVICE,"asyncPostData",`Payloads Not Present : Please associate with  -`,` this Mac ${mac} and payload : ${payloadId} `,'',ERROR_APPLICATION,ERROR_FALSE,EXIT_FALSE);   
+        }
     else{
       var sensorNms;
       var indexOfPayLoad = filetredPayloads.findIndex(element => element.payloadId == payloadId);
@@ -241,6 +232,7 @@ function sendToDevice(data,dbo,mac){
       //of particular mac.
       if (dataFromDevices.filter(item => item.mac == mac).length == 0) {
         gomos.gomosLog( logger,gConsole,TRACE_TEST,"Device Not Present dataFromDevices : Please add a Device for - ",mac);  
+        gomos.errorCustmHandler(NAMEOFSERVICE,"asyncPostData",`Device Not Present dataFromDevices : Please add a Device for - `,` this Mac ${mac}  `,'',ERROR_APPLICATION,ERROR_FALSE,EXIT_FALSE);         
       }
       else {
         var assetsId, DeviceName;
@@ -345,7 +337,7 @@ function sendToDevice(data,dbo,mac){
   }
   
 catch (err) {
-    gomos.errorCustmHandler(NAMEOFSERVICE,"asyncPostData",'THIS IS TRY CATCH ERROR','',err);    
+    gomos.errorCustmHandler(NAMEOFSERVICE,"asyncPostData",`THIS IS TRY CATCH ERROR`,result1,err,ERROR_RUNTIME,ERROR_TRUE,EXIT_TRUE);         
   }
 }
 
@@ -366,7 +358,8 @@ async function sendToClientApi(customerURL, sendToClient,id , dbo, numTries){
                       break;
                         } catch(err) {
                            gomos.gomosLog( logger,gConsole,TRACE_DEV,"This is response In error",err);  
-                           gomos.errorCustmHandler(NAMEOFSERVICE,"alertToDevice",'THIS IS ERROR FROM API OF CUSTOMER',sendToClient1,err); 
+                           gomos.errorCustmHandler(NAMEOFSERVICE,"sendToClientApi",`THIS IS ERROR FROM API OF CUSTOMER`,sendToClient1,err,ERROR_APPLICATION,ERROR_TRUE,EXIT_FALSE);         
+
                           if(numTries == j){
                             var processedValue ="E";
                             var lasterrorString = "Exceed number of Attempt"
@@ -401,8 +394,7 @@ function updateAlertsForError(objId, dbo,processedValue, lasterrorString) {
         function (err, result) {
           if (err) {
             gomos.gomosLog( logger,gConsole,TRACE_TEST,"This is updating Alert Error",err);
-            gomos.errorCustmHandler(NAMEOFSERVICE,"updateAlertsForError",'THIS IS UPDATETING ERROR','',err);     
-            process.hasUncaughtExceptionCaptureCallback();
+            gomos.errorCustmHandler(NAMEOFSERVICE,"updateAlertsForError",`THIS IS UPDATETING ERROR`,`id : ${objId}`,err,ERROR_DATABASE,ERROR_TRUE,EXIT_TRUE);         
           }
           gomos.gomosLog( logger,gConsole,TRACE_TEST,"This is updateAlertsForError");  
         }
@@ -422,8 +414,7 @@ function updateAlerts(objId, dbo) {
    },
     function (err, result) {
       if (err) {
-        gomos.errorCustmHandler(NAMEOFSERVICE,"updateAlerts",'THIS IS UPDATETING ERROR','',err);     
-        process.hasUncaughtExceptionCaptureCallback();
+        gomos.errorCustmHandler(NAMEOFSERVICE,"updateAlerts",`THIS IS UPDATETING ERROR`,`id : ${objId}`,err,ERROR_DATABASE,ERROR_TRUE,EXIT_TRUE);         
       }
       gomos.gomosLog( logger,gConsole,TRACE_TEST,"This is updateAlerts");  
     }
@@ -437,8 +428,7 @@ function updateForTranslated(objId, dbo, translatedMsg, DeviceName) {
     } },
     function (err, result) {
       if (err) {
-        gomos.errorCustmHandler(NAMEOFSERVICE,"updateForTranslated",'THIS IS UPDATETING ERROR','',err);     
-        process.hasUncaughtExceptionCaptureCallback();
+        gomos.errorCustmHandler(NAMEOFSERVICE,"updateForTranslated",`THIS IS UPDATETING ERROR`,`id : ${objId}`,err,ERROR_DATABASE,ERROR_TRUE,EXIT_TRUE);         
       }
       gomos.gomosLog( logger,gConsole,TRACE_TEST,"This is updateForTranslated");  
     }
@@ -468,21 +458,12 @@ module.exports = function (app) {
     { useNewUrlParser: true },
     function (err, connection) {
       if (err) {
-      gomos.errorCustmHandler(NAMEOFSERVICE,"processStartEvent",'THIS MONGO CLIENT ERROR','',err);            
-        process.hasUncaughtExceptionCaptureCallback();
+        gomos.errorCustmHandler(NAMEOFSERVICE,"module.exports",`This is DataBase Connection Error`,``,err,ERROR_DATABASE,ERROR_TRUE,EXIT_TRUE);         
       }
        dbo = connection.db(dbName);
     })
-  // gomos =app.locals;
-  // getServiceConfig();s
-  // getDevices();
-  // getAssets();
-  // getCustomer();
-  // getPayloads();
   setTimeout(function() {
-  
     getAllconfig();
-
     setTimeout(function () {
        processStartEvent();
     }, 2000);

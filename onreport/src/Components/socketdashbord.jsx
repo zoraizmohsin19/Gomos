@@ -6,8 +6,8 @@ import {Table} from 'react-bootstrap';
 import socketIOClient from "socket.io-client";
 import axios from "axios";
 import CPagination from "../layout/Pagination";
-import * as ExcelJs from "exceljs/dist/exceljs.min.js";
-import * as FileSaver from "file-saver";
+// import * as ExcelJs from "exceljs/dist/exceljs.min.js";
+// import * as FileSaver from "file-saver";
 import dateFormat  from  "dateformat";
 import swal from 'sweetalert';
 import Spinner from '../layout/Spinner';
@@ -63,7 +63,8 @@ constructor(){
     selectedGroups : {},
    sensorsMainData: [],
    selectedGroupsitem: "",
-   headerTable: []
+   headerTable: [],
+   OpratingDashBoardEnable: Boolean
   }
   }
   this.changePage     =   this.changePage.bind(this);
@@ -94,8 +95,8 @@ handler(selectedSensorsType1,selectedSensorsName){
 chartsIdbyDeviceType(deviceType){
   let tempData = JSON.parse(sessionStorage.getItem("ClientObj"));
   let obj = tempData.ViewDashBord.deviceTypes[deviceType].map(item  =>    { return {"businessName" : item.businessName , "axisY" : item.axisY} })
-  console.log("This Device type ")
-  console.log(obj)
+  //console.log("This Device type ")
+  //console.log(obj)
   return obj;
 }
 componentDidMount(){
@@ -103,6 +104,7 @@ componentDidMount(){
   let mainData = JSON.parse(sessionStorage.getItem("configData"));
   let tempData = JSON.parse(sessionStorage.getItem("dashboardConfigobj"));
    me.state.body.deviceType            =     tempData.DeviceType;
+   me.state.OpratingDashBoardEnable    =     tempData.OpratingDashBoardEnable 
    me.state.body.deviceTypeObj         =     this.chartsIdbyDeviceType(tempData.DeviceType);
    me.state.body.selectedSPValue       =     mainData.spCd;
    me.state.body.selectedCustValue     =     mainData.custCd;
@@ -110,11 +112,11 @@ componentDidMount(){
    me.state.body.mac                   =     mainData.mac;
    me.state.body.selectedDeviceName    =     mainData.DeviceName;
    me.state.body.selectedAssets        =     mainData.assetId;
-   console.log("Device type of View")
-   console.log( mainData.DeviceType)
+   //console.log("Device type of View")
+   //console.log( mainData.DeviceType)
    me.setState({body: me.state.body});
   //  var result1 = this.groupingDataArray();
-  //  console.log(result1)
+  //  //console.log(result1)
   this.startFunction()
 
   }
@@ -144,8 +146,8 @@ componentDidMount(){
       me.state.body.DeviceIdentifierForSensors = json["data"].sensors;
       let tempArray = (json["data"].sensors).concat(json["data"].channel)
   
-      console.log("This is TempArray Data ")
-      console.log(tempArray);
+      //console.log("This is TempArray Data ")
+      //console.log(tempArray);
       var groupedData = this.groupingDataArray(tempArray)
       me.state.body.sensorsGroups = groupedData
       me.state.body.selectedGroups = groupedData[0]
@@ -233,8 +235,8 @@ DisplayChart(result, valueSensoor ){
       me.state.body.Spinnerdata = true;
       me.setState({ body: me.state.body})
       let json1 =[];
-       console.log("this is Source of data ");
-       console.log(json["data"]);
+       //console.log("this is Source of data ");
+       //console.log(json["data"]);
      json1 = json["data"]["finalResult"]
       if(json1 !== 0){
         for (var i = 0; i < json1.length ; i++) {
@@ -338,12 +340,13 @@ callToSocket(){
   var arrayofbgClass = dashboardData.SensorsBgC;
   socket.emit('lastUpdatedValue',body);  
   socket.on("onViewDashboard", data =>{
-    console.log("This is socket ");
-    console.log(data.sensors);
+    //console.log("This is socket ");
+    //console.log(data.sensors);
   var dataofSensors = [];
   if( me.state.body.selectedGroups.devicebusinessNM !== undefined &&  me.state.body.selectedGroups.devicebusinessNM != null &&  me.state.body.selectedGroups.devicebusinessNM.length !== 0){
 
- 
+    //console.log(data)
+    //console.log(me.state.body.selectedGroups.devicebusinessNM)
   for(let i =0; i < me.state.body.selectedGroups.devicebusinessNM.length; i++ ){
     dataofSensors.push(data.sensors.filter( item => item.devicebusinessNM === me.state.body.selectedGroups.devicebusinessNM[i])[0])
   }
@@ -354,7 +357,7 @@ me.state.body.selectedSensorsName = dataofSensors[0].devicebusinessNM;
 me.state.body.sensorsMainData   =   data.sensors;  
 // me.setState({body: me.state.body})
     var array = [];
-    
+   // console.log(dataofSensors)
     for (var i = 0 ; i < dataofSensors.length ; i++ ){ 
       array.push({ "sensorsNM":dataofSensors[i].type, 
       "bgClass": arrayofbgClass[i],
@@ -384,7 +387,7 @@ handleGroups = (value) => {
     me.state.body.selectedGroups = me.state.body.sensorsGroups[index];
     // console.log(seletedGroupdata)
     // console.log(me.state.body.sensorsMainData)
-     alert(value);
+    //  alert(value);
      var dataofSensors = [];
      for(let i = 0; i <  me.state.body.selectedGroups.devicebusinessNM.length; i++ ){
        dataofSensors.push(me.state.body.sensorsMainData.filter( item => item.devicebusinessNM ==    me.state.body.selectedGroups.devicebusinessNM[i])[0])
@@ -461,9 +464,9 @@ firstTimeRender(){
     var data = [];
     var dashboardData = JSON.parse(sessionStorage.getItem("dashboardConfigobj"));
     var arrayofbgClass = dashboardData.SensorsBgC;
-    var arrayOfsensors= dashboardData.Sensors;
+    // var arrayOfsensors= dashboardData.Sensors;
     var obj = [];
-    for(var i =0; i< arrayOfsensors.length; i++){
+    for(var i =0; i< arrayofbgClass.length; i++){
         var temobj ={};
         temobj["sesnorsType"]= "sensorType"+i;
         temobj["sensorsName"]= "sensor"+i;
@@ -523,8 +526,8 @@ return color;
      <div className="navright">
      <button type="button"  className="spanNev btn"  onClick={() =>{ 
                          this.props.history.push("/NevMenu")}}>Device Menu</button>
-     <button  type="button" className="spanNev btn"  onClick={() =>{ 
-                         this.props.history.push("/activeDashbord")}}>Operating Dashboard</button>
+   {(this.state.OpratingDashBoardEnable)?  <button  type="button" className="spanNev btn"  onClick={() =>{ 
+                         this.props.history.push("/activeDashbord")}}>Operating Dashboard</button>: ""}
      </div>
      </div>
       {/* </div> */}

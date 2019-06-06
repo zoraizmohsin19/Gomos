@@ -17,7 +17,7 @@ class activeDashbord extends Component {
     super();
     this.state = {
       value: { min: 2, max: 10 },
-      endpoint: "http://localhost:4001",
+      endpoint: "http://34.244.151.117:4001",
       channelName: [],
       actionTypes: [],
       formStructure: '',
@@ -306,8 +306,8 @@ class activeDashbord extends Component {
     const { channelArray } = this.state;
     let index = channelArray.findIndex(item => item.devicebusinessNM === channel);
 
-    console.log(channelArray);
-    console.log(channelArray[index].Value);
+    //console.log(channelArray);
+    //console.log(channelArray[index].Value);
     return channelArray[index].Value;
   }
   manualOverrideCancel() {
@@ -336,15 +336,15 @@ class activeDashbord extends Component {
     var dataToSendApi = {};
     var me = this;
     const { selectedAtionType,  channelArray, configkeyInput, DefaulaCopyManualOverride, configkeyInputKeyValue } = this.state;
-    console.log(DefaulaCopyManualOverride);
-    console.log(configkeyInputKeyValue);
+    //console.log(DefaulaCopyManualOverride);
+    //console.log(configkeyInputKeyValue);
     for (var key = 0; key < configkeyInput.length; key++) {
       if (configkeyInputKeyValue[configkeyInput[key]]["pendingMode"] !== DefaulaCopyManualOverride[configkeyInput[key]]["pendingMode"]) {
         configkeyInputKeyValue[configkeyInput[key] + "confirmation"] = true;
         let jsontemp = { "mode": configkeyInputKeyValue[configkeyInput[key]]["pendingMode"] }
         if (configkeyInputKeyValue[configkeyInput[key]]["pendingMode"] === 1 && this.getChannelCurrentvalue(configkeyInput[key]) === 1) {
           jsontemp["action"] = 0;
-          console.log(channelArray)
+          //console.log(channelArray)
 
           let index = channelArray.findIndex(item => item.devicebusinessNM === configkeyInput[key]);
           channelArray[index].ActionCond = 0;
@@ -358,7 +358,7 @@ class activeDashbord extends Component {
 
     }
 
-    console.log(dataToSendApi);
+    //console.log(dataToSendApi);
     me.state.submitDataObj.payloadId = selectedAtionType;
     me.state.submitDataObj.dataBody = dataToSendApi;
     me.state.submitDataObj.isDaillyJob = "";
@@ -388,7 +388,7 @@ class activeDashbord extends Component {
   }
   callApiForClimateSave() {
     var me = this;
-    axios.post("http://localhost:3992/ActiveClimatesave", me.state.submitDataObj)
+    axios.post("http://34.244.151.117:3992/ActiveClimatesave", me.state.submitDataObj)
       .then(json => {
         // if(json["data"] == "success"){
 
@@ -416,7 +416,7 @@ class activeDashbord extends Component {
       dataToSendApi[configkeyInput[key]] = configkeyInputKeyValue[configkeyInput[key]]
     }
     Obj.dataBody = dataToSendApi;
-    axios.post("http://localhost:3992/ActivesaveForManualOver", Obj)
+    axios.post("http://34.244.151.117:3992/ActivesaveForManualOver", Obj)
       .then(json => {
         // if(json["data"] == "success"){
         me.handleChange(this.state.selectedevent)
@@ -430,7 +430,7 @@ class activeDashbord extends Component {
   }
   callApiForManoverrideForTiles() {
     var me = this;
-    axios.post("http://localhost:3992/ActivesaveForManualOverForTiles", me.state.submitDataObj)
+    axios.post("http://34.244.151.117:3992/ActivesaveForManualOverForTiles", me.state.submitDataObj)
       .then(json => {
         // if(json["data"] == "success"){
 
@@ -442,7 +442,7 @@ class activeDashbord extends Component {
   }
   callApiForAction() {
     var me = this;
-    axios.post("http://localhost:3992/ActiveDAction", me.state.submitDataObj)
+    axios.post("http://34.244.151.117:3992/ActiveDAction", me.state.submitDataObj)
       .then(json => {
         if (json["data"] === "success") {
 
@@ -460,9 +460,9 @@ class activeDashbord extends Component {
     let temp = {};
     temp = JSON.parse(JSON.stringify(me.state.submitDataObj));
     temp.remark = remark
-    console.log("This is callApiLevel4");
-    console.log(temp)
-    axios.post("http://localhost:3992/ActiveAPiForLevel4", temp)
+    //console.log("This is callApiLevel4");
+    //console.log(temp)
+    axios.post("http://34.244.151.117:3992/ActiveAPiForLevel4", temp)
       .then(json => {
         if (json["data"] === "success") {
 
@@ -475,7 +475,7 @@ class activeDashbord extends Component {
       });
   }
   callApiForActionForButtonclick(submitDataObj) {
-    axios.post("http://localhost:3992/ActiveDAction", submitDataObj)
+    axios.post("http://34.244.151.117:3992/ActiveDAction", submitDataObj)
       .then(json => {
         if (json["data"] === "success") {
 
@@ -573,8 +573,8 @@ class activeDashbord extends Component {
           keysofObj.splice(keysofObj.indexOf("Channel"), 1);
           //console.log(objectpayload.sensors[keysofObj[0]]);
           var allBusinessName = Object.values(objectpayload.sensors[keysofObj[0]]);
-          console.log("allBusinessName");
-          console.log(allBusinessName);
+          //console.log("allBusinessName");
+          //console.log(allBusinessName);
 
           if (formStructure === "table") {
             let configkeyInputKeyValue = {};
@@ -681,7 +681,7 @@ class activeDashbord extends Component {
     // console.log(me.state.submitDataObj.mac)
     // alert(me.state.submitDataObj.mac)
     // return new Promise((resolve, reject)=>{
-    axios.post("http://localhost:3992/ActiveProgrameFetch", { mac: me.state.submitDataObj.mac })
+    axios.post("http://34.244.151.117:3992/ActiveProgrameFetch", { mac: me.state.submitDataObj.mac })
       .then(json => {
         // console.log(json["data"]);
 
@@ -796,7 +796,7 @@ class activeDashbord extends Component {
     //  me.setState({configkeyInputKeyValue: configkeyInputKeyValue})
     SendObj["mac"] = me.state.submitDataObj.mac;
     SendObj["dataBody"] = temp
-    axios.post("http://localhost:3992/ActiveProgrameSave", SendObj)
+    axios.post("http://34.244.151.117:3992/ActiveProgrameSave", SendObj)
       .then(json => {
         // console.log("This is data of save to DeviceIntruction for ProgramDEtails")
         // console.log(json["data"])
@@ -821,13 +821,13 @@ class activeDashbord extends Component {
   updateSetEndTimeProgram(){
     const {ProgramDetailsListObj} = this.state;
   var me = this;
-  console.log("This is updateSetEndTime")
+  //console.log("This is updateSetEndTime")
   for(let item=0; item< me.state.ProgramDetailsListObj["schedules"].length; item++){
     me.state.ProgramDetailsListObj["schedules"][item].endTimeProgramListItem = me.convertDateTimeForSetProg(me.state.ProgramDetailsListObj.startTime, me.state.ProgramDetailsListObj["schedules"][item].startAt + me.state.ProgramDetailsListObj["schedules"][item].duration)
   }
   //   ProgramDetailsListObj["schedules"]["endTime"] = moment(new Date(Math.max.apply(null, ProgramDetailsListObj["schedules"].map(item => item.endTimeProgramListItem))));
   // 
-    console.log( ProgramDetailsListObj)
+    //console.log( ProgramDetailsListObj)
   me.setState({ProgramDetailsListObj: me.state.ProgramDetailsListObj})
   }
   AddRowFrProgSubmit() {
@@ -875,12 +875,20 @@ class activeDashbord extends Component {
     for (let key = 0; key < configkeyInput.length; key++) {
       dataToSendApi[configkeyInput[key]] = ProgramDetailsListObj[configkeyInput[key]]
     }
-
+    let newKeyArray = [...keysOfArray];
+    newKeyArray.splice(newKeyArray.indexOf("enabled"), 1);
     dataToSendApi["schedules"] = [];
     for (let k = 0; k < ProgramDetailsListObj["schedules"].length; k++) {
-      let temp = {}
-      for (let p = 0; p < keysOfArray.length; p++) {
-        temp[keysOfArray[p]] = ProgramDetailsListObj["schedules"][k][keysOfArray[p]]
+      let temp = [];
+      for (let p = 0; p < newKeyArray.length; p++) {
+        temp.push(ProgramDetailsListObj["schedules"][k][newKeyArray[p]])
+        
+      }
+      if(ProgramDetailsListObj["schedules"][k].enabled === true){
+        temp.push(1);
+      }
+      else{
+        temp.push(0);
       }
       dataToSendApi["schedules"].push(temp);
     }
@@ -923,7 +931,7 @@ class activeDashbord extends Component {
             currentState: configkeyInputKeyValue["ArrayOfProg"][index].currentState,
             pendingConfirmation: configkeyInputKeyValue["ArrayOfProg"][index].pendingConfirmation
           }
-          axios.post("http://localhost:3992/ActiveProgramRuleUpdate", obj)
+          axios.post("http://34.244.151.117:3992/ActiveProgramRuleUpdate", obj)
             .then(json => {
               swal("Poof! Your imaginary file has been sent!", {
                 icon: "success",
@@ -992,10 +1000,10 @@ class activeDashbord extends Component {
   manualOverrideProcess(objectpayload, selectedAtionType, selectedevent) {
     var configkeyInputKeyValue = {};
 
-    axios.post("http://localhost:3992/getAManualOverride", { mac: this.state.CriteriaForOP.mac })
+    axios.post("http://34.244.151.117:3992/getAManualOverride", { mac: this.state.CriteriaForOP.mac })
       .then(json => {
-        console.log("This is all json data for getmanualoverride");
-        console.log(json["data"])
+        //console.log("This is all json data for getmanualoverride");
+        //console.log(json["data"])
         let DefaulaManualOverride = json["data"];
         var keysofObj = Object.keys(objectpayload.sensors)
         var allBusinessName = Object.values(objectpayload.sensors[keysofObj[0]]);
@@ -1116,7 +1124,7 @@ class activeDashbord extends Component {
       return this;
     }
 
-    axios.post("http://localhost:3992/getActiveDashBoardDevice", { mac: this.state.CriteriaForOP.mac })
+    axios.post("http://34.244.151.117:3992/getActiveDashBoardDevice", { mac: this.state.CriteriaForOP.mac })
 
       .then(json => {
         //console.log("this componentDidMount getActiveDashBoardDevice");
@@ -1221,7 +1229,7 @@ class activeDashbord extends Component {
   fetchPayload() {
     var me = this;
     var body = { mac: this.state.CriteriaForOP.mac }
-    axios.post("http://localhost:3992/ActiveActionTypeCall", body)
+    axios.post("http://34.244.151.117:3992/ActiveActionTypeCall", body)
       .then(json => {
         if (json.length !== 0) {
           // console.log("This is payload Data")
@@ -1322,7 +1330,7 @@ class activeDashbord extends Component {
       me.setState({ lastAlertData: lastAlertData });
       //console.log(data)
     });
-    // axios.post("http://localhost:3992/getdashbordlastalert", body)
+    // axios.post("http://34.244.151.117:3992/getdashbordlastalert", body)
     // .then(json =>  {
     //   // alert("This is last Alert Object Data ");
     //   //console.log("This is log of Alert Object ")
@@ -1356,7 +1364,7 @@ class activeDashbord extends Component {
   });
     payloadData.emit('lastPayloadClient', body);
     payloadData.on('lastPayloadServerData', function (data) {
-      // axios.post("http://localhost:3992/lastpayloadTime",body)
+      // axios.post("http://34.244.151.117:3992/lastpayloadTime",body)
       // .then(json =>  {
       if (data.length > 0) {
         var datedata = [];
@@ -1421,7 +1429,7 @@ class activeDashbord extends Component {
           let Obj = {};
           Obj = JSON.parse(JSON.stringify(data));
           Obj.mac = me.state.submitDataObj.mac;
-          axios.post("http://localhost:3992/ActiveProgramerevert",Obj)
+          axios.post("http://34.244.151.117:3992/ActiveProgramerevert",Obj)
           .then(json => {
             // console.log(json.data.n)
             if(json.data.n > 0){
@@ -1446,7 +1454,7 @@ class activeDashbord extends Component {
   
   }
   deleteDeviceSentInstruction(data){
-    axios.delete("http://localhost:3992/deleteSentCommand?id=" + data._id)
+    axios.delete("http://34.244.151.117:3992/deleteSentCommand?id=" + data._id)
     .then(json => {
       swal("Poof! Your SentCommand  Info has been deleted!", {
         icon: "success",
@@ -1477,7 +1485,7 @@ console.log(dataToResand);
             swal("Poof! Your SentCommand  Info has been Sent!", {
               icon: "success",
           });
-          // axios.delete("http://localhost:3992/deleteSentCommand?id=" + dataToResand._id)
+          // axios.delete("http://34.244.151.117:3992/deleteSentCommand?id=" + dataToResand._id)
           // .then(json => 
           //  console.log(json)
           // );
@@ -1503,7 +1511,7 @@ console.log(dataToResand);
         me.state.submitDataObj.payloadId = "SetTime";
       let tempdate = moment(me.state.selectcteDeviceTime).format("YYYY:MM:DD:HH:mm");
       let arrayObDate = tempdate.split(":");
-      console.log(arrayObDate)
+      //console.log(arrayObDate)
       let obj = {
         YYYY : arrayObDate[0],
         MM   : arrayObDate[1],
@@ -1513,7 +1521,7 @@ console.log(dataToResand);
         ss : "00"
 
       }
-console.log(obj)
+//console.log(obj)
         me.state.submitDataObj.dataBody =  obj;
         me.state.submitDataObj.isDaillyJob = "";
         me.state.submitDataObj.ChannelName = "";
@@ -1529,13 +1537,13 @@ console.log(obj)
     swal("Oops", values, "error")
   }
   fetchClimateControlDevice() {
-    axios.post("http://localhost:3992/getActiveDAction", { mac: this.state.CriteriaForOP.mac })
+    axios.post("http://34.244.151.117:3992/getActiveDAction", { mac: this.state.CriteriaForOP.mac })
       .then(json => {
         this.setState({ deviceAllData: json["data"] })
       })
   }
   fetchClimateParameter() {
-    axios.post("http://localhost:3992/getAClimateparameter", { mac: this.state.CriteriaForOP.mac })
+    axios.post("http://34.244.151.117:3992/getAClimateparameter", { mac: this.state.CriteriaForOP.mac })
       .then(json => {
         var keys1 = Object.keys(json["data"]);
         var obj = {}
@@ -1543,16 +1551,16 @@ console.log(obj)
           obj[keys1[i] + "Lower"] = json["data"][keys1[i]][0];
           obj[keys1[i] + "higher"] = json["data"][keys1[i]][1];
         }
-        //console.log(obj)
+        ////console.log(obj)
         //console.log( json["data"])getAManualOverride
         this.setState({ Defaultparameter: obj })
       })
   }
   fetchFromManualOverride() {
-    axios.post("http://localhost:3992/getAManualOverride", { mac: this.state.CriteriaForOP.mac })
+    axios.post("http://34.244.151.117:3992/getAManualOverride", { mac: this.state.CriteriaForOP.mac })
       .then(json => {
-        console.log("This is all json data for getmanualoverride");
-        console.log(json["data"])
+        //console.log("This is all json data for getmanualoverride");
+        //console.log(json["data"])
         this.setState({ DefaulaManualOverride: json["data"], DefaulaCopyManualOverride: JSON.parse(JSON.stringify(json["data"])) })
       })
   }
@@ -1560,7 +1568,7 @@ console.log(obj)
     var me = this;
     //alert("Hello This Working")
     //  THIS IS GETING SENSORNAME BASED ON SPCD,CUSTCD,SUBCUSTCD
-    fetch("http://localhost:3992/getSensorNames?spCode=" + this.state.CriteriaForOP.spCd +
+    fetch("http://34.244.151.117:3992/getSensorNames?spCode=" + this.state.CriteriaForOP.spCd +
       "&&custCd=" + this.state.CriteriaForOP.CustCd + "&&subCustCd=" + this.state.CriteriaForOP.subCustCd)
       .then(response => response.json())
       .then(json => {
@@ -1660,7 +1668,7 @@ console.log(obj)
       }
       return temp;
     }
-    axios.post("http://localhost:3992/getAllClimateControl", { subCustCd: this.state.CriteriaForOP.subCustCd, custCd: this.state.CriteriaForOP.CustCd })
+    axios.post("http://34.244.151.117:3992/getAllClimateControl", { subCustCd: this.state.CriteriaForOP.subCustCd, custCd: this.state.CriteriaForOP.CustCd })
       .then(json => {
         //console.log("This fetchClimateControlAllData");
         var temp = [];
@@ -1705,7 +1713,7 @@ console.log(obj)
       startDate: this.state.startDatelimit,
       endDate: this.state.endDatelimit,
     }
-    axios.post("http://localhost:3992/ActiveJobs", ActiveBody)
+    axios.post("http://34.244.151.117:3992/ActiveJobs", ActiveBody)
       .then(json => {
         var ActiveJobsArray = json["data"]["ActiveJob"];
         if (json["data"]["ActiveJob"].length !== 0) {
@@ -1713,8 +1721,8 @@ console.log(obj)
             mainActiveJobsArray: json["data"]["ActiveJob"],
           }
           );
-          console.log("This is data ");
-          console.log(ActiveJobsArray);
+          //console.log("This is data ");
+          //console.log(ActiveJobsArray);
           me.firstrender(ActiveJobsArray);
         }
         else {
@@ -1736,7 +1744,7 @@ console.log(obj)
     };
     if (this.state.filter.TypeOfJobs === "ExecutedJob") {
 
-      axios.post("http://localhost:3992/executedJob", body)
+      axios.post("http://34.244.151.117:3992/executedJob", body)
         .then(function (result) {
           var mainActiveJobdata = result.data;
           items = result.data.executedJob;
@@ -1747,7 +1755,7 @@ console.log(obj)
           me.setState({ mAOfInactivejob: [], 'in_prog': false });
         });
     } else if (this.state.filter.TypeOfJobs === "PendingJob") {
-      axios.post("http://localhost:3992/PendingJob", body)
+      axios.post("http://34.244.151.117:3992/PendingJob", body)
         .then(function (result) {
           var mainActiveJobdata = result.data;
           items = result.data.PendingJob;
@@ -2194,11 +2202,7 @@ console.log(obj)
 
                 </div>
                 <div className="col-lg-5 col-md-6 col-sm-6 co-xs-12">
-                  {/* <div className ="col-sm-7 col-md-6 col-lg-6 col-xs-7">
-        
-       </div> */}
                   <label className="ProgramLabel">W.E.F :</label>
-                  {/* <div className="col-sm-5 col-md-6 col-lg-6 col-xs-5"> */}
                   <div className="wefDef">
                     <DatePicker id="wef"
                       selected={ProgramDetailsListObj["wefselected"]}
@@ -2212,15 +2216,11 @@ console.log(obj)
                       showYearDropdown
                       minDate={new Date()}
                       dateFormat="DD/MM/YYYY"
-                      // isClearable={true}
                       disabled={(ProgramDetailsListObj["viewFlag"]) ? true : null}
                       className="inputforProgramWef"
-                    // placeholderText="   *  .  *  .  *  .  *  .  *  .  *"
                     />
                   </div>
-                  {/* <div className="col-sm-7 col-md-7 col-lg-7 col-xs-7"> */}
                   <label className="ProgramLabel" >Start Time :</label>
-                  {/* </div>  */}
                   <div className="wefDef">
                     <DatePicker id="startTime"
                       selected={ProgramDetailsListObj["startTimeselected"]}
@@ -2238,16 +2238,9 @@ console.log(obj)
                       timeCaption="Time"
                       disabled={(ProgramDetailsListObj["viewFlag"]) ? true : null}
                       className="inputforProgramWef"
-                    // placeholderText="   *  .  *  .  *  .  *  .  *  .  *"
                     />
                   </div>
                 </div>
-                {/* <div className="col-lg-3 col-sm-3">
-      
-                       
-      
-
-       </div> */}
                 <div classname="col-lg-2 col-md-2 col-sm-6 co-xs-12">
                   <label className="ProgramLabel">End Time :</label>
                   {!ProgramDetailsListObj["schedules"].isEmpty() && <span>{(ProgramDetailsListObj["schedules"][0].endTimeProgramListItem !== '') ? moment(new Date(Math.max.apply(null, ProgramDetailsListObj["schedules"].map(item => item.endTimeProgramListItem)))).format("HH:mm") : ""}

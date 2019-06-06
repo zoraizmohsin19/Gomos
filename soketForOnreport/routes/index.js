@@ -4,6 +4,13 @@ const TRACE_STAGE = 2;
 const TRACE_TEST  = 3;
 const TRACE_DEV   = 4;
 const TRACE_DEBUG = 5;
+const ERROR_RUNTIME      = "runTimeError";
+const ERROR_APPLICATION  =  "ApplicationError";
+const ERROR_DATABASE     = "DataBaseError";
+const EXIT_TRUE  = true;
+const EXIT_FALSE = false;
+const ERROR_TRUE = true;
+const ERROR_FALSE = false;
 var  gomos = require("../../commanFunction/routes/commanFunction");
 var MongoClient = require("mongodb").MongoClient;
 var urlConn, dbName, dbo;
@@ -44,7 +51,7 @@ socket.on("disconnect", () =>{
 gomos.gomosLog(TRACE_TEST,"Client disconnected on onDeviceinstruction")}); 
 
 } catch (err) {
-  gomos.errorCustmHandler(NAMEOFSERVICE,"LastPayloadDataFn"," THIS IS TRY CATCH ERROR",'',err)
+  gomos.errorCustmHandler(NAMEOFSERVICE,"LastPayloadDataFn",'THIS IS TRY CATCH ERROR',``,err,ERROR_RUNTIME,ERROR_TRUE,EXIT_TRUE);
 }
 }
 async  function lastPayloadDataCall(socket,data,tempArray){
@@ -92,8 +99,7 @@ async  function lastPayloadDataCall(socket,data,tempArray){
   
     
   } catch (err) {
-  gomos.errorCustmHandler(NAMEOFSERVICE,"LastPayloadDataFn"," THIS IS TRY CATCH ERROR",'',err)
-    
+  gomos.errorCustmHandler(NAMEOFSERVICE,"LastPayloadDataFn",'THIS IS TRY CATCH ERROR',``,err,ERROR_RUNTIME,ERROR_TRUE,EXIT_TRUE);
   }
  
 }
@@ -118,7 +124,7 @@ async function getlastpayloadData(criteria){
   
     })
   } catch (err) {
-  gomos.errorCustmHandler(NAMEOFSERVICE,"LastPayloadDataFn"," THIS IS TRY CATCH ERROR",'',err)
+  gomos.errorCustmHandler(NAMEOFSERVICE,"LastPayloadDataFn",'THIS IS TRY CATCH ERROR',``,err,ERROR_RUNTIME,ERROR_TRUE,EXIT_TRUE);
     
   }
  
@@ -140,7 +146,7 @@ function ActivelastError(socket){
     socket.on("disconnect", () =>{   clearInterval(checkInterval);
      gomos.gomosLog( logger,gConsole,TRACE_TEST,"Client disconnected on onDeviceinstruction")}); 
   } catch (err) {
-    gomos.errorCustmHandler(NAMEOFSERVICE,"ActivelastError"," THIS IS TRY CATCH ERROR",'',err)
+    gomos.errorCustmHandler(NAMEOFSERVICE,"ActivelastError",'THIS IS TRY CATCH ERROR',``,err,ERROR_RUNTIME,ERROR_TRUE,EXIT_TRUE);
   }
 }
 function ActivelastErrorEmiter(socket,data){
@@ -178,7 +184,7 @@ try {
 }
 })
 } catch (err) {
-  gomos.errorCustmHandler(NAMEOFSERVICE,"ActivelastErrorEmiter"," THIS IS TRY CATCH ERROR",'',err)
+  gomos.errorCustmHandler(NAMEOFSERVICE,"ActivelastErrorEmiter",'THIS IS TRY CATCH ERROR',``,err,ERROR_RUNTIME,ERROR_TRUE,EXIT_TRUE);
 }
 }
 
@@ -198,7 +204,8 @@ function onDeviceinstruction(socket){
     });
       socket.on("disconnect", () =>{ clearInterval(checkInterval);gomos.gomosLog( logger,gConsole,TRACE_PROD,"Client disconnected on onDeviceinstruction")}); 
   } catch (err) {
-  gomos.errorCustmHandler(NAMEOFSERVICE,"onDeviceinstruction"," THIS IS TRY CATCH ERROR",'',err)
+   gomos.errorCustmHandler(NAMEOFSERVICE,"onDeviceinstruction",'THIS IS TRY CATCH ERROR',``,err,ERROR_RUNTIME,ERROR_TRUE,EXIT_TRUE);
+
   }
 }
 
@@ -211,7 +218,8 @@ function DeviceinstructionEmiter(socket,data){
   gomos.gomosLog( logger,gConsole,TRACE_DEBUG,"this is second DeviceInstruction");
     dbo.collection("DeviceInstruction").find(criteria).sort({"createdTime": -1}).toArray(function (err, result) {
       if (err) {
-        gomos.errorCustmHandler(NAMEOFSERVICE,"DeviceinstructionEmiter"," THIS IS QUERY ERROR ",'',err)
+        gomos.errorCustmHandler(NAMEOFSERVICE,"DeviceinstructionEmiter",'THIS IS QUERY ERROR',``,err,ERROR_RUNTIME,ERROR_TRUE,EXIT_TRUE);
+
         // process.hasUncaughtExceptionCaptureCallback();
       }
       var json = {};
@@ -256,8 +264,7 @@ function DeviceinstructionEmiter(socket,data){
     }
   });
   } catch (err) {
-    gomos.errorCustmHandler(NAMEOFSERVICE,"DeviceinstructionEmiter"," THIS IS TRY CATCH ERROR",'',err)
-    
+    gomos.errorCustmHandler(NAMEOFSERVICE,"DeviceinstructionEmiter",'THIS IS QUERY ERROR',``,err,ERROR_RUNTIME,ERROR_TRUE,EXIT_TRUE);
   }
 
 }
@@ -277,7 +284,7 @@ function onConnection(socket) {
     socket.on("disconnect", () => { clearInterval(checkInterval); gomos.gomosLog( logger,gConsole,TRACE_DEV,"Client disconnected")});
   }
   catch(err){
-gomos.errorCustmHandler(NAMEOFSERVICE,"onConnection","THIS IS Try Catch OF Function","",err);
+    gomos.errorCustmHandler(NAMEOFSERVICE,"onConnection",'THIS IS Try Catch OF Function',``,err,ERROR_RUNTIME,ERROR_TRUE,EXIT_TRUE);
   }
  
 }
@@ -293,7 +300,7 @@ gomos.errorCustmHandler(NAMEOFSERVICE,"onConnection","THIS IS Try Catch OF Funct
        .find({ mac: mac})
        .toArray(function (err, result) {
          if (err) {
-         gomos.errorCustmHandler(NAMEOFSERVICE,"getApiAndEmit","THIS IS Query of DeviceState","",err);
+          gomos.errorCustmHandler(NAMEOFSERVICE,"getApiAndEmit",'THIS IS Query of DeviceState',``,err,ERROR_RUNTIME,ERROR_TRUE,EXIT_TRUE);
          }else{
          var deviceStateKey = Object.keys(result[0]);
          var keysToRemove2 = ["_id", "mac", "DeviceName","updatedTime","createdTime"];
@@ -342,8 +349,7 @@ gomos.errorCustmHandler(NAMEOFSERVICE,"onConnection","THIS IS Try Catch OF Funct
  );
     }
     catch(err){
-      gomos.errorCustmHandler(NAMEOFSERVICE,"getApiAndEmit","THIS IS TRY CATCH ERROR","",err);
-      
+      gomos.errorCustmHandler(NAMEOFSERVICE,"getApiAndEmit",'THIS IS TRY CATCH ERROR',``,err,ERROR_RUNTIME,ERROR_TRUE,EXIT_TRUE);
     }  
        
   }
@@ -367,7 +373,7 @@ return new Promise((resolve, reject)=>{
 )
     }
     catch(err){
-
+      gomos.errorCustmHandler(NAMEOFSERVICE,"getApiAndEmit",'THIS IS TRY CATCH ERROR',``,err,ERROR_RUNTIME,ERROR_TRUE,EXIT_TRUE);
     }
   }
 function dbConnection(){
@@ -376,7 +382,7 @@ function dbConnection(){
     { useNewUrlParser: true },
     function (err, connection) {
       if (err) {
-        gomos.errorCustmHandler(NAMEOFSERVICE,"dbConnection","This is mongo Client Error")
+        gomos.errorCustmHandler(NAMEOFSERVICE,"dbConnection",'This is mongo Client Error',``,err,ERROR_RUNTIME,ERROR_TRUE,EXIT_TRUE);
         next(err);
       }
       dbo = connection.db(dbName);
@@ -402,7 +408,7 @@ gomos.gomosLog( logger,gConsole,TRACE_PROD,"this started For Operating DashBoard
       mBoxApp = app;
     }
     catch(err){
-      gomos.errorCustmHandler(NAMEOFSERVICE,"module.exports","This is Main Try catch Error","", err)
+      gomos.errorCustmHandler(NAMEOFSERVICE,"module.exports",'This is Main Try catch Error',``,err,ERROR_RUNTIME,ERROR_TRUE,EXIT_TRUE);
     }
   }, 6000);
 };

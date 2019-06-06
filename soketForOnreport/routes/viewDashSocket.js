@@ -4,6 +4,13 @@ const TRACE_STAGE = 2;
 const TRACE_TEST  = 3;
 const TRACE_DEV   = 4;
 const TRACE_DEBUG = 5;
+const ERROR_RUNTIME      = "runTimeError";
+const ERROR_APPLICATION  =  "ApplicationError";
+const ERROR_DATABASE     = "DataBaseError";
+const EXIT_TRUE  = true;
+const EXIT_FALSE = false;
+const ERROR_TRUE = true;
+const ERROR_FALSE = false;
 var  gomos = require("../../commanFunction/routes/commanFunction");
 var MongoClient = require("mongodb").MongoClient;
 var urlConn, dbName, dbo;
@@ -49,7 +56,7 @@ if(process.argv[4] == SERVICE_VALUE ){
    });
     socket.on("disconnect", () => { clearInterval(checkInterval);gomos.gomosLog(TRACE_PROD,"Client disconnected on OnViewDashboard")}); 
    } catch (err) {
-     gomos.errorCustmHandler(NAMEOFSERVICE,"onViewDashboard","THIS IS TRY CATCH ERROR",'',err);
+    gomos.errorCustmHandler(NAMEOFSERVICE,"onViewDashboard",'THIS IS TRY CATCH ERROR',``,err,ERROR_RUNTIME,ERROR_TRUE,EXIT_TRUE);
    } 
  }
 
@@ -102,7 +109,8 @@ if(process.argv[4] == SERVICE_VALUE ){
 }
 );       
    } catch (err) {
-    gomos.errorCustmHandler(NAMEOFSERVICE,"lastupdateddata","THIS IS TRY CATCH ERROR",'',err);
+    gomos.errorCustmHandler(NAMEOFSERVICE,"lastupdateddata",'THIS IS TRY CATCH ERROR',``,err,ERROR_RUNTIME,ERROR_TRUE,EXIT_TRUE);
+
      
    }
  }
@@ -120,8 +128,7 @@ if(process.argv[4] == SERVICE_VALUE ){
         dbo = connection.db(dbName);
       }); 
    } catch (err) {
-    gomos.errorCustmHandler(NAMEOFSERVICE,"dbConnection","THIS IS TRY CATCH ERROR",'',err);
-     
+    gomos.errorCustmHandler(NAMEOFSERVICE,"dbConnection",'THIS IS TRY CATCH ERROR',``,err,ERROR_RUNTIME,ERROR_TRUE,EXIT_TRUE);
    }
   }
 
@@ -137,7 +144,8 @@ module.exports = function (app) {
         nsp.on('connection',onViewDashboard);
     }, 6000);
     } catch (err) {
-    gomos.errorCustmHandler(NAMEOFSERVICE,"module.exports","THIS IS TRY CATCH ERROR",'',err);      
+  gomos.errorCustmHandler(NAMEOFSERVICE,"module.exports",'THIS IS TRY CATCH ERROR',``,err,ERROR_RUNTIME,ERROR_TRUE,EXIT_TRUE);
+
     }
  
   };

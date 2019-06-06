@@ -4,6 +4,13 @@ const TRACE_STAGE = 2;
 const TRACE_TEST  = 3;
 const TRACE_DEV   = 4;
 const TRACE_DEBUG = 5;
+const ERROR_RUNTIME      = "runTimeError";
+const ERROR_APPLICATION  =  "ApplicationError";
+const ERROR_DATABASE     = "DataBaseError";
+const EXIT_TRUE  = true;
+const EXIT_FALSE = false;
+const ERROR_TRUE = true;
+const ERROR_FALSE = false;
 var  gomos = require("./commanFunction");
 
 exports.getCustomers =  function(db,NAMEOFSERVICE,logger,gConsole){
@@ -12,8 +19,8 @@ exports.getCustomers =  function(db,NAMEOFSERVICE,logger,gConsole){
     .find()
     .toArray(function (err, result) {
       if (err) {
-        gomos.errorCustmHandler(NAMEOFSERVICE,"Customers","This IS Getting All SubCustmoer","",err);
-        process.hasUncaughtExceptionCaptureCallback();
+        gomos.errorCustmHandler(NAMEOFSERVICE,"Customers",'This IS Getting All Customer',``,err,ERROR_DATABASE,ERROR_TRUE,EXIT_TRUE);
+
       }
       try{
           let dataFromCustomer = [];
@@ -25,7 +32,7 @@ exports.getCustomers =  function(db,NAMEOFSERVICE,logger,gConsole){
         gomos.gomosLog(logger,gConsole,TRACE_PROD,"Customers - No. of subeCustomer read from collection", dataFromCustomer.length);
       }
       catch(err){
-        gomos.errorCustmHandler(NAMEOFSERVICE,"getSubCCustomersustomers","This is Try catch Of getting All Sub Custmoer",err);    
+        gomos.errorCustmHandler(NAMEOFSERVICE,"Customers",'This IS Getting All Custmoer Try Catch Erroe',``,err,ERROR_RUNTIME,ERROR_TRUE,EXIT_TRUE);
       }
     });
       

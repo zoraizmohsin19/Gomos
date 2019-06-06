@@ -9,6 +9,7 @@ var fs = require("fs");
 var index = require("./routes/index");
 var users = require("./routes/users");
 var app = express();
+var  gomos = require("../commanFunction/routes/commanFunction");
 
 //reads the data from config file which contains DB connection url and the DB Name.
 var appConfig = JSON.parse(
@@ -51,21 +52,7 @@ else {
 //set app level local vars
 app.locals.urlConn = urlConn;
 app.locals.dbName = dbName;
-// app.locals.gomosLog = function(x){
-//   if(process.argv[3] >= arguments[0]){
-//      var  currTime = new Date();
-//     if(arguments[2] instanceof Object){
-//       console.log(currTime.getHours()+":"+currTime.getMinutes()+":"+currTime.getSeconds()+"."+currTime.getMilliseconds()+"-"+arguments[1]);
-//       console.log(arguments[2]);
-//     }else if(arguments.length == 2){
-//       console.log( currTime.getHours()+":"+currTime.getMinutes()+":"+currTime.getSeconds()+"."+currTime.getMilliseconds()+"-"+arguments[1]);
-//     }
-//     else{
-//       console.log( currTime.getHours()+":"+currTime.getMinutes()+":"+currTime.getSeconds()+"."+currTime.getMilliseconds()+"-"+arguments[1]+" ["+arguments[2]+ "]");
-//     }
- 
-//   }
-// }
+
 
 // view engine setup
 app.set("views", path.join(__dirname, "views"));
@@ -98,22 +85,25 @@ app.use(function (error, req, res, next) {
     error.statusCode = 500;
   }
   console.log("Error handler: ", error.message, error.statusCode);
-  log_file_err.write(
-    "Error handler: " +
-    "Error Code:" +
-    error.statusCode +
-    "  " +
-    error.stack +
-    "\n"
-  );
+  // log_file_err.write(
+  //   "Error handler: " +
+  //   "Error Code:" +
+  //   error.statusCode +
+  //   "  " +
+  //   error.stack +
+  //   "\n"
+  // );
+  gomos.errorCustmHandler("MqttService","error.statusCode=500","app error hander", error.message,error,"runTimeError",true,false)
+  
   res.status(500).json({ error: error.message });
 });
 
 //uncaught exception handling
 process.on("uncaughtException", function (err) {
   console.log("Caught exception: " + err);
-  log_file_err.write("Caught exception: " + err.stack + "\n");
-  process.exit();
+ // log_file_err.write("Caught exception: " + err.stack + "\n");
+  gomos.errorCustmHandler("MqttService","uncaughtException",'uncaughtException error','',err,"runTimeError",true,true)
+ // process.exit();
 });
 
 // error handler

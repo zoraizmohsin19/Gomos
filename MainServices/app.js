@@ -9,6 +9,7 @@ var alertService = require('./routes/alertService');
 var factService = require('./routes/factService');
 var usersRouter = require('./routes/users');
 var dateTime = require('node-datetime');
+var  gomos = require("../commanFunction/routes/commanFunction");
 
 //reads the data from config file which contains DB connection url and the DB Name.
 var appConfig = JSON.parse(fs.readFileSync(process.cwd() + '/appConfig.json', 'utf8'));
@@ -78,16 +79,19 @@ app.use(function (error, req, res, next) {
   if (!error.statusCode) {
     error.statusCode = 500;
   }
-  console.log("Error handler: ", error.message, error.statusCode);
-  log_file_err.write("Error handler: " + "Error Code:" + error.statusCode + "  " + error.stack + '\n');
+  // console.log("Error handler: ", error.message, error.statusCode);
+  // log_file_err.write("Error handler: " + "Error Code:" + error.statusCode + "  " + error.stack + '\n');
+  gomos.errorCustmHandler("mainService","error.statusCode=500","app error hander", error.message,error,"runTimeError",true,false)
   res.status(500).json({ error: error.message });
 });
 
 //uncaught exception handling
 process.on('uncaughtException', function (err) {
   console.log('Caught exception: ' + err);
-  log_file_err.write('Caught exception: ' + err.stack + '\n');
-  process.exit();
+  // log_file_err.write('Caught exception: ' + err.stack + '\n');
+  // process.exit();
+  gomos.errorCustmHandler("mainService","uncaughtException","Caught exception", error.message,error,"runTimeError",true,true)
+
 });
 
 // error handler

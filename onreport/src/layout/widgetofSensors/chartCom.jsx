@@ -69,7 +69,7 @@ class Chartcom extends Component {
        // console.log("This is Chart componenet data ")
        // console.log(arrData);
     
-       if( arrData != undefined && arrData.length != 0 && arrData != null){
+       if( arrData !== undefined && arrData.length !== 0 && arrData !== null){
         var axisY = ["first-y-axis", "first-y-axis", "second-y-axis"]
         var labelName = [];
         var keysofBsName = Object.keys(arrData[0])
@@ -81,10 +81,10 @@ class Chartcom extends Component {
           console.log(this.getIdForChart(chartAxis,keysofBsName[i]));
       
           if(this.getIdForChart(chartAxis,keysofBsName[i]) === "second-y-axis"){
-            labelName1 += keysofBsName[i] + " ; ";
+            labelName2 += keysofBsName[i] + " ; ";
           }
           else{
-            labelName2 += keysofBsName[i] + " ; ";
+            labelName1 += keysofBsName[i] + " ; ";
           }
           var json = {};
           json["label"]  = keysofBsName[i];

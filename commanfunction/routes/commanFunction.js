@@ -56,15 +56,14 @@ exports.gomosLog = function(x){
 //   }
  
   exports.unWantedLog = function(functionName,message){
-    var DateTime = new Date().toISOString();
-    let writeStream = fs.createWriteStream("../unWantedLogCommanlog-" +  formattedDate+ ".json", { flags: "a" });
- var json ={DateTime,functionName ,message}
-//  var jsonStrring = JSON.stringify(json)
+    var DateTime = new Date();
+    let writeStream = fs.createWriteStream("../unWantedLogCommanlog-" +  formattedDate+ ".log", { flags: "a" });
 
   // write some data with a base64 encoding
   writeStream.write(
-
-    json +
+   "DateTime :"+ DateTime +"\n"+
+   "functionName :" + functionName +"\n"+
+   "message :" + message +"\n"+
     "\n"
   );
   
@@ -79,35 +78,70 @@ exports.gomosLog = function(x){
   }
   exports.errorCustmHandler =  function(x){
     // console.log(typeofError);
-      let writeStream = fs.createWriteStream("../commanError-" + formattedDate + ".json", { flags: "a" });
-      var dateTime = new Date().toISOString();
+      let writeStream = fs.createWriteStream("../commanError-" + formattedDate + ".log", { flags: "a" });
+      var dateTime = new Date();
     // write some data with a base64 encoding
     // var errors = typeofError.toS
-    var errorobj ={
-      DateTime : dateTime,
-      serviceName: arguments[0],
-      functionName : arguments[1]
-    }
+    // var errorobj ={
+    //   DateTime : dateTime,
+    //   serviceName: arguments[0],
+    //   functionName : arguments[1]
+    // }
+    // if(arguments[2] != ''){
+    //   errorobj["messageInfo"] = arguments[2]
+    // }
+    // if(arguments[3] != '' || arguments[3] != undefined || arguments[3] != null){
+    //   errorobj["message"] = arguments[3]
+    // }
+    // try {
+    //   errorobj["ErrorCode"] =arguments[4].statusCode,
+    //   errorobj["Error"] = arguments[4].toString(),
+    //   errorobj["typeofErrorstack"] = arguments[4].stack  
+    // } catch (error) {
+    //   errorobj["ErrorMassage"] = arguments[4]
+    // }
+    var errorString = "";
+    
+     errorString +=   "DateTime :"+ dateTime + "\n";
+     errorString +=   "serviceName :"+ arguments[0] + "\n";
+     errorString +=  "functionName :"+ arguments[1] + "\n";
+    
     if(arguments[2] != ''){
-      errorobj["messageInfo"] = arguments[2]
+      errorString += "messageInfo :" + arguments[2] +"\n";
     }
-    if(arguments[3] != '' || arguments[3] != undefined || arguments[3] != null){
-      errorobj["message"] = arguments[3]
+    if(arguments[3] != '' && arguments[3] != undefined ){
+      errorString += "context :" + arguments[3] +"\n";
     }
-    try {
-      errorobj["ErrorCode"] =arguments[4].statusCode,
-      errorobj["Error"] = arguments[4].toString(),
-      errorobj["typeofErrorstack"] = arguments[4].stack  
-    } catch (error) {
-      errorobj["ErrorMassage"] = arguments[4]
+    if(arguments[5] != '' && arguments[5] != undefined  ){
+      errorString += "errorType :" + arguments[5] +"\n";
     }
+    if(arguments[6] == undefined  ){
+      try {
+        errorString  += "ErrorCode :" + arguments[4].statusCode +"\n";
+        errorString  += "Error :" + arguments[4].toString()+ "\n";
+        errorString  += "typeofErrorstack :" + arguments[4].stack  +"\n";
+      } catch (error) {
+        errorString  += "ErrorMassage"+ arguments[4] +"\n";
+      }
+    }
+    else{
+      if(arguments[6]){
+        errorString += "ErrorCode :" + arguments[4].statusCode +"\n";
+        errorString += "Error :"  + arguments[4].toString() +"\n";
+        errorString += "typeofErrorstack : "+ arguments[4].stack +"n";  
+      }else{
+        errorString += "ErrorMassage :" + arguments[4] +"\n"
+      }
+  }
+    
+   
    
 
 
-    var strObj = JSON.stringify(errorobj)
+    // var strObj = JSON.stringify(errorobj)
   // console.log(typeofError);
     writeStream.write(
-      strObj+
+      errorString +
       "\n"
       );
     
@@ -117,6 +151,10 @@ exports.gomosLog = function(x){
     });
     // close the stream
     writeStream.end(); 
+    setTimeout(()=> { if(arguments[7]){
+      process.exit()
+    }},1000)
+   
     }
   
 
