@@ -248,6 +248,6 @@ module.exports = function (app) {
     alertSrvc = app;
    
      processAlerts();
-  }, 2000);
-}, 2000);
+  }, 5000);
+}, 5000);
 };

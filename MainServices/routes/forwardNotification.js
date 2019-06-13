@@ -466,8 +466,8 @@ module.exports = function (app) {
     getAllconfig();
     setTimeout(function () {
        processStartEvent();
-    }, 2000);
-  }, 2000);
+    }, 5000);
+  }, 6000);
 
    return router;
 };
