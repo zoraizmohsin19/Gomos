@@ -1,5 +1,6 @@
 // 'use strict';
 var dateTime = require("node-datetime");
+const moment = require('moment');
 var fs = require("fs");
 var dt = dateTime.create();
 var formattedDate = dt.format("Y-m-d");
@@ -13,26 +14,26 @@ exports.createConsole = function(output,errorOutput){
 
 exports.gomosLog = function(x){
   if(process.argv[3] >= arguments[2]){
-     let  currTime = new Date();
+     let  currTime = moment().format("HH:mm:ss:SSS");
      let logger = arguments[0];
      let logToGlobalConsole  =   arguments[1];
     if(arguments[4] instanceof Object){
-      logger.log(currTime.getHours()+":"+currTime.getMinutes()+":"+currTime.getSeconds()+"."+currTime.getMilliseconds()+"-"+arguments[3]);
+      logger.log(currTime +"-"+arguments[3]);
       logger.log(arguments[4]);
       if(logToGlobalConsole == true){
-        console.log(currTime.getHours()+":"+currTime.getMinutes()+":"+currTime.getSeconds()+"."+currTime.getMilliseconds()+"-"+arguments[3]);
+        console.log(currTime+"-"+arguments[3]);
         console.log(arguments[4])
       }
     }else if(arguments.length == 4){
-      logger.log( currTime.getHours()+":"+currTime.getMinutes()+":"+currTime.getSeconds()+"."+currTime.getMilliseconds()+"-"+arguments[3]);
+      logger.log( currTime+"-"+arguments[3]);
       if(logToGlobalConsole == true){
-      console.log( currTime.getHours()+":"+currTime.getMinutes()+":"+currTime.getSeconds()+"."+currTime.getMilliseconds()+"-"+arguments[3]);        
+      console.log( currTime+"-"+arguments[3]);        
       }
     }
     else{
-      logger.log( currTime.getHours()+":"+currTime.getMinutes()+":"+currTime.getSeconds()+"."+currTime.getMilliseconds()+"-"+arguments[3]+" ["+arguments[4]+ "]");
+      logger.log( currTime+"-"+arguments[3]+" ["+arguments[4]+ "]");
       if(logToGlobalConsole == true){
-        console.log( currTime.getHours()+":"+currTime.getMinutes()+":"+currTime.getSeconds()+"."+currTime.getMilliseconds()+"-"+arguments[3]+" ["+arguments[4]+ "]");
+        console.log( currTime+"-"+arguments[3]+" ["+arguments[4]+ "]");
       }
     }
  
@@ -56,8 +57,8 @@ exports.gomosLog = function(x){
 //   }
  
   exports.unWantedLog = function(functionName,message){
-    var DateTime = new Date();
-    let writeStream = fs.createWriteStream("../unWantedLogCommanlog-" +  formattedDate+ ".log", { flags: "a" });
+    var DateTime = moment().format("YYYY-MM-DD HH:mm:ss:SSS");
+    let writeStream = fs.createWriteStream("../unWantedLogCommanlog-" +  moment().format("YYYY-MM-DD")+ ".log", { flags: "a" });
 
   // write some data with a base64 encoding
   writeStream.write(
@@ -78,8 +79,8 @@ exports.gomosLog = function(x){
   }
   exports.errorCustmHandler =  function(x){
     // console.log(typeofError);
-      let writeStream = fs.createWriteStream("../commanError-" + formattedDate + ".log", { flags: "a" });
-      var dateTime = new Date();
+      let writeStream = fs.createWriteStream("../commanError-" + moment().format("YYYY-MM-DD")+ ".log", { flags: "a" });
+      var dateTime =  moment().format("YYYY-MM-DD HH:mm:ss:SSS");
     // write some data with a base64 encoding
     // var errors = typeofError.toS
     // var errorobj ={

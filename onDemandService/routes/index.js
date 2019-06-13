@@ -6,6 +6,7 @@ var requiredDateTime = require("node-datetime");
 const mongoose = require("mongoose");
 var ObjectId = require('mongodb').ObjectID;
 const uuidv4 = require('uuid/v4');
+const mqtt = require('mqtt')
 
 const Schema = mongoose.Schema;
 const NAMEOFSERVICE = "OnDemandService"
@@ -83,6 +84,7 @@ router.delete("/deleteSentCommand", function (req, res, next) {
 router.get("/flashPrograms", function (req, res, next) {
   var query = url.parse(req.url, true).query;
   var mac = query.mac;
+  var response = {}
   gomos.gomosLog(logger, gConsole, TRACE_DEV, "This is mac");
 
   if (mac != undefined && mac != "") {
@@ -129,7 +131,26 @@ router.get("/flashPrograms", function (req, res, next) {
                           gomos.gomosLog(logger, gConsole, TRACE_DEBUG, "this err", err);
                           res.json(err)
                         }
+                        response["SentManOverride"] = "SentManOverride updated"
+                          db.collection("Instructionindex")
+                          .deleteMany({ programKeyIndex: {$regex: mac} }, function (err, result) {
+                                if (err) {
+                                  gomos.gomosLog(logger, gConsole, TRACE_DEBUG, "this err", err);
+                                  res.json(err)
+                                }
+                                 response["Instructionindex"] = "Instructionindex delete : "+ result.result.n;
+                                gomos.gomosLog(logger,gConsole,TRACE_DEV,"This is InstructionIndex Delete",result.result.n)
+                                db.collection("DeviceUpTime")
+                                .deleteMany({ mac: mac }, function (err, result) {
+                                      if (err) {
+                                        gomos.gomosLog(logger, gConsole, TRACE_DEBUG, "this err", err);
+                                        res.json(err)
+                                      }
+                                 response["DeviceUpTime"] = "DeviceUpTime delete : "+ result.result.n;
+                                 gomos.gomosLog(logger,gConsole,TRACE_DEV,"This is deleteMany Delete",result.result.n)
+
                           // if(result.result.nModified > 0){
+                         
                         db.collection("DeviceState")
                           .find({ mac: mac })
                           .toArray(function (err, result2) {
@@ -160,18 +181,36 @@ router.get("/flashPrograms", function (req, res, next) {
                                       res.json(err)
                                     }
                                     gomos.gomosLog(logger, gConsole, TRACE_DEBUG, "This is log of DeviceState Update", result);
-                                    res.send(`successfully Flase PlateForm For Programs ${result.result.nModified}`)
+                                    response["DeviceState"] = "DeviceState updated : "+ result.result.nModified;
+                                 //   res.send(`successfully Flase PlateForm For Programs ${result.result.nModified}`)
+                                    let client  = mqtt.connect('mqtt://34.244.151.117');
+                                    client.on("error", function (){
+                                      gomos.gomosLog(logger,gConsole,TRACE_PROD,"This is Mqtt broker connection error");
 
+                                    });
+                                    client.on("offline", function (){
+                                      gomos.gomosLog(logger,gConsole,TRACE_PROD,"This is Mqtt broker offline");
+                                    
+                                    });
+                                    let message = JSON.stringify({"payloadId": "SystemReset",  "programs": false,   "channels": {  "mode": 0,"action": 0 }});
+                                    response["client_publish"] = message;
+                                    client.publish(`mqtt_rx/test/GHC01/${mac}`, message, function (err, result){
+                                      if(err){
+                                        gomos.gomosLog(logger,gConsole,TRACE_DEBUG,"This is Mqtt publishing error",err);   
+                                        res.json(err)                                   
+                                      }
+                                       
+                                      gomos.gomosLog(logger,gConsole,TRACE_PROD,"This is publish Mqtt Message",result);
+                                      res.json(response);
                                   });
+                                });
                             }
                             else{
                               res.send("Some Things Wrong 2")
                             }
                           });
-                        // }
-                        // else{
-                        //   res.send("Some Things Wrong 2")
-                        // }
+                        }); 
+                      });
                       });
 
                 }
@@ -1742,6 +1781,61 @@ MongoClient.connect(
   });
 });
 });
+router.post("/getDeviceUpTime", function (req,res, next){
+  accessPermission(res);
+  var body = req.body;
+  var mac         =   body.mac;
+  var name        =  body.name;
+console.log(body)
+MongoClient.connect(
+  urlConn,
+  { useNewUrlParser: true },
+  function (err, connection) {
+    if (err) {
+      next(err);
+    }
+    gomos.gomosLog( logger,gConsole,TRACE_DEBUG,"This is finding DeviceUpTime with this mac", mac)
+    var db = connection.db(dbName);
+    var dateTime = new Date(new Date().toISOString());
+    
+      db.collection("DeviceUpTime")
+      .find({mac:body.mac ,bootstrap: {$gte: new Date(body.startTime), $lte: new Date(body.endTime)}})
+      .toArray(function (err, result) {
+        if (err) {
+           gomos.gomosLog( logger,gConsole,TRACE_DEBUG,"this err",err);  
+        }
+        gomos.gomosLog( logger,gConsole,TRACE_DEBUG,"This is device Instruction for ClimateSave", result);
+        if(result.length > 0){
+          let count =0 ;
+        for(let i = 0; i < result.length; i++){
+        
+         count += result[i].duration;   
+        }
+         let value = Math.floor(count/60)+":"+Math.round(count%60);
+          let data  = value.split(":");
+          let data2 = ''
+          if (data[0].length === 1) {
+            data2 += 0 + data[0]
+          }
+          else {
+            data2 += data[0]
+          }
+          data2 += ":"
+          if (data[1].length === 1) {
+            data2 += 0 + data[1]
+          }
+          else {
+            data2 += data[1]
+          }
+          res.json(data2)
+
+        }
+        else{
+        res.json("00:00")
+        }
+  });
+});
+});
 
 router.post("/ActiveProgrameSave", function (req,res, next){
   accessPermission(res);
@@ -1859,7 +1953,23 @@ MongoClient.connect(
 //  });
 // });
 
+function deleteProgramIndex(dbo,data){
+  return new Promise((resolve, reject)=> {
+    gomos.gomosLog( logger,gConsole,TRACE_DEV,"This is deleteProgramIndex going to delete ", `${data.mac}-${data.sourceMsg.body.programKey}`);
+  dbo.collection("Instructionindex").deleteOne(
+  {programKeyIndex : `${data.mac}-${data.sourceMsg.body.programKey}`},
+    function(err, result) {
+      if (err) {
+        gomos.errorCustmHandler( NAMEOFSERVICE,"delted For ProgrameDetails Override","This is Updateting Error","", err);
+        process.hasUncaughtExceptionCaptureCallback();
+        reject(err)
+      }
+    gomos.gomosLog( logger,gConsole,TRACE_DEV,"This is deleteProgramIndex", result.result.n);
+    resolve(result)
 
+    });
+  });
+}
 router.post("/ActiveProgramerevert", function (req,res, next){
   accessPermission(res);
   var reqData = req.body;
@@ -1888,55 +1998,60 @@ MongoClient.connect(
       if (err) {
         process.hasUncaughtExceptionCaptureCallback();
       }
-      if (resultMain.length != 0) {
-        gomos.gomosLog( logger,gConsole, TRACE_DEBUG,"This ProgrameDetails data",resultMain);
-        gomos.gomosLog( logger,gConsole, TRACE_DEBUG, "This ProgrameDetails dataInsruction.sourceMsg.body Splite data ito part",reqData.sourceMsg);
-        gomos.gomosLog( logger,gConsole,TRACE_DEBUG,"This is ProgrameDetails after asing",resultMain[0].sourceMsg.body);
-        if(reqData.ActionType === "SetProgramState"){
-        dbo.collection("DeviceInstruction").updateOne(
-          { _id: resultMain[0]["_id"],$or : [{"sourceMsg.body.pendingConfirmation":{ $ne : false}}]  },
-          {$set: {
-            "sourceMsg.body.currentState": resultMain[0].sourceMsg.body.previousState,
-            "sourceMsg.body.previousState": resultMain[0].sourceMsg.body.currentState,
-            "sourceMsg.body.pendingConfirmation": false,
-            updatedTime: new Date(new Date().toISOString())
+          if (resultMain.length != 0) {
+            gomos.gomosLog( logger,gConsole, TRACE_DEBUG,"This ProgrameDetails data",resultMain);
+            gomos.gomosLog( logger,gConsole, TRACE_DEBUG, "This ProgrameDetails dataInsruction.sourceMsg.body Splite data ito part",reqData.sourceMsg);
+            gomos.gomosLog( logger,gConsole,TRACE_DEBUG,"This is ProgrameDetails after asing",resultMain[0].sourceMsg.body);
+            if(reqData.ActionType === "SetProgramState"){
+            dbo.collection("DeviceInstruction").updateOne(
+              { _id: resultMain[0]["_id"],$or : [{"sourceMsg.body.pendingConfirmation":{ $ne : false}}]  },
+              {$set: {
+                "sourceMsg.body.currentState": resultMain[0].sourceMsg.body.previousState,
+                "sourceMsg.body.previousState": resultMain[0].sourceMsg.body.currentState,
+                "sourceMsg.body.pendingConfirmation": false,
+                updatedTime: new Date(new Date().toISOString())
+              }
+            }, 
+           async function(err, result1) {
+                if (err) {
+                  gomos.errorCustmHandler( NAMEOFSERVICE,"updated For Programe State in ProgrameDetails   in setProgramStateErrorProcess","This is Updateting Error","", err);
+                  res.send("Some Things Error .");
+                  process.hasUncaughtExceptionCaptureCallback();
+                }
+                 let response =  await deleteProgramIndex(dbo,resultMain[0])
+                 gomos.gomosLog(logger,gConsole,TRACE_DEBUG,"This is resonse deleteProgramIndex", response)
+                gomos.gomosLog( logger,gConsole,TRACE_DEBUG, "updated For Programe State in ProgrameDetails   in setProgramStateErrorProcess",result1);
+                res.json(result1)
+              }
+            );
           }
-        }, 
-        function(err, result1) {
-            if (err) {
-              gomos.errorCustmHandler( NAMEOFSERVICE,"updated For Programe State in ProgrameDetails   in setProgramStateErrorProcess","This is Updateting Error","", err);
-              res.send("Some Things Error .");
-              process.hasUncaughtExceptionCaptureCallback();
+        
+        else if( reqData.ActionType ===  "SetProgram"){
+          gomos.gomosLog( logger,gConsole, TRACE_DEBUG, "This ProgrameDetails dataInsruction.sourceMsg.body Splite data ito part",reqData.sourceMsg);
+          gomos.gomosLog( logger,gConsole,TRACE_DEBUG,"This is ProgrameDetails after asing",resultMain[0].sourceMsg.body);
+          dbo.collection("DeviceInstruction").deleteOne(
+            { _id: resultMain[0]["_id"] ,$or : [{"sourceMsg.body.pendingConfirmation":{ $ne : false}}] },
+            async function(err, result) {
+              if (err) {
+                gomos.errorCustmHandler( NAMEOFSERVICE,"delted For ProgrameDetails Override","This is Updateting Error","", err);
+                res.send("Some Things Error .");
+                process.hasUncaughtExceptionCaptureCallback();
+              }
+              gomos.gomosLog( logger,gConsole,TRACE_DEBUG, " For ProgrameDetails Override  in setProgramErrorProcess");
+              let response =  await deleteProgramIndex(dbo,resultMain[0])
+              gomos.gomosLog(logger,gConsole,TRACE_DEBUG,"This is resonse deleteProgramIndex", response)
+              res.json(result)
             }
-            gomos.gomosLog( logger,gConsole,TRACE_DEBUG, "updated For Programe State in ProgrameDetails   in setProgramStateErrorProcess",result1);
-            res.json(result1)
-          }
-        );
-      }
-    
-    else if( reqData.ActionType ===  "SetProgram"){
-      gomos.gomosLog( logger,gConsole, TRACE_DEBUG, "This ProgrameDetails dataInsruction.sourceMsg.body Splite data ito part",reqData.sourceMsg);
-      gomos.gomosLog( logger,gConsole,TRACE_DEBUG,"This is ProgrameDetails after asing",resultMain[0].sourceMsg.body);
-      dbo.collection("DeviceInstruction").deleteOne(
-        { _id: resultMain[0]["_id"] ,$or : [{"sourceMsg.body.pendingConfirmation":{ $ne : false}}] },
-        function(err, result) {
-          if (err) {
-            gomos.errorCustmHandler( NAMEOFSERVICE,"delted For ProgrameDetails Override","This is Updateting Error","", err);
-            res.send("Some Things Error .");
-            process.hasUncaughtExceptionCaptureCallback();
-          }
-          gomos.gomosLog( logger,gConsole,TRACE_DEBUG, " For ProgrameDetails Override  in setProgramErrorProcess");
-          res.json(result)
+          );
         }
-      );
-    }
-    }
-    else{
-      res.send("No Record Found .");
-    }
-    
-      
-    }
+
+        }
+        else{
+          res.send("No Record Found .");
+        }
+        
+          
+        }
     );
  });
 });
