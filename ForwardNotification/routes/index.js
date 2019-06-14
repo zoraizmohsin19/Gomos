@@ -232,7 +232,8 @@ function processStartEvent() {
                 var id = result[i]._id;
                 var resultTime =  result[i].updatedTime;
                  var currentTime= new Date(new Date().toISOString());
-                 var mac = result[i].mac;
+                //  var mac = result[i].mac;
+                //  gomos.gomosLog(TRACE_PROD,"This Debug Of Mac",mac);
              db.collection("Alerts")
              .findOneAndUpdate(
                 {
@@ -247,13 +248,14 @@ function processStartEvent() {
                 },
               })
               .then(function(result1) {
+                gomos.gomosLog(TRACE_PROD,"This is Debug Of Alert Update", result1)
                   if(result[count].type === "level3"){
-                        gomos.gomosLog(TRACE_TEST,"Going to process For Level3",result[count]);
+                        gomos.gomosLog(TRACE_PROD,"Going to process For Level3",result[count]);
                         asyncPostData(db,result, count);
                   }
                   else if(result[count].type === "level4"){
-                    gomos.gomosLog(TRACE_TEST,"Going to process For Level4",result[count]);
-                    sendToDevice(result[count],db,mac);
+                    gomos.gomosLog(TRACE_PROD,"Going to process For Level4",result[count]);
+                    sendToDevice(result[count],db);
                     
                   }
                    count++;
@@ -283,10 +285,12 @@ function processStartEvent() {
   });
 }
 
-function sendToDevice(data,db,mac){
+function sendToDevice(data,db){
   gomos.gomosLog(TRACE_DEBUG,"Going to process in sendToDevice method with data",data);
+  // gomos.gomosLog(TRACE_PROD,"Going to process in sendToDevice method with data",mac);
   var custCd = data.custCd;
   var id = data._id;
+  var mac = data.mac;
   gomos.gomosLog(TRACE_DEBUG,"Inside sendToDevice, about to process for Id :",id);
  var translatedMsg = data.translatedMsg;
  db.collection("Customers")
