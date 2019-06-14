@@ -26,11 +26,63 @@ var gConsole = false;
 if (process.argv[4] == SERVICE_VALUE) {
   gConsole = true;
 }
+function setProgramfetch(socket){
+try {
+  let checkInterval;
+  socket.on('setProgramFetch', function (data) {
+  
+  gomos.gomosLog(logger, gConsole, TRACE_PROD, "This is setProgramFetch", data);
+  setTimeout(function () { setProgramFetchFn(socket, data) }, 2000);
+  clearInterval(checkInterval);
+
+  checkInterval = setInterval(
+    () =>
+    setProgramFetchFn(socket, data),
+    1000
+  );
+});
+socket.on('end', function (){
+  socket.disconnect(0);
+});
+socket.on("disconnect", () => {
+  clearInterval(checkInterval)
+  gomos.gomosLog(TRACE_TEST, "Client disconnected on onDeviceinstruction")
+});
+} catch (err) {
+  
+}
+}
+function setProgramFetchFn(socket, dataInfo){
+     let mac = dataInfo.mac;
+  gomos.gomosLog( logger,gConsole,TRACE_DEBUG,"THis is MAc", mac)
+      dbo.collection("DeviceInstruction")
+      .aggregate([{$match: {"mac":mac,"type": "ProgramDetails"}},{ $group : { _id: "$sourceMsg.body.name", version: { $max : "$sourceMsg.body.version" }}}]).toArray(function (err, result){
+        if (err) {
+          gomos.gomosLog( logger,gConsole,TRACE_DEBUG,"this err",err);  
+            }   
+            let data = result.map(item => `${item._id}-${item.version}`)
+            let currentDate = new Date(new Date().toISOString());
+            gomos.gomosLog( logger,gConsole,TRACE_DEBUG,"This is result of find",data)                
+             dbo.collection("DeviceInstruction")
+            .find( {"mac":mac,"type": "ProgramDetails","sourceMsg.body.programKey": {$in: data} ,
+            $and: [ {$or: [ {"sourceMsg.body.currentState":{$ne :"delete"}}, {"sourceMsg.body.pendingConfirmation": {$ne:false}} ]}, {$or: [{"sourceMsg.body.expiryDate": {$gte: currentDate}},{"sourceMsg.body.expiryDate": "" }] } ]
+          
+          }).toArray(function (err, result1) {
+              if (err) {
+              gomos.gomosLog( logger,gConsole,TRACE_DEBUG,"this err",err);  
+              }
+              gomos.gomosLog( logger,gConsole,TRACE_DEBUG,"This is device Instruction for Program Details", result1);
+    
+              socket.emit("setProgramEmit", result1);
+            });
+});
+
+}
 function LastPayloadDataFn(socket) {
   try {
     //gomos.gomosLog( logger,gConsole,TRACE_PROD,"New client connected  lastPayloadData comming");
     var checkInterval;
-    socket.on('lastPayloadClient', function (data) {
+      socket.on('lastPayloadClient', function (data) {
       var tempArray = [];
       gomos.gomosLog(logger, gConsole, TRACE_PROD, "This is lastPayloadClient", data);
       setTimeout(function () { lastPayloadDataCall(socket, data, tempArray) }, 1000);
@@ -389,6 +441,8 @@ module.exports = function (app) {
       nsp2.on('connection', ActivelastError);
       var nsp3 = io.of('/LastPayloadData');
       nsp3.on('connection', LastPayloadDataFn);
+      var nsp4 = io.of('/ActiveProgrameFetch');
+      nsp4.on('connection', setProgramfetch);
       mBoxApp = app;
     }
     catch (err) {

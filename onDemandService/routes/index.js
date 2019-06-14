@@ -1886,8 +1886,6 @@ MongoClient.connect(
 router.post("/ActiveProgrameFetch", function (req,res, next){
   accessPermission(res);
   var body = req.body;
-  // var message     =   body.dataBody; 
-
   var mac         =   body.mac;
 MongoClient.connect(
   urlConn,
@@ -1898,12 +1896,6 @@ MongoClient.connect(
     }
     var db = connection.db(dbName);
     gomos.gomosLog( logger,gConsole,TRACE_DEBUG,"THis is MAc", mac)
-      // db.collection("DeviceInstruction")
-      // .find( {"mac":mac,"type": "ProgramDetails"}).toArray(function (err, result) {
-      //   if (err) {
-      // gomos.gomosLog( logger,gConsole,TRACE_DEBUG,"this err",err);  
-      //   }
- 
         db.collection("DeviceInstruction")
         .aggregate([{$match: {"mac":mac,"type": "ProgramDetails"}},{ $group : { _id: "$sourceMsg.body.name", version: { $max : "$sourceMsg.body.version" }}}]).toArray(function (err, result){
           if (err) {
