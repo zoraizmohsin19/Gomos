@@ -600,6 +600,11 @@ function updateDevInstructionActiveJobs(dbo, dataToInsert, sourceMsgObj) {
           response["DeviceInstructionInsert"] = await DeviceInstructionInsert(dbo, tempobj);
           resolve(response)
         }
+        else{
+          gomos.errorCustmHandler(NAMEOFSERVICE, "updateDevInstructionActiveJobs", 'This is generated from updateDevInstructionActiveJobs where programLineExecution like payload Process', `result Not Found`, "", ERROR_APPLICATION, ERROR_FALSE, EXIT_FALSE);
+          resolve({"DeviceInstructionInsert": "result Not Found"});
+
+        }
         gomos.gomosLog(logger, gConsole, TRACE_DEV, "This is find Of updateDevInstructionActiveJob", result);
       });
   });
@@ -629,6 +634,10 @@ function updateDevInstrForRActive(dbo, dataToInsert, Token) {
             response["DeviceInstructionInsert"] = await DeviceInstructionInsert(dbo, tempobj);
             resolve(response);
           }
+        }
+        else{
+          gomos.errorCustmHandler(NAMEOFSERVICE, "updateDevInstrForRActive", 'This is generated from updateDevInstrForRActive ', `result Not Found`, "", ERROR_APPLICATION, ERROR_FALSE, EXIT_FALSE);
+          resolve({"updateDevInstrForRActiveFn": "result not Found"});
         }
         gomos.gomosLog(logger, gConsole, TRACE_DEV, "This is find Of updateDevInstrForRActive", result);
       });
@@ -671,6 +680,9 @@ function processForInstructionError(dbo, dataToInsert, mainDatapayload) {
             }
             resolve(response);
           }
+        }else{
+          gomos.errorCustmHandler(NAMEOFSERVICE, "processForInstructionError", 'This is generated from processForInstructionError ', `result Not Found`, "", ERROR_APPLICATION, ERROR_FALSE, EXIT_FALSE);
+          resolve({"processForInstructionErrorFn": " result Not Found"});
         }
       });
   });
@@ -734,6 +746,9 @@ function setProgramStateErrorProcess(dbo, dataInsruction) {
               resolve({ "setProgramStateErrorProcess": result.result.nModified ,  "deleteProgramIndex": response.result.n});
             }
           );
+        }else{
+          gomos.errorCustmHandler(NAMEOFSERVICE, "setProgramStateErrorProcessFn", 'This is generated from setProgramStateErrorProcessFn ', `result Not Found`, "", ERROR_APPLICATION, ERROR_FALSE, EXIT_FALSE);
+          resolve({"setProgramStateErrorProcessFn": " result Not Found"});
         }
       });
   });
@@ -772,6 +787,9 @@ function setProgramErrorProcess(dbo, dataInsruction) {
             "deleteProgramIndex": response.result.n })
             }
           );
+        }else{
+          gomos.errorCustmHandler(NAMEOFSERVICE, "setProgramErrorProcessFn", 'This is generated from setProgramErrorProcessFn ', `result Not Found`, "", ERROR_APPLICATION, ERROR_FALSE, EXIT_FALSE);
+          resolve({"setProgramErrorProcessFn": " result Not Found"});
         }
       });
   });
@@ -828,6 +846,7 @@ function updateDeviceInstruction(dbo, dataToInsert, Token) {
           }
         } else {
           gomos.errorCustmHandler(NAMEOFSERVICE, "updateDeviceInstruction", '"DeviceInstruction Token Not Present In SentIntruction",', ` mac  ${dataToInsert.mac} and Token ${Token}`, "", ERROR_APPLICATION, ERROR_FALSE, EXIT_FALSE);
+          resolve({"updateDeviceInstructionFn": "result Not Found"})
         }
         gomos.gomosLog(logger, gConsole, TRACE_DEBUG, "This is find Of DeviceInstruction", result);
       });
@@ -889,6 +908,10 @@ async function setProgramProcess(dbo, dataInsruction) {
               resolve(response2)
             }
           );
+        }
+        else{
+          gomos.errorCustmHandler(NAMEOFSERVICE, "setProgramProcessFn", 'This is generated from setProgramProcessFn ', `result Not Found`, "", ERROR_APPLICATION, ERROR_FALSE, EXIT_FALSE);
+          resolve({"setProgramProcessFn": "result Not Found"})
         }
       });
   });
@@ -972,6 +995,9 @@ async function manualOverrideProcess(dbo, dataInsruction) {
               gomos.gomosLog(logger, gConsole, TRACE_DEBUG, "update For Manual Override ");
             }
           );
+        }else{
+          gomos.errorCustmHandler(NAMEOFSERVICE, "manualOverrideProcessFn", 'This is generated from manualOverrideProcessFn ', `result Not Found`, "", ERROR_APPLICATION, ERROR_FALSE, EXIT_FALSE);
+          resolve({ "manualOverrideProcessFn":"result Not Found" })
         }
       });
   });
@@ -1318,6 +1344,8 @@ function programDeleteSet(dbo, id) {
         if (result.result.nModified > 0) {
           gomos.gomosLog(logger, gConsole, TRACE_DEV, "This is debug of programDeleteSet updated result Value", result.result.nModified);
           resolve({ "N": result.result.nModified })
+        }else{
+          resolve({ "programDeleteSetFn":"result Not Found" })
         }
       });
   });
@@ -1395,9 +1423,11 @@ async function updateDeviceState(dbo, _id, devicesStateKeyValue, updatedTime, cu
           gomos.errorCustmHandler(NAMEOFSERVICE, "updateDeviceState", 'This is updateing error', `This is id ${_id} and ${devicesStateKeyValue}`, err, ERROR_DATABASE, ERROR_TRUE, EXIT_TRUE);
         }
         if (res.result.nModified == 1) {
-          resolve({ "Type": "success" })
+          resolve({ "updateDeviceState": "success" })
           gomos.gomosLog(logger, gConsole, TRACE_DEV, "updateDeviceState :" + index, currentTime);
         } else {
+          gomos.errorCustmHandler(NAMEOFSERVICE, "updateDeviceState", 'This is generated from updateDeviceState ', `result Not Found`, "", ERROR_APPLICATION, ERROR_FALSE, EXIT_FALSE);
+          resolve({ "updateDeviceState": "Not success" })
           gomos.gomosLog(logger, gConsole, TRACE_DEV, "This is Result Zero For DeviceUpdateMethod " + index, res.result.nModified)
         }
       }
