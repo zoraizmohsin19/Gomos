@@ -67,7 +67,7 @@ componentDidMount() {
 
    
   if (sessionData.length == 1 && sessionData[0] == "ALL") {
-      fetch('http://34.244.151.117:3992/getRegisterSP')
+      fetch('http://18.203.28.35:3992/getRegisterSP')
       .then(response => response.json())
       .then(json =>  {
       var spCd =  json.map( x =>  { return  x.spCd  });
@@ -92,7 +92,7 @@ componentDidMount() {
     var customers = mainData[0].customers.split(",");
     var custCd = [];
     if (customers.length == 1 && customers[0] == "ALL") {
-        fetch("http://34.244.151.117:3992/getCustomers?spCode=" + AspCd)
+        fetch("http://18.203.28.35:3992/getCustomers?spCode=" + AspCd)
         .then(response => response.json())
         .then(json =>  {
         var custCd =  json.map( x =>  { return  x._id  });
@@ -116,7 +116,7 @@ componentDidMount() {
       var subCustomers = mainData[0].subCustomers.split(",");
       var subCustCd= [];
     if (subCustomers.length == 1 && subCustomers[0] == "ALL") {
-        fetch("http://34.244.151.117:3992/getSubCustomers?spCode=" + AspCd +
+        fetch("http://18.203.28.35:3992/getSubCustomers?spCode=" + AspCd +
         "&&custCd=" + AcustCd )
         .then(response => response.json())
         .then(json =>  {
@@ -142,7 +142,7 @@ componentDidMount() {
     var Assets = mainData[0].Assets.split(",");
     var Assetsdata= [];
     if (Assets.length == 1 && Assets[0] == "ALL") {
-    fetch("http://34.244.151.117:3992/getAssets?subCustCd="+ AsubCustCd )
+    fetch("http://18.203.28.35:3992/getAssets?subCustCd="+ AsubCustCd )
     .then(response => response.json())
     .then(json =>  {
         var Assetsdata =  json;
@@ -167,7 +167,7 @@ componentDidMount() {
  var Devicesdata= [];
  var DeviceMacArray = [];
  if (Devices.length == 1 && Devices[0] == "ALL") {
- fetch("http://34.244.151.117:3992/getDevice?assetId="+Aasset )
+ fetch("http://18.203.28.35:3992/getDevice?assetId="+Aasset )
  .then(response => response.json())
  .then(json =>  {
   var Devicesdata =  json.map(item => {return item.DeviceName});
@@ -274,7 +274,7 @@ sessionStorage.setItem("configData", JSON.stringify(temp));
     var sessionData = mainData[0].customers.split(",");
      var custCd = [];
     if (sessionData.length == 1 && sessionData[0] == "ALL") {
-      fetch("http://34.244.151.117:3992/getCustomers?spCode=" + SendForSp)
+      fetch("http://18.203.28.35:3992/getCustomers?spCode=" + SendForSp)
     .then(response => response.json())
     .then(json =>  {
     var custCd =  json.map( x =>  { return  x._id  });
@@ -313,7 +313,7 @@ sessionStorage.setItem("configData", JSON.stringify(temp));
         var sessionData = mainData[0].subCustomers.split(",");
         var subCustCd= [];
         if (sessionData.length == 1 && sessionData[0] == "ALL") {
-        fetch("http://34.244.151.117:3992/getSubCustomers?spCode=" + SendForSp +
+        fetch("http://18.203.28.35:3992/getSubCustomers?spCode=" + SendForSp +
         "&&custCd=" + SendFroCustCD )
         .then(response => response.json())
         .then(json =>  {
@@ -359,7 +359,7 @@ getAssetApi(SubCustomer){
   var sessionData = mainData[0].Assets.split(",");
   var Assets= [];
   if (sessionData.length == 1 && sessionData[0] == "ALL") {
-  fetch("http://34.244.151.117:3992/getAssets?subCustCd="+SubCustomer )
+  fetch("http://18.203.28.35:3992/getAssets?subCustCd="+SubCustomer )
   .then(response => response.json())
   .then(json =>  {
   var Assets =  json;
@@ -391,7 +391,7 @@ getDeviceApi(Asset){
   var Devicesdata= [];
   var DeviceMacArray = [];
   if (sessionData.length == 1 && sessionData[0] == "ALL") {
-  fetch("http://34.244.151.117:3992/getDevice?assetId="+Asset )
+  fetch("http://18.203.28.35:3992/getDevice?assetId="+Asset )
   .then(response => response.json())
   .then(json =>  {
     var Devicesdata =  json.map(item => {return item.DeviceName});
