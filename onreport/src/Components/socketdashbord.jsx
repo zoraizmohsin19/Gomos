@@ -11,13 +11,14 @@ import CPagination from "../layout/Pagination";
 import dateFormat  from  "dateformat";
 import swal from 'sweetalert';
 import Spinner from '../layout/Spinner';
-import {NavItem ,Nav} from "react-bootstrap"
+import {NavItem ,Nav} from "react-bootstrap";
+import URL from "../Common/confile/appConfig.json";
 class socketdashbord extends Component {
 constructor(){
   super();
   this.state={
   body: {
-    endpoint: "http://18.203.28.35:4001",
+    endpoint: `${URL.IP}:4001`,
     socket1: {},
     arrData: [],
     arrLabels:[],
@@ -94,26 +95,25 @@ handler(selectedSensorsType1,selectedSensorsName){
 }
 chartsIdbyDeviceType(deviceType){
   let tempData = JSON.parse(sessionStorage.getItem("ClientObj"));
-  let obj = tempData.ViewDashBord.deviceTypes[deviceType].map(item  =>    { return {"businessName" : item.businessName , "axisY" : item.axisY} })
-  //console.log("This Device type ")
-  //console.log(obj)
+  let obj = tempData.viewDashBoard.deviceTypes[deviceType].map(item  =>    { return {"businessName" : item.businessName , "axisY" : item.axisY} })
+
   return obj;
 }
 componentDidMount(){
   var me = this;
   let mainData = JSON.parse(sessionStorage.getItem("configData"));
   let tempData = JSON.parse(sessionStorage.getItem("dashboardConfigobj"));
-   me.state.body.deviceType            =     tempData.DeviceType;
+ //  me.state.body.deviceType            =     tempData.DeviceType;
    me.state.OpratingDashBoardEnable    =     tempData.OpratingDashBoardEnable 
-   me.state.body.deviceTypeObj         =     this.chartsIdbyDeviceType(tempData.DeviceType);
+//   me.state.body.deviceTypeObj         =     this.chartsIdbyDeviceType(tempData.DeviceType);
    me.state.body.selectedSPValue       =     mainData.spCd;
    me.state.body.selectedCustValue     =     mainData.custCd;
    me.state.body.selectedSubCustValue  =     mainData.subCustCd;
    me.state.body.mac                   =     mainData.mac;
    me.state.body.selectedDeviceName    =     mainData.DeviceName;
    me.state.body.selectedAssets        =     mainData.assetId;
-   //console.log("Device type of View")
-   //console.log( mainData.DeviceType)
+   me.state.body.Spinnerdata  = false
+ // console.log(URL.IP);
    me.setState({body: me.state.body});
   //  var result1 = this.groupingDataArray();
   //  //console.log(result1)
@@ -121,15 +121,16 @@ componentDidMount(){
 
   }
    
-  startFunction(){
+ async startFunction(){
     var me   = this;
-    me.callDeviceIdentifier();
+    let response = await me.callDeviceIdentifier();
+   // console.log(response)
       me.callToSocket();
       var dashboardData = JSON.parse(sessionStorage.getItem("dashboardConfigobj"));
       me.state.body.Assets                =   dashboardData.Assets;
       me.state.body.Devices               =   dashboardData.Devices;
-      me.state.body.selectedSensorsType1  =   dashboardData.ActivesesnorsType;
-      me.state.body.selectedSensorsName   =   dashboardData.ActiveSensorsName;
+      // me.state.body.selectedSensorsType1  =   dashboardData.ActivesesnorsType;
+      // me.state.body.selectedSensorsName   =   dashboardData.ActiveSensorsName;
       me.state.body.page_size             =    10;
       me.state.body.page                  =    1;
       me.setState({body: me.state.body});
@@ -137,27 +138,42 @@ componentDidMount(){
       me.firstTimeRender();
       me.fetchdata();
   }
-  callDeviceIdentifier(){
+   callDeviceIdentifier(){
+    return new Promise((resolve, reject) => {
     var me = this;
-    axios.post("http://18.203.28.35:3992/getDevicesIdentifier",{mac: this.state.body.mac})
+    axios.post(`${URL.IP}:3992/getDevicesIdentifier`,{mac: this.state.body.mac})
     .then(json =>  {
       // console.log("This is device Identifier");
-      // console.log(json);
+      // console.log(json["data"]);
       me.state.body.DeviceIdentifierForSensors = json["data"].sensors;
       let tempArray = (json["data"].sensors).concat(json["data"].channel)
   
-      //console.log("This is TempArray Data ")
-      //console.log(tempArray);
+      
       var groupedData = this.groupingDataArray(tempArray)
-      me.state.body.sensorsGroups = groupedData
-      me.state.body.selectedGroups = groupedData[0]
-      me.state.body.selectedGroupsitem = groupedData[0].group
+      let index = groupedData.findIndex(item=> item.group === json["data"].defaultGroupInfo);
+      let index2 = tempArray.findIndex(item=> item.group === json["data"].defaultGroupInfo);
+
+      me.state.body.sensorsGroups = groupedData;
+      me.state.body.selectedGroups = groupedData[index];
+      me.state.body.selectedGroupsitem = groupedData[index].group;
+      me.state.body.selectedSensorsType1  =   tempArray[index2].Type;
+      me.state.body.selectedSensorsName   =   tempArray[index2].devicebusinessNM;
+      me.state.body.deviceType            =     json["data"].deviceTypes;
+      me.state.body.deviceTypeObj         =     this.chartsIdbyDeviceType(json["data"].deviceTypes);
+
+      // console.log("This is TempArray Data ")
+      // console.log(groupedData[0]);
+      // console.log( tempArray[index2].Type);
+      // console.log( tempArray[index2].devicebusinessNM);
       // console.log(me.state.body.sensorsGroups);
       me.setState({ body : me.state.body})
       // let json1 =[];
+      resolve({"get": "success"})
     })
+  })
   }
-DisplayChart(result, valueSensoor ){
+DisplayChart(obj, valueSensoor ){
+  let result = JSON.parse(JSON.stringify(obj))
 //  console.log(result)
   var me = this;
   if( result.length > 0 ){
@@ -165,6 +181,7 @@ DisplayChart(result, valueSensoor ){
     var arrLabels =[];
     var dataToSend1 =[];
     var dataToSend2 = [];
+    result.sort((a,b) => new Date(a.column5).getTime()  - new Date(b.column5).getTime())
     for (var i = 0; i < result.length; i++) {
       var formattedDate = dateFormat(result[i]["column5"], "dd-mmm HH:MM");
     //  var arrayforsend= [];
@@ -175,17 +192,10 @@ DisplayChart(result, valueSensoor ){
       
       }
       dataToSend1.push(temp);
-      // console.log("This Chart data ")
-      // console.log(arrayforsend)
-      // dataToSend1 = arrayforsend;
       dataToSend2.push(
         formattedDate 
       );
     }
-    // console.log("This is log for DataTo Send ");
-    // console.log(dataToSend1)
-    //console.log(dataToSend2)
-    //console.log(valueSensoor)
     arrData = dataToSend1;
     arrLabels= dataToSend2;
     var yaxisName = valueSensoor;
@@ -230,7 +240,7 @@ DisplayChart(result, valueSensoor ){
     me.setState({body: me.state.body});
     var FdataArray =[];
     var dataArray =[];
-    axios.post("http://18.203.28.35:3992/getdashboard",body)
+    axios.post(`${URL.IP}:3992/getdashboard`,body)
     .then(json =>  {
       me.state.body.Spinnerdata = true;
       me.setState({ body: me.state.body})
@@ -240,16 +250,6 @@ DisplayChart(result, valueSensoor ){
      json1 = json["data"]["finalResult"]
       if(json1 !== 0){
         for (var i = 0; i < json1.length ; i++) {
-
-          
-        //   FdataArray.push({
-        //           column1: json1[i][0],
-        //           column2: json1[i][1],
-        //           column3: json1[i][2],
-        //           column4: json1[i][3].toFixed(2),
-        //           column5: json1[i][4]
-     
-        // })
         
 
 var jsontemp ={column1: json1[i][0],
@@ -267,17 +267,6 @@ arrayHeder.push(me.state.body.selectedGroups.devicebusinessNM[l]);
 }
 
 arrayHeder.push("CREATED TIME");
-// console.log(arrayHeder)
- // console.log(jsontemp)
- 
-//         dataArray.push({
-//           column1: json1[i][0],
-//           column2: json1[i][1],
-//           column3: json1[i][2],
-//           column4: json1[i][3].toFixed(2),
-//           column5: dateFormat(json1[i][4], "dd-mmm-yy HH:MM:ss")
-// })
-
 dataArray.push(
   jsontemp
 )
@@ -385,15 +374,14 @@ handleGroups = (value) => {
     var index = me.state.body.sensorsGroups.findIndex(item => item.group == value);
   
     me.state.body.selectedGroups = me.state.body.sensorsGroups[index];
-    // console.log(seletedGroupdata)
     // console.log(me.state.body.sensorsMainData)
     //  alert(value);
      var dataofSensors = [];
      for(let i = 0; i <  me.state.body.selectedGroups.devicebusinessNM.length; i++ ){
        dataofSensors.push(me.state.body.sensorsMainData.filter( item => item.devicebusinessNM ==    me.state.body.selectedGroups.devicebusinessNM[i])[0])
      }
-     // console.log(dataofSensors[0].type)
-     // console.log(dataofSensors[0].devicebusinessNM)
+    //  console.log(dataofSensors[0].type)
+    //  console.log(dataofSensors[0].devicebusinessNM)
      var array = [];
       
      for (var i = 0 ; i < dataofSensors.length ; i++ ){ 
@@ -433,7 +421,7 @@ callForlastAlert(custCd,subCustCd, mac){
   var me = this;
   const {endpoint } = this.state.body;
  var body = {custCd,subCustCd,mac}
-  // axios.post("http://18.203.28.35:3992/getdashbordlastalert", body)
+  // axios.post("http://URL.IP:3992/getdashbordlastalert", body)
   // .then(json =>  {
     var lastError = socketIOClient(endpoint+"/ActivelastError", {
       reconnection: true,

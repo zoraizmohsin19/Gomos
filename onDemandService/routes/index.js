@@ -23,8 +23,8 @@ var fs = require("fs");
 let dateTime = require("node-datetime");
 var dt = dateTime.create();
 var formattedDate = dt.format('Y-m-d');
-const output = fs.createWriteStream(`./mqqtSvrStd${formattedDate}.log`, { flags: "a" });
-const errorOutput = fs.createWriteStream(`./mqqtSvrErr${formattedDate}.log`, { flags: "a" });
+const output = fs.createWriteStream(`./onDemandStd${formattedDate}.log`, { flags: "a" });
+const errorOutput = fs.createWriteStream(`./onDemand${formattedDate}.log`, { flags: "a" });
 var logger = gomos.createConsole(output,errorOutput);
 const SERVICE_VALUE = 1;
 var gConsole = false;
@@ -183,7 +183,7 @@ router.get("/flashPrograms", function (req, res, next) {
                                     gomos.gomosLog(logger, gConsole, TRACE_DEBUG, "This is log of DeviceState Update", result);
                                     response["DeviceState"] = "DeviceState updated : "+ result.result.nModified;
                                  //   res.send(`successfully Flase PlateForm For Programs ${result.result.nModified}`)
-                                    let client  = mqtt.connect('mqtt://34.244.151.117');
+                                    let client  = mqtt.connect('mqtt://mqtt.agrisensorsandcontrols.com');
                                     client.on("error", function (){
                                       gomos.gomosLog(logger,gConsole,TRACE_PROD,"This is Mqtt broker connection error");
 
@@ -194,7 +194,7 @@ router.get("/flashPrograms", function (req, res, next) {
                                     });
                                     let message = JSON.stringify({"payloadId": "SystemReset",  "programs": false,   "channels": {  "mode": 0,"action": 0 }});
                                     response["client_publish"] = message;
-                                    client.publish(`mqtt_rx/test/GHC01/${mac}`, message, function (err, result){
+                                    client.publish(`mqtt_rx/prod/GHC01/${mac}`, message, function (err, result){
                                       if(err){
                                         gomos.gomosLog(logger,gConsole,TRACE_DEBUG,"This is Mqtt publishing error",err);   
                                         res.json(err)                                   
@@ -251,9 +251,9 @@ router.post("/dummy1", function (req, res, next){
 //checks whether given userId and password is valid or not if valid pass the user details
 router.post("/authenticate", function (req, res, next) {
   // var query = url.parse(req.url, true).query;
-   var body = req.body.body
-  var userId = body.email;
-  var password = body.password;
+   let body = req.body.body
+  let userId = body.email;
+  let password = body.password;
   console.log(userId +" ,"+ password );
   userDtls = [];
   accessPermission(res);
@@ -285,8 +285,8 @@ router.post("/authenticate", function (req, res, next) {
                 userLN: result[index].userLN,
                 userType : result[index].userTypegetSensorNames
               });  
-              var dashboardConfigId = result[0].dashboardConfigId;
-              var clientID = result[0].clientID;
+              let dashboardConfigId = result[0].dashboardConfigId;
+              let clientID = result[0].clientID;
               db.collection("DashboardConfig")
               .find({ dashboardConfigId: dashboardConfigId })
               .toArray(function (err, result1) {
@@ -303,17 +303,11 @@ router.post("/authenticate", function (req, res, next) {
                   Devices: result1[0].Devices,
                   ActiveDevice: result1[0].ActiveDeviceName,
                   ActiveMac:  result1[0].ActiveMac,
-                  Sensors: result1[0].Sensors,
                   SensorsBgC: result1[0].SensorsBgC,
-                  ActiveSensorsName: result1[0].ActiveSensorsName,
-                  ActivesesnorsType: result1[0].ActivesesnorsType,
-                  ConfADPayload: result1[0].ConfADPayload,
                   Nevigation : result1[0].Nevigation,
-                  DeviceType: result1[0].deviceType,
                   ActiveDashBoardEnable: result1[0].ActiveDashBoardEnable,
                   OpratingDashBoardEnable: result1[0].OpratingDashBoardEnable
                  }
-                  console.log(dashboardConfigobj); 
                   gomos.gomosLog( logger,gConsole,TRACE_DEBUG,"This is result1[0].deviceType", result1[0].deviceType)
                  var  configData = {
                   DeviceName: result1[0].ActiveDeviceName,
@@ -333,10 +327,7 @@ router.post("/authenticate", function (req, res, next) {
                    } 
 
                   gomos.gomosLog( logger,gConsole,TRACE_DEV,"This is clientID ",clientData);
-                  var ClientObj = {
-                    OperatingForms : clientData[0].activeDashBoard.OperatingForms,
-                    ViewDashBord : clientData[0].viewDashBoard,
-                  }
+                  var ClientObj =  clientData[0]
                   gomos.gomosLog( logger,gConsole,TRACE_DEV,"This is ClientObj",ClientObj)
                 res.json({userDtls, dashboardConfigobj, configData,ClientObj});
               });
@@ -822,7 +813,52 @@ var query={
       }
     );
     });
-
+    router.post("/getAssetsNav", function (req, res, next) {
+      var query = req.body;
+ 
+      var SubCustomersIds = query.subCustCd;
+     console.log(SubCustomersIds)
+      accessPermission(res);
+      MongoClient.connect(
+        urlConn,
+        { useNewUrlParser: true },
+        function (err, connection) {
+          if (err) {
+            process.hasUncaughtExceptionCaptureCallback();
+          }
+          var db = connection.db(dbName);
+          db.collection("Assets")
+            .find(
+              { subCustCd: SubCustomersIds } )
+            .toArray(function (err, result) {
+              if (err) {
+                process.hasUncaughtExceptionCaptureCallback();
+              }
+              if (result.length > 0) {
+                var arrOfAssets =[];
+                for (var i = 0; i < result.length; i++) {
+                  arrOfAssets.push(result[i].assetId);
+                }
+                db.collection("ClientMenuConfig")
+                .find({ clientID: SubCustomersIds })
+                .toArray(function (err, clientData) {
+                  if (err) {
+                    process.hasUncaughtExceptionCaptureCallback();
+                  } 
+  
+                 gomos.gomosLog( logger,gConsole,TRACE_DEV,"This is clientID ",clientData);
+                 var ClientObj =  clientData[0]
+                 let tempObj = {arrOfAssets, ClientObj}
+                res.json(tempObj);
+              });
+               }
+         
+            
+        }
+      );
+     
+    });
+  });
     router.get("/getAssets", function (req, res, next) {
       var query = url.parse(req.url, true).query;
       // var criteria, arrOfSensorNms = [];
@@ -2696,7 +2732,7 @@ router.post("/getDevicesIdentifier", function (req, res, next) {
           if (err) {
           }
           var deviceStateKey = Object.keys(result[0]);
-          var keysToRemove2 = ["_id", "mac","deviceTemplate","active","assetId", "DeviceName",];
+          var keysToRemove2 = ["_id", "mac","deviceTemplate","active","assetId", "DeviceName","defaultGroupInfo","roles"];
           gomos.gomosLog( logger,gConsole,TRACE_DEV,"This Is key of identifire 1 Place",deviceStateKey);  
           for (var l = 0; l < keysToRemove2.length; l++) {
             if (deviceStateKey.includes(keysToRemove2[l])) {
@@ -2715,10 +2751,13 @@ router.post("/getDevicesIdentifier", function (req, res, next) {
            gomos.gomosLog( logger,gConsole,TRACE_DEBUG,"this devicebusinessNM"); 
                ActiveIdentifier["devicebusinessNM"] = result[0][deviceStateKey[k]][keyofCode[i]]["businessName"];
                ActiveIdentifier["group"]    =  result[0][deviceStateKey[k]][keyofCode[i]]["group"];
+               ActiveIdentifier["Type"]    =  result[0][deviceStateKey[k]][keyofCode[i]]["Type"];
                sensorsArray.push(ActiveIdentifier);
           }
           json[name] = sensorsArray;
         }
+        json["defaultGroupInfo"]  = result[0]["defaultGroupInfo"];
+        json["deviceTypes"]  = result[0]["deviceTypes"];
         gomos.gomosLog( logger,gConsole,TRACE_DEV,"This is json which i want send to front end", json);
             res.json(json)
         

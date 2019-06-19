@@ -1,11 +1,12 @@
 import React, { Component } from 'react'
 import './Login.css';
-import Header from "../layout/Header"
-import { Link } from 'react-router-dom';
+// import Header from "../layout/Header"
+// import { Link } from 'react-router-dom';
 import * as Validate from "./validation";
 import axios from "axios";
 import swal from 'sweetalert';
 import Spinner from '../layout/Spinner';
+import URL from "../Common/confile/appConfig.json";
 
  class Login extends Component {
     constructor(props){
@@ -57,7 +58,7 @@ import Spinner from '../layout/Spinner';
             var userdata ={email,
                 password};
                 me.setState({ 'Spinnerdata': false});
-        axios.post('http://18.203.28.35:3992/authenticate', {body: userdata
+        axios.post(`${URL.IP}:3992/authenticate`, {body: userdata
            
           })
           .then(function (response) {
