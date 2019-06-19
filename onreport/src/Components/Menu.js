@@ -14,6 +14,8 @@ import swal from 'sweetalert';
 import {DropdownButton,MenuItem} from 'react-bootstrap';
 import dateFormat  from  "dateformat";
 import ReactMultiSelectCheckboxes from 'react-multiselect-checkboxes';
+import URL from "../Common/confile/appConfig.json";
+
 class Menu extends Component {
     constructor(){
         super();
@@ -85,7 +87,7 @@ componentDidMount() {
     var spData = userDetails[0].serviceProviders.split(",");
 if(spData.length ==  1 && spData[0] == "ALL"){
   this.setState({ spDisable : null})
-  fetch('http://18.203.28.35:3992/getRegisterSP')
+  fetch(`${URL.IP}:3992/getRegisterSP`)
   .then(response => response.json())
   .then(json =>  {
   var spCd =  json.map( x =>  { return  x.spCd  });
@@ -194,7 +196,7 @@ onSubmit = (e) => {
       var userDetails = JSON.parse(sessionStorage.getItem("userDetails"));
       var CustData = userDetails[0].customers.split(",");
       if(CustData.length == 1 && CustData[0] == "ALL"){
-        fetch("http://18.203.28.35:3992/getCustomers?spCode=" + SendForSp)
+        fetch(`${URL.IP}:3992/getCustomers?spCode=` + SendForSp)
         .then(response => response.json())
         .then(json =>  {
         var custCd =  json.map( x =>  { return  x._id  });
@@ -220,7 +222,7 @@ onSubmit = (e) => {
     var userDetails = JSON.parse(sessionStorage.getItem("userDetails"));
     var SubCustData = userDetails[0].subCustomers.split(",");
     if(SubCustData.length ==1 && SubCustData[0] == "ALL"){
-      fetch("http://18.203.28.35:3992/getSubCustomers?spCode=" + SendForSp +
+      fetch(`${URL.IP}:3992/getSubCustomers?spCode=` + SendForSp +
       "&&custCd=" + SendFroCustCD )
       .then(response => response.json())
       .then(json =>  {
@@ -254,7 +256,7 @@ getAssetApi(SubCustomer){
   var userDetails = JSON.parse(sessionStorage.getItem("userDetails"));
   var AssetData = userDetails[0].Assets.split(",");
   if(AssetData.length == 1 && AssetData[0] =="ALL"){
-    fetch("http://18.203.28.35:3992/getAssets?subCustCd="+SubCustomer )
+    fetch(`${URL.IP}:3992/getAssets?subCustCd=`+SubCustomer )
     .then(response => response.json())
     .then(json =>  {
     me.setState({ArrayofAsset: json });
@@ -276,7 +278,7 @@ getDeviceApi(Asset){
   var userDetails = JSON.parse(sessionStorage.getItem("userDetails"));
   var DeviceData = userDetails[0].Devices.split(",");
   if(DeviceData.length == 1 && DeviceData[0] == "ALL"){
-    fetch("http://18.203.28.35:3992/getDevice?assetId="+Asset )
+    fetch(`${URL.IP}:3992/getDevice?assetId=`+Asset )
     .then(response => response.json())
     .then(json =>  {
     me.setState({ArrayofDevice: json });
@@ -294,7 +296,7 @@ getDeviceApi(Asset){
 }
 //THIS API FOR GET SENSOR  BASED ON SERVICE PROVIDER , CUSTOMER CODE, SUBCUSTOMER CODE
 getSensorApi(SendForSp,SendFroCustCD,SendForSbCd){
-  fetch("http://18.203.28.35:3992/getSensorNames?spCode=" +SendForSp +
+  fetch(`${URL.IP}:3992/getSensorNames?spCode=` +SendForSp +
          "&&custCd=" + SendFroCustCD + "&&subCustCd=" + SendForSbCd)
        .then(response => response.json())
        .then(json =>  {
@@ -311,7 +313,7 @@ getSensorApi(SendForSp,SendFroCustCD,SendForSbCd){
   }
   //THIS IS API FOR OPERTION SELECTION BASED ON SERVICE PROVIDER , CUSTOMER CODE, SUBCUSTOMER AND SELECTED SENSORE CODE
   opertionApi(SendForSp,SendFroCustCD,SendForSbCd,SendForSensor){
-    fetch("http://18.203.28.35:3992/getOperations?spCode=" + SendForSp + "&&custCd=" +
+    fetch(`${URL.IP}:3992/getOperations?spCode=` + SendForSp + "&&custCd=" +
     SendFroCustCD + "&&subCustCd=" + SendForSbCd + "&&sensorNm=" + SendForSensor)
      .then(response => response.json())
      .then(json =>  {
@@ -350,7 +352,7 @@ getAllDetails(){
 //THIS IS API METHOD FOR FETCH ALL DATA FROM SERVER BASED ON SELECTED CRITERIA.
 getAllDataApi(SendForSp,SendFroCustCD,SendForSbCd,SendForSensor,SendForStartDate,
   SendForEndDate,SendForOperation,SendForEqual,SendForStartRange,SendforEndRange,sendforAsset,sendforDevice){
-    fetch("http://18.203.28.35:3992/getFacts?spCode=" + SendForSp + "&&custCd=" +
+    fetch(`${URL.IP}:3992/getFacts?spCode=` + SendForSp + "&&custCd=" +
     SendFroCustCD + "&&subCustCd=" + SendForSbCd + "&&sensorNm=" + SendForSensor +
   "&&startDate=" + SendForStartDate + "&&endDate=" + SendForEndDate + 
   "&&operation=" + SendForOperation + "&&equalsFacts=" +
