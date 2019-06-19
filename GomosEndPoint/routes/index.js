@@ -10,12 +10,33 @@ const axios = require('axios');
 var urlConn, dbName;
 var fs = require("fs");
 var dateTime = require("node-datetime");
+const NAMEOFSERVICE = "GomosEndPoint";
 const  TRACE_PROD = 1
 const TRACE_STAGE = 2;
 const TRACE_TEST  = 3;
 const TRACE_DEV   = 4;
 const TRACE_DEBUG = 5;
+const ERROR_RUNTIME      = "runTimeError";
+const ERROR_APPLICATION  =  "ApplicationError";
+const ERROR_DATABASE     = "DataBaseError";
+const EXIT_TRUE  = true;
+const EXIT_FALSE = false;
+const ERROR_TRUE = true;
+const ERROR_FALSE = false;
 var  gomos = require("../../commanFunction/routes/commanFunction");
+var midllelayer = require("../../EndPointMiddlelayer/routes/middlelayer");
+var fs = require("fs");
+var dt = dateTime.create();
+var formattedDate = dt.format('Y-m-d');
+const output = fs.createWriteStream(`./gomosEndPointStd${formattedDate}.log`, { flags: "a" });
+const errorOutput = fs.createWriteStream(`./gomosEndPointErr${formattedDate}.log`, { flags: "a" });
+var logger = gomos.createConsole(output,errorOutput);
+const SERVICE_VALUE = 1;
+var gConsole = false;
+if(process.argv[4] == SERVICE_VALUE ){
+  gConsole = true;
+}
+
 /* GET home page. */
 router.get("/", function (req, res, next) {
   res.render("index", { title: "Express" });
@@ -45,119 +66,41 @@ router.post("/sendto/plateform", function (req, res, next) {
   var DeviceName = identifier.DeviceName;
   var subCustCd = identifier.subCustCd;
   var custCd = identifier.custCd;
+  var Token = identifier.Token; 
   // var assetId = identifier.assetId;
   var Date = identifier.Date;
-  gomos.gomosLog(TRACE_DEBUG,"post method and getting following data ",userId+":"+password+":"+payloadId+":"+DeviceName+":"+custCd+":"+subCustCd); 
+  gomos.gomosLog( logger,gConsole,TRACE_DEBUG,"post method and getting following data ",userId+":"+password+":"+payloadId+":"+DeviceName+":"+custCd+":"+subCustCd); 
   }
   catch(err){
-    gomos.errorCustmHandler("/sendto/plateform",err);
+    gomos.errorCustmHandler(NAMEOFSERVICE,"/sendto/plateform",'THIS IS TRY CATCH ERROR for parsing Data ',req.body,err,ERROR_RUNTIME,ERROR_TRUE,EXIT_FALSE);
+
   }
   MongoClient.connect(
     urlConn,
     { useNewUrlParser: true },
     function (err, connection) {
       if (err) {
-        gomos.errorCustmHandler("/sendto/plateform",err)
-        process.hasUncaughtExceptionCaptureCallback();
+       gomos.errorCustmHandler(NAMEOFSERVICE,"/sendto/plateform",'THIS IS MONGO CLIENT CONNECTION ERROR ','',ERROR_DATABASE,ERROR_TRUE,EXIT_TRUE);
       }
       var db = connection.db(dbName);
       db.collection("Users")
         .find({ userId: userId, password: password })
         .toArray(function (err, result) {
           if (err) {
-            gomos.errorCustmHandler("/sendto/plateform",err)
-            process.hasUncaughtExceptionCaptureCallback();
+            gomos.errorCustmHandler(NAMEOFSERVICE,"/sendto/plateform",'THIS IS QUERY ERROR From Users For Validation',`userId :${userId} and password :${password}`,ERROR_DATABASE,ERROR_TRUE,EXIT_TRUE);
           }
           if (result.length > 0) {
-                gomos.gomosLog(TRACE_DEBUG,"userId and password validation ",userId+":"+password);     
-                dataToStore = {
-                          payloadId,
-                          DeviceName,
-                          subCustCd,
-                          custCd,
-                          // assetId,
-                          Date,
-                          message
-                            }
-                gomos.gomosLog(TRACE_DEBUG," After userId and password validation dataToStore sendToMidlelayer",dataToStore);     
-                asyncPostData(res,dataToStore);            
+                gomos.gomosLog( logger,gConsole,TRACE_DEBUG,"userId and password validation ",userId+":"+password);       
+                midllelayer.endPointMiddelayerFn(urlConn,dbName,res,custCd,subCustCd,DeviceName,payloadId,dateTime,message,Token);
           }
           else{
-            gomos.gomosLog(TRACE_PROD,"UserId and password not validate");     
+            gomos.gomosLog( logger,gConsole,TRACE_PROD,"UserId and password not validate");     
             res.json("UserId and password not validate");
           }
   
    });
   });
 });
-async function asyncPostData(res,dataToStore) {
-  try {
-    const response = await axios.post('http://localhost:3996/sendto', {body: dataToStore});
-    gomos.gomosLog(TRACE_PROD,"success in endPoint and response value come from middlelayer :", response["data"]);     
-    res.json(response["data"])
-      } catch(err) {
-        gomos.errorCustmHandler("asyncPostData",err)
-        res.json("somthing wrong");
-      }
-
-}
-
-// var dt = dateTime.create();
-// var formattedDate = dt.format("Y-m-d");
-// function gomos.errorCustmHandler(functionName,typeofError){
-//   // console.log(typeofError);
-//     let writeStream = fs.createWriteStream("../commanError-" + formattedDate + ".log", { flags: "a" });
-//     var dateTime = new Date().toISOString();
-//   // write some data with a base64 encoding
-//   writeStream.write(
-//   "DateTime: " +dateTime+ "\n"+  
-//   "Error handler: " + "\n"+
-//   "serviceName:"+ "GomosEndPoint" +"\n"+
-//   "functionName:"+ functionName +"\n"+
-//   // "lineNo: " + lineNo  +"\n"+
-//   "Error Code:" + typeofError.statusCode +"\n"+
-//   " Error: " + typeofError + "\n"+
-//   "typeofError.stack"+ typeofError.stack +
-//   "\n"
-//   );
-  
-//   // the finish event is emitted when all data has been flushed from the stream
-//   writeStream.on('finish', () => {  
-//     gomos.gomosLog(TRACE_PROD,"wrote all data to file For Error log");     
-//   });
-  
-//   // close the stream
-//   writeStream.end(); 
-  
-    // MongoClient.connect(
-    //   urlConn,
-    //   { useNewUrlParser: true },
-    //   function (err, connection) {
-    //     if (err) {
-    //       // console.log(err);
-    //       process.hasUncaughtExceptionCaptureCallback();
-    //     }
-    //     var createdTime = new Date();
-    //     errorobj = {
-    //       lineNo,
-    //       functionName,
-    //       Error,
-    //       typeofError,
-    //       createdTime
-    //     }
-    //     var db = connection.db(dbName);
-    //     db.collection("MqttErrorhandler")
-    //     .insert(errorobj, function (err, result) {
-    //       if (err) {
-    //         // console.log(err);
-    //          process.hasUncaughtExceptionCaptureCallback();
-    //       } else console.log("Entry saved in MqttErrorhandler Collection");
-    //     });
-    //   }
-    // )
-  
-  // }
-
 module.exports = function (app) {
   //DB Name and the url for database connection is from appConfig file in app.js
   urlConn = app.locals.urlConn;

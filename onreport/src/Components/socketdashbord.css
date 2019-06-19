@@ -200,9 +200,63 @@ background: #00C0EF !important;
     .dashlastAlert {
         font-size: 18px;
         margin-top: 24px;
-        margin-bottom: 44px;
+        /* margin-bottom: 44px; */
     }
     .fontsizeicon {
         font-size: 84px !important;
         top: -2px !important;
     }
+    .ViewBredCum {
+        /* margin-top: 10px; */
+        background: aliceblue;
+        padding: 10px;
+        margin-bottom: 10px;
+        border-radius: 7px;
+    }
+    .spanBredcum {
+        font-weight: bold;
+    }
+    
+.spanBredcumslash {
+    margin-left: 5px;
+    margin-right: 10px;
+    font-weight: 900;
+}
+.navright {
+    display: inline;
+    float: right;
+}
+.spanNev {
+    padding: 7px;
+    border-radius: 50px;
+    border: 1px solid #c1e1ac;
+    cursor: pointer;
+    background: transparent;
+    color: #41503e;
+    font-size: 14px !important;
+    margin-left: 7px;
+    margin-right: 7px;
+}
+
+.spanNev:hover,
+.spanNev:active {
+    background: #e0e3de !important;
+    box-shadow: inset 0 3px 5px rgba(0,0,0,.125);
+}
+.spanNev:focus {
+    outline: 0px !important;
+}
+.criteriaClass {
+    color: white;
+    font-size: 12px;
+    margin-top: 10px;
+    margin-bottom: 15px;
+}
+.chartbtn {
+    font-size: 26px !important;
+    padding-left: 8px;
+    padding-right: 8px;
+    color: darkgreen;
+    padding-bottom: 37px !important;
+    padding-top: 1px !important;
+}

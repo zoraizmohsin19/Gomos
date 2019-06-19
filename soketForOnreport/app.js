@@ -4,12 +4,20 @@ var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 var fs = require("fs");
-
+var dateTime = require("node-datetime");
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 var userViewDashboard = require('./routes/viewDashSocket');
 var app = express();
+var dt = dateTime.create();
+var formattedDate = dt.format("Y-m-d");
+var  gomos = require("../commanFunction/routes/commanFunction");
 
+//creates the file to write all errors that occurs,which will be usefull for debugging.
+var log_file_err = fs.createWriteStream(
+  process.cwd() + "/error-" + formattedDate + ".log",
+  { flags: "a" }
+);
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
@@ -62,7 +70,33 @@ app.use(function(req, res, next) {
 });
 //Checks whether the service is running in production mode or development mode and sets the enviroment
 //accordingly.
+//Error Handling
+app.use(function (error, req, res, next) {
+  if (!error.statusCode) {
+    error.statusCode = 500;
+  }
+  console.log("Error handler: ", error.message, error.statusCode);
+  // log_file_err.write(
+  //   "Error handler: " +
+  //   "Error Code:" +
+  //   error.statusCode +
+  //   "  " +
+  //   error.stack +
+  //   "\n"
+  // );
+  gomos.errorCustmHandler("soketForOnreport","Error Handling",'Error Handling','',err,"runTimeError",true,true)
 
+  res.status(500).json({ error: error.message });
+});
+
+//uncaught exception handling
+process.on("uncaughtException", function (err) {
+  console.log("Caught exception: " + err);
+  // log_file_err.write("Caught exception: " + err.stack + "\n");
+  // process.exit();
+  gomos.errorCustmHandler("soketForOnreport","uncaughtException",'uncaughtException error','',err,"runTimeError",true,true)
+
+});
 
 // error handler
 app.use(function(err, req, res, next) {

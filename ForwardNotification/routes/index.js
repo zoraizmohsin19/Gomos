@@ -11,6 +11,7 @@ const querystring = require("querystring");
 // var dateTime = require("node-datetime");
 // var ObjectId = require('mongodb').ObjectID;
 // const Schema = mongoose.Schema;
+const NAMEOFSERVICE = "ForwardNotification";
 const  TRACE_PROD = 1
 const TRACE_STAGE = 2;
 const TRACE_TEST  = 3;
@@ -46,7 +47,7 @@ function getDevices() {
     { useNewUrlParser: true },
     function (err, connection) {
       if (err) {
-        gomos.errorCustmHandler("getDevices",err);
+        gomos.errorCustmHandler(NAMEOFSERVICE,"getDevices",'THIS IS MONGO CLIENT COONENCTION ERROR','',err);
         process.hasUncaughtExceptionCaptureCallback();
       }
       var db = connection.db(dbName);
@@ -54,7 +55,7 @@ function getDevices() {
         .find()
         .toArray(function (err, result) {
           if (err) {
-           gomos.errorCustmHandler("getDevices",err);
+           gomos.errorCustmHandler(NAMEOFSERVICE,"getDevices",'THIS IS QUERY ERROR','',err);
             process.hasUncaughtExceptionCaptureCallback();
           }
           try {
@@ -63,7 +64,7 @@ function getDevices() {
             }
           gomos.gomosLog(TRACE_PROD,"getDevices No. devices",dataFromDevices.length);
           } catch (err) {
-           gomos.errorCustmHandler("getDevices",err);
+           gomos.errorCustmHandler(NAMEOFSERVICE,"getDevices",'THIS IS TRY CATCH ERROR','',err);
           }
           connection.close();
         });
@@ -78,7 +79,7 @@ function getAssets() {
     { useNewUrlParser: true },
     function (err, connection) {
       if (err) {
-        gomos.errorCustmHandler("getAssets",err);
+        gomos.errorCustmHandler(NAMEOFSERVICE,"getAssets",'THIS IS MONGO CLIENT ERROR','',err);
         process.hasUncaughtExceptionCaptureCallback();
       }
       var db = connection.db(dbName);
@@ -86,7 +87,7 @@ function getAssets() {
         .find()
         .toArray(function (err, result) {
           if (err) {
-            gomos.errorCustmHandler("getAssets",err);
+            gomos.errorCustmHandler(NAMEOFSERVICE,"getAssets",'THIS IS QUERY ERROR','',err);
             process.hasUncaughtExceptionCaptureCallback();
           }
           try {
@@ -95,7 +96,7 @@ function getAssets() {
             }
           gomos.gomosLog(TRACE_PROD,"getAssets No. assets ",dataFromAssets.length);
           } catch (err) {
-            gomos.errorCustmHandler("getAssets",err);
+            gomos.errorCustmHandler(NAMEOFSERVICE,"getAssets",'THIS IS TRY CATCH ERROR','',err);
           }
          
           connection.close();
@@ -111,7 +112,7 @@ function getPayloads() {
     { useNewUrlParser: true },
     function (err, connection) {
       if (err) {
-        gomos.errorCustmHandler("getPayloads",err);
+        gomos.errorCustmHandler(NAMEOFSERVICE,"getPayloads",'THIS IS MONGO CLIENT ERROR','',err);
         process.hasUncaughtExceptionCaptureCallback();
       }
       var db = connection.db(dbName);
@@ -119,7 +120,7 @@ function getPayloads() {
         .find()
         .toArray(function (err, result) {
           if (err) {
-            gomos.errorCustmHandler("getPayloads",err);
+            gomos.errorCustmHandler(NAMEOFSERVICE,"getPayloads",'THIS IS QUERY ERROR','',err);
             process.hasUncaughtExceptionCaptureCallback();
           }
           try {
@@ -128,7 +129,7 @@ function getPayloads() {
             } 
           gomos.gomosLog(TRACE_PROD,"getPayloads No. payloads ",dataFromPayload.length);
           } catch (err) {
-            gomos.errorCustmHandler("getPayloads",err);     
+            gomos.errorCustmHandler(NAMEOFSERVICE,"getPayloads",'THIS IS TRY CATCH ERROR','',err);     
           }
           
           connection.close();
@@ -146,7 +147,7 @@ function getCustomer() {
     { useNewUrlParser: true },
     function (err, connection) {
       if (err) {
-        gomos.errorCustmHandler("getCustomer",err);
+        gomos.errorCustmHandler(NAMEOFSERVICE,"getCustomer","THIS IS MONGO CLIENT ERROR","",err)
         process.hasUncaughtExceptionCaptureCallback();
       }
       var db = connection.db(dbName);
@@ -154,7 +155,7 @@ function getCustomer() {
         .find()
         .toArray(function (err, result) {
           if (err) {
-            gomos.errorCustmHandler("getCustomer",err);
+            gomos.errorCustmHandler(NAMEOFSERVICE,"getCustomer",'THIS IS QUERY ERROR','',err);
             process.hasUncaughtExceptionCaptureCallback();
           }
           try {
@@ -163,7 +164,7 @@ function getCustomer() {
             } 
           gomos.gomosLog(TRACE_PROD,"getCustomer No. Customer ",dataFromCustomer.length);
           } catch (error) {
-        gomos.errorCustmHandler("getCustomer",error);            
+        gomos.errorCustmHandler(NAMEOFSERVICE,"getCustomer",'THIS IS TRY CATCH ERROR','',error);            
           }
          
           connection.close();
@@ -191,7 +192,7 @@ function processStartEvent() {
   }
   else {
     gomos.gomosLog(TRACE_PROD,"Scheduling issues, Can not proceed : It can only support Seconds, Minutes up to 59");
-    gomos.errorCustmHandler("processStartEvent","Scheduling issues, Can not proceed : It can only support Seconds, Minutes up to 59");               
+    gomos.errorCustmHandler(NAMEOFSERVICE,"processStartEvent","Scheduling issues, Can not proceed : It can only support Seconds, Minutes up to 59");               
     process.exit(0);
   }
   var schPattern = sec + min + "* * * *";
@@ -202,7 +203,7 @@ function processStartEvent() {
       { useNewUrlParser: true },
       function (err, connection) {
         if (err) {
-        gomos.errorCustmHandler("processStartEvent",err);            
+        gomos.errorCustmHandler(NAMEOFSERVICE,"processStartEvent",'THIS MONGO CLIENT ERROR','',err);            
           process.hasUncaughtExceptionCaptureCallback();
         }
         var db = connection.db(dbName);
@@ -219,7 +220,7 @@ function processStartEvent() {
      }])
         .toArray(function (err, result) {
           if (err) {
-            gomos.errorCustmHandler("processStartEvent",err);            
+            gomos.errorCustmHandler(NAMEOFSERVICE,"processStartEvent","THIS IS QUERY ERROR",'',err);            
             process.hasUncaughtExceptionCaptureCallback();
           }
           if(result.length > 0){
@@ -260,7 +261,7 @@ function processStartEvent() {
                    count++;
               })  
               } catch (err) {
-                 gomos.errorCustmHandler("processStartEvent",err);            
+                 gomos.errorCustmHandler(NAMEOFSERVICE,"processStartEvent",'THIS IS TRY CATCH ERROR','',err);            
                 
               }
 
@@ -296,7 +297,7 @@ function sendToDevice(data,db){
  .find({custCd})
    .toArray(function (err, result) {
      if (err) {
-       gomos.errorCustmHandler("sendToDevice",err);            
+       gomos.errorCustmHandler(NAMEOFSERVICE,"sendToDevice",'THIS IS QUERY ERROR','',err);            
        process.hasUncaughtExceptionCaptureCallback();
      }
    
@@ -309,7 +310,7 @@ function sendToDevice(data,db){
         alertToDevice(topic,mqttClient,translatedMsg,db,id);
        }
        catch(err){
-        gomos.errorCustmHandler("sendToDevice",err);     
+        gomos.errorCustmHandler(NAMEOFSERVICE,"sendToDevice",'THIS IS TRY CATCH ERROR','',err);     
        }
       
      }
@@ -340,7 +341,7 @@ function sendToDevice(data,db){
 
                 });
               }catch(err){
-                gomos.errorCustmHandler("alertToDevice",err);
+                gomos.errorCustmHandler(NAMEOFSERVICE,"alertToDevice",'THIS IS TRY CATCH ERROR','',err);
               }
   }
 
@@ -486,7 +487,7 @@ function sendToDevice(data,db){
   }
   
 catch (err) {
-    gomos.errorCustmHandler("asyncPostData",err);    
+    gomos.errorCustmHandler(NAMEOFSERVICE,"asyncPostData",'THIS IS TRY CATCH ERROR','',err);    
   }
 }
 
@@ -507,7 +508,7 @@ async function sendToClientApi(customerURL, sendToClient,id , db, numTries){
                       break;
                         } catch(err) {
                            gomos.gomosLog(TRACE_DEV,"This is response In error",err);  
-                           gomos.errorCustmHandler("alertToDevice",err); 
+                           gomos.errorCustmHandler(NAMEOFSERVICE,"alertToDevice",'THIS IS ERROR FROM API OF CUSTOMER',sendToClient1,err); 
                           if(numTries == j){
                             var processedValue ="E";
                             var lasterrorString = "Exceed number of Attempt"
@@ -542,7 +543,7 @@ function updateAlertsForError(objId, db,processedValue, lasterrorString) {
         function (err, result) {
           if (err) {
             gomos.gomosLog(TRACE_TEST,"This is updating Alert Error",err);
-            gomos.errorCustmHandler("updateAlertsForError",err);     
+            gomos.errorCustmHandler(NAMEOFSERVICE,"updateAlertsForError",'THIS IS UPDATETING ERROR','',err);     
             process.hasUncaughtExceptionCaptureCallback();
           }
           gomos.gomosLog(TRACE_TEST,"This is updateAlertsForError");  
@@ -563,7 +564,7 @@ function updateAlerts(objId, db) {
    },
     function (err, result) {
       if (err) {
-        gomos.errorCustmHandler("updateAlerts",err);     
+        gomos.errorCustmHandler(NAMEOFSERVICE,"updateAlerts",'THIS IS UPDATETING ERROR','',err);     
         process.hasUncaughtExceptionCaptureCallback();
       }
       gomos.gomosLog(TRACE_TEST,"This is updateAlerts");  
@@ -578,7 +579,7 @@ function updateForTranslated(objId, db, translatedMsg, DeviceName) {
     } },
     function (err, result) {
       if (err) {
-        gomos.errorCustmHandler("updateForTranslated",err);     
+        gomos.errorCustmHandler(NAMEOFSERVICE,"updateForTranslated",'THIS IS UPDATETING ERROR','',err);     
         process.hasUncaughtExceptionCaptureCallback();
       }
       gomos.gomosLog(TRACE_TEST,"This is updateForTranslated");  
@@ -599,7 +600,7 @@ function getServiceConfig() {
         .find()
         .toArray(function (err, result) {
           if (err) {
-          gomos.errorCustmHandler("getServiceConfig",err);     
+          gomos.errorCustmHandler(NAMEOFSERVICE,"getServiceConfig",'THIS IS QUERY ERROR','',err);     
             process.hasUncaughtExceptionCaptureCallback();
           }
           if (result.length > 0) {
@@ -611,7 +612,7 @@ function getServiceConfig() {
               gomos.gomosLog(TRACE_PROD,"ServiceConfig freq. of Forward Notification srvcs",fNSrvcSchedule); 
             }
             catch(err){
-              gomos.errorCustmHandler("getServiceConfig",err);     
+              gomos.errorCustmHandler(NAMEOFSERVICE,"getServiceConfig",'THIS IS TRY CATCH ERROR','',err);     
             }
             
           }
@@ -620,110 +621,6 @@ function getServiceConfig() {
   );
 }
 
-
-
-// var dt = dateTime.create();
-// var formattedDate = dt.format("Y-m-d");
-// function gomos.errorCustmHandler(functionName,typeofError){
-//   // // // console.log(typeofError);
-//     let writeStream = fs.createWriteStream("../commanError-" + formattedDate + ".log", { flags: "a" });
-//     var dateTime = new Date().toISOString();
-//   // write some data with a base64 encoding
-//   writeStream.write(
-//   "DateTime: " +dateTime+ "\n"+  
-//   "Error handler: " + "\n"+
-//   "serviceName:"+ "ForwardNotification"+"\n"+
-//   "functionName:"+ functionName +"\n"+
-//   // "lineNo: " + lineNo  +"\n"+
-//   "Error Code:" + typeofError.statusCode +"\n"+
-//   " Error: " + typeofError + "\n"+
-//   "typeofError.stack"+ typeofError.stack +
-//   "\n"
-//   );
-  
-//   // the finish event is emitted when all data has been flushed from the stream
-//   writeStream.on('finish', () => {  
-//       // // console.log('wrote all data to file');
-//   });
-  
-//   // close the stream
-//   writeStream.end(); 
-  
-//     // MongoClient.connect(
-//     //   urlConn,
-//     //   { useNewUrlParser: true },
-//     //   function (err, connection) {
-//     //     if (err) {
-//     //       // // // console.log(err);
-//     //       process.hasUncaughtExceptionCaptureCallback();
-//     //     }
-//     //     var createdTime = new Date();
-//     //     errorobj = {
-//     //       lineNo,
-//     //       functionName,
-//     //       Error,
-//     //       typeofError,
-//     //       createdTime
-//     //     }
-//     //     var db = connection.db(dbName);
-//     //     db.collection("MqttErrorhandler")
-//     //     .insert(errorobj, function (err, result) {
-//     //       if (err) {
-//     //         // // // console.log(err);
-//     //          process.hasUncaughtExceptionCaptureCallback();
-//     //       } else // // console.log("Entry saved in MqttErrorhandler Collection");
-//     //     });
-//     //   }
-//     // )
-  
-//   }
-//   function start(){
-//   //  const sobj = { 
-//     const sendToClient={
-//      identifier:
-//       { payloadId: "GHSN10",
-//         DeviceName: "PilotGH_001T",
-//         subCustCd: "TF1",
-//         custCd: "Cuberootz",
-//         Date: "30/12/2018 15:59:9" 
-//       },
-//      message:
-//       { GH_Temperature: 28.6,
-//         GH_Relative_Humidity: 40,
-//         GH_CO2: 968,
-//         GH_Luminescence: 40, 
-//         GH_Rain_Sensor: 30,
-//         GH_Dummy: 25,
-//         Date: "30/12/2018 15:59:9" } }
-//       // }
-
-//     const config = {
-//       headers: {
-//         'Content-Type': 'application/x-www-form-urlencoded'
-//       }
-//     }
-//     var sendToClient1 = JSON.stringify(sendToClient)
-//     // // // console.log(typeof sendToClient)
-//   // const strrobj=  JSON.stringify(sendToClient);
-// //   axios.post("http://35.244.42.97:8080/deviceRest/deviceReading",querystring.stringify({sendToClient: { identifier: {  payloadId: "GHSN10",
-// //   DeviceName: "PilotGH_001T",
-// //     subCustCd: "TF1",
-// //     custCd: "Cuberootz",
-// //     Date: "30/12/2018 15:59:9" }
-// // }}), config)
-
-//    // axios.post("http://35.244.42.97:8080/deviceRest/deviceReading?","sendToClient={identifier:{payloadId: 'GHSN10', DeviceName: 'PilotGH_001T', subCustCd: 'TF1', custCd: 'Cuberootz', Date: '30/12/2018 15:59:09' }, message: {GH_Temperature: 999, GH_Relative_Humidity: 40, GH_CO2: 968, GH_Luminescence: 40,  GH_Rain_Sensor: 30, GH_Dummy: 25, Date: '30/12/2018 15:59:09'} }", config)
-//     // .then(response => response.json())
-//     axios.post("http://35.244.42.97:8080/deviceRest/deviceReading?","sendToClient="+ sendToClient1, config)
-
-//   .then(json =>  {
-//     // // console.log("success")
-//     // // console.log(json);
-//   })
-//   .catch(function (error) {
-//      // // console.log(error);
-// });
-//   }
 module.exports = function (app) {
   //DB Name and the url for database connection is from appConfig file in app.js
   urlConn = app.locals.urlConn;
@@ -734,10 +631,7 @@ module.exports = function (app) {
   getAssets();
   getCustomer();
   getPayloads();
-  //  start();
- 
     setTimeout(function () {
-      // // // console.log("hello data 2");
        processStartEvent();
     }, 2000);
 

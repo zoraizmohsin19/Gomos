@@ -1,6 +1,8 @@
 var express = require("express");
 var router = express.Router();
 var MongoClient = require("mongodb").MongoClient;
+var ObjectId = require('mongodb').ObjectID;
+
 var scheduleTemp = require("node-schedule");
 const nodemailer = require('nodemailer');
 var mqtt = require("mqtt");
@@ -9,17 +11,26 @@ var urlConn, dbName;
 var alertSrvcSchedule;
 var fs = require("fs");
 var dateTime = require("node-datetime");
-
+var dbo ;
+let gomosSchedule = require("../../commanFunction/routes/getServiceConfig");
 // Mailing Details
-var mailFrom = '"Vidzai IOT"<vidzai.iot@gmail.com>';
-var mailTo = 'takreem96@gmail.com';
+var mailFrom = '"AS Agri Alert"<asagrialert@gmail.com>';
+var mailTo = 'takreem@asagrisystems.com';
 var  gomos = require("../../commanFunction/routes/commanFunction");
+const NAMEOFSERVICE = "alertService";
+const TRACE_PROD = 1;
+const TRACE_STAGE = 2;
+const TRACE_TEST = 3;
+const TRACE_DEV = 4;
+const TRACE_DEBUG = 5;
 var transporter = nodemailer.createTransport({
   service: 'gmail',
   pool: true,
   auth: {
-    user: 'vidzai.iot@gmail.com',
-    pass: 'vidzai123'
+    // user: 'vidzai.iot@gmail.com',
+    // pass: 'vidzai123'
+    user: 'asagrialert@gmail.com',
+    pass: 'snch2000'
   }
 });
 
@@ -27,169 +38,6 @@ var transporter = nodemailer.createTransport({
 router.get("/", function (req, res, next) {
   res.render("index", { title: "Express" });
 });
-
-
-function getServiceConfig() {
-  MongoClient.connect(
-    urlConn,
-    { useNewUrlParser: true },
-    function (err, connection) {
-      if (err) {
-        gomos.errorCustmHandler("getServiceConfig",err);  
-        process.hasUncaughtExceptionCaptureCallback();
-      }
-      var db = connection.db(dbName);
-      db.collection("ServiceSchedules")
-        .find()
-        .toArray(function (err, result) {
-          if (err) {
-        gomos.errorCustmHandler("getServiceConfig",err);  
-            process.hasUncaughtExceptionCaptureCallback();
-          }
-          if (result.length > 0) {
-            try{
-              var keys = Object.keys(result[0]);
-              if (keys.includes("alertSrvc")) {
-                alertSrvcSchedule = result[0]["alertSrvc"];
-                console.log(alertSrvcSchedule);
-              }
-            }
-            catch(err){
-              gomos.errorCustmHandler("getServiceConfig",err);
-            }
-           
-          }
-          connection.close();
-        });
-    }
-  );
-}
-
-
-// //global method to get the assetId for the particular mac
-// function getDevices(db, macPassed,Message) {
-//   db.collection("Devices")
-//     .aggregate([
-//       {
-//         $match: { mac: macPassed }
-//       },
-//       {
-//         $group: {
-//           _id: "$assetsId",
-//           assetsId: { $first: "$assetId" }
-//         }
-//       }
-//     ])
-//     .toArray(function (err, result) {
-//       if (err) {
-//         gomos.errorCustmHandler("getDevices",err);
-//         process.hasUncaughtExceptionCaptureCallback();
-//       }
-//       if (result.length > 0) {
-//         assetsId = result[0].assetsId;
-//         getAssets(db, assetsId, macPassed, Message);
-//       }
-//     });
-// }
-
-// //method to get the subCustomerCode for the particular assetId.
-// function getAssets(db, passedAssetId, mac, Message) {
-//   db.collection("Assets")
-//     .aggregate([
-//       {
-//         $match: { assetId: passedAssetId }
-//       },
-//       {
-//         $group: {
-//           _id: "$assetId",
-//           subCustCd: { $first: "$subCustCd" }
-//         }
-//       }
-//     ])
-//     .toArray(function (err, result) {
-//       if (err) {
-//         gomos.errorCustmHandler("getAssets",err);
-//         process.hasUncaughtExceptionCaptureCallback();
-//       }
-//       if (result.length > 0) {
-//         subCustId = result[0].subCustCd;
-//         getSubCustomers(db, subCustId,mac, Message);
-//       }
-//     });
-// }
-
-// //global method to get the customerCode for the particular subCustomerCode and call the criteria method.
-// function getSubCustomers(db, passedSubCust, mac, Message) {
-//   db.collection("SubCustomers")
-//     .aggregate([
-//       {
-//         $match: { subCustCd: passedSubCust }
-//       },
-//       {
-//         $group: {
-//           _id: "$subCustCd",
-//           custCd: { $first: "$custCd" }
-//         }
-//       }
-//     ])
-//     .toArray(function (err, result) {
-//       if (err) {
-//         gomos.errorCustmHandler("getSubCustomers",err);
-//         process.hasUncaughtExceptionCaptureCallback();
-//       }
-//       if (result.length > 0) {
-//         custId = result[0].custCd;
-//         // for (var i = 0; i < businessNm.length; i++) {
-//         //   checkCriteria(db, custId, subCustId, businessNm[i], businessNmValues[businessNm[i]], mac);
-//         // }
-//        getCustomer(db, custId, mac, Message);
-//       }
-//     });
-// }
-// function getCustomer(db, custCd, mac, Message){
-//   db.collection("Customers")
-//     .aggregate([
-//       {
-//         $match: { custCd: custCd }
-//       }
-//     ])
-//     .toArray(function (err, result) {
-//       if (err) {
-//         gomos.errorCustmHandler("getCustomer",err);
-//         process.hasUncaughtExceptionCaptureCallback();
-//       }
-//       if (result.length > 0) {
-//        var  SubTopic = result[0].SubTopic;
-//        var   mqttClient  = result[0].mqttClient; 
-//         alertToDevice(SubTopic,mqttClient,Message );
-   
-//       }
-    
-//     });
-
-
-// }
-//THIS IS ALERT SEND TO BOX;
-// function alertToDevice(SubTopic,mqttClient,Message ){
-//   console.log(mqttClient,SubTopic)
-//     // var json  = { "message ": Message }
-//     var MessageToSend = JSON.stringify( Message)
-//   mqtt.connect(mqttClient).publish(SubTopic, MessageToSend, function (err, result){
-//     if(err){
-//       process.hasUncaughtExceptionCaptureCallback();
-//     }
-//    console.log(result);
-// }) 
-
-// }
-
-// //This for send alert to device 
-// function processAlertToDevice(db,mac,Message){
-
-//   getDevices(db, mac, Message);
- 
-// }
-      
 
 function processAlerts() {
   var sec, min; sec = min = "";
@@ -205,51 +53,102 @@ function processAlerts() {
     sec = "";
   }
   else {
-    console.log("Scheduling issues, Can not proceed : It can only support Seconds, Minutes up to 59");
-    gomos.errorCustmHandler("processAlerts","Scheduling issues, Can not proceed : It can only support Seconds, Minutes up to 59");  
+    gomos.gomosLog(
+      TRACE_PROD,
+      "Scheduling issues, Can not proceed : It can only support Seconds, Minutes up to 59",
+      alertSrvcSchedule
+    );
+    gomos.gomosLog(
+      TRACE_PROD,
+      "Scheduling issues, Can not proceed : It can only support Seconds, Minutes up to 59",
+      factSrvcSchedule
+    );
+    gomos.errorCustmHandler(
+      NAMEOFSERVICE,
+      "processAlerts",
+      "Scheduling issues, Can not proceed : It can only support Seconds, Minutes up to 59"
+    );
+   
     process.exit(0);
   }
   var schPattern = sec + min + "* * * *";
 
   // var tempSchedule = scheduleTemp.scheduleJob("*/30 * * * * *", function () {
     var tempSchedule = scheduleTemp.scheduleJob(schPattern, function () {
-    console.log("Processing Level 1 Alerts - " + new Date());
-    MongoClient.connect(
-      urlConn,
-      { useNewUrlParser: true },
-      function (err, connection) {
-        if (err) {
-          gomos.errorCustmHandler("processAlerts",err);
-          process.hasUncaughtExceptionCaptureCallback();
-        }
-        var db = connection.db(dbName);
-        db.collection("Alerts")
+    gomos.gomosLog(TRACE_PROD, "Processing Started - Processing Level 1 Alerts ");
+
+   
+      // dbo = connection.db(dbName);
+        dbo.collection("Alerts")
           .find({ processed: "N", type: "level1" })
-          .toArray(function (err, result) {
+          .toArray(
+           async function (err, result) {
             if (err) {
-              gomos.errorCustmHandler("processAlerts",err);
+              gomos.errorCustmHandler(NAMEOFSERVICE,"processAlerts","",err);
               process.hasUncaughtExceptionCaptureCallback();
             }
             try {
-              for (var i = 0; i <= result.length - 1; i++) {
+              if(result.length > 0){
+                gomos.gomosLog(TRACE_DEV,"This Is result length", result.length);
+              for (var i = 0; i < result.length; i++) {
+                gomos.gomosLog(TRACE_DEV,"This is response of getRecipientMail");
+                let response = await getRecipientMail(dbo, result[i]); 
+                 gomos.gomosLog(TRACE_DEV,"This is response of getRecipientMail",response);
                 sendAlertMail(result[i].DeviceName, result[i].alertText, result[i].type,
-                  result[i].subCustCd, result[i]._id, db, result[i].businessNm,
-                  result[i].businessNmValues);
-                // processAlertToDevice( db, result[i].mac,result[i].alertText);
+                  result[i].subCustCd, result[i]._id, dbo, result[i].businessNm,
+                  result[i].businessNmValues, response.emailRecipient);
               }
+            }
             } catch (err) {
-             gomos.errorCustmHandler("processAlerts",err);           
+             gomos.errorCustmHandler(NAMEOFSERVICE,"processAlerts","",err);           
             }
             
-          });
+        
       }
     );
   });
 }
 
+function getRecipientMail(dbo, data){
+  gomos.gomosLog(TRACE_DEV,"This is call of getRecipient", data.referenceConfig);
+  return new Promise((resolve, reject)=> { 
+
+   dbo.collection("Devices")
+  .find({"mac":data.mac})
+  .toArray(
+   async function (err, result1) {
+    if (err) {
+      gomos.errorCustmHandler(NAMEOFSERVICE,"processAlerts","",err);
+      process.hasUncaughtExceptionCaptureCallback();
+      reject(err)
+    }
+    if(result1.length > 0){
+      let emailRecipientRole = data.emailRecipientRole;
+      var emails = "";
+      if(emailRecipientRole !== "ALL"){
+       
+        for(let i =0 ; i< emailRecipientRole.length; i++){
+          emails += result1[0].roles[emailRecipientRole[i]] +",";
+        }
+       
+      }
+      else{
+        let arrayOfemailrecipientRole = Object.keys(result1[0].roles);
+        for(let i = 0; i< arrayOfemailrecipientRole.length ; i++){
+          emails += result1[0].roles[arrayOfemailrecipientRole[i]] +",";
+        }
+
+      }
+    gomos.gomosLog(TRACE_DEV,"This log of email of recipient ", emails);
+      resolve({emailRecipient: emails.substring(0, emails.length - 1)
+      });
+    }
+  });
+});
+}
 //method to update Alerts collection
-function updateAlerts(objId, db) {
-  db.collection("Alerts").updateOne(
+function updateAlerts(objId, dbo) {
+  dbo.collection("Alerts").updateOne(
     { _id: objId },
     { $set: { processed: "Y" } },
     function (err, result) {
@@ -261,11 +160,12 @@ function updateAlerts(objId, db) {
   );
 }
 
-function sendAlertMail(DeviceName, strText, level, custCode, objId, db, businessName,businessNmValues) {
+function sendAlertMail(DeviceName, strText, level, custCode, objId, dbo, businessName,businessNmValues,emailsToSend) {
   try {
     let mailOptions = {
       from: mailFrom, // sender address
-      to: mailTo, // list of receivers
+      // to: emailsToSend, // list of receivers
+      bcc: emailsToSend,
       subject: 'Alert : ' + level + " : " + businessName + " : " + DeviceName, // Subject line
       //text: strText + " : mac :" + mac + " subCustCode : " + custCode,
       html: '<p style="font-family:TimesNewRoman;font-size:15px"><B>Customer : ' + custCode + '</B></p>' +
@@ -276,65 +176,59 @@ function sendAlertMail(DeviceName, strText, level, custCode, objId, db, business
     };
   
     // send mail with defined transport object
-    transprter.sendMail(mailOptions, (err, info) => {
+    transporter.sendMail(mailOptions, (err, info) => {
       if (err) {
-        gomos.errorCustmHandler("sendAlertMail",err); 
-        return console.log(err);
+        gomos.errorCustmHandler(NAMEOFSERVICE,"sendAlertMail","",err); 
+        return gomos.gomosLog(TRACE_PROD,"this is sendMail Error",err);
       }
-      console.log("Message Sent : " + info.messageId)
+      gomos.gomosLog(TRACE_PROD,"This is Message Sent", info.messageId)
       //Update processed flag in 'Alerts'
-      updateAlerts(objId, db);
+      updateAlerts(objId, dbo);
     }); 
   } catch (err) {
-    gomos.errorCustmHandler("sendAlertMail",err); 
+    gomos.errorCustmHandler(NAMEOFSERVICE,"sendAlertMail","",err); 
   }
 
 }
 
-// var dt = dateTime.create();
-// var formattedDate = dt.format("Y-m-d");
-// function gomos.errorCustmHandler(functionName,typeofError){
-//   // console.log(typeofError);
-//     let writeStream = fs.createWriteStream("../commanError-" + formattedDate + ".log", { flags: "a" });
-//     var dateTime = new Date().toISOString();
-//   // write some data with a base64 encoding
-//   // var errors = typeofError.toS
-//   var errorobj ={
-//     DateTime : dateTime,
-//     serviceName: "AlertService",
-//     functionName : functionName,
-//     ErrorCode :typeofError.statusCode,
-//      Error : typeofError.toString(),
-//      typeofErrorstack: typeofError.stack
+async function getAllconfig() {
+  alertSrvcSchedule = await gomosSchedule.getServiceConfig(
+    dbo,
+    NAMEOFSERVICE,
+    "alertSrvc"
+  );
 
-//   }
-//   var strObj = JSON.stringify(errorobj)
-// // console.log(typeofError);
-//   writeStream.write(
-//     strObj+"\n"
-//     );
-  
-//   // the finish event is emitted when all data has been flushed from the stream
-//   writeStream.on('finish', () => {  
-//       console.log('wrote all data to file');
-//   });
-//   // close the stream
-//   writeStream.end(); 
-//   }
-
-
+}
 var alertSrvc = null;
 module.exports = function (app) {
   //const router = express.Router()
   urlConn = app.locals.urlConn;
   dbName = app.locals.dbName;
   // connectToDb();
+  MongoClient.connect(urlConn, { useNewUrlParser: true }, function(
+    err,
+    connection
+  ) {
+    if (err) {
+      // console.log(err);
+      gomos.errorCustmHandler(
+        NAMEOFSERVICE,
+        "handleMqttMessage",
+        "THIS IS MONGO CLIENT CONNECTION ERROR",
+        "",
+        err
+      );
+      process.hasUncaughtExceptionCaptureCallback();
+    }
+    dbo = connection.db(dbName);
+  });
   setTimeout(function () {
-  getServiceConfig();
+  //getServiceConfig();
+  getAllconfig()
   setTimeout(function () {
     alertSrvc = app;
    
      processAlerts();
   }, 2000);
-}, 100);
+}, 2000);
 };

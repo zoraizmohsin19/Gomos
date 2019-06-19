@@ -82,7 +82,7 @@ class AlertReport extends Component {
       alert(DeviceName);
       var page = 1;
       this.setState({DeviceNameValue:DeviceName,flag : undefined,page:page});
-      // fetch("http://localhost:3992/getAlertDevices?subCustCd=" + this.state.selectedSubCustValue +"&&DeviceName="+DeviceName+
+      // fetch("http://18.203.28.35:3992/getAlertDevices?subCustCd=" + this.state.selectedSubCustValue +"&&DeviceName="+DeviceName+
       // "&&type=" + this.state.selectedlevelValue)
       //   .then(response => response.json())
       //   .then(json =>  {
@@ -103,7 +103,7 @@ fetchData(flag,DeviceName,page){
     page: page,
     page_size: this.state.page_size,
   }
-  axios.post("http://localhost:3992/getAlertFlag",{body:filterData})
+  axios.post("http://18.203.28.35:3992/getAlertFlag",{body:filterData})
   
   // .then(response => response.json())
     .then(json =>  {
@@ -119,7 +119,7 @@ clickedOnflag(flag,DeviceName){
   this.setState({DeviceNameValue: DeviceName,flag: flag,page: page});
   alert(flag+ DeviceName);
   this.fetchData(flag,DeviceName,page);
-  // // fetch("http://localhost:3992/getAlertFlag?subCustCd=" + this.state.selectedSubCustValue +"&&DeviceName="+DeviceName+
+  // // fetch("http://18.203.28.35:3992/getAlertFlag?subCustCd=" + this.state.selectedSubCustValue +"&&DeviceName="+DeviceName+
   // // "&&type=" + this.state.selectedlevelValue+"&&processed=" + flag+"&&page=" + this.state.page+"&&page_size=" + this.state.page_size)
   // var filterData = {
   //   subCustCd: this.state.selectedSubCustValue,
@@ -129,7 +129,7 @@ clickedOnflag(flag,DeviceName){
   //   page: this.state.page,
   //   page_size: this.state.page_size,
   // }
-  // axios.post("http://localhost:3992/getAlertFlag",{body:filterData})
+  // axios.post("http://18.203.28.35:3992/getAlertFlag",{body:filterData})
   
   // // .then(response => response.json())
   //   .then(json =>  {
@@ -155,7 +155,7 @@ clickedOnflag(flag,DeviceName){
   }
     //ON PAGE LOAD DATA FETCH FROM SERVER FOR ALL SERVICE PROVIDER
 componentDidMount() {
-    fetch('http://localhost:3992/getRegisterSP')
+    fetch('http://18.203.28.35:3992/getRegisterSP')
     .then(response => response.json())
     .then(json =>  {
     var spCd =  json.map( x =>  { return  x.spCd  });
@@ -243,7 +243,7 @@ body = {spToSend,ArrayOfCusts,ArrayOfSubCusts,selectedAssetsValue,dateTime1,
 }
 //THIS IS API METHOD FOR FETCH ALL DATA FROM SERVER BASED ON SELECTED CRITERIA.
 getAllDataApi(body){
-    axios.post("http://localhost:3992/getAlert", body)
+    axios.post("http://18.203.28.35:3992/getAlert", body)
     // .then(response => response.json())
     .then(json =>  {
       alert(json)
@@ -351,7 +351,7 @@ getAllDataApi(body){
      }
   //THIS METHOD FOR GET CUSTOMER CODE
       getCustomerApi(SendForSp){
-        fetch("http://localhost:3992/getCustomers?spCode=" + SendForSp)
+        fetch("http://18.203.28.35:3992/getCustomers?spCode=" + SendForSp)
         .then(response => response.json())
         .then(json =>  {
         var custCd =  json.map( x =>  { return  x._id  });
@@ -376,7 +376,7 @@ getAllDataApi(body){
     }
     //THIS IS  API FOR GET SUBCUSTOMER BASED ON SERVICE PROVIDER AND CUSTOMER CODE
     getSubCustomerApi(SendForSp,SendFroCustCD){
-        fetch("http://localhost:3992/getSubCustomers?spCode=" + SendForSp +
+        fetch("http://18.203.28.35:3992/getSubCustomers?spCode=" + SendForSp +
         "&&custCd=" + SendFroCustCD )
         .then(response => response.json())
         .then(json =>  {
@@ -413,7 +413,7 @@ getAllDataApi(body){
   }
   //THIS API FOR GET SENSOR  BASED ON SERVICE PROVIDER , CUSTOMER CODE, SUBCUSTOMER CODE
   getAssetsApi(SendForSbCd){
-    fetch("http://localhost:3992/getAssetsBySpCstSubCst?subCustCd=" + SendForSbCd)
+    fetch("http://18.203.28.35:3992/getAssetsBySpCstSubCst?subCustCd=" + SendForSbCd)
          .then(response => response.json())
          .then(json =>  {
          var assetsNM =  json.map( x =>  { return  x  });

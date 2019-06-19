@@ -97,22 +97,25 @@ app.use(function (error, req, res, next) {
     error.statusCode = 500;
   }
   console.log("Error handler: ", error.message, error.statusCode);
-  log_file_err.write(
-    "Error handler: " +
-    "Error Code:" +
-    error.statusCode +
-    "  " +
-    error.stack +
-    "\n"
-  );
+  // log_file_err.write(
+  //   "Error handler: " +
+  //   "Error Code:" +
+  //   error.statusCode +
+  //   "  " +
+  //   error.stack +
+  //   "\n"
+  // );
+  gomos.errorCustmHandler("gomosEndPoint","error.statusCode=500","app error hander", error.message,error,"runTimeError",true,false)
+
   res.status(500).json({ error: error.message });
 });
 
 //uncaught exception handling
 process.on("uncaughtException", function (err) {
   console.log("Caught exception: " + err);
-  log_file_err.write("Caught exception: " + err.stack + "\n");
-  process.exit();
+  // log_file_err.write("Caught exception: " + err.stack + "\n");
+  // process.exit();
+  gomos.errorCustmHandler("gomosEndPoint","uncaughtException","Caught exception", error.message,error,"runTimeError",true,true)
 });
 
 app.use(function (req, res, next) {

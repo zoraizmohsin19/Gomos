@@ -11,14 +11,14 @@
     margin: 20px 30px;
 } */
 .AcDropS {
-    color: black;
-    margin: 20px 30px;
-    background: white;
+    /* color: black; */
+    /* margin: 20px 30px; */
+    /* background: white; */
 }
-.AcDropS>.open>.dropdown-menu {
+/* .AcDropS>.open>.dropdown-menu {
     display: block;
     margin-top: -20px;
-}
+} */
 
 .red-border{
     border: 1px solid red;
@@ -31,7 +31,7 @@
 .small-boxDActive {
     width: 70px;
     background: white;
-    border: 1px solid gainsboro;
+    border: 1px solid #069833;
     margin: 4px;
 }
 .ActiveSheading{
@@ -86,7 +86,7 @@
     margin-bottom: 0px;
 }
 .ActiveTableH {
-    max-height: 275px;
+    max-height: 291px;
     overflow-y: scroll;
     margin-bottom: 10px;
   
@@ -120,10 +120,12 @@
     background-color: #fff;
     border: 1px solid #ddd;
     border-radius: 15px;
+    cursor: pointer;
     color: #337ab7;
     text-decoration: none;
     
 }
+
 .Acustmborder{
     border: 1px solid red !important;
 }
@@ -146,14 +148,7 @@ li.ActiveList {
     padding-right: 30px;
     border: 1px #62D27B solid;
 }
-@media (max-width: 768px) {
-    #containersimg {
-        width: 327px ;
-    }
-    #wrapper {
-        width: 207%;
-    }
-  }
+
   label.ActiveLabel {
     margin-top: 30px !important;
     margin-left: 8px;
@@ -284,9 +279,9 @@ textarea.ActivetestArea {
 .modal-90w.modal-dialog {
     width: 90%;
 }
-.OpdLable {
+/* .OpdLable {
     margin-right: -20px;
-}
+} */
 .toggleButton {
     margin: 0px;
     padding: 0px;
@@ -301,7 +296,8 @@ textarea.ActivetestArea {
     display: inline-block;
 }
 .paddForm {
-    margin: 15px;
+    margin-bottom: 15px;
+    margin-top: 15px;
 }
 .SensorsOuter {
     width: max-content;
@@ -318,9 +314,14 @@ textarea.ActivetestArea {
 }
 .ActiveCorner {
     background: rgba(185,249,174,.85);
-    height: 568px;
-    margin: -15px;
-    padding: 20px;
+    /* height: 600px; */
+    /* margin: -15px; */
+    height: 790px;
+    padding-top: 20px;
+    padding-left: 5px;
+    padding-right: 5px;
+    margin-left: -15px;
+    margin-right: -15px;
 }
 .ChannelBGColorYellow{
     background: rgba(251, 255, 0, 0.87);
@@ -372,3 +373,293 @@ textarea.ActivetestArea {
       border: 1px solid rgb(3, 148, 3);
       color: white;
   } 
+  .dropdown-toggle.btn.btn-Awhite {
+    background: white;
+    border: 1px solid #136f13cf;
+  
+}
+.dropDown {
+    margin-bottom: 10px;
+}
+.ActivFilterBtn {
+    background: white;
+    border: 1px solid #136f13cf;
+}
+.Mlabel {
+    margin-right: 25px;
+}
+.modal-footer {
+    padding: 15px;
+    text-align: right;
+    border-top: 1px solid #148606;
+}
+.ClimateTExM{
+    margin-top: 0px !important;
+}
+.rangeClassActive{
+    display: inline !important;
+    width: 80% !important;
+}
+.displayRange {
+    text-align: center;
+    font-size: 11px;
+}
+.rangeLabel {
+    font-size: 11px;
+}
+
+
+  .pointer1{
+    cursor: pointer;
+  }
+  
+  
+element.style {
+}
+
+
+.input-range__label {
+ 
+    font-size: 16px !important;
+    
+}
+.input-range__label--value {
+  top: -25px !important;
+}
+.displayRange {
+  
+  margin-bottom: -6px;
+  margin-top: 6px
+
+}
+.input-range__track--active {
+  background: #1ca03e !important;
+}
+.input-range__slider {
+
+  background: #1ca03e !important;
+  border: 1px solid #1ca03e !important;
+}
+.input-range__track {
+  background: #c3faba ;
+}
+.input-range {
+  margin-left: 50px;
+  width: 80% !important;
+  margin-top: 15px;
+  margin-bottom: 10px;
+}
+.margin-topActive{
+    margin-top: 10px
+}
+/* .nav-pills>li.active>a, .nav-pills>li.active>a:focus, .nav-pills>li.active>a:hover {
+    color: #fff;
+    background: #62D27B;
+} */
+.fontsizeicon2 {
+    font-size: 45px !important;
+    top: 16px !important;
+}
+.ForAlertActive {
+    color: white;
+    font-size: 11px;
+}
+.fonsizename {
+    font-size: 13px;
+}
+.spanclass {
+    font-size: 12px;
+}
+.NotActivefont{
+    font-weight: 500;
+    color: gray;
+
+}
+.NotActivefont{
+    font-weight: bold;
+    color:black;
+}
+.marginbtnManual {
+    margin-bottom:46px  !important
+}
+.pull-right {
+    float: right !important; 
+}
+.pull-left {
+    float: left !important; 
+}
+.classForsvgManual{
+    background-image:url(../layout/MANUAL.svg);
+    background-repeat: no-repeat;
+}
+.classForsvgatomatic{
+    background-image:url(../layout/automatic.svg);
+    background-repeat: no-repeat;
+}
+
+.fontsizeicon12 {
+    width: 19px;
+    margin-right: 2px;
+}
+.spanBredDiv {
+    margin-top: 8px;
+}
+td.Acustmtd {
+    padding-top: 20px !important;
+}
+.automaticClas {
+    margin-left: 10px;
+}
+.maualclass {
+   
+    margin-left: 10px;
+}
+.margincell {
+    margin-right: 100px;
+}
+@media (max-width: 768px) {
+    #containersimg {
+        width: 327px ;
+    }
+    .ActiveCorner {
+        /* background: rgba(185,249,174,.85); */
+        /* height: 600px; */
+        /* margin: -15px; */
+        height: 580px;
+    }
+
+    #wrapper {
+        width: 207%;
+    }
+  }
+  @media (min-width: 992px ) and (max-width : 1199px) {
+    .ViewBredCum {
+        margin-bottom: 0px;
+        border-radius: 7px;
+        padding-bottom: 40px;
+        padding-top: 4px;
+    }
+  }
+  @media (max-width: 992px ) and (min-width : 768px ) {
+    .ViewBredCum {
+        margin-bottom: 0px;
+        border-radius: 7px;
+        padding-bottom: 49px;
+        padding-top: 10px;
+    }
+  }
+
+
+  .inputFoeldForOffset {
+    width: 36px;
+    height: 30px;
+    padding-top: 0px;
+}
+.inputforProgram {
+    height: 30px;
+    width: 171px;
+    margin: 10px;
+}
+
+.versioninput{
+    width: 30px;
+    margin-left: 0px !important;
+}
+.version{
+    margin-left: 0px !important;
+}
+
+.inputforProgramWef {
+    width: 83px !important;
+    margin-top:10px;
+}
+.ProgramLabel {
+    margin: 13px;
+}
+.smalLine {
+    border: 0.7px solid #ddd;
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+.btn-group-xs>.btn, .btn-xs {
+  
+    height:  22px;
+    /* line-height: 1.428571; */
+}
+.wefDef {
+    display: inline-block;
+}
+
+.headermanovr {
+    /* padding: 12px !important; */
+    font-size: 14px;
+        padding-bottom: 15px !important;
+}
+.margintop {
+    margin-top: 30px;
+}
+.center {
+    text-align: center;
+}
+
+
+/* .tableDropDown {
+    position: absolute;
+} */
+.DisplayBloakInMobile {
+    display: inline;
+}
+@media (max-width : 768px){
+    .wefDef {
+      
+        display: block;
+    }
+    .inputforProgramWef {
+        width:100% !important;
+        margin-top: 0px;
+        margin-left: 10px;
+    }
+    .CusttableProgram {
+       
+        overflow-y: auto;
+    }
+    .Acustmfloat {
+        float: none;
+         margin-right: none;
+       
+    }
+    .pagerActive {
+      
+        text-align: center;
+        list-style: none;
+        display: -webkit-inline-box;
+        border: 1px solid #ddd;
+        padding-left: 5px;
+        padding-top: 2px;
+        padding-bottom: 2px;
+        border-radius: 20px;
+        padding-right: 5px;
+        margin-left: 0px;
+        font-size: 11px;
+        float: right;
+    }
+    .paddForm {
+        margin-left: -15px;
+        margin-right: -15px;
+    
+    }
+    .DisplayBloakInMobile {
+        display: flex;
+    }
+  }
+
+  .tableDropDown> .dropdown  > .dropdown-menu{
+      position: relative !important;
+  }
+  .hiddenClass {
+ display: none;
+  }
+  .setDeviceTime {
+    font-weight: 800;
+    text-decoration: underline;
+}

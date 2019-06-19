@@ -19,7 +19,9 @@ class Sensors extends Component {
     // error
 
     return (
-        <div className={bgclass} onClick = {this.props.Change}>
+        <div className={bgclass} 
+        // onClick = {this.props.Change}
+        >
         <div className="inner"><h3 className= {heading_class_name}>{message}</h3>
             <p className= {P_name_class}>{label}</p>
             <p className= {takenClass}>Last Taken At: {dateTime} </p>
