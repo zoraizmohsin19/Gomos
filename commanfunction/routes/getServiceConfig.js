@@ -26,7 +26,7 @@ exports.getServiceConfig =  function(db,NAMEOFSERVICE,serviceKey,logger,gConsole
                   var keys = Object.keys(result[0]);
                   if (keys.includes(serviceKey)) {
                     resolve(result[0][serviceKey]);
-                    gomos.gomosLog(logger,gConsole,TRACE_PROD,"ServiceConfig freq. of Fact srvcs",result[0][serviceKey]); 
+                    gomos.gomosLog(logger,gConsole,TRACE_PROD,`ServiceConfig freq. of ${serviceKey}`,result[0][serviceKey]); 
                   }
                 }
                 catch(err){
