@@ -7,6 +7,8 @@ const mongoose = require("mongoose");
 var ObjectId = require('mongodb').ObjectID;
 const uuidv4 = require('uuid/v4');
 const mqtt = require('mqtt')
+// const  FileSaver = require("file-saver");
+const  ExcelJs  = require("exceljs");
 
 const Schema = mongoose.Schema;
 const NAMEOFSERVICE = "OnDemandService"
@@ -2607,6 +2609,13 @@ gomos.gomosLog( logger,gConsole,TRACE_DEBUG,"this is debuging in starting",senso
         mac: mac,
        }
       criteria["sensors."+sensorNm+"."+sensorsBSN]  = {$exists: true}
+  console.log(body.endTime);
+  console.log(body.startTime)
+    
+    if(body.startTime != "" && body.startTime != undefined && body.startTime != null && body.endTime != "" && body.endTime != undefined && body.endTime != null ){
+      criteria["createdTime"] = {$lte : new Date(body.endTime) , $gte: new Date(body.startTime)}
+    }
+    gomos.gomosLog(logger,gConsole,TRACE_DEV,"This is Log of Criteria for getdashboard ", criteria)
       // var  queryToExecute = [
       //     {
       //       $match: criteria
@@ -2643,7 +2652,7 @@ gomos.gomosLog( logger,gConsole,TRACE_DEBUG,"this is debuging in starting",senso
           }
           if (result1.length > 0) {
             var resultCopy = result1;
-            console.log(resultCopy);
+            // console.log(resultCopy);
             result = [];
             result4 = []
             var finalResult =[];
@@ -2715,6 +2724,7 @@ gomos.gomosLog( logger,gConsole,TRACE_DEBUG,"this is debuging in starting",senso
   
 router.post("/getDevicesIdentifier", function (req, res, next) {
   accessPermission(res);
+
   MongoClient.connect(
     urlConn,
     { useNewUrlParser: true },
@@ -2769,6 +2779,7 @@ router.post("/getDevicesIdentifier", function (req, res, next) {
 //get the reporting details of perticular Sensor based on given data
 router.get("/getFacts", function (req, res, next) {
   accessPermission(res);
+  
   MongoClient.connect(
     urlConn,
     { useNewUrlParser: true },
@@ -2830,7 +2841,7 @@ gomos.gomosLog( logger,gConsole,TRACE_DEBUG,"This is gomos get messageFact",  cr
 function factsOperations(db, sensorNm, startFactValue, endFactValue, connection, next,
   equalsFacts, operation, res, criteria) {
   var finalResult = [], ltdttm, queryToExecute;
-
+ 
   //query to get the last dateTime the collection was modified.This dateTime is used only in excel report.
   db.collection("MsgFacts")
     .find({}, { limit: 1 })

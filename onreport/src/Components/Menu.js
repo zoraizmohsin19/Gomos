@@ -450,7 +450,7 @@ getAllDataApi(SendForSp,SendFroCustCD,SendForSbCd,SendForSensor,SendForStartDate
   }
 }
   //export To Excel and Save it to server and add the Details to Collection
-  exportToExcel(arColumns, arKeys, arWidths, reportName, dataSet) {
+ async exportToExcel(arColumns, arKeys, arWidths, reportName, dataSet) {
     var workbook = new ExcelJs.Workbook();
     workbook.created = new Date();
 
@@ -627,8 +627,8 @@ getAllDataApi(SendForSp,SendFroCustCD,SendForSbCd,SendForSensor,SendForStartDate
       }
       j = j + 1;
     }
-
-    workbook.xlsx.writeBuffer().then(data => {
+try{
+   await workbook.xlsx.writeBuffer().then(data => {
       const blob = new Blob([data], { type: "application/octet-stream" });
       var dt = new Date();
       var strdt;
@@ -639,6 +639,11 @@ getAllDataApi(SendForSp,SendFroCustCD,SendForSbCd,SendForSensor,SendForStartDate
       var fileName = reportName + strdt + ".xlsx";
       FileSaver.saveAs(blob, fileName);
     });
+  }
+  catch(err){
+    console.log("This is Error writebuffer");
+    console.log(err)
+  }
   }
 
  
@@ -708,63 +713,6 @@ if(this.state.sensorNm.length != 0){
     sensorsObj.push(obj);
   })
 }
-    
-        
-       //THIS VARIABLE FOR DYNAMIC TABLE WHICH APPEAR IN PRESENTS OF DATA .
-      //  var table = null;
-      //  if(this.state.tableDataToSend !=0){
-      //   // console.log("this json data1");
-      //   // console.log(this.state.tableDataToSend);
-      //   // console.log("end json");
-       
-      //  table =  <div className= "custNav btn-group">
-      //    <button className="btn btn-sm btn-secondary" onClick={this.displayChart.bind(this)}><i class="far fa-chart-bar iconfont"></i></button>
-      //    <button  className="btn btn-sm btn-secondary" onClick={this.downloadToExcel.bind(this)}><i class="far fa-file-excel iconfont"></i></button>
-      //    </div>;
-      
-      // }
-      // else{
-      //   table = null;
-      // }
-      //   <div className="row bg">
-      //    <div className= "custNav btn-group">
-      //  <button className="btn btn-sm btn-secondary" onClick={this.displayChart.bind(this)}><i class="far fa-chart-bar iconfont"></i></button>
-      //  <button  className="btn btn-sm btn-secondary" onClick={this.downloadToExcel.bind(this)}><i class="far fa-file-excel iconfont"></i></button>
-      //  </div>
-      {/* //THIS TABLE COMPONENT WHICH COMMING FROM REACT TABLE LIBRARY */}
-    {/* <Table style={{
-        opacity: 0.8,
-        backgroundColor: "#6c757d",
-        color: "#ffffff",
-        textAlign: "center"
-      }}
-      tableStyle="table table-hover table-striped table-bordered table-borderless table-responsive"
-      pages={true}
-      pagination={true}
-      onRowClick={(row) => {// // alert(row); // console.log(row)}} // if You Want Table Row Data OnClick then assign this {row => // console.log(row)}
-      page={true}
-      errormsg="Error. . ."
-      loadingmsg="Loading. . ."
-      isLoading={false} 
-      sort={true} 
-      title="Sensor Report"
-      search={true}
-      size={10}
-      data={{
-        head: {
-          Device: "Device",
-          Device_Name: "Device Name",
-          Bibusiness_name : "Business Name",
-          SensorName: this.state.selectedSensorValueArray,
-          queue_date_time: "Queue Date Time",
-        },
-        data: this.state.tableDataToSend
-      }} />
-        </div>;
-
-       }else{
-        table = null;
-       } */}
   
           return (
             <div className=" container">
@@ -789,14 +737,6 @@ if(this.state.sensorNm.length != 0){
                         )}
                         </DropdownButton>
                         </div>
-                     {/* <SelectionInput 
-                          label="SERVICE PROVIDER :"
-                          namefor="SERVICE PROVIDER :"
-                          names = {spCd}
-                          defaultDisabled = {null}
-                          Change = {this.handleSp}
-                          
-                         /> */}
                      </div>
                      <div className="col-sm-3">
                      <div className= "divmanueDrop">
@@ -809,13 +749,6 @@ if(this.state.sensorNm.length != 0){
                         )}
                         </DropdownButton>
                         </div>
-                     {/* <SelectionInput 
-                              label="CUSTOMER :"
-                              namefor="CUSTOMER :"
-                              names = {custCd}
-                              defaultDisabled = {this.state.custDisable}
-                              Change = {this.handleCutMr}
-                              /> */}
                      </div>
                      <div className="col-sm-3">
                      <div className= "divmanueDrop">
@@ -856,24 +789,9 @@ if(this.state.sensorNm.length != 0){
                      </div>
                      <div className="col-sm-3">
                      <div className= "divmanueDrop">
-                     {/* <DropdownButton  className = ""  onSelect={this.handleSensorNm}
-                      disabled = {this.state.sensorDisable}
-                        bsStyle={"white"}
-                        title={this.state.selectedSensorValueArray || "SELECT THE SENSOR" }>
-                        {sensorNm.map( (item) =>
-                        <MenuItem eventKey={item}>{item}</MenuItem>
-                        )}
-                        </DropdownButton> */}
                      <ReactMultiSelectCheckboxes placeholderButtonLabel= "SELECT THE SENSOR" disabled onChange= {this.handleSensorNm.bind(this)} options={sensorsObj} />
 
                         </div>
-                     {/* <SelectionInput 
-                          label="SELECT THE SENSOR :"
-                          namefor="SELECT THE SENSOR :"
-                          names = {sensorNm}
-                          defaultDisabled = {this.state.sensorDisable}
-                          Change = {this.handleSensorNm}
-                          /> */}
                      </div> 
                      <div className="col-sm-6">
                      <div className= "sensors">
@@ -882,56 +800,7 @@ if(this.state.sensorNm.length != 0){
                      </div>
                      </div>
                      </div>
-                     {/* <div className="col-sm-3">
-                     <div className= "divmanueDrop">
-                     <DropdownButton  className = ""  onSelect={this.handleOperation}
-                      disabled = {this.state.parameterDisable}
-                        bsStyle={"white"}
-                        title={this.state.operationSelected || "SELECT THE OPERATION" }>
-                        {operations.map( (item) =>
-                        <MenuItem eventKey={item}>{item}</MenuItem>
-                        )}
-                        </DropdownButton>
-                        </div> */}
-                     {/* <SelectionInput 
-                          label="SELECT THE OPERATION :"
-                          namefor="SELECT THE OPERATION :"
-                          names = {operations}
-                          defaultDisabled = {this.state.parameterDisable}
-                          Change = {this.handleOperation}
-                          /> */}
-                     {/* </div> */}
                      </div>
-                     {/* <div className="row">
-                     <div className="col-sm-3">
-                     <div className= "divmanueDrop">
-                     <input
-                          type="number"
-                          name= {dynamicname}
-                          className= "form-control custoin "
-                          placeholder = {dynamPlaceholder}
-                          value = {dynamicvalue}
-                          disabled = {equalvaluedisabled}
-                          onChange = {this.onChange}
-                         />
-                         </div>
-                     </div>
-                     
-                     <div className="col-sm-3">
-                     <div className= "divmanueDrop">
-                     <input
-                          type="number"
-                          name= "endRange"
-                          className= "form-control custoin "
-                          placeholder= "Enter End values :"
-                          value = {this.state.endRange}
-                          disabled = {startendvalue}
-                          onChange = { (e) => {
-                          this.setState({endRange : e.target.value});}}
-                         />                    
-                    </div>
-                     </div>
-                     </div> */}
                      <div className="row">
                      <div className="col-sm-12 col-md-6">
                      <table>
@@ -962,7 +831,6 @@ if(this.state.sensorNm.length != 0){
                              <span className="lab1">To:</span>
                            </td>
                            <td>
-                             {/* disabled={true} */}
                              <DatePicker
                             selected={this.state.endDate}
                             onChange={this.handleChange2}

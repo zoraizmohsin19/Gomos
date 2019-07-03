@@ -42,7 +42,7 @@ var gConsole = false;
 function processAggregater() {
   var min = aggreSrvcSchedule.min;
 
-  var schPattern =  `10 ${"*"} * * * *`;
+  var schPattern =  `0 ${min} * * * *`;
   var tempSchedule = scheduleTemp.scheduleJob(schPattern, async function () {
     gomos.gomosLog(logger, gConsole, TRACE_DEV, "This is Scheduler process in Aggregater service")
     gomos.gomosLog(logger, gConsole, TRACE_DEV, "This is Console of Device")
