@@ -9,7 +9,7 @@ const uuidv4 = require('uuid/v4');
 const mqtt = require('mqtt')
 // const  FileSaver = require("file-saver");
 const  ExcelJs  = require("exceljs");
-
+const moment = require('moment');
 const Schema = mongoose.Schema;
 const NAMEOFSERVICE = "OnDemandService"
 const  TRACE_PROD = 1
@@ -2646,156 +2646,41 @@ gomos.gomosLog( logger,gConsole,TRACE_DEBUG,"this is debuging in starting",senso
 }
 );
 function dailyDataProcessing(db, res, criteria, offset, page_size) {
-  let NewCriteria = { mac: criteria.mac };
-  if (criteria.createdTime != "" && criteria.createdTime != undefined && criteria.createdTime != null) {
-    NewCriteria["createdTime"] = criteria["createdTime"];
-  }
-  db.collection("Dummy")
-    // .find(NewCriteria).skip(offset).limit(page_size).sort({ createdTime: -1 })
-    .aggregate([{$match: NewCriteria},
-        {
-      $sort:{"Date": -1,"hours": -1}
-    },
-      { $group : { _id:  { "hr": "$hours","bs":"$bsName","dt": "$Date" } ,"max" : { $max :"$Max"} ,"min" : { $min :"$Min"}, "avg" : { $avg :"$Avg"}
-      ,"count" : { $first :"$Count"}, duration: {$first: "$duration"}}}, 
-      {"$group": { "_id": "$_id.hr",
-     
-      "processedData": {
-       
-        "$push": {
-           "Date": "$_id.dt",
-           "bs": "$_id.bs",
-           "max" :  "$max" ,
-           "min" : "$min",
-           "avg": "$avg",
-           "duration": "$duration",
-           "sum": "$count"
 
-        }
-      },
-      //  "totalCount": {"$count": "$_id.dt" }
-    
-    }}
-   
-    // {
-    //   $sort:{"$_id.hr": -1}
-    // },
-    // {
-    //   $limit: 10,
-    
-    // },
-    // {
-    //   $skip : 1,
-    // }
-    ]).toArray(function (err, result1){
-      if (err) {
-        console.log(err)
-        process.hasUncaughtExceptionCaptureCallback();
-      }
-
-      else if (result1.length > 0) {
-        let array = []
-console.log(result1)
-        let finalResult = array;
-        let data_count = result1.length;
-        let lastdataObj = {};
-        let lastCreatedTime = "";
-          let json = { finalResult, data_count, lastdataObj, lastCreatedTime ,result1}
-          res.json(json)
-      }
-    });
-
-}
-function hourlyDataProcessingTem(db, res, criteria, offset, page_size) {
-  let NewCriteria = { mac: criteria.mac };
-  if (criteria.createdTime != "" && criteria.createdTime != undefined && criteria.createdTime != null) {
-    NewCriteria["createdTime"] = criteria["createdTime"];
-  }
-  db.collection("AggregatedData")
-    .find(NewCriteria).skip(offset).limit(page_size).sort({ createdTime: -1 })
-    .toArray(function (err, result1) {
-      if (err) {
-        process.hasUncaughtExceptionCaptureCallback();
-      }
-      if (result1.length > 0) {
-        let array = []
-        for (let i = 0; i < result1.length; i++) {
-
-
-          let tempObj = {};
-          let hours = result1[i].hours;
-          let tempArray = (result1[i].sensors).concat(result1[i].channel)
-          for (let j = 0; j < tempArray.length; j++) {
-            let bsName = tempArray[j].bsName;
-            let tempNewObj = {
-              Avg: (tempArray[j].Avg == undefined) ? "" : tempArray[j].Avg,
-              Min: (tempArray[j].Min == undefined) ? "" : tempArray[j].Min,
-              Max: (tempArray[j].Max == undefined) ? "" : tempArray[j].Max,
-              Durations: (tempArray[j].duration == undefined) ? "" : tempArray[j].duration,
-              Count: (tempArray[j].Count == undefined) ? "" : tempArray[j].Count,
-            };
-
-            tempObj[bsName] = tempNewObj;
-          }
-          console.log(tempObj)
-          array.push([result1[i].mac, result1[i].DeviceName, "", tempObj, result1[i].createdTime])
-        }
-
-        let finalResult = array;
-        let data_count = result1.length;
-        let lastdataObj = {};
-        let lastCreatedTime = "";
-        db.collection("AggregatedData")
-          .find(NewCriteria).count()
-          .then(function (data) {
-            data_count = data
-            let json = { finalResult, data_count, lastdataObj, lastCreatedTime }
-            res.json(json)
-          })
-
-        // console.log(result1)
-      }
-    });
-
-}
-function hourlyDataProcessing(db, res, criteria, offset, page_size) {
- 
   let NewCriteria = { mac: criteria.mac };
   if (criteria.createdTime != "" && criteria.createdTime != undefined && criteria.createdTime != null) {
     NewCriteria["createdTime"] = criteria["createdTime"];
   }
   console.log(NewCriteria)
-  db.collection("Dummy")
+  db.collection("AggregatedData")
     .aggregate([{$match: NewCriteria},
-       
-      { $group : { _id:  { "Hour": "$Hour","bsName":"$bsName","Date": "$Date" } ,"Max" : { $max :"$Max"} ,"Min" : { $min :"$Min"}, "Avg" : { $first :"$Avg"}, 
-      "createdTime": {"$first":"$createdTime" }, mac: {"$first": "$mac"} ,"DeviceName": {"$first":"$DeviceName" }
-      ,"Count" : { $first :"$Count"}, duration: {$first: "$duration"}}}, 
-      {"$group": { "_id": "$_id.Hour",
-     
-      "processedData": {
-       
+    { $group : { _id:  {"Date": "$Date","bsName":"$bsName" } ,"max" : { $max :"$Max"} ,"min" : { $min :"$Min"}, 
+      mac: {"$first": "$mac"} ,"DeviceName": {"$first":"$DeviceName" }
+      ,"sum1" : { $sum :"$Sum"} ,"Count" : { $sum :"$Count"}, Duration: {$sum: "$duration"}}}, 
+      {"$group": { "_id":{$dayOfYear :"$_id.Date" },
+       "processedData": {
         "$push": {
-           "Date": "$_id.Date",
+           "Date":{$dateToString: { format: "%Y-%m-%d", date: "$_id.Date" } } ,
            "bsName": "$_id.bsName",
-           "Max" :  "$Max" ,
-           "Min" : "$Min",
-           "Avg": "$Avg",
-           "Duration": "$duration",
+           "Max" :  "$max" ,
+           "Min" : "$min",
+           "Sum": "$sum1",
+           "Avg": { $divide: [ "$sum1", "$Count" ] },
+           "Duration": "$Duration",
            "Count": "$Count",
-           "createdTime": "$createdTime",
+          //  "createdTime": "$createdTime",
+        // "DateTime": {$dateToString: { format: "%Y-%m-%d", date: "$Date" } },
            "mac": "$mac",
            "DeviceName": "$DeviceName"
 
         }
     
       }
-    
-    
     }},
     {
-      $sort:{"Date": -1,"Hour": -1}
+      $sort:{ "_id": -1,}
     },
+   
     {
       $limit: offset + page_size,
     
@@ -2819,22 +2704,26 @@ function hourlyDataProcessing(db, res, criteria, offset, page_size) {
           let createdTime = "";
           let mac ="";
           let DeviceName ="";
-          let hours = result1[i]._id;
+         // let hours = result1[i]._id.Hour;
+          let hours = "";
+
           let tempArray = result1[i].processedData;
           for (let j = 0; j < tempArray.length; j++) {
             let bsName = tempArray[j].bsName;
             let tempNewObj = {
-              Avg: (tempArray[j].Avg == null) ? "" : tempArray[j].Avg,
+              Avg: (tempArray[j].Avg == null) ? "" : Math.floor(tempArray[j].Avg * 100)/100,
               Min: (tempArray[j].Min == null) ? "" : tempArray[j].Min,
               Max: (tempArray[j].Max == null) ? "" : tempArray[j].Max,
               Durations: (tempArray[j].Duration == null) ? "" : tempArray[j].Duration,
               Count: (tempArray[j].Count == null) ? "" : tempArray[j].Count
             };
-            if(0 == j){
-              createdTime = tempArray[j].createdTime;
+            // if(0 == j){
+           
+              createdTime = tempArray[j].Date
+              console.log(tempArray[j].Date)
               mac =  tempArray[j].mac;
               DeviceName = tempArray[j].DeviceName;
-            }
+            // }
 
             tempObj[bsName] = tempNewObj;
           }
@@ -2846,14 +2735,11 @@ function hourlyDataProcessing(db, res, criteria, offset, page_size) {
         let data_count = result1;
         let lastdataObj = {};
         let lastCreatedTime = "";
-        db.collection("Dummy")
+        db.collection("AggregatedData")
           .aggregate([{$match: NewCriteria},
     //     {
-    //   $sort:{"Date": -1,"hours": -1}
-    // },
-      { $group : { _id:  { "Hour": "$Hour","bsName":"$bsName","Date": "$Date" } }},
-      {"$group": { "_id": "$_id.Hour"
-    
+      { $group : { _id:  {"Date": "$Date","bsName":"$bsName" }}}, 
+      {"$group": { "_id":{$dayOfYear :"$_id.Date" }
     }},
     {
       $count: "totalCount"
@@ -2862,7 +2748,171 @@ function hourlyDataProcessing(db, res, criteria, offset, page_size) {
     ]).toArray(function (err, result2){
       data_count  = result2[0].totalCount;
        console.log(result1)
-      let json = { finalResult, data_count, lastdataObj, lastCreatedTime ,result1}
+      let json = { finalResult, data_count, lastdataObj, lastCreatedTime,result1}
+      res.json(json)
+    });
+ }else{
+  res.json(0);
+ }
+    });
+
+}
+// function hourlyDataProcessingTem(db, res, criteria, offset, page_size) {
+//   let NewCriteria = { mac: criteria.mac };
+//   if (criteria.createdTime != "" && criteria.createdTime != undefined && criteria.createdTime != null) {
+//     NewCriteria["createdTime"] = criteria["createdTime"];
+//   }
+//   db.collection("AggregatedData")
+//     .find(NewCriteria).skip(offset).limit(page_size).sort({ createdTime: -1 })
+//     .toArray(function (err, result1) {
+//       if (err) {
+//         process.hasUncaughtExceptionCaptureCallback();
+//       }
+//       if (result1.length > 0) {
+//         let array = []
+//         for (let i = 0; i < result1.length; i++) {
+
+
+//           let tempObj = {};
+//           let hours = result1[i].hours;
+//           let tempArray = (result1[i].sensors).concat(result1[i].channel)
+//           for (let j = 0; j < tempArray.length; j++) {
+//             let bsName = tempArray[j].bsName;
+//             let tempNewObj = {
+//               Avg: (tempArray[j].Avg == undefined) ? "" : tempArray[j].Avg,
+//               Min: (tempArray[j].Min == undefined) ? "" : tempArray[j].Min,
+//               Max: (tempArray[j].Max == undefined) ? "" : tempArray[j].Max,
+//               Durations: (tempArray[j].duration == undefined) ? "" : tempArray[j].duration,
+//               Count: (tempArray[j].Count == undefined) ? "" : tempArray[j].Count,
+//             };
+
+//             tempObj[bsName] = tempNewObj;
+//           }
+//           console.log(tempObj)
+//           array.push([result1[i].mac, result1[i].DeviceName, "", tempObj, result1[i].createdTime])
+//         }
+
+//         let finalResult = array;
+//         let data_count = result1.length;
+//         let lastdataObj = {};
+//         let lastCreatedTime = "";
+//         db.collection("AggregatedData")
+//           .find(NewCriteria).count()
+//           .then(function (data) {
+//             data_count = data
+//             let json = { finalResult, data_count, lastdataObj, lastCreatedTime }
+//             res.json(json)
+//           })
+
+//         // console.log(result1)
+//       }
+//     });
+
+// }
+
+
+function hourlyDataProcessing(db, res, criteria, offset, page_size) {
+ 
+  let NewCriteria = { mac: criteria.mac };
+  if (criteria.createdTime != "" && criteria.createdTime != undefined && criteria.createdTime != null) {
+    NewCriteria["createdTime"] = criteria["createdTime"];
+  }
+  console.log(NewCriteria)
+  db.collection("AggregatedData")
+    .aggregate([{$match: NewCriteria},
+    
+      // { $group : { _id:  {"Date": "$Date", "Hour": "$Hour","bsName":"$bsName" } ,"Max" : { $max :"$Max"} ,"Min" : { $min :"$Min"}, "Avg" : { $first :"$Avg"}, 
+      // "createdTime": {"$first":"$createdTime" }, mac: {"$first": "$mac"} ,"DeviceName": {"$first":"$DeviceName" }
+      // ,"Count" : { $first :"$Count"}, duration: {$first: "$duration"}}}, 
+       
+      {"$group": { "_id":{"Date": "$Date","Hour":"$Hour"},
+      "processedData": {
+        "$push": {
+           "Date": "$Date",
+           "bsName": "$bsName",
+           "Max" :  "$Max" ,
+           "Min" : "$Min",
+           "Avg": "$Avg",
+           "Duration": "$duration",
+           "Count": "$Count",
+          //  "createdTime": "$createdTime",
+           "DateTime": {$dateToString: { format: "%Y-%m-%d", date: "$Date" } },
+           "mac": "$mac",
+           "DeviceName": "$DeviceName"
+
+        }
+    
+      }
+    }},
+    {
+      $sort:{ "_id.Date": -1, "_id.Hour": -1}
+    },
+   
+    {
+      $limit: offset + page_size,
+    
+    },
+    {
+      $skip : offset,
+    }
+    ]).toArray(function (err, result1){
+     //  console.log(result1)
+      if (err) {
+        console.log(err)
+        process.hasUncaughtExceptionCaptureCallback();
+      }
+
+      else if (result1.length > 0) {
+        let array = []
+        for (let i = 0; i < result1.length; i++) {
+
+
+          let tempObj = {};
+          let createdTime = "";
+          let mac ="";
+          let DeviceName ="";
+          let hours = result1[i]._id.Hour;
+          let tempArray = result1[i].processedData;
+          for (let j = 0; j < tempArray.length; j++) {
+            let bsName = tempArray[j].bsName;
+            let tempNewObj = {
+              Avg: (tempArray[j].Avg == null) ? "" : tempArray[j].Avg,
+              Min: (tempArray[j].Min == null) ? "" : tempArray[j].Min,
+              Max: (tempArray[j].Max == null) ? "" : tempArray[j].Max,
+              Durations: (tempArray[j].Duration == null) ? "" : tempArray[j].Duration,
+              Count: (tempArray[j].Count == null) ? "" : tempArray[j].Count
+            };
+            // if(0 == j){
+           
+              createdTime = moment(tempArray[j].DateTime+" "+hours+":30", "YYYY-MM-DD HH:mm").toISOString();
+              mac =  tempArray[j].mac;
+              DeviceName = tempArray[j].DeviceName;
+            // }
+
+            tempObj[bsName] = tempNewObj;
+          }
+         // console.log(tempObj)
+          array.push([mac, DeviceName, "", tempObj, createdTime])
+        }
+       //console.log(result1)
+        let finalResult = array;
+        let data_count = result1;
+        let lastdataObj = {};
+        let lastCreatedTime = "";
+        db.collection("AggregatedData")
+          .aggregate([{$match: NewCriteria},
+    //     {
+    //   $sort:{"Date": -1,"hours": -1}
+    // },
+      { $group : {"_id":{"Date": "$Date","Hour":"$Hour"}}},
+    {
+      $count: "totalCount"
+    },
+  
+    ]).toArray(function (err, result2){
+      data_count  = result2[0].totalCount;
+       console.log(result1)
+      let json = { finalResult, data_count, lastdataObj, lastCreatedTime}
       res.json(json)
     });
  }else{
