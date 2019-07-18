@@ -1,4 +1,5 @@
-
+// var express = require("express");
+// var router = express.Router();
 var MongoClient = require("mongodb").MongoClient;
 var scheduleTemp = require("node-schedule");
 const moment = require('moment');
@@ -40,6 +41,14 @@ var logger = gomos.createConsole(output, errorOutput);
 const SERVICE_VALUE = 1;
 var gConsole = false;
 
+/* GET home page. */
+// router.get("/", function (req, res, next) {
+//   console.log("This is Called")
+//   res.send("Hello Takreem");
+// });
+
+
+
 function calcIST(date) {
   gomos.gomosLog(logger, gConsole, TRACE_DEV, "This is Initail Time", date);
   d = new Date(date);
@@ -53,13 +62,26 @@ function calcIST(date) {
   return nd;
 
 }
+function calcUtc(date) {
+  gomos.gomosLog(logger, gConsole, TRACE_DEV, "This is Initail Time", date);
+  d = new Date(date);
+
+  utc = d.getTime() + (d.getTimezoneOffset() * 60000);
+  gomos.gomosLog(logger, gConsole, TRACE_DEV, "This is utc Time", utc);
+
+  nd = new Date(utc - (3600000 * 5.5));
+  gomos.gomosLog(logger, gConsole, TRACE_DEV, "This is return Time", nd);
+  // return  nd.toLocaleString()
+  return nd;
+
+}
 function convertIntTo2decPoint(value){
  return Math.floor(value*100)/100
 }
 function processAggregater() {
   var min = aggreSrvcSchedule.min;
-
-  var schPattern = `0 ${min} * * * *`;
+// second place must be 0 
+  var schPattern = `10 ${"*"} * * * *`;
   var tempSchedule = scheduleTemp.scheduleJob(schPattern, function () {
     gomos.gomosLog(logger, gConsole, TRACE_DEV, "This is Scheduler process started in Aggregater service")
     startProcess();
@@ -85,14 +107,17 @@ async function startProcess() {
     gomos.gomosLog(logger, gConsole, TRACE_TEST, `[${dataFromDevices[DeviceIndex].mac}] - [${i}]  DeviceIndex [${DeviceIndex}] - This is Device Going Process `)
     headerInfo["mac"] = dataFromDevices[DeviceIndex].mac;
     headerInfo["DeviceName"] = dataFromDevices[DeviceIndex].DeviceName;
-    headerInfo["Date"] = {}
-    let temDate= moment(startTime.toISOString()).subtract(1, 'days')
-    temDate.set({hour:18, minute: 30, second: 0, millisecond: 0 })
-    let DateObj = new Date(temDate.toISOString());
-    // let DateObj = new Date(moment(calcIST(startTime.toISOString())).format("YYYY-MM-DD"));
-   // console.log(new Date(moment(calcIST(startTime.toISOString())).format("YYYY-MM-DD")))
-    // headerInfo["Hour"] = calcIST(startTime.toISOString()).getHours();
-    headerInfo["Hour"] = moment(startTime.toISOString()).hours();
+    let temDate = moment(calcIST(startTime.toISOString()))
+    headerInfo["Date"] = temDate.format("YYYY-MM-DD");
+    headerInfo["Day"] = ((temDate.dayOfYear()).toString()).padStart(2,"0"); 
+    headerInfo["Week"] = ((temDate.isoWeek()).toString()).padStart(2,"0");
+    headerInfo["Month"] = ((temDate.month() + 1).toString()).padStart(2,"0");
+    headerInfo["Year"] =   (temDate.year()).toString()
+
+      //console.log(calcUtc(moment(calcIST(startTime.toISOString())).format("YYYY-MM-DD")));
+    headerInfo["Hour"] = ((calcIST(startTime.toISOString()).getHours()).toString()).padStart(2,"0");
+   //  console.log(headerInfo)
+    // console.log(calcUtc(moment(calcIST(startTime.toISOString())).format("YYYY-MM-DD")));
     //THIS IS startMainProcessSensors FOR SENSORS DATA PROCESSING AND startMainProcessForChannel FOR CHANNEL PROCESS
     let sensorsData = await startMainProcessSensors(dataFromDevices[DeviceIndex], dataFromDevices[DeviceIndex].mac, "sensors", endTime, startTime);
     let channelData = await startMainProcessForChannel(dataFromDevices[DeviceIndex], dataFromDevices[DeviceIndex].mac, "channel", endTime, startTime);
@@ -100,12 +125,12 @@ async function startProcess() {
     gomos.gomosLog(logger, gConsole, TRACE_DEBUG, "This mai startProcess1", headerInfo);
     gomos.gomosLog(logger, gConsole, TRACE_TEST, `[${dataFromDevices[DeviceIndex].mac}] - [${Data.length}]  DeviceIndex [${DeviceIndex}] -total # records - ready to insert `);
     if (sensorsData !== undefined && channelData !== undefined && (Data.length !== 0)) {
-      //THIS IS inserIntoAggregation FOR INSERTING DATA OF AGGRAGATION HOURS
+      //THIS IS inserIntoAggregation FOR INSERTING DATA OF AGGRAGATION HOURS  
       let currentTime = new Date(new Date().toISOString());
       let ArrayOfObject = [];
       for (let l = 0; l < Data.length; l++) {
         let json = JSON.parse(JSON.stringify(headerInfo))
-         json["Date"] = DateObj;
+        //  json["Date"] = DateObj;
         // json["_id"] = uuidv4();
    
         let key = Object.keys(Data[l]);
@@ -119,7 +144,7 @@ async function startProcess() {
         ArrayOfObject.push(json)
       }
       //console.log(ArrayOfObject)
-      await inserIntoAggregation(dbo, ArrayOfObject);
+     await inserIntoAggregation(dbo, ArrayOfObject);
     } else if (Data.length === 0) {
       //  this condition never meet
         await inserIntoAlert(dbo, json);
@@ -240,7 +265,7 @@ function getBsNameAndType(dataFromDevices, TypeOf) {
   let = json = {};
   let codeKeys = Object.keys(dataFromDevices[TypeOf]);
   for (let k = 0; k < codeKeys.length; k++) {
-    if (dataFromDevices[TypeOf][codeKeys[k]].aggregationProcesse !== undefined || dataFromDevices[TypeOf][codeKeys[k]].aggregationProcesse === "Y") {
+    if (dataFromDevices[TypeOf][codeKeys[k]].aggregationProcesse !== undefined && dataFromDevices[TypeOf][codeKeys[k]].aggregationProcesse === "Y") {
       let temp = dataFromDevices[TypeOf][codeKeys[k]].Type + "." + dataFromDevices[TypeOf][codeKeys[k]].businessName;
       bsName.push(dataFromDevices[TypeOf][codeKeys[k]].businessName)
       Type.push(dataFromDevices[TypeOf][codeKeys[k]].Type)

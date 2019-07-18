@@ -132,8 +132,8 @@ class viewDashboard extends Component {
 
   chartsIdbyDeviceType(deviceType) {
     let tempData = JSON.parse(sessionStorage.getItem("ClientObj"));
-    console.log("chartsIdbyDeviceType");
-    console.log(tempData)
+    //console("chartsIdbyDeviceType");
+    //console(tempData)
     let obj = tempData.viewDashBoard.deviceTypes[deviceType].map(item => { return { "businessName": item.businessName, "axisY": item.axisY } })
 
     return obj;
@@ -210,9 +210,9 @@ dataTypeDisable(){
         
           let tempArray = (json["data"].sensors).concat(json["data"].channel)
 
-          console.log("This is Device Identifier json");
-          // console.log(tempSdata);
-          console.log(tempArray)
+          //console("This is Device Identifier json");
+          // //console(tempSdata);
+          //console(tempArray)
           // let tempCSArray = [];
               me.state.body.deviceIdentifier = tempArray;
           var groupedData = this.groupingDataArray(tempArray)
@@ -220,15 +220,15 @@ dataTypeDisable(){
           let index2 = tempArray.findIndex(item => item.group === json["data"].defaultGroupInfo);
 
           me.state.body.sensorsGroups = groupedData;
-          console.log("This is Group Data");
-          console.log(groupedData);
+          //console("This is Group Data");
+          //console(groupedData);
           me.state.body.selectedGroups = groupedData[index];
           me.state.body.selectedGroupsitem = groupedData[index].group;
           me.state.body.selectedSensorsType1 = tempArray[index2].Type;
           me.state.body.selectedSensorsName = tempArray[index2].devicebusinessNM;
           me.state.body.selectedSensorsDataArray = groupedData[index].devicebusinessNM;
           me.state.body.selectedEntitiesValues= groupedData[index].devicebusinessNM;
-          console.log(groupedData[index].devicebusinessNM)
+          //console(groupedData[index].devicebusinessNM)
           me.state.body.deviceType = json["data"].deviceTypes;
           me.state.body.deviceTypeObj = this.chartsIdbyDeviceType(json["data"].deviceTypes);
           me.setState({ body: me.state.body })
@@ -252,9 +252,9 @@ dataTypeDisable(){
       let arrLabels = [];
       let dataToSend1 = [];
       let dataToSend2 = [];
-      result.sort((a, b) => new Date(a.column5).getTime() - new Date(b.column5).getTime())
+      (me.state.body.selectedNevData === "Normal")?  result.sort((a, b) => new Date(a.column5).getTime() - new Date(b.column5).getTime()):result.sort()
       for (let i = 0; i < result.length; i++) {
-        let formattedDate = dateFormat(result[i]["column5"], "dd-mmm HH:MM");
+        let formattedDate =  (me.state.body.selectedNevData === "Normal")? dateFormat(result[i]["column5"], "dd-mmm HH:MM"): result[i]["column5"];
         //  var arrayforsend= [];
         let temp = {};
         for (let j = 0; j < me.state.body.tableSecondKeyArray.length; j++) {
@@ -317,7 +317,7 @@ dataTypeDisable(){
     axios.post(`${URL.IP}:3992/getdashboard`, body)
       .then(json => {
           me.state.body.mainjson= json;
-          console.log(json)
+          //console(json)
           me.setState({ body: me.state.body })
           // me.DisplayChart();
         // }
@@ -335,31 +335,33 @@ dataTypeDisable(){
   }
   callMainDataProcess(){
     let me = this;
-    console.log("This is Call of CallMainDataProcess")
+    //console("This is Call of CallMainDataProcess")
     try{
-      console.log("This is Call of CallMainDataProcess Try")
+      //console("This is Call of CallMainDataProcess Try")
       me.state.body.Spinnerdata = true;
       me.setState({ body: me.state.body })
     let json = me.state.body.mainjson;
     let json1 = [];
     let dataArray = [];
     let arrayHeder = [];
-     console.log("this is Source of data ");
-     console.log(json["data"]);
+     //console("this is Source of data ");
+     //console(json["data"]);
     json1 = json["data"]["finalResult"]
     if (json1 !== 0) {
       for (let i = 0; i < json1.length; i++) {
         let jsontemp = {
           column1: json1[i][0],
           column2: json1[i][1],
-          column5: dateFormat(json1[i][4], "dd-mmm-yy HH:MM:ss")
+         column5: (me.state.body.selectedNevData === "Normal")? dateFormat(json1[i][4], "dd-mmm-yy HH:MM:ss") :json1[i][4]
         };
-        // console.log(me.state.body.selectedGroups.devicebusinessNM)
+        //console("This Debug For Date")
+          //console(json1[i][4])
+          // alert("Alert")
         arrayHeder = ["SI", "DEVICE NAME"];
         let sensorsKeys =  me.state.body.selectedEntitiesValues;
         let arrayOfDisplayData = me.state.body.selectedDataInfoTypeValues.map(item => item);
-        console.log("arrayOfDisplayData");
-        console.log(arrayOfDisplayData);
+        //console("arrayOfDisplayData");
+        //console(arrayOfDisplayData);
         if(me.state.body.selectedNevData !== "Normal"){
           // if(arrayOfDisplayData.filter(item => item == "Values").length !== 0){
           //  arrayOfDisplayData = arrayOfDisplayData.splice(arrayOfDisplayData.findIndex(item => item == "Values"),1);
@@ -421,12 +423,12 @@ dataTypeDisable(){
           )
         }
       }
-      console.log("This is header Of table")
-      console.log(arrayHeder)
-      console.log("This is Data Array")
-      console.log(dataArray)
+      //console("This is header Of table")
+      //console(arrayHeder)
+      //console("This is Data Array")
+      //console(dataArray)
 
-      let lastUpdatedTime = dateFormat(json["data"]["lastCreatedTime"], "dd-mmm-yy HH:MM:ss")
+      let lastUpdatedTime = "";
       // console.log("This is dataArray");
       // console.log(dataArray);
       me.state.body.headerTable = arrayHeder
@@ -455,7 +457,7 @@ dataTypeDisable(){
     me.state.body.Spinnerdata = true;
     // me.state.body.in_prog = false;
     me.setState({ body: me.state.body })
-    console.log("This is Call of CallMainDataProcess Try")
+    //console("This is Call of CallMainDataProcess Try")
     me.errorganerator()
   }
   }
@@ -638,8 +640,8 @@ dataTypeDisable(){
     me.state.body.arrayOfDataIfoDisplay[index].disable = true;
     me.state.body.selectedDataInfoTypeValuesflag["Durations"] = false
    }
-   console.log("This is graphProcessForMultiCase")
-    console.log(temD);
+   //console("This is graphProcessForMultiCase")
+    //console(temD);
     let index = me.state.body.arrayOfDataIfoDisplay.findIndex(item => item.type === "Count");
     me.state.body.arrayOfDataIfoDisplay[index].disable = true;
     me.state.body.selectedDataInfoTypeValuesflag["Count"] = false
@@ -660,12 +662,12 @@ dataTypeDisable(){
       me.state.body.selectedEntitiesValues =  me.state.body.selectedSensorsDataArray.map(item => item)
       me.state.body.selectedDataInfoType = "radio";
       me.state.body.selectedDataInfoClass = "radio-inline";
-      console.log("This is Log For graph Values")
-      console.log(me.state.body.selectedDataInfoDefault)
+      //console("This is Log For graph Values")
+      //console(me.state.body.selectedDataInfoDefault)
       me.state.body.arrayOfDataIfoDisplay.map(item => { me.state.body.selectedDataInfoTypeValuesflag[item.type] =false});
       me.state.body.selectedDataInfoTypeValues  = [];
   
-      console.log(  me.state.body.selectedDataInfoTypeValuesflag)
+      //console(  me.state.body.selectedDataInfoTypeValuesflag)
       me.setState({ body: me.state.body })
       me.graphProcessForMultiCase();
    
@@ -682,10 +684,10 @@ dataTypeDisable(){
       me.state.body.selectedEntitiesValuesflag[temSensorsName] = true;
         
       // }else{
-        console.log("This is Single Bs Selected Data")
-        console.log(me.state.body.selectedEntity);
-        console.log( me.state.body.selectedEntitiesValues);
-        console.log(temSensorsName)
+        //console("This is Single Bs Selected Data")
+        //console(me.state.body.selectedEntity);
+        //console( me.state.body.selectedEntitiesValues);
+        //console(temSensorsName)
         // me.state.body.selectedEntitiesValues = [me.state.body.selectedEntity];
         // me.state.body.selectedEntitiesValuesflag[me.state.body.selectedEntity] = true;
       // }
@@ -708,14 +710,14 @@ dataTypeDisable(){
       }
       me.setState({ body: me.state.body })
       }
-      console.log("This is default SensorsName")
-      console.log(me.state.body.selectedSensorsName)
+      //console("This is default SensorsName")
+      //console(me.state.body.selectedSensorsName)
    
   }
   graphType = (value) => {
     //alert(value)
-    // console.log(value.target.value)
-    console.log(value)
+    // //console(value.target.value)
+    //console(value)
     let me = this
     me.state.body.selectedgraphType = value;
    
@@ -749,8 +751,8 @@ dataTypeDisable(){
     }
 
     
-    console.log(value)
-    console.log(me.state.body.selectedEntitiesValues)
+    //console(value)
+    //console(me.state.body.selectedEntitiesValues)
     me.setState({ body: me.state.body })
     me.callMainDataProcess()
 
@@ -786,8 +788,8 @@ dataTypeDisable(){
     }
 
 
-    console.log(value)
-    console.log(me.state.body.selectedDataInfoTypeValues)
+    //console(value)
+    //console(me.state.body.selectedDataInfoTypeValues)
     me.setState({ body: me.state.body });
     me.callMainDataProcess()
 
@@ -801,7 +803,7 @@ dataTypeDisable(){
       let index = me.state.body.sensorsGroups.findIndex(item => item.group == value);
 
       me.state.body.selectedGroups = me.state.body.sensorsGroups[index];
-      console.log(me.state.body.sensorsMainData)
+      //console(me.state.body.sensorsMainData)
       //  alert(value);
       var dataofSensors = [];
       for (let i = 0; i < me.state.body.selectedGroups.devicebusinessNM.length; i++) {
@@ -821,7 +823,7 @@ dataTypeDisable(){
         });
       }
       me.state.body.selectedSensorsDataArray = dataofSensors.map(item => item.devicebusinessNM);
-      console.log(me.state.body.selectedSensorsDataArray)
+      //console(me.state.body.selectedSensorsDataArray)
       me.state.body.selectedSensorsType1 = dataofSensors[0].type;
       me.state.body.selectedSensorsName = dataofSensors[0].devicebusinessNM;
       me.state.body.Sensors = array;
@@ -829,7 +831,7 @@ dataTypeDisable(){
     //  me.fetchdata();
     me.submit()
     } catch (error) {
-      console.log(error)
+      //console(error)
       this.errorganerator()
     }
 
