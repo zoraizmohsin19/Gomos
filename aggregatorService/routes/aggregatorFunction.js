@@ -1,5 +1,4 @@
-// var express = require("express");
-// var router = express.Router();
+// 'use strict';
 var MongoClient = require("mongodb").MongoClient;
 var scheduleTemp = require("node-schedule");
 const moment = require('moment');
@@ -11,10 +10,10 @@ var dataFromDevices = [],
   dataFromAssets = [],
   dataFromSubCust = [],
   dataFromPayload = [];
-var aggreSrvcSchedule;
+// var aggreSrvcSchedule;
 var dbo;
-var fs = require("fs");
-const NAMEOFSERVICE = "aggreterService";
+//var fs = require("fs");
+let NAMEOFSERVICE = "";
 const TRACE_PROD = 1;
 const TRACE_STAGE = 2;
 const TRACE_TEST = 3;
@@ -28,25 +27,26 @@ const EXIT_FALSE = false;
 const ERROR_TRUE = true;
 const ERROR_FALSE = false;
 var gomos = require("../../commanFunction/routes/commanFunction");
-var gomosSchedule = require("../../commanFunction/routes/getServiceConfig");
-var gomosDevices = require("../../commanFunction/routes/getDevices");
-let gomosAssets = require("../../commanFunction/routes/getAssets");
-let gomosSubCustCd = require("../../commanFunction/routes/getSubCustomers");
-let goomosPayloads = require("../../commanFunction/routes/getPayloads");
-var dt = dateTime.create();
-var formattedDate = dt.format('Y-m-d');
-const output = fs.createWriteStream(`./aggStd${formattedDate}.log`, { flags: "a" });
-const errorOutput = fs.createWriteStream(`./aggErr${formattedDate}.log`, { flags: "a" });
-var logger = gomos.createConsole(output, errorOutput);
-const SERVICE_VALUE = 1;
-var gConsole = false;
+// var gomosSchedule = require("../../commanFunction/routes/getServiceConfig");
+ let gomosDevices = require("../../commanFunction/routes/getDevices");
+// let gomosAssets = require("../../commanFunction/routes/getAssets");
+// let gomosSubCustCd = require("../../commanFunction/routes/getSubCustomers");
+// let goomosPayloads = require("../../commanFunction/routes/getPayloads");
+// var dt = dateTime.create();
+// var formattedDate = dt.format('Y-m-d');
+// const output = fs.createWriteStream(`./aggStd${formattedDate}.log`, { flags: "a" });
+// const errorOutput = fs.createWriteStream(`./aggErr${formattedDate}.log`, { flags: "a" });
+// var logger = gomos.createConsole(output, errorOutput);
+// const SERVICE_VALUE = 1;
+// var gConsole = false;
 
 /* GET home page. */
 // router.get("/", function (req, res, next) {
 //   console.log("This is Called")
 //   res.send("Hello Takreem");
 // });
-
+var logger;
+var gConsole;
 
 
 function calcIST(date) {
@@ -78,28 +78,40 @@ function calcUtc(date) {
 function convertIntTo2decPoint(value){
  return Math.floor(value*100)/100
 }
-function processAggregater() {
-  var min = aggreSrvcSchedule.min;
-// second place must be 0 
-  var schPattern = `10 ${"*"} * * * *`;
-  var tempSchedule = scheduleTemp.scheduleJob(schPattern, function () {
-    gomos.gomosLog(logger, gConsole, TRACE_DEV, "This is Scheduler process started in Aggregater service")
-    startProcess();
-  });
-}
+function callDateSpliter(startRengeparam, endRengeparam){
+    let startRenge = moment(startRengeparam);
+    let endRenge = moment(endRengeparam);
+   
+   let totalHours = endRenge.diff(startRenge, 'hours');
+   let hoursArray = [];
+   for(i = 0; i< totalHours ; i++){
+   
+   let endTime = moment(endRenge.toISOString()).add(i, "hours");
+   endTime.set({ minute: 30, second: 0, millisecond: 0 })
+   let startTime = moment(endTime.toISOString()).subtract(1, "hours");
+   hoursArray.push({startTime: startTime.toISOString(),endTime: endTime.toISOString()})
+   
+   }
+      return hoursArray;
+   }
 // THIS IS MAIN STARTING FUNCTION FOR HOUR AGGREGATION
-async function startProcess() {
-  let endTime = moment();
+exports.startProcess  = async function (NAMEOFSERVICE1,logger1, gConsole1 ,dbo1,startRenge,endRenge,deviceMacDataArray,flagValues) {
+ logger = logger1;
+ gConsole = gConsole1;
+ NAMEOFSERVICE = NAMEOFSERVICE1;
+ dbo = dbo1;
+let dataFromDevices = await gomosDevices.getDevices(dbo, NAMEOFSERVICE, logger, gConsole);
+gomos.gomosLog(logger,gConsole,TRACE_DEV,`#[${dataFromDevices.length}] - dataFromDevice Array`, dataFromDevices)
+gomos.gomosLog(logger,gConsole,TRACE_DEV,`#[${deviceMacDataArray.length}] - deviceMacDataArray Array`, deviceMacDataArray)
+let  rengeOfTime = await callDateSpliter(startRenge, endRenge);
+ gomos.gomosLog(logger, gConsole, TRACE_PROD, `rengeOfTime length - [${rengeOfTime.length}] and Array of Time`,rengeOfTime);
+ for(let t =0 ; t < rengeOfTime.length; t++ ){
+  let endTime = rengeOfTime[t].endTime;
   // minute 30 for server and 0 for local machine;
-  endTime.set({ minute: 30, second: 0, millisecond: 0 })
-  let startTime = moment(endTime.toISOString()).subtract(1, "hours");
-
-
-  gomos.gomosLog(logger, gConsole, TRACE_PROD, `startTime [${startTime.toISOString()}] endTime - [${endTime.toISOString()}] - Date - [${moment(calcIST(startTime.toISOString())).format("YYYY-MM-DD")}]  Hour - [${calcIST(startTime.toISOString()).getHours()}]  - going to process aggregation for this period.`);
-  // console.log(calcIST(startTime.toISOString()).getHours())
-  // console.log(moment(calcIST(startTime.toISOString())).format("YYYY-MM-DD"))
-  let deviceMacDataArray = await getDistinctArrayOfmacHourly(dbo, endTime, startTime);
-
+  //endTime.set({ minute: 30, second: 0, millisecond: 0 })
+  let startTime = rengeOfTime[t].startTime
+  gomos.gomosLog(logger, gConsole, TRACE_PROD, `startTime [${startTime}] endTime - [${endTime}] - Date - [${moment(calcIST(startTime)).format("YYYY-MM-DD")}]  Hour - [${calcIST(startTime).getHours()}]  - going to process aggregation for this period.`);
+//   let deviceMacDataArray = await getDistinctArrayOfmacHourly(dbo, endTime, startTime);
   for (let i = 0; i < deviceMacDataArray.length; i++) {
     let headerInfo = {};
     //THIS IS MAKING IDENTIFIRES FOR HOURS AGGREGATION
@@ -107,7 +119,7 @@ async function startProcess() {
     gomos.gomosLog(logger, gConsole, TRACE_TEST, `[${dataFromDevices[DeviceIndex].mac}] - [${i}]  DeviceIndex [${DeviceIndex}] - This is Device Going Process `)
     headerInfo["mac"] = dataFromDevices[DeviceIndex].mac;
     headerInfo["DeviceName"] = dataFromDevices[DeviceIndex].DeviceName;
-    let temDate = moment(calcIST(startTime.toISOString()))
+    let temDate = moment(calcIST(startTime))
     headerInfo["Date"] = temDate.format("YYYY-MM-DD");
     headerInfo["Day"] = ((temDate.dayOfYear()).toString()).padStart(2,"0"); 
     headerInfo["Week"] = ((temDate.isoWeek()).toString()).padStart(2,"0");
@@ -115,10 +127,15 @@ async function startProcess() {
     headerInfo["Year"] =   (temDate.year()).toString()
 
       //console.log(calcUtc(moment(calcIST(startTime.toISOString())).format("YYYY-MM-DD")));
-    headerInfo["Hour"] = ((calcIST(startTime.toISOString()).getHours()).toString()).padStart(2,"0");
+    headerInfo["Hour"] = ((calcIST(startTime).getHours()).toString()).padStart(2,"0");
    //  console.log(headerInfo)
     // console.log(calcUtc(moment(calcIST(startTime.toISOString())).format("YYYY-MM-DD")));
     //THIS IS startMainProcessSensors FOR SENSORS DATA PROCESSING AND startMainProcessForChannel FOR CHANNEL PROCESS
+    if(flagValues !== "N"){
+        let responseDeletedRecord = await checkingDataAvailability(dataFromDevices[DeviceIndex].mac, headerInfo["Date"], headerInfo["Hour"]);
+    gomos.gomosLog(logger, gConsole, TRACE_TEST, `[${dataFromDevices[DeviceIndex].mac}] -total # record deleted `,responseDeletedRecord);
+
+    }
     let sensorsData = await startMainProcessSensors(dataFromDevices[DeviceIndex], dataFromDevices[DeviceIndex].mac, "sensors", endTime, startTime);
     let channelData = await startMainProcessForChannel(dataFromDevices[DeviceIndex], dataFromDevices[DeviceIndex].mac, "channel", endTime, startTime);
     let Data = (sensorsData["sensors"]).concat(channelData["channel"]);
@@ -137,6 +154,7 @@ async function startProcess() {
         for (let j = 0; j < key.length; j++) {
           json[key[j]] = Data[l][key[j]];
         }
+        json["flag"] = flagValues;
         json["createdTime"] = currentTime;
         json["updatedTime"] = currentTime;
         gomos.gomosLog(logger, gConsole, TRACE_TEST, `[${json.mac}] - [${json.bsName}] - About to insert for this Sensor/Channel`);
@@ -147,18 +165,35 @@ async function startProcess() {
      await inserIntoAggregation(dbo, ArrayOfObject);
     } else if (Data.length === 0) {
       //  this condition never meet
-        await inserIntoAlert(dbo, json);
+      //  await inserIntoAlert(dbo, json);
     }
     else {
       gomos.errorCustmHandler(NAMEOFSERVICE, "startProcess", 'This key not found for processing - ', channelData, sensorsData, ERROR_APPLICATION, ERROR_FALSE, EXIT_FALSE);
     }
   }
-
+ }
+ return "completed"
 
 }
+//THIS IS CHEAKING DATA PRESENT OR NOT  IN Aggregation 
+function checkingDataAvailability(mac, Date, Hour) {
+    return new Promise( (resolve, reject) => {
+   gomos.gomosLog(logger, gConsole, TRACE_DEV, `mac [${mac}] - Date : [${ Date }] - Hour [${Hour}]`);
+      dbo.collection("AggregatedData").deleteMany({mac,Date,Hour}, function (err, result) {
+        if (err) {
+          gomos.errorCustmHandler(NAMEOFSERVICE, "checkingDataAvailability", 'This deletting To  aggregation Error - ', ` `, err, ERROR_DATABASE, ERROR_TRUE, EXIT_FALSE);
+          //reject(err)
+          resolve({ Error: "This is Error of  Deleted" })
+        } else {
+          gomos.gomosLog(logger, gConsole, TRACE_DEBUG, "Deleted : aggregation",result.result.n);
+          resolve(result.result.n)
+        }
+      });
+    })
+  }
 //THIS IS DEFINATION OF inserIntoAggregation 
 function inserIntoAggregation(dbo, dataToInsert) {
-  return new Promise(async (resolve, reject) => {
+  return new Promise( (resolve, reject) => {
  
     dbo.collection("AggregatedData").insertMany(dataToInsert, function (err, result) {
       if (err) {
@@ -173,91 +208,91 @@ function inserIntoAggregation(dbo, dataToInsert) {
     });
   })
 }
-function getDistinctArrayOfmacHourly(dbo, endTime, startTime) {
-  return new Promise((resolve, reject) => {
-    gomos.gomosLog(logger, gConsole, TRACE_DEBUG, "Entered Function - getDistinctArrayOfmacHourly");
-    dbo.collection("MsgFacts")
-      .distinct(
-        "mac", { DeviceTime: { $lte: new Date(endTime.toISOString()), $gte: new Date(startTime.toISOString()) } }
-        , function (err, result) {
-          if (err) {
-            gomos.gomosLog(logger, gConsole, TRACE_DEBUG, "Exiting Function - getDistinctArrayOfmacHourly Error");
-            reject(err)
-            //process.hasUncaughtExceptionCaptureCallback();
-          }
-          gomos.gomosLog(logger, gConsole, TRACE_TEST, `These are the devices for which aggregation needs to be done `, result);
-          gomos.gomosLog(logger, gConsole, TRACE_DEBUG, "Exiting Function - getDistinctArrayOfmacHourly Success");
-          resolve(result);
-        });
-  });
-}
-function inserIntoAlert(dbo, dataToInsert) {
-  return new Promise(async (resolve, reject) => {
-    if (dataFromDevices.filter(element => element.mac == dataToInsert.mac).length == 0) {
-      gomos.gomosLog(logger, gConsole, TRACE_DEV, "Mac Is not Found ", dataToInsert);
-      resolve({ err: "mac is Not Defind" })
-    } else {
+// function getDistinctArrayOfmacHourly(dbo, endTime, startTime) {
+//   return new Promise((resolve, reject) => {
+//     gomos.gomosLog(logger, gConsole, TRACE_DEBUG, "Entered Function - getDistinctArrayOfmacHourly");
+//     dbo.collection("MsgFacts")
+//       .distinct(
+//         "mac", { DeviceTime: { $lte: new Date(endTime.toISOString()), $gte: new Date(startTime.toISOString()) } }
+//         , function (err, result) {
+//           if (err) {
+//             gomos.gomosLog(logger, gConsole, TRACE_DEBUG, "Exiting Function - getDistinctArrayOfmacHourly Error");
+//             reject(err)
+//             //process.hasUncaughtExceptionCaptureCallback();
+//           }
+//           gomos.gomosLog(logger, gConsole, TRACE_TEST, `These are the devices for which aggregation needs to be done `, result);
+//           gomos.gomosLog(logger, gConsole, TRACE_DEBUG, "Exiting Function - getDistinctArrayOfmacHourly Success");
+//           resolve(result);
+//         });
+//   });
+// }
+// function inserIntoAlert(dbo, dataToInsert) {
+//   return new Promise(async (resolve, reject) => {
+//     if (dataFromDevices.filter(element => element.mac == dataToInsert.mac).length == 0) {
+//       gomos.gomosLog(logger, gConsole, TRACE_DEV, "Mac Is not Found ", dataToInsert);
+//       resolve({ err: "mac is Not Defind" })
+//     } else {
 
-      let indexOfDevice = dataFromDevices.findIndex(element => element.mac == dataToInsert.mac);
-      assetsId = dataFromDevices[indexOfDevice].assetId;
-      if (dataFromAssets.filter(item => item.assetId == assetsId).length == 0) {
-        gomos.gomosLog(logger, gConsole, TRACE_DEV, "assetId Is not Found ", dataToInsert);
-        resolve({ err: "assetsId is Not Defind" })
-      }
-      else {
-        let subCustCd, custCd, spCd;
-        let indexOfAsset = dataFromAssets.findIndex(element => element.assetId == assetsId);
-        subCustCd = dataFromAssets[indexOfAsset].subCustCd;
-        if (dataFromSubCust.filter(item => item.subCustCd == subCustCd).length == 0) {
-          gomos.gomosLog(logger, gConsole, TRACE_DEV, "subCustCd Is not Found ", dataToInsert)
-          resolve({ err: "subCustCd is Not Defind" })
-        } else {
-          let indexOfSubCust = dataFromSubCust.findIndex(element => element.subCustCd == subCustCd);
-          custCd = dataFromSubCust[indexOfSubCust].custCd;
-          spCd = dataFromSubCust[indexOfSubCust].spCd;
-          let jsonObj = {
-            spCd: spCd,
-            custCd: custCd,
-            subCustCd: subCustCd,
-            mac: dataToInsert.mac,
-            DeviceName: dataToInsert.DeviceName,
-            body: {
-              Date: dataToInsert.Date,
-              Hour: dataToInsert.Hour,
-              alertText: "Data Not Found In MsgFacts",
-              sensors: dataToInsert.sensors,
-              channel: dataToInsert.channel
-            },
-            type: "level2",
-            subType: "Notification1",
-            createdTime: dataToInsert.createdTime,
-            updatedTime: dataToInsert.updatedTime,
-          }
+//       let indexOfDevice = dataFromDevices.findIndex(element => element.mac == dataToInsert.mac);
+//       assetsId = dataFromDevices[indexOfDevice].assetId;
+//       if (dataFromAssets.filter(item => item.assetId == assetsId).length == 0) {
+//         gomos.gomosLog(logger, gConsole, TRACE_DEV, "assetId Is not Found ", dataToInsert);
+//         resolve({ err: "assetsId is Not Defind" })
+//       }
+//       else {
+//         let subCustCd, custCd, spCd;
+//         let indexOfAsset = dataFromAssets.findIndex(element => element.assetId == assetsId);
+//         subCustCd = dataFromAssets[indexOfAsset].subCustCd;
+//         if (dataFromSubCust.filter(item => item.subCustCd == subCustCd).length == 0) {
+//           gomos.gomosLog(logger, gConsole, TRACE_DEV, "subCustCd Is not Found ", dataToInsert)
+//           resolve({ err: "subCustCd is Not Defind" })
+//         } else {
+//           let indexOfSubCust = dataFromSubCust.findIndex(element => element.subCustCd == subCustCd);
+//           custCd = dataFromSubCust[indexOfSubCust].custCd;
+//           spCd = dataFromSubCust[indexOfSubCust].spCd;
+//           let jsonObj = {
+//             spCd: spCd,
+//             custCd: custCd,
+//             subCustCd: subCustCd,
+//             mac: dataToInsert.mac,
+//             DeviceName: dataToInsert.DeviceName,
+//             body: {
+//               Date: dataToInsert.Date,
+//               Hour: dataToInsert.Hour,
+//               alertText: "Data Not Found In MsgFacts",
+//               sensors: dataToInsert.sensors,
+//               channel: dataToInsert.channel
+//             },
+//             type: "level2",
+//             subType: "Notification1",
+//             createdTime: dataToInsert.createdTime,
+//             updatedTime: dataToInsert.updatedTime,
+//           }
 
-          await inserIntoAlertLeve2(dbo, jsonObj);
-          resolve(jsonObj)
-        }
-      }
+//           await inserIntoAlertLeve2(dbo, jsonObj);
+//           resolve(jsonObj)
+//         }
+//       }
 
-    }
+//     }
 
 
-  })
-}
-function inserIntoAlertLeve2(dbo, dataToInsert) {
-  return new Promise(async (resolve, reject) => {
-    dbo.collection("Alerts").insertOne(dataToInsert, function (err, result) {
-      if (err) {
-        gomos.errorCustmHandler(NAMEOFSERVICE, "inserIntoAggregation", 'This Inserting To  inserIntoAlert Error - ', ` `, err, ERROR_DATABASE, ERROR_TRUE, EXIT_FALSE);
-        reject(err)
-      } else {
+//   })
+// }
+// function inserIntoAlertLeve2(dbo, dataToInsert) {
+//   return new Promise(async (resolve, reject) => {
+//     dbo.collection("Alerts").insertOne(dataToInsert, function (err, result) {
+//       if (err) {
+//         gomos.errorCustmHandler(NAMEOFSERVICE, "inserIntoAggregation", 'This Inserting To  inserIntoAlert Error - ', ` `, err, ERROR_DATABASE, ERROR_TRUE, EXIT_FALSE);
+//         reject(err)
+//       } else {
 
-        gomos.gomosLog(logger, gConsole, TRACE_DEBUG, "Inserted : Alerts");
-        resolve(result)
-      }
-    });
-  })
-}
+//         gomos.gomosLog(logger, gConsole, TRACE_DEBUG, "Inserted : Alerts");
+//         resolve(result)
+//       }
+//     });
+//   })
+// }
 function getBsNameAndType(dataFromDevices, TypeOf) {
   let arrayBSName = [];
   let bsName = [];
@@ -325,7 +360,7 @@ async function startMainProcessForChannel(dataFromDevices, mac, TypeOf, endTime,
 }
 function aggragateChannel(dbo, mac, dt, dt2, arrayBSName, Type, bsName) {
   return new Promise((resolve, reject) => {
-    let tempCriteria = { mac: mac, DeviceTime: { $lte: new Date(dt.toISOString()), $gte: new Date(dt2.toISOString()) } }
+    let tempCriteria = { mac: mac, DeviceTime: { $lte: new Date(dt), $gte: new Date(dt2) } }
     tempCriteria[`sensors.${arrayBSName}`] = { $exists: true }
 
     dbo.collection("MsgFacts")
@@ -344,16 +379,16 @@ function aggragateChannel(dbo, mac, dt, dt2, arrayBSName, Type, bsName) {
           for (let i = 0; i < result.length; i++) {
             if (result[i]["sensors"][Type][bsName] == 1) {
               if (i === 0 && result[0]["sensors"][Type][bsName] == 1) {
-                let response = await getlastTimeForOn(dbo, mac, arrayBSName, { $lt: new Date(dt2.toISOString()) });
+                let response = await getlastTimeForOn(dbo, mac, arrayBSName, { $lt: new Date(dt2) });
                 if (response.length !== 0 && response[0]["sensors"][Type][bsName] == 1) {
-                  dateArray.push(new Date(dt2.toISOString()))
+                  dateArray.push(new Date(dt2))
                 }
               }
               dateArray.push(result[i].DeviceTime)
 
               if (i === result.length - 1) {
                 if (result[result.length - 1]["sensors"][Type][bsName] == 1) {
-                  dateArray.push(new Date(dt.toISOString()))
+                  dateArray.push(new Date(dt))
                 }
                 if (dateArray.length != 0) {
                   duration += moment.duration(moment(dateArray[dateArray.length - 1]).diff(moment(dateArray[0]))).asMinutes();
@@ -448,7 +483,7 @@ function aggragateSensors(dbo, mac, dt, dt2, arrayBSName) {
   return new Promise((resolve, reject) => {
     dbo.collection("MsgFacts")
       .aggregate([
-        { $match: { mac: mac, DeviceTime: { $lte: new Date(dt.toISOString()), $gte: new Date(dt2.toISOString()) } } },
+        { $match: { mac: mac, DeviceTime: { $lte: new Date(dt), $gte: new Date(dt2) } } },
         {
           $group: {
             _id: "$mac",
@@ -478,41 +513,41 @@ function aggragateSensors(dbo, mac, dt, dt2, arrayBSName) {
 }
 
 
-async function getAllconfig() {
-  aggreSrvcSchedule = await gomosSchedule.getServiceConfig(dbo, NAMEOFSERVICE, "aggrSrvc", logger, gConsole);
-  dataFromDevices = await gomosDevices.getDevices(dbo, NAMEOFSERVICE, logger, gConsole);
-  dataFromAssets = await gomosAssets.getAssets(dbo, NAMEOFSERVICE, logger, gConsole);
-  dataFromSubCust = await gomosSubCustCd.getSubCustomers(dbo, NAMEOFSERVICE, logger, gConsole);
-  dataFromPayload = await goomosPayloads.getPayloads(dbo, NAMEOFSERVICE, logger, gConsole);
+// async function getAllconfig() {
+//   aggreSrvcSchedule = await gomosSchedule.getServiceConfig(dbo, NAMEOFSERVICE, "aggrSrvc", logger, gConsole);
+//   dataFromDevices = await gomosDevices.getDevices(dbo, NAMEOFSERVICE, logger, gConsole);
+//   dataFromAssets = await gomosAssets.getAssets(dbo, NAMEOFSERVICE, logger, gConsole);
+//   dataFromSubCust = await gomosSubCustCd.getSubCustomers(dbo, NAMEOFSERVICE, logger, gConsole);
+//   dataFromPayload = await goomosPayloads.getPayloads(dbo, NAMEOFSERVICE, logger, gConsole);
 
-}
-module.exports = function (app) {
-  //const router = express.Router()
+// }
+// module.exports = function (app) {
+//   //const router = express.Router()
 
-  urlConn = app.locals.urlConn;
-  dbName = app.locals.dbName;
-  if (process.argv[4] == SERVICE_VALUE) {
-    console.log(process.argv[4]);
-    gConsole = true;
-    console.log(gConsole)
-  }
-  MongoClient.connect(urlConn, { useNewUrlParser: true }, function (
-    err,
-    connection
-  ) {
-    if (err) {
-      gomos.errorCustmHandler(NAMEOFSERVICE, "module.exports", 'THIS IS MONGO CLIENT CONNECTION ERROR', ``, err, ERROR_DATABASE, ERROR_TRUE, EXIT_TRUE);
+//   urlConn = app.locals.urlConn;
+//   dbName = app.locals.dbName;
+//   if (process.argv[4] == SERVICE_VALUE) {
+//     console.log(process.argv[4]);
+//     gConsole = true;
+//     console.log(gConsole)
+//   }
+//   MongoClient.connect(urlConn, { useNewUrlParser: true }, function (
+//     err,
+//     connection
+//   ) {
+//     if (err) {
+//       gomos.errorCustmHandler(NAMEOFSERVICE, "module.exports", 'THIS IS MONGO CLIENT CONNECTION ERROR', ``, err, ERROR_DATABASE, ERROR_TRUE, EXIT_TRUE);
 
-    }
-    dbo = connection.db(dbName);
-  });
-  setTimeout(() => {
-    getAllconfig(); setTimeout(() => {
-      processAggregater();
-      //     setTimeout( () =>  
-      //     //startProcess()
-      // , 5000)
-    }
-      , 1000)
-  }, 5000);
-};
+//     }
+//     dbo = connection.db(dbName);
+//   });
+//   setTimeout(() => {
+//     getAllconfig(); setTimeout(() => {
+//       processAggregater();
+//       //     setTimeout( () =>  
+//       //     //startProcess()
+//       // , 5000)
+//     }
+//       , 1000)
+//   }, 5000);
+// };
