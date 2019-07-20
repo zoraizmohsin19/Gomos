@@ -21,7 +21,7 @@ const TRACE_DEV   = 4;
 const TRACE_DEBUG = 5; 
 var  gomos = require("../../commanFunction/routes/commanFunction");
 var midllelayer = require("../../EndPointMiddlelayer/routes/middlelayer");
-var aggragator = require("../../AggregaterService/routes/aggregatorFunction");
+var aggragator = require("../../aggregatorService/routes/aggregatorFunction");
 //var gomosDevices = require("../../commanFunction/routes/getDevices");
 var urlConn, dbName;
 var  gomos = require("../../commanFunction/routes/commanFunction");
