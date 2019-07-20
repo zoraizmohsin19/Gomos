@@ -100,7 +100,7 @@ function processFactMessages() {
         if (err) {
           gomos.errorCustmHandler(NAMEOFSERVICE, "processFactMessages", 'This Finding Dump From Db', `getting data From Dump`, err, ERROR_DATABASE, ERROR_TRUE, EXIT_TRUE);
         }
-        if (result.length > 0) {
+        else if (result.length > 0) {
           gomos.gomosLog(logger, gConsole,
             TRACE_PROD,
             "processFactMessages - No. of documents retrived",
@@ -122,7 +122,7 @@ function processFactMessages() {
             var currentTime = new Date(new Date().toISOString());
             gomos.gomosLog(logger, gConsole, TRACE_DEV, "This is Debug For Id Of before update", id)
             let response = await mainpipeLineProcessing(mac, processedFlag, createdTime, updatedTime, payloadId, id, currentTime, i);
-            gomos.gomosLog(logger, gConsole, TRACE_TEST, "This is mainpipelineProcess response", response)
+            gomos.gomosLog(logger, gConsole, TRACE_PROD, "This is mainpipelineProcess response", response)
             gomos.gomosLog(logger, gConsole, TRACE_TEST, "This is debug of Trace For Index ", i);
             // Refreshing the collections for the next run
             // console.log("hello")
@@ -252,7 +252,9 @@ function mainpipeLineProcessing(mac, processedFlag, createdTime, updatedTime, pa
                         gomos.gomosLog(logger, gConsole, TRACE_DEBUG, "processFactMessages -  where msgFactsKeys and sensorsNms values", sensorKeys + ":" + msgFactsKeys);
                         //if the msg pattern changes wven these keys also changes,so it has to be manually inserted
                         // when ever there is change in the msg pattern.
-                        keysToRemove = ["payloadId", "mac", "createdTime", "updatedTime", "_id", "processed", "Token"];
+                        let DeviceTime = await deviceDateFind(result1.value);
+                        gomos.gomosLog(logger,gConsole,TRACE_DEV,"This is log for Device time", DeviceTime);
+                        keysToRemove = ["payloadId", "mac", "createdTime", "updatedTime", "_id", "processed", "Token", "Date"];
 
                         //except the business names related keys all other keys has to be removed from the
                         //msgFactskeys,which is further used for mapping with payload business names.
@@ -290,6 +292,7 @@ function mainpipeLineProcessing(mac, processedFlag, createdTime, updatedTime, pa
                           custCd: custCd,
                           spCd: spCd,
                           sensors: finalSensors,
+                          DeviceTime: new Date(DeviceTime),
                           createdTime: currentTime,
                           updatedTime: currentTime
                         };
@@ -347,6 +350,33 @@ function mainpipeLineProcessing(mac, processedFlag, createdTime, updatedTime, pa
       });
   });
 
+}
+function deviceDateFind(data){
+  try {
+    let dateTime = data.Date
+    let now = moment(dateTime)
+    // if(dateTime !==undefined ){
+
+    
+      return (dateTime !==undefined ) ? (now.isValid())? now.toISOString():  moment(data.createdTime).toISOString(): moment(data.createdTime).toISOString();
+    // if(  now.isValid() ) {
+    //   gomos.gomosLog(logger,gConsole,TRACE_DEV,"This is valid case",now.toISOString())
+    //   // gomos.gomosLog(logger,gConsole,TRACE_DEV,"This is valid case",moment("sdfsfdsd"))
+    //   return now.toISOString();
+
+    // }
+    // else{
+    //   gomos.gomosLog(logger,gConsole,TRACE_DEV,"This is In  valid case",now.toISOString())
+    //   return moment(data.createdTime).toISOString();
+    // }
+  // }else{
+  //   gomos.gomosLog(logger,gConsole,TRACE_DEV,"This is In  valid case",now.toISOString())
+  //     return moment(data.createdTime).toISOString(); 
+  // }
+  } catch (err) {
+    gomos.gomosLog(logger,gConsole,TRACE_DEV,"This is catch ",now.toISOString())
+    return moment(data.createdTime).toISOString();
+  }
 }
 function deviceUpTimeUpdated(dbo, mac, inBootstrap, inLastbeat, duration, currentTime) {
   return new Promise((resolve, reject) => {
@@ -1485,8 +1515,25 @@ async function getAllconfig() {
   dataFromSubCust  = await gomosSubCustCd.getSubCustomers(dbo, NAMEOFSERVICE, logger, gConsole);
   dataFromPayload  = await goomosPayloads.getPayloads(dbo, NAMEOFSERVICE, logger, gConsole);
 }
+function connectDb(){
+  return new Promise((resolve,reject)=>{
+    MongoClient.connect(urlConn, { useNewUrlParser: true }, function (
+      err,
+      connection
+    ) {
+      if (err) {
+
+        gomos.errorCustmHandler(NAMEOFSERVICE, "module.exports", 'THIS IS MONGO CLIENT CONNECTION ERROR', ``, err, ERROR_DATABASE, ERROR_TRUE, EXIT_TRUE);
+  reject(err)
+      }
+      dbo = connection.db(dbName);
+      resolve(dbo)
+    });
+  })
+ 
+}
 var factTempInv = null;
-module.exports = function (app) {
+module.exports = async function (app) {
   //const router = express.Router()
 
   urlConn = app.locals.urlConn;
@@ -1496,16 +1543,7 @@ module.exports = function (app) {
     gConsole = true;
     console.log(gConsole)
   }
-  MongoClient.connect(urlConn, { useNewUrlParser: true }, function (
-    err,
-    connection
-  ) {
-    if (err) {
-      gomos.errorCustmHandler(NAMEOFSERVICE, "module.exports", 'THIS IS MONGO CLIENT CONNECTION ERROR', ``, err, ERROR_DATABASE, ERROR_TRUE, EXIT_TRUE);
-
-    }
-    dbo = connection.db(dbName);
-  });
+ await connectDb()
   setTimeout(function () {
     factTempInv = app;
     getAllconfig();

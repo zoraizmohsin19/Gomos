@@ -24,9 +24,18 @@ class Chartcom extends Component {
   //     }
   //     return color;
   //     }
+
   getIdForChart(chartAxis, keysofBsName){
-   let index =  chartAxis.findIndex(item => item.businessName === keysofBsName);
-   return chartAxis[index].axisY
+let array =[{businessName: "Values", axisY: "first-y-axis"},
+{businessName: "Min", axisY: "first-y-axis"},
+{businessName: "Max", axisY: "second-y-axis"},
+{businessName: "Avg", axisY: "first-y-axis"},
+{businessName: "Durations", axisY: "first-y-axis"},
+{businessName: "Count", axisY: "second-y-axis"}];
+ let temp = chartAxis.concat(array)
+//  console.log(temp)
+   let index =  temp.findIndex(item => item.businessName === keysofBsName);
+   return temp[index].axisY
   }
   render(){
      const{chartAxis,arrData, arrLabels, legend, xAxisLbl, yAxisLbl,bgColors,borderColors } = this.props
@@ -78,7 +87,7 @@ class Chartcom extends Component {
          var labelName2 = '';
          
         for(var i = 0 ; i< keysofBsName.length; i++){
-          console.log(this.getIdForChart(chartAxis,keysofBsName[i]));
+       //   console.log(this.getIdForChart(chartAxis,keysofBsName[i]));
       
           if(this.getIdForChart(chartAxis,keysofBsName[i]) === "second-y-axis"){
             labelName2 += keysofBsName[i] + " ; ";

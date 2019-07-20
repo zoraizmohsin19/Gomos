@@ -4,18 +4,23 @@ var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 var fs = require('fs');
-var indexRouter = require('./routes/index');
+var index = require('./routes/index');
 var usersRouter = require('./routes/users');
 var dateTime = require('node-datetime');
-// var appConfig = require(process.cwd() +'\\appConfig.json');
-var appConfig = JSON.parse(fs.readFileSync(process.cwd() +'/appConfig.json', 'utf8'));
+var  gomos = require("../commanFunction/routes/commanFunction");
+
+//reads the data from config file which contains DB connection url and the DB Name.
+var appConfig = JSON.parse(fs.readFileSync(process.cwd() + '/appConfig.json', 'utf8'));
+
 var urlConn, dbName;
 
 var app = express();
 
 var dt = dateTime.create();
 var formattedDate = dt.format('Y-m-d');
-var log_file_err=fs.createWriteStream(process.cwd() + '/error-' + formattedDate + '.log',{flags:'a'});  
+
+//creates the file to write all errors that occurs,which will be usefull for debugging.
+var log_file_err = fs.createWriteStream(process.cwd() + '/error-' + formattedDate + '.log', { flags: 'a' });
 
 //Checks whether the service is running in production mode or development mode and sets the enviroment
 //accordingly.
@@ -40,27 +45,11 @@ else {
   process.exit();
 }
 
-
 //set app level local vars
 app.locals.urlConn = urlConn;
 app.locals.dbName = dbName;
-// app.locals.gomosLog = function(env,staticStr,traceValue){
-//   app.locals.gomosLog = function(x){
-//   if(process.argv[3] >= arguments[0]){
-//      var  currTime = new Date();
-//     if(arguments[2] instanceof Object){
-//       console.log(currTime.getHours()+":"+currTime.getMinutes()+":"+currTime.getSeconds()+"."+currTime.getMilliseconds()+"-"+arguments[1]);
-//       console.log(arguments[2]);
-//     }else if(arguments.length == 2){
-//       console.log( currTime.getHours()+":"+currTime.getMinutes()+":"+currTime.getSeconds()+"."+currTime.getMilliseconds()+"-"+arguments[1]);
-//     }
-//     else{
-//       console.log( currTime.getHours()+":"+currTime.getMinutes()+":"+currTime.getSeconds()+"."+currTime.getMilliseconds()+"-"+arguments[1]+" ["+arguments[2]+ "]");
-//     }
- 
-//   }
-// }
-indexRouter(app);
+
+index(app);
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -72,33 +61,36 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use('/', indexRouter);
+app.use('/', index);
 app.use('/users', usersRouter);
 
 //catch 404 and forward to error handler
-app.use(function(req, res, next) {
+app.use(function (req, res, next) {
   next(createError(404));
 });
 
 //Error Handling
-app.use(function(error,req, res, next) {
-  if(!error.statusCode){
+app.use(function (error, req, res, next) {
+  if (!error.statusCode) {
     error.statusCode = 500;
   }
-  console.log("Error handler: ", error.message , error.statusCode);
-  log_file_err.write("Error handler: " + "Error Code:" + error.statusCode+ "  " + error.stack + '\n');  
-  res.status(500).json({error:error.message});
+  // console.log("Error handler: ", error.message, error.statusCode);
+  // log_file_err.write("Error handler: " + "Error Code:" + error.statusCode + "  " + error.stack + '\n');
+  gomos.errorCustmHandler("mainService","error.statusCode=500","app error hander", "Error handler: " + "Error Code:" + error.statusCode + "  " + error.stack + '\n',error,"runTimeError",true,false)
+  res.status(500).json({ error: error.message });
 });
 
 //uncaught exception handling
-process.on('uncaughtException', function(err) {
+process.on('uncaughtException', function (err) {
   console.log('Caught exception: ' + err);
-  log_file_err.write('Caught exception: ' + err.stack + '\n');
-  process.exit();
+  // log_file_err.write('Caught exception: ' + err.stack + '\n');
+  // process.exit();
+  gomos.errorCustmHandler("mainService","uncaughtException","Caught exception", err.message,err,"runTimeError",true,true)
+
 });
 
 // error handler
-app.use(function(err, req, res, next) {
+app.use(function (err, req, res, next) {
   // set locals, only providing error in development
   res.locals.message = err.message;
   res.locals.error = req.app.get('env') === 'development' ? err : {};

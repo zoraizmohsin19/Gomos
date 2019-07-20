@@ -13,10 +13,10 @@ import addCustomer from './Components/addCustomer';
 
 import SPdashBoard from './Components/SPdashBoard';
 import CustdashBoard from './Components/CustdashBoard';
-import socketdashbord from './Components/socketdashbord';
+import viewDashboard from './Components/viewDashboard/viewDashboard';
 import AlertReport from './Components/alertReport';
 import activeDashbord from './Components/activeDashbord';
-import soketdemo from './Components/soketdemo';
+
 import Header from "./layout/Header"
 import ClimateTemp from "./Components/ClimateControlTemp/climateControlTemp"
 import alertSetup from "./Components/AlertSetupComponent/alertSetup"
@@ -35,18 +35,17 @@ class App extends Component {
               <Route exact path="/" component={Login} />
               <Route exact path="/menu" component={Menu} />
               <Route exact path="/AlertReport" component={AlertReport} />
-              <Route exact path="/alertSetup" component={alertSetup} />
-              <Route exact path= "/climatTemp" component= {ClimateTemp}/> 
+              {/* <Route exact path="/alertSetup" component={alertSetup} /> */}
+              {/* <Route exact path= "/climatTemp" component= {ClimateTemp}/>  */}
               <Route exact path="/activeDashbord" component={activeDashbord} />
               <Route exact path="/NevMenu" component={NevMenu} />                            
               {/* <Route exact path="/chartcomp/:data" component = {chartcomp} />     */}
-              <Route exact path="/chartcomp" component = {chartcomp} />
+              {/* <Route exact path="/chartcomp" component = {chartcomp} /> */}
               <Route exact path="/addServiceProvider" component = {addServiceProvider} /> 
               <Route exact path="/addCustomer" component = {addCustomer} /> 
               <Route exact path="/SPdashBoard" component = {SPdashBoard} />
               <Route exact path="/CustdashBoard" component = {CustdashBoard} />  
-              <Route exact path="/soketdemo" component = {soketdemo} /> 
-              <Route exact path="/socketdashbord" component = {socketdashbord} />      
+              <Route exact path="/socketdashbord" component = {viewDashboard} />      
               {/* <Route exact path="/UserList" component = {UserList} />    */}
               <Route exact path="/EditServiceProvider/:id/:title" component = {EditServiceProvider} /> 
                      
