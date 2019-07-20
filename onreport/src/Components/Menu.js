@@ -53,6 +53,7 @@ class Menu extends Component {
             disableToDt : true,
             unabledatepiker:true,
             Disabledsubmit: true,
+            fileName: "",
             DynamicInput: '',
             startDate: moment(),
             endDate :  moment(),
@@ -363,24 +364,25 @@ getAllDataApi(SendForSp,SendFroCustCD,SendForSbCd,SendForSensor,SendForStartDate
       if(json !=0){
         swal("Success!", "", "success");
         //HERE WE REMOVE LAST ELEMENT JSON ARRAY
-        json.pop();
+        // json.pop();
       //MAKING A ARRAY FOR STRUCTURE DATA ARRAY FOR CHART AND EXCEL 
-        var FdataArray =[];
+        // var FdataArray =[];
    
-        for (var i = 0; i < json.length - 1; i++) {
-          var tempobj ={}
-          var  keysofbussinessName = Object.keys(json[i][2]);
-          for(var j = 0; j< keysofbussinessName.length; j++){
-            tempobj[keysofbussinessName[j]] = json[i][2][keysofbussinessName[j]];
-          }
-          tempobj["CreatedTime"] =  json[i][3]
-          FdataArray.push(tempobj)}
+        // for (var i = 0; i < json.length - 1; i++) {
+        //   var tempobj ={}
+        //   var  keysofbussinessName = Object.keys(json[i][2]);
+        //   for(var j = 0; j< keysofbussinessName.length; j++){
+        //     tempobj[keysofbussinessName[j]] = json[i][2][keysofbussinessName[j]];
+        //   }
+        //   tempobj["CreatedTime"] =  json[i][3]
+        //   FdataArray.push(tempobj)}
         // // console.log("this json data");
+        this.setState({fileName: json.fileName})
          console.log(json);
         // // alert(json)
         // // console.log("end json");
         //HERE WE UPDATTING STATE FOR TABLE DATA FOR tableDataToSend AND RESUALT FOR CHART AND EXCEL
-        this.setState({tableDataToSend : json ,result :FdataArray })
+        // this.setState({tableDataToSend : json ,result :FdataArray })
       // // console.log(json);
       // // // alert(json)
         }else{
@@ -391,33 +393,33 @@ getAllDataApi(SendForSp,SendFroCustCD,SendForSbCd,SendForSensor,SendForStartDate
 }
  //THIS METHOD FOR HENDER FOR CHART WHICH NEVIGATE TO CHART COMPONENT AND SAVE DATA RO SESSION MEMORY
  displayChart() {
-  const {result,selectedSensorValueArray,startDate,endDate} = this.state;
-  var dataToSend1 = [];
-  var dataToSend2 = [];
-  for (var i = 0; i < result.length; i++) {
-    dataToSend1.push(result[i]["CreatedTime"]);
-    var kyetoRemove = ["CreateTime","CreatedTime","Mac"];
-    var keypr = Object.keys(result[i]);
-  for(var j =0; j< kyetoRemove.length;j++){
-    keypr.splice(kyetoRemove.indexOf(kyetoRemove[j]),1);
-  }
-  var temp ={}
-  for(var k =0; k< keypr.length; k++){
-    temp[keypr] =result[i][keypr[k]]; 
-  }
-    dataToSend2.push(temp);
-  }
-  var yaxisName = selectedSensorValueArray;
-  var formDate = new Date(startDate).toLocaleString();
-  var toDate = new Date(endDate).toLocaleString();
-  //HERE SENDING DATA SESSION-STORAGE
-    sessionStorage.setItem("dataToSend1",dataToSend1);
-    sessionStorage.setItem("dataToSend2",dataToSend2);
-    sessionStorage.setItem("yaxisName",yaxisName);
-    sessionStorage.setItem("formDate",formDate);
-    sessionStorage.setItem("toDate",toDate);
-    //HERE NEVIGATING TO CHART COMPONENT
-    this.props.history.push("/chartcomp");
+//   const {result,selectedSensorValueArray,startDate,endDate} = this.state;
+//   var dataToSend1 = [];
+//   var dataToSend2 = [];
+//   for (var i = 0; i < result.length; i++) {
+//     dataToSend1.push(result[i]["CreatedTime"]);
+//     var kyetoRemove = ["CreateTime","CreatedTime","Mac"];
+//     var keypr = Object.keys(result[i]);
+//   for(var j =0; j< kyetoRemove.length;j++){
+//     keypr.splice(kyetoRemove.indexOf(kyetoRemove[j]),1);
+//   }
+//   var temp ={}
+//   for(var k =0; k< keypr.length; k++){
+//     temp[keypr] =result[i][keypr[k]]; 
+//   }
+//     dataToSend2.push(temp);
+//   }
+//   var yaxisName = selectedSensorValueArray;
+//   var formDate = new Date(startDate).toLocaleString();
+//   var toDate = new Date(endDate).toLocaleString();
+//   //HERE SENDING DATA SESSION-STORAGE
+//     sessionStorage.setItem("dataToSend1",dataToSend1);
+//     sessionStorage.setItem("dataToSend2",dataToSend2);
+//     sessionStorage.setItem("yaxisName",yaxisName);
+//     sessionStorage.setItem("formDate",formDate);
+//     sessionStorage.setItem("toDate",toDate);
+//     //HERE NEVIGATING TO CHART COMPONENT
+//     this.props.history.push("/chartcomp");
 }
 
  //THIS IS HANDER FOR EXCEL DOWNLOAD
@@ -450,196 +452,196 @@ getAllDataApi(SendForSp,SendFroCustCD,SendForSbCd,SendForSensor,SendForStartDate
   }
 }
   //export To Excel and Save it to server and add the Details to Collection
-  exportToExcel(arColumns, arKeys, arWidths, reportName, dataSet) {
-    var workbook = new ExcelJs.Workbook();
-    workbook.created = new Date();
+//   exportToExcel(arColumns, arKeys, arWidths, reportName, dataSet) {
+//     var workbook = new ExcelJs.Workbook();
+//     workbook.created = new Date();
 
-    // create a sheet with blue tab colour
-    var ws = workbook.addWorksheet("DATA_RECORDING", {
-      properties: { tabColor: { argb: "1E1E90FF" } }
-    });
-  var sensorType = this.state.selectedSensorValueArray;
-// if(this.state.selectedDeviceValue !=0){
-// for(var i = 0; i< this.state.selectedDeviceValue.length; i++){
-//   sensorType = sensorType + this.state.selectedDeviceValue[i];
-// }
-// }
-    // Add initial set of rows
-    var titleRows = [
-      ["ReportName", "Sensors Data Recording"],
-      ["Report Generated On", dateFormat("dd-mmm HH:MM")],
-      ["Customer Name", this.state.selectedCustValue],
-      ["Sub Customer Name", this.state.selectedSubCustValue],
-      ["Asset Name", this.state.selectedAssetValue],
-      ["Device Name", this.state.selectedDeviceValue],
-      ["Sensors Type", sensorType.join(",")],
-      ["Time Interval", dateFormat(this.state.startDate,"dd-mmm HH:MM")+","+dateFormat(this.state.endDate,"dd-mmm HH:MM")]
-      // ["Class", this.std]
-    ];
+//     // create a sheet with blue tab colour
+//     var ws = workbook.addWorksheet("DATA_RECORDING", {
+//       properties: { tabColor: { argb: "1E1E90FF" } }
+//     });
+//   var sensorType = this.state.selectedSensorValueArray;
+// // if(this.state.selectedDeviceValue !=0){
+// // for(var i = 0; i< this.state.selectedDeviceValue.length; i++){
+// //   sensorType = sensorType + this.state.selectedDeviceValue[i];
+// // }
+// // }
+//     // Add initial set of rows
+//     var titleRows = [
+//       ["ReportName", "Sensors Data Recording"],
+//       ["Report Generated On", dateFormat("dd-mmm HH:MM")],
+//       ["Customer Name", this.state.selectedCustValue],
+//       ["Sub Customer Name", this.state.selectedSubCustValue],
+//       ["Asset Name", this.state.selectedAssetValue],
+//       ["Device Name", this.state.selectedDeviceValue],
+//       ["Sensors Type", sensorType.join(",")],
+//       ["Time Interval", dateFormat(this.state.startDate,"dd-mmm HH:MM")+","+dateFormat(this.state.endDate,"dd-mmm HH:MM")]
+//       // ["Class", this.std]
+//     ];
 
-    // Add title rows
-    ws.addRows(titleRows);
+//     // Add title rows
+//     ws.addRows(titleRows);
 
-    for (i = 1; i <= titleRows.length; ++i) {
-      ws.getRow(i).font = { size: 12, bold: true };
-      ws.getRow(i).alignment = {
-        vertical: "middle",
-        horizontal: "center",
-        wrapText: true
-      };
-      ws.getCell("A" + i).fill = {
-        type: "pattern",
-        pattern: "solid",
-        fgColor: { argb: "8787CEFA" }
-      };
-      ws.getCell("A" + i).border = ws.getCell("B" + i).border = {
-        left: { style: "thin" },
-        top: { style: "thin" },
-        bottom: { style: "thin" },
-        right: { style: "thin" }
-      };
-    }
+//     for (i = 1; i <= titleRows.length; ++i) {
+//       ws.getRow(i).font = { size: 12, bold: true };
+//       ws.getRow(i).alignment = {
+//         vertical: "middle",
+//         horizontal: "center",
+//         wrapText: true
+//       };
+//       ws.getCell("A" + i).fill = {
+//         type: "pattern",
+//         pattern: "solid",
+//         fgColor: { argb: "8787CEFA" }
+//       };
+//       ws.getCell("A" + i).border = ws.getCell("B" + i).border = {
+//         left: { style: "thin" },
+//         top: { style: "thin" },
+//         bottom: { style: "thin" },
+//         right: { style: "thin" }
+//       };
+//     }
 
-    /*Set Column headers and keys*/
-    for (let i = 0; i < arColumns.length; ++i) {
-      ws.getColumn(i + 1).key = arKeys[i];
-      ws.getColumn(i + 1).width = arWidths[i];
-    }
+//     /*Set Column headers and keys*/
+//     for (let i = 0; i < arColumns.length; ++i) {
+//       ws.getColumn(i + 1).key = arKeys[i];
+//       ws.getColumn(i + 1).width = arWidths[i];
+//     }
 
-    ws.getRow(titleRows.length + 2).height = 40;
-    ws.getRow(titleRows.length + 2).font = { size: 12, bold: true };
-    ws.getRow(titleRows.length + 2).values = arColumns;
+//     ws.getRow(titleRows.length + 2).height = 40;
+//     ws.getRow(titleRows.length + 2).font = { size: 12, bold: true };
+//     ws.getRow(titleRows.length + 2).values = arColumns;
 
-    // add all the rows in datasource to sheet - make sure keys are matching
-    ws.addRows(dataSet);
+//     // add all the rows in datasource to sheet - make sure keys are matching
+//     ws.addRows(dataSet);
 
-    // loop through and style all the cells - Optimize this loop later.
-    var j = titleRows.length + 2;
-    for (
-      var i = titleRows.length + 2;
-      i <= dataSet.length + titleRows.length + 2;
-      ++i
-    ) {
-      ws.getRow(i).alignment = {
-        vertical: "middle",
-        horizontal: "center",
-        wrapText: true
-      };
-      if (i == titleRows.length + 2) {
-        var strDataCol = "A";
-        for (var k = 0; k < arColumns.length; ++k) {
-          if (k == 0) {
-            ws.getCell(strDataCol + j).fill = {
-              type: "pattern",
-              pattern: "solid",
-              fgColor: { argb: "8787CEFA" }
-            };
-            ws.getCell(strDataCol + j).border = {
-              left: { style: "medium" },
-              top: { style: "medium" },
-              bottom: { style: "medium" },
-              right: { style: "thin" }
-            };
-          } else if (k == arColumns.length - 1) {
-            ws.getCell(strDataCol + j).fill = {
-              type: "pattern",
-              pattern: "solid",
-              fgColor: { argb: "8787CEFA" }
-            };
-            ws.getCell(strDataCol + j).border = {
-              left: { style: "thin" },
-              top: { style: "medium" },
-              bottom: { style: "medium" },
-              right: { style: "medium" }
-            };
-          } else {
-            ws.getCell(strDataCol + j).fill = {
-              type: "pattern",
-              pattern: "solid",
-              fgColor: { argb: "8787CEFA" }
-            };
-            ws.getCell(strDataCol + j).border = {
-              left: { style: "thin" },
-              top: { style: "medium" },
-              bottom: { style: "medium" },
-              right: { style: "thin" }
-            };
-          }
-          strDataCol = String.fromCharCode(strDataCol.charCodeAt(0) + 1);
-        }
-      } else {
-        if (i == dataSet.length + titleRows.length + 2) {
-          strDataCol = "A";
-          ws.getRow(j).alignment = { vertical: "middle", horizontal: "center" };
-          for (var k = 0; k < arColumns.length; ++k) {
-            if (k == 0) {
-              ws.getCell(strDataCol + j).border = {
-                left: { style: "medium" },
-                top: { style: "thin" },
-                bottom: { style: "medium" },
-                right: { style: "thin" }
-              };
-            } else if (k == arColumns.length - 1) {
-              ws.getCell(strDataCol + j).border = {
-                left: { style: "thin" },
-                top: { style: "thin" },
-                bottom: { style: "medium" },
-                right: { style: "medium" }
-              };
-            } else {
-              ws.getCell(strDataCol + j).border = {
-                left: { style: "thin" },
-                top: { style: "thin" },
-                bottom: { style: "medium" },
-                right: { style: "thin" }
-              };
-            }
-            strDataCol = String.fromCharCode(strDataCol.charCodeAt(0) + 1);
-          }
-        } else {
-          var strDataCol = "A";
-          for (var k = 0; k < arColumns.length; ++k) {
-            if (k == 0) {
-              ws.getCell(strDataCol + j).border = {
-                left: { style: "medium" },
-                top: { style: "thin" },
-                bottom: { style: "thin" },
-                right: { style: "thin" }
-              };
-            } else if (k == arColumns.length - 1) {
-              ws.getCell(strDataCol + j).border = {
-                left: { style: "thin" },
-                top: { style: "thin" },
-                bottom: { style: "thin" },
-                right: { style: "medium" }
-              };
-            } else {
-              ws.getCell(strDataCol + j).border = {
-                left: { style: "thin" },
-                top: { style: "thin" },
-                bottom: { style: "thin" },
-                right: { style: "thin" }
-              };
-            }
-            strDataCol = String.fromCharCode(strDataCol.charCodeAt(0) + 1);
-          }
-        }
-      }
-      j = j + 1;
-    }
+//     // loop through and style all the cells - Optimize this loop later.
+//     var j = titleRows.length + 2;
+//     for (
+//       var i = titleRows.length + 2;
+//       i <= dataSet.length + titleRows.length + 2;
+//       ++i
+//     ) {
+//       ws.getRow(i).alignment = {
+//         vertical: "middle",
+//         horizontal: "center",
+//         wrapText: true
+//       };
+//       if (i == titleRows.length + 2) {
+//         var strDataCol = "A";
+//         for (var k = 0; k < arColumns.length; ++k) {
+//           if (k == 0) {
+//             ws.getCell(strDataCol + j).fill = {
+//               type: "pattern",
+//               pattern: "solid",
+//               fgColor: { argb: "8787CEFA" }
+//             };
+//             ws.getCell(strDataCol + j).border = {
+//               left: { style: "medium" },
+//               top: { style: "medium" },
+//               bottom: { style: "medium" },
+//               right: { style: "thin" }
+//             };
+//           } else if (k == arColumns.length - 1) {
+//             ws.getCell(strDataCol + j).fill = {
+//               type: "pattern",
+//               pattern: "solid",
+//               fgColor: { argb: "8787CEFA" }
+//             };
+//             ws.getCell(strDataCol + j).border = {
+//               left: { style: "thin" },
+//               top: { style: "medium" },
+//               bottom: { style: "medium" },
+//               right: { style: "medium" }
+//             };
+//           } else {
+//             ws.getCell(strDataCol + j).fill = {
+//               type: "pattern",
+//               pattern: "solid",
+//               fgColor: { argb: "8787CEFA" }
+//             };
+//             ws.getCell(strDataCol + j).border = {
+//               left: { style: "thin" },
+//               top: { style: "medium" },
+//               bottom: { style: "medium" },
+//               right: { style: "thin" }
+//             };
+//           }
+//           strDataCol = String.fromCharCode(strDataCol.charCodeAt(0) + 1);
+//         }
+//       } else {
+//         if (i == dataSet.length + titleRows.length + 2) {
+//           strDataCol = "A";
+//           ws.getRow(j).alignment = { vertical: "middle", horizontal: "center" };
+//           for (var k = 0; k < arColumns.length; ++k) {
+//             if (k == 0) {
+//               ws.getCell(strDataCol + j).border = {
+//                 left: { style: "medium" },
+//                 top: { style: "thin" },
+//                 bottom: { style: "medium" },
+//                 right: { style: "thin" }
+//               };
+//             } else if (k == arColumns.length - 1) {
+//               ws.getCell(strDataCol + j).border = {
+//                 left: { style: "thin" },
+//                 top: { style: "thin" },
+//                 bottom: { style: "medium" },
+//                 right: { style: "medium" }
+//               };
+//             } else {
+//               ws.getCell(strDataCol + j).border = {
+//                 left: { style: "thin" },
+//                 top: { style: "thin" },
+//                 bottom: { style: "medium" },
+//                 right: { style: "thin" }
+//               };
+//             }
+//             strDataCol = String.fromCharCode(strDataCol.charCodeAt(0) + 1);
+//           }
+//         } else {
+//           var strDataCol = "A";
+//           for (var k = 0; k < arColumns.length; ++k) {
+//             if (k == 0) {
+//               ws.getCell(strDataCol + j).border = {
+//                 left: { style: "medium" },
+//                 top: { style: "thin" },
+//                 bottom: { style: "thin" },
+//                 right: { style: "thin" }
+//               };
+//             } else if (k == arColumns.length - 1) {
+//               ws.getCell(strDataCol + j).border = {
+//                 left: { style: "thin" },
+//                 top: { style: "thin" },
+//                 bottom: { style: "thin" },
+//                 right: { style: "medium" }
+//               };
+//             } else {
+//               ws.getCell(strDataCol + j).border = {
+//                 left: { style: "thin" },
+//                 top: { style: "thin" },
+//                 bottom: { style: "thin" },
+//                 right: { style: "thin" }
+//               };
+//             }
+//             strDataCol = String.fromCharCode(strDataCol.charCodeAt(0) + 1);
+//           }
+//         }
+//       }
+//       j = j + 1;
+//     }
 
-    workbook.xlsx.writeBuffer().then(data => {
-      const blob = new Blob([data], { type: "application/octet-stream" });
-      var dt = new Date();
-      var strdt;
-      strdt = dt
-        .toString()
-        .split("GMT")[0]
-        .trim();
-      var fileName = reportName + strdt + ".xlsx";
-      FileSaver.saveAs(blob, fileName);
-    });
-  }
+//     workbook.xlsx.writeBuffer().then(data => {
+//       const blob = new Blob([data], { type: "application/octet-stream" });
+//       var dt = new Date();
+//       var strdt;
+//       strdt = dt
+//         .toString()
+//         .split("GMT")[0]
+//         .trim();
+//       var fileName = reportName + strdt + ".xlsx";
+//       FileSaver.saveAs(blob, fileName);
+//     });
+//   }
 
  
   render() {
@@ -690,12 +692,13 @@ getAllDataApi(SendForSp,SendFroCustCD,SendForSbCd,SendForSensor,SendForStartDate
         // Disabledsubmit=null;
        }
        var table = null;
-       var table = null;
-       if(this.state.tableDataToSend !=0){
+       if(this.state.fileName !=""){
           table = <div className="row bg">
                <div className= "custNav btn-group">
-               <button className="btn btn-sm btn-secondary" onClick={this.displayChart.bind(this)} disabled><i class="far fa-chart-bar iconfont"></i></button>
-               <button  className="btn btn-sm btn-secondary" onClick={this.downloadToExcel.bind(this)}><i class="far fa-file-excel iconfont"></i></button>
+               <button className="btn btn-sm btn-secondary"
+                onClick={this.displayChart.bind(this)
+              } disabled><i class="far fa-chart-bar iconfont"></i></button>
+               <button onClick= {()=> window.location = `excelData/${this.state.fileName}`} className="btn btn-sm btn-secondary" ><i class="far fa-file-excel iconfont"></i></button>
               </div>
               </div>;
           }
@@ -708,64 +711,7 @@ if(this.state.sensorNm.length != 0){
     sensorsObj.push(obj);
   })
 }
-    
-        
-       //THIS VARIABLE FOR DYNAMIC TABLE WHICH APPEAR IN PRESENTS OF DATA .
-      //  var table = null;
-      //  if(this.state.tableDataToSend !=0){
-      //   // console.log("this json data1");
-      //   // console.log(this.state.tableDataToSend);
-      //   // console.log("end json");
-       
-      //  table =  <div className= "custNav btn-group">
-      //    <button className="btn btn-sm btn-secondary" onClick={this.displayChart.bind(this)}><i class="far fa-chart-bar iconfont"></i></button>
-      //    <button  className="btn btn-sm btn-secondary" onClick={this.downloadToExcel.bind(this)}><i class="far fa-file-excel iconfont"></i></button>
-      //    </div>;
-      
-      // }
-      // else{
-      //   table = null;
-      // }
-      //   <div className="row bg">
-      //    <div className= "custNav btn-group">
-      //  <button className="btn btn-sm btn-secondary" onClick={this.displayChart.bind(this)}><i class="far fa-chart-bar iconfont"></i></button>
-      //  <button  className="btn btn-sm btn-secondary" onClick={this.downloadToExcel.bind(this)}><i class="far fa-file-excel iconfont"></i></button>
-      //  </div>
-      {/* //THIS TABLE COMPONENT WHICH COMMING FROM REACT TABLE LIBRARY */}
-    {/* <Table style={{
-        opacity: 0.8,
-        backgroundColor: "#6c757d",
-        color: "#ffffff",
-        textAlign: "center"
-      }}
-      tableStyle="table table-hover table-striped table-bordered table-borderless table-responsive"
-      pages={true}
-      pagination={true}
-      onRowClick={(row) => {// // alert(row); // console.log(row)}} // if You Want Table Row Data OnClick then assign this {row => // console.log(row)}
-      page={true}
-      errormsg="Error. . ."
-      loadingmsg="Loading. . ."
-      isLoading={false} 
-      sort={true} 
-      title="Sensor Report"
-      search={true}
-      size={10}
-      data={{
-        head: {
-          Device: "Device",
-          Device_Name: "Device Name",
-          Bibusiness_name : "Business Name",
-          SensorName: this.state.selectedSensorValueArray,
-          queue_date_time: "Queue Date Time",
-        },
-        data: this.state.tableDataToSend
-      }} />
-        </div>;
 
-       }else{
-        table = null;
-       } */}
-  
           return (
             <div className=" container">
                 
