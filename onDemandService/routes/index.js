@@ -19,6 +19,8 @@ const TRACE_DEV   = 4;
 const TRACE_DEBUG = 5; 
 var  gomos = require("../../commanFunction/routes/commanFunction");
 var midllelayer = require("../../EndPointMiddlelayer/routes/middlelayer");
+var aggragator = require("../../AggregaterService/routes/aggregatorFunction");
+//var gomosDevices = require("../../commanFunction/routes/getDevices");
 var urlConn, dbName;
 var  gomos = require("../../commanFunction/routes/commanFunction");
 var fs = require("fs");
@@ -2984,58 +2986,6 @@ function dailyDataProcessing(db, res, criteria, offset, page_size) {
     });
 
 }
-// function hourlyDataProcessingTem(db, res, criteria, offset, page_size) {
-//   let NewCriteria = { mac: criteria.mac };
-//   if (criteria.createdTime != "" && criteria.createdTime != undefined && criteria.createdTime != null) {
-//     NewCriteria["createdTime"] = criteria["createdTime"];
-//   }
-//   db.collection("AggregatedData")
-//     .find(NewCriteria).skip(offset).limit(page_size).sort({ createdTime: -1 })
-//     .toArray(function (err, result1) {
-//       if (err) {
-//         process.hasUncaughtExceptionCaptureCallback();
-//       }
-//       if (result1.length > 0) {
-//         let array = []
-//         for (let i = 0; i < result1.length; i++) {
-
-
-//           let tempObj = {};
-//           let hours = result1[i].hours;
-//           let tempArray = (result1[i].sensors).concat(result1[i].channel)
-//           for (let j = 0; j < tempArray.length; j++) {
-//             let bsName = tempArray[j].bsName;
-//             let tempNewObj = {
-//               Avg: (tempArray[j].Avg == undefined) ? "" : tempArray[j].Avg,
-//               Min: (tempArray[j].Min == undefined) ? "" : tempArray[j].Min,
-//               Max: (tempArray[j].Max == undefined) ? "" : tempArray[j].Max,
-//               Durations: (tempArray[j].duration == undefined) ? "" : tempArray[j].duration,
-//               Count: (tempArray[j].Count == undefined) ? "" : tempArray[j].Count,
-//             };
-
-//             tempObj[bsName] = tempNewObj;
-//           }
-//           console.log(tempObj)
-//           array.push([result1[i].mac, result1[i].DeviceName, "", tempObj, result1[i].createdTime])
-//         }
-
-//         let finalResult = array;
-//         let data_count = result1.length;
-//         let lastdataObj = {};
-//         let lastCreatedTime = "";
-//         db.collection("AggregatedData")
-//           .find(NewCriteria).count()
-//           .then(function (data) {
-//             data_count = data
-//             let json = { finalResult, data_count, lastdataObj, lastCreatedTime }
-//             res.json(json)
-//           })
-
-//         // console.log(result1)
-//       }
-//     });
-
-// }
 
 
 function hourlyDataProcessing(db, res, criteria, offset, page_size) {
@@ -3228,7 +3178,44 @@ function normalDataProcessing(db,res,criteria,offset,sensorsBSN,sensorNm,page_si
 
 );
 }
-  
+   
+router.post("/apiAggregator", function (req, res, next) {
+  accessPermission(res);
+
+  MongoClient.connect(
+    urlConn,
+    { useNewUrlParser: true },
+   async function (err, connection) {
+      if (err) {
+        next(err);
+      }
+      let dbo = connection.db(dbName);
+      let body = req.body;
+       let macArray = ["5ccf7f5a0556"];
+       let startRenge = body.startRenge;
+       let endRenge = body.endRenge;
+       let totalHours = moment(endRenge).diff(moment(startRenge), 'hours');
+   if(Math.sign(totalHours) !== -1 && Math.sign(totalHours) !== 0){
+
+
+       gomos.gomosLog(logger,gConsole,TRACE_DEV,`This is Criteria for ApiAggregator startRenge : [${startRenge}] -  endRenge :[${endRenge}] and macArray`,macArray, "Y")
+
+         // let  dataFromDevices = await gomosDevices.getDevices(dbo, NAMEOFSERVICE, logger, gConsole);
+    let response   =  await aggragator.startProcess(NAMEOFSERVICE,logger, gConsole ,dbo,startRenge,endRenge,macArray)
+   console.log(response)
+   if(response === "completed"){
+         connection.close();
+         res.send(response+ "   Successfully")
+   }
+        
+          }else{
+            res.json("Not Valid Renge")
+          }
+          });
+       
+    
+    
+});
 router.post("/getDevicesIdentifier", function (req, res, next) {
   accessPermission(res);
 
