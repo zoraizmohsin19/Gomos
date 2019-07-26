@@ -58,12 +58,12 @@ function processAggregater() {
    endRenge.set({ minute: 30, second: 0, millisecond: 0 })
    let startRenge = moment(endRenge.toISOString()).subtract(1, "hours");
    let deviceMacDataArray = await getDistinctArrayOfmacHourly(dbo, endRenge, startRenge);
-    let response   = await aggragator.startProcess(NAMEOFSERVICE,logger, gConsole ,dbo,startRenge.toISOString(),endRenge.toISOString(),deviceMacDataArray,"N")
-    if(response === "completed"){
-      connection.close();
-   //  gomos.gomosLog(logger,gConsole,TRACE_PROD," here end response of service", response)
-      // res.send(response+ "   Successfully")
- }
+    let response   = await aggragator.startProcess(NAMEOFSERVICE,logger, gConsole ,dbo,connection,startRenge.toISOString(),endRenge.toISOString(),deviceMacDataArray,"N")
+//     if(response === "completed"){
+//       connection.close();
+//    //  gomos.gomosLog(logger,gConsole,TRACE_PROD," here end response of service", response)
+//       // res.send(response+ "   Successfully")
+//  }
  gomos.gomosLog(logger,gConsole,TRACE_PROD," here end response of service", response)
   });
 });

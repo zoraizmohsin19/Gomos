@@ -86,7 +86,7 @@ function callDateSpliter(startRengeparam, endRengeparam){
    let hoursArray = [];
    for(i = 0; i< totalHours ; i++){
    
-   let endTime = moment(endRenge.toISOString()).add(i, "hours");
+   let endTime = moment(startRenge.toISOString()).add(i, "hours");
    endTime.set({ minute: 30, second: 0, millisecond: 0 })
    let startTime = moment(endTime.toISOString()).subtract(1, "hours");
    hoursArray.push({startTime: startTime.toISOString(),endTime: endTime.toISOString()})
@@ -95,7 +95,7 @@ function callDateSpliter(startRengeparam, endRengeparam){
       return hoursArray;
    }
 // THIS IS MAIN STARTING FUNCTION FOR HOUR AGGREGATION
-exports.startProcess  = async function (NAMEOFSERVICE1,logger1, gConsole1 ,dbo1,startRenge,endRenge,deviceMacDataArray,flagValues) {
+exports.startProcess  = async function (NAMEOFSERVICE1,logger1, gConsole1 ,dbo1,connection,startRenge,endRenge,deviceMacDataArray,flagValues) {
  logger = logger1;
  gConsole = gConsole1;
  NAMEOFSERVICE = NAMEOFSERVICE1;
@@ -172,6 +172,8 @@ let  rengeOfTime = await callDateSpliter(startRenge, endRenge);
     }
   }
  }
+ gomos.gomosLog(logger,gConsole,TRACE_PROD,"This is End OF Aggregator Function");
+ connection.close();
  return "completed"
 
 }
@@ -194,7 +196,7 @@ function checkingDataAvailability(mac, Date, Hour) {
 //THIS IS DEFINATION OF inserIntoAggregation 
 function inserIntoAggregation(dbo, dataToInsert) {
   return new Promise( (resolve, reject) => {
- 
+  
     dbo.collection("AggregatedData").insertMany(dataToInsert, function (err, result) {
       if (err) {
         gomos.errorCustmHandler(NAMEOFSERVICE, "inserIntoAggregation", 'This Inserting To  aggregation Error - ', ` `, err, ERROR_DATABASE, ERROR_TRUE, EXIT_FALSE);

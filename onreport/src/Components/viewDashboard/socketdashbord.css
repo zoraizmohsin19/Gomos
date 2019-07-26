@@ -254,12 +254,14 @@ background: #00C0EF !important;
 }
 .chartbtn {
     font-size: 26px !important;
-    padding-left: 8px;
-    padding-right: 8px;
     color: darkgreen;
-    padding-bottom: 37px !important;
+    padding-bottom: 38px !important;
     padding-top: 1px !important;
     margin-bottom: 6px;
+    background: white;
+}
+.mr-Bootom-2 {
+    margin-bottom: 20px;
 }
 .align-right {
     float: right;

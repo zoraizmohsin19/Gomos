@@ -9,12 +9,12 @@ import {Nav, Navbar,NavItem, NavDropdown, MenuItem} from 'react-bootstrap';
 
 const Header = props => {
   const { branding } = props;
-  var ActiveData = JSON.parse(sessionStorage.getItem("dashboardConfigobj"));
-  var data = JSON.parse(sessionStorage.getItem("userDetails"));
+  let ActiveData = JSON.parse(sessionStorage.getItem("dashboardConfigobj"));
+  let data = JSON.parse(sessionStorage.getItem("userDetails"));
 //   var  Admin =  data[0].userType ;
   function handleSelect(selectedKey) {
   
-    if(`${selectedKey}` == 3){
+    if(selectedKey === 6){
      
       sessionStorage.clear();
     }
@@ -35,7 +35,7 @@ const Header = props => {
   {ActiveData ? ( <Navbar.Collapse>
 
        <Nav pullRight onSelect={handleSelect}>
-        <NavDropdown eventKey={3} title={ "Hello"+" "+ data[0].userFN } id="basic-nav-dropdown">
+        <NavDropdown eventKey={5} title={ "Hello"+" "+ data[0].userFN } id="basic-nav-dropdown">
         <li>
                 <div className="navbar-login">
                     <div className="row">
@@ -61,7 +61,7 @@ const Header = props => {
                         <div className="col-lg-12">
                             <p>
                                 {/* <a href="#"  > */}
-                                <NavItem eventKey={3}  onSelect={handleSelect} >
+                                <NavItem eventKey={6}  onSelect={handleSelect} >
                                 <Link to="/" className="btn btn-success btn-block"><i className ="fas fa-sign-out-alt"></i> Log out</Link>
                                 
                                 </NavItem>
@@ -76,16 +76,20 @@ const Header = props => {
     {data[0].userType == "Admin" ? (
         <Nav pullRight onSelect={handleSelect}>
         <NavItem eventKey={1} >
-          <Link to="/socketdashbord">Dashboard</Link>
-           
-          </NavItem>
-          <NavItem eventKey={1} >
-          <Link to="/SPdashBoard">Service Providers</Link>
+          <Link to="/NevMenu">Home</Link>
            
           </NavItem>
           <NavItem eventKey={2} >
+          <Link to="/aggregator">Aggregator</Link>
+          </NavItem>
+          <NavItem eventKey={3} >
+          <Link to="/SPdashBoard">Service Providers</Link>
+           
+          </NavItem>
+          <NavItem eventKey={4} >
           <Link to="/CustdashBoard">Customers</Link>
           </NavItem>
+  
           {/* <NavItem eventKey={3} >
           <Link to="/"><i className ="fas fa-sign-out-alt"></i> Log out</Link>
           

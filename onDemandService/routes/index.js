@@ -19,7 +19,14 @@ const TRACE_DEV   = 4;
 const TRACE_DEBUG = 5; 
 var  gomos = require("../../commanFunction/routes/commanFunction");
 var midllelayer = require("../../EndPointMiddlelayer/routes/middlelayer");
-var aggragator = require("../../AggregaterService/routes/aggregatorFunction");
+var aggragator = require("../../aggregatorService/routes/aggregatorFunction");
+let gomosDevices = require("../../commanFunction/routes/getDevices");
+let gomosAssets = require("../../commanFunction/routes/getAssets");
+let gomosSubCustCd = require("../../commanFunction/routes/getSubCustomers");
+let gomosCustCd = require("../../commanFunction/routes/getCustomer");
+let gomosSpCd = require("../../commanFunction/routes/getServiceProviders");
+
+
 //var gomosDevices = require("../../commanFunction/routes/getDevices");
 var urlConn, dbName;
 var  gomos = require("../../commanFunction/routes/commanFunction");
@@ -287,7 +294,7 @@ router.post("/authenticate", function (req, res, next) {
                 email: result[index].email,
                 userFN: result[index].userFN,
                 userLN: result[index].userLN,
-                userType : result[index].userTypegetSensorNames
+                userType : result[index].userType
               });  
               let dashboardConfigId = result[0].dashboardConfigId;
               let clientID = result[0].clientID;
@@ -3178,6 +3185,122 @@ function normalDataProcessing(db,res,criteria,offset,sensorsBSN,sensorNm,page_si
 
 );
 }
+router.post("/adminAggregator", function (req, res, next) {
+  accessPermission(res);
+
+  MongoClient.connect(
+    urlConn,
+    { useNewUrlParser: true },
+  async  function (err, connection) {
+      if (err) {
+        next(err);
+      }
+     dbo = connection.db(dbName);
+   
+   let  dataFromDevices           = await gomosDevices.getDevices(dbo, NAMEOFSERVICE, logger, gConsole);
+   let  dataFromAssets            = await gomosAssets.getAssets(dbo, NAMEOFSERVICE, logger, gConsole);
+   let  dataFromSubCust           = await gomosSubCustCd.getSubCustomers(dbo, NAMEOFSERVICE, logger, gConsole);
+   let  dataFromCustomers         = await gomosCustCd.getCustomers(dbo, NAMEOFSERVICE, logger, gConsole);
+   let  dataFromServiceProviders  = await gomosSpCd.getServiceProviders(dbo, NAMEOFSERVICE, logger, gConsole);
+
+    //  console.log(dataFromServiceProviders)
+     let response     = await joinToAllDetail(dataFromDevices,dataFromAssets,dataFromSubCust,dataFromCustomers,dataFromServiceProviders)
+     response.sort((a,b)=>{
+       let spCdA = a.spCd;
+       let spCdB = b.spCd;
+       let custCdA = a.custCd;
+       let custCdB = b.custCd;
+       let assetIdA = a.assetId;
+       let assetIdB = b.assetId;
+       if(spCdA < spCdB || spCdA == spCdB){
+         if(custCdA < custCdB || custCdA  == custCdB){
+          if(assetIdA < assetIdB || assetIdA  == assetIdA){
+            return -1;
+          }
+          else{
+            assetIdA - assetIdB;
+          }
+        }
+        else{
+          custCdA - custCdB;
+        }
+       }
+       else{
+        spCdA -spCdB;
+       }
+
+
+     })
+   gomos.gomosLog(logger,gConsole,TRACE_DEV,"This is Response of allJoined Data", response)
+   connection.close();
+   res.json(response)
+
+    });
+  
+  
+  });
+
+  function joinToAllDetail(dataFromDevices,dataFromAssets,dataFromSubCust,dataFromCustomers,dataFromServiceProviders){
+    let ArrayOfjson = [];
+for(let i = 0 ; i< dataFromAssets.length; i++){
+let assetId = dataFromAssets[i].assetId;
+let subCustCd = dataFromAssets[i].subCustCd;
+let AssetName  = dataFromAssets[i].name;
+if(dataFromDevices.filter(item => item.assetId == assetId && item.subCustCd == subCustCd).length !== 0){
+ let devices = dataFromDevices.filter(item => item.assetId == assetId && item.subCustCd == subCustCd);
+ for(let j = 0 ; j< devices.length; j++ ){
+ let DeviceName = devices[j].DeviceName;
+ let mac   = devices[j].mac;
+ let channelLength =  Object.keys(devices[j].channel).length;
+ let sensorsLength =  Object.keys(devices[j].sensors).length;
+ if (dataFromSubCust.filter(item => item.subCustCd == subCustCd).length !== 0) {
+  let indexOfSubCust = dataFromSubCust.findIndex( element => element.subCustCd == subCustCd);
+  let SubCustomerName = dataFromSubCust[indexOfSubCust].name;
+  let custCd = dataFromSubCust[indexOfSubCust].custCd;
+  let spCd = dataFromSubCust[indexOfSubCust].spCd;
+  if (dataFromCustomers.filter(item => item.custCd == custCd && item.spCd == spCd).length !== 0) {
+    let indexOfCust = dataFromCustomers.findIndex( item => item.custCd == custCd && item.spCd == spCd);
+    let CustomerName = dataFromCustomers[indexOfCust].name;
+    if (dataFromServiceProviders.filter(item => item.spCd == spCd).length !== 0) {
+      let indexOfSp = dataFromServiceProviders.findIndex( item => item.spCd == spCd);
+      let ServiceName = dataFromCustomers[indexOfSp].name;
+       ArrayOfjson.push({DeviceName,mac,channelLength,sensorsLength, assetId,AssetName,subCustCd,SubCustomerName,custCd,CustomerName,spCd,ServiceName})  
+    }
+  }
+  }
+ }
+}
+}
+
+
+    
+    
+    return ArrayOfjson; 
+    }
+function joinToAllDetailTemp(dataFromDevices,dataFromAssets,dataFromSubCust){
+let ArrayOfjson = [];
+for(let i =0;  i < dataFromDevices.length; i++){
+let DeviceName = dataFromDevices[i].DeviceName;
+let mac = dataFromDevices[i].mac;
+let assetId = dataFromDevices[i].assetId;
+if(dataFromAssets.filter(item => item.assetId == assetId).length !== 0){
+ 
+  let indexOfAsset = dataFromAssets.findIndex(element => element.assetId == assetId);
+  let AssetName = dataFromAssets[indexOfAsset].name;
+  let subCustCd = dataFromAssets[indexOfAsset].subCustCd;
+  if (dataFromSubCust.filter(item => item.subCustCd == subCustCd).length !== 0) {
+   let indexOfSubCust = dataFromSubCust.findIndex( element => element.subCustCd == subCustCd);
+   let SubCustomerName = dataFromSubCust[indexOfSubCust].name;
+   let custCd = dataFromSubCust[indexOfSubCust].custCd;
+   let spCd = dataFromSubCust[indexOfSubCust].spCd;
+   ArrayOfjson.push({DeviceName,mac,assetId,AssetName,subCustCd,SubCustomerName,custCd,spCd})  
+}
+}
+
+
+}
+return ArrayOfjson; 
+}
    
 router.post("/apiAggregator", function (req, res, next) {
   accessPermission(res);
@@ -3191,25 +3314,26 @@ router.post("/apiAggregator", function (req, res, next) {
       }
       let dbo = connection.db(dbName);
       let body = req.body;
-       let macArray = ["5ccf7f5a0556"];
+       let macArray = body.macArray;
        let startRenge = body.startRenge;
        let endRenge = body.endRenge;
        let totalHours = moment(endRenge).diff(moment(startRenge), 'hours');
    if(Math.sign(totalHours) !== -1 && Math.sign(totalHours) !== 0){
 
 
-       gomos.gomosLog(logger,gConsole,TRACE_DEV,`This is Criteria for ApiAggregator startRenge : [${startRenge}] -  endRenge :[${endRenge}] and macArray`,macArray, "Y")
+       gomos.gomosLog(logger,gConsole,TRACE_TEST,`This is Criteria for ApiAggregator startRenge : [${startRenge}] -  endRenge :[${endRenge}] and macArray`,macArray, "Y")
 
          // let  dataFromDevices = await gomosDevices.getDevices(dbo, NAMEOFSERVICE, logger, gConsole);
-    let response   =  await aggragator.startProcess(NAMEOFSERVICE,logger, gConsole ,dbo,startRenge,endRenge,macArray)
-   console.log(response)
-   if(response === "completed"){
-         connection.close();
-         res.send(response+ "   Successfully")
-   }
-        
-          }else{
-            res.json("Not Valid Renge")
+    aggragator.startProcess(NAMEOFSERVICE,logger, gConsole ,dbo,connection,startRenge,endRenge,macArray)
+  //  console.log(response)
+  //  if(response === "completed"){
+  //       // connection.close();
+  //        res.send(response+ "   Successfully")
+  //  }
+        res.send("Send To Client")
+          
+  }else{
+            res.send("Not Valid Renge")
           }
           });
        
