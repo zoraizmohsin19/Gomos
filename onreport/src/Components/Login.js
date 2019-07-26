@@ -86,7 +86,7 @@ import URL from "../Common/confile/appConfig.json";
             // me.props.history.push("/SPdashBoard");
           })
           .catch(function (error) {
-            console.log(error);
+          //  console.log(error);
             me.setState({ 'Spinnerdata':true});
           }); 
         }
@@ -115,10 +115,10 @@ import URL from "../Common/confile/appConfig.json";
     }
 
     var email_input_class   =   "form-group  ";
-    if(state.email_error.length != 0){
+    if(state.email_error.length !== 0){
         email_input_class   = "form-group   is-invalid";
     }
-if(this.state.Spinnerdata == true ){
+if(this.state.Spinnerdata === true ){
     return (
         <div className= "container-fluid">
        <div class="container">
@@ -132,11 +132,11 @@ if(this.state.Spinnerdata == true ){
         <span id="reauth-email" class="reauth-email"></span>
         <div className={email_input_class}>
         <input type="email" id="inputEmail" class="form-control"  name="email"  value={this.state.email} onChange={this.onChange} placeholder="Email address" required autofocus />
-        {email_error.length != 0 && <div className=' text-danger'>{email_error}</div>}
+        {email_error.length !== 0 && <div className=' text-danger'>{email_error}</div>}
         </div>
         <div className={Password_input_class}>
         <input type="password" id="inputPassword"  name="password"  value={this.state.password} onChange={this.onChange} class="form-control" placeholder="Password" required />
-        {password_error.length != 0 && <div className=' text-danger'>{password_error}</div>}
+        {password_error.length !== 0 && <div className=' text-danger'>{password_error}</div>}
         </div>
         <div id="remember" class="checkbox">
             {/* <label>

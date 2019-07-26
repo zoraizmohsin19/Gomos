@@ -21,6 +21,8 @@ import Header from "./layout/Header"
 import ClimateTemp from "./Components/ClimateControlTemp/climateControlTemp"
 import alertSetup from "./Components/AlertSetupComponent/alertSetup"
 import NevMenu from "./Components/NevigationMenu/nevMenu"
+import aggregatorScreen from "./Components/AdminScreens/aggregatorScreen"
+
 // import UserList from './Components/List/index';socketdashbord
 class App extends Component {
  
@@ -35,6 +37,7 @@ class App extends Component {
               <Route exact path="/" component={Login} />
               <Route exact path="/menu" component={Menu} />
               <Route exact path="/AlertReport" component={AlertReport} />
+              <Route exact path="/aggregator" component={aggregatorScreen} />
               {/* <Route exact path="/alertSetup" component={alertSetup} /> */}
               {/* <Route exact path= "/climatTemp" component= {ClimateTemp}/>  */}
               <Route exact path="/activeDashbord" component={activeDashbord} />

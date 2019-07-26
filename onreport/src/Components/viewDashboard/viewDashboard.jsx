@@ -2,7 +2,6 @@ import React, { Component } from 'react'
 import "./socketdashbord.css"
 import Sensors from "../../layout/widgetofSensors/sensorsCantainer";
 import Chartcom from "../../layout/widgetofSensors/chartCom";
-import { Table } from 'react-bootstrap';
 import socketIOClient from "socket.io-client";
 import axios from "axios";
 import moment from 'moment';
@@ -13,7 +12,7 @@ import DatePicker from 'react-datepicker';
 import dateFormat from "dateformat";
 import swal from 'sweetalert';
 import Spinner from '../../layout/Spinner';
-import { NavItem, Nav } from "react-bootstrap";
+import {Table, NavItem, Nav } from "react-bootstrap";
 import URL from "../../Common/confile/appConfig.json";
 class viewDashboard extends Component {
   constructor() {
@@ -1083,11 +1082,11 @@ dataTypeDisable(){
               </div>
             </div>
             {/* <div className=""> */}
-            <p className="line2"></p>
+            <p className="line2 mr-Bootom-2"></p>
             {/* </div> */}
 
             <div className="row">
-              <div className="col-lg-3 col-md-3 col-sm-3 col-xs-3">
+              <div className="col-lg-3 col-md-3 col-sm-3 col-xs-2">
                 {/* <div className="align-center">  */}
                 <span className="spanchart">#ROWS </span>
                 <select onChange={this.changePagesize} className=" selectcolor" value={this.state.body.page_size} id="Page_Size">{this.state.body.page_size}
@@ -1100,16 +1099,16 @@ dataTypeDisable(){
                 {/* <button type="button" onClick={this.downloadToExcel.bind(this)}>downloadToExcel</button>  */}
                 {/* </div> */}
               </div>
-              <div className="col-sm-5 col-lg-5 col-xs-12 col-md-5">
+              <div className="col-sm-6 col-lg-5  col-md-6  col-xs-8">
                 <div className='align-center'>
                   {total_page > 1 && <CPagination page={state.page} totalpages={total_page} onPageChange={this.changePage} />}
                 </div>
               </div>
-              <div className="col-lg-3 col-md-3 col-sm-3 col-xs-9">
+              <div className="col-lg-3 col-md-3 col-sm-3 col-xs-2">
                 <div className="align-right">  <button title="Download Report In Excel Formate" className="btn btn-xs btn-secondary chartbtn" onClick={() => {
-                  this.props.history.push("/menu")
-                }
-                }><i class="far fa-file-excel"></i></button>
+                this.props.history.push("/menu")
+              }
+              }><img src={require('../../layout/Nms-excel.png')} alt="Excel"/></button>
 
                 </div>
               </div>
@@ -1221,32 +1220,32 @@ dataTypeDisable(){
                 {"Pages: " + total_page}
               </Table>
             </div>
-            <div className="col-lg-3 col-md-3 col-sm-3 col-xs-3">
-              {/* <div className="align-center">  */}
-              <span className="spanchart">#ROWS </span>
-              <select onChange={this.changePagesize} className=" selectcolor" value={this.state.body.page_size} id="Page_Size">{this.state.body.page_size}
+            <div className="col-lg-3 col-md-3 col-sm-3 col-xs-2">
+                {/* <div className="align-center">  */}
+                <span className="spanchart">#ROWS </span>
+                <select onChange={this.changePagesize} className=" selectcolor" value={this.state.body.page_size} id="Page_Size">{this.state.body.page_size}
 
-                {["10", "20", "50", "100"].map(n =>
-                  <option className="selectcolor " value={n}>{n}</option>)
-                }
+                  {["10", "20", "50", "100"].map(n =>
+                    <option className="selectcolor " value={n}>{n}</option>)
+                  }
 
-              </select>
-              {/* <button type="button" onClick={this.downloadToExcel.bind(this)}>downloadToExcel</button>  */}
-              {/* </div> */}
-            </div>
-            <div className="col-sm-5 col-lg-5 col-xs-12 col-md-5">
-              <div className='align-center'>
-                {total_page > 1 && <CPagination page={state.page} totalpages={total_page} onPageChange={this.changePage} />}
+                </select>
+                {/* <button type="button" onClick={this.downloadToExcel.bind(this)}>downloadToExcel</button>  */}
+                {/* </div> */}
               </div>
-            </div>
-            <div className="col-lg-3 col-md-3 col-sm-3 col-xs-9">
-              <div className="align-right">  <button title="Download Report In Excel Formate" className="btn btn-xs btn-secondary chartbtn" onClick={() => {
+              <div className="col-sm-6 col-lg-5  col-md-6  col-xs-8">
+                <div className='align-center'>
+                  {total_page > 1 && <CPagination page={state.page} totalpages={total_page} onPageChange={this.changePage} />}
+                </div>
+              </div>
+              <div className="col-lg-3 col-md-3 col-sm-3 col-xs-2">
+                <div className="align-right">  <button title="Download Report In Excel Formate" className="btn btn-xs btn-secondary chartbtn" onClick={() => {
                 this.props.history.push("/menu")
               }
-              }><i class="far fa-file-excel"></i></button>
+              }><img src={require('../../layout/Nms-excel.png')} alt="Excel"/></button>
 
+                </div>
               </div>
-            </div>
 
           </div>
         </div>
