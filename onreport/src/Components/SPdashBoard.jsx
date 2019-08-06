@@ -1,12 +1,11 @@
 import React, { Component } from 'react'
 import CPagination from "../layout/Pagination";
 import SearchInput from "../layout/SearchInput/SearchInput";
-import {Table,Button,FormControl,ButtonGroup} from 'react-bootstrap';
-import moment from "moment";
+import {Table,FormControl} from 'react-bootstrap';
 import axios from "axios";
 import './Spdashboard.css'
+import URL from "../Common/confile/appConfig.json";
 
-import { Alert } from 'react-bootstrap';
 class SPdashBoard extends Component {
   constructor(props){
     super(props);
@@ -45,7 +44,7 @@ fetch(){
     // .then(response => response.json())
     // .then(json =>  {
         var me = this;
-        axios.post('http://18.203.28.35:3992/getRegisterSP', {
+        axios.post(`${URL.IP}:3992/getRegisterSP`, {
             body: this.state.filter
            })
            .then(function (result) {
@@ -68,19 +67,20 @@ changePage(page){
 onDeleteClick(_id){
     var me = this;
     // delete('http://13.127.10.197:3992/delRegisterSPbyId?id='+ _id
-    axios.delete('http://18.203.28.35:3992/delRegisterSPbyId?id='+ _id, {
+    // this is Working 
+    // axios.delete('http://18.203.28.35:3992/delRegisterSPbyId?id='+ _id, {
        
-       })
-       .then(function (response) {
-        //  alert(response);
-        var newuser = me.state.users.filter(
-            user => user._id !== _id
-           );
-           me.setState({users:newuser })
-       })
-       .catch(function (error) {
-         console.log(error);
-       });
+    //    })
+    //    .then(function (response) {
+    //     //  alert(response);
+    //     var newuser = me.state.users.filter(
+    //         user => user._id !== _id
+    //        );
+    //        me.setState({users:newuser })
+    //    })
+    //    .catch(function (error) {
+    //      console.log(error);
+    //    });
 
 
 }

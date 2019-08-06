@@ -29,10 +29,10 @@ exports.getCustomers =  function(db,NAMEOFSERVICE,logger,gConsole){
         }
         resolve(dataFromCustomer);
 
-        gomos.gomosLog(logger,gConsole,TRACE_PROD,"Customers - No. of subeCustomer read from collection", dataFromCustomer.length);
+        gomos.gomosLog(logger,gConsole,TRACE_PROD,"Customers - No. of Customer read from collection", dataFromCustomer.length);
       }
       catch(err){
-        gomos.errorCustmHandler(NAMEOFSERVICE,"Customers",'This IS Getting All Custmoer Try Catch Erroe',``,err,ERROR_RUNTIME,ERROR_TRUE,EXIT_TRUE);
+        gomos.errorCustmHandler(NAMEOFSERVICE,"Customers",'This IS Getting All Custmoer Try Catch Error',``,err,ERROR_RUNTIME,ERROR_TRUE,EXIT_TRUE);
       }
     });
       

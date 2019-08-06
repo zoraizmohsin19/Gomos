@@ -1,13 +1,11 @@
 import React, { Component } from 'react'
 import CPagination from "../layout/Pagination";
 import SearchInput from "../layout/SearchInput/SearchInput";
-import {Table,Button,FormControl,ButtonGroup} from 'react-bootstrap';
-import moment from "moment";
+import {Table,FormControl} from 'react-bootstrap';
 import axios from "axios";
 import SelectionInput from '../layout/SelectionInput';
 import './Spdashboard.css'
-
-import { Alert } from 'react-bootstrap';
+import URL from "../Common/confile/appConfig.json";
 class CustdashBoard extends Component {
   constructor(props){
     super(props);
@@ -48,7 +46,7 @@ class CustdashBoard extends Component {
 componentDidMount() {
   this.fetch();
 
-  fetch('http://18.203.28.35:3992/getRegisterSP')
+  fetch(`${URL.IP}:3992/getRegisterSP`)
   .then(response => response.json())
   .then(json =>  {
   var spCd =  json.map( x =>  { return  x.spCd  });
@@ -68,7 +66,7 @@ fetch(){
     // .then(response => response.json())
     // .then(json =>  {
         var me = this;
-        axios.post('http://18.203.28.35:3992/getCustomerData', {
+        axios.post(`${URL.IP}:3992/getCustomerData`, {
             body: this.state.filter
            })
            .then(function (result) {
@@ -114,7 +112,7 @@ console.log("this is id"+_id)
     // alert(e.target.value);
     if(e.target.value == "ALL"){
         this.state.filter.spCddata = this.state.ArrayOfSPs;
-        alert( this.state.filter.spCddata+"Hello ");
+      //  alert( this.state.filter.spCddata+"Hello ");
         this.setState({'filter' :this.state.filter });
         this.fetch();
        
@@ -186,10 +184,10 @@ console.log("this is id"+_id)
     ];
     var sort_value  =   null;
     var keys    =   Object.keys(state.filter.order);
-    if(keys[0] != undefined){
-        sort_value  =   keys[0]+"#"+(state.filter.order[keys[0]]==1?"asc":'desc');
+    if(keys[0] !== undefined){
+        sort_value  =   keys[0]+"#"+(state.filter.order[keys[0]]===1?"asc":'desc');
     }
-    console.log("this is entered value"+this.state.filter);
+   // console.log("this is entered value"+this.state.filter);
   
     return (
       <div className="container-fluid">
