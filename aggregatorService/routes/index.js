@@ -1,121 +1,59 @@
-
-var MongoClient = require("mongodb").MongoClient;
-var scheduleTemp = require("node-schedule");
+const scheduleTemp = require("node-schedule");
 const moment = require('moment');
-const uuidv4 = require('uuid/v4');
+const gomos = require("../../commanFunction/routes/commanFunction");
+const g = require('./gConstant')
+const aggragator = require("./aggregatorFunction");
 
-var urlConn, dbName;
-var dateTime = require("node-datetime");
-var dataFromDevices = [];
+const ServiceScheduleManager = require("./ServiceScheduleManager/ServiceScheduleBs");
+const MsgFactsModel = require('./Model/msgFactModel')
 
-var aggreSrvcSchedule;
-var dbo;
-var fs = require("fs");
 const NAMEOFSERVICE = "aggreterService";
-const TRACE_PROD = 1;
-const TRACE_STAGE = 2;
-const TRACE_TEST = 3;
-const TRACE_DEV = 4;
-const TRACE_DEBUG = 5;
-const ERROR_RUNTIME = "runTimeError";
-const ERROR_APPLICATION = "ApplicationError";
-const ERROR_DATABASE = "DataBaseError";
-const EXIT_TRUE = true;
-const EXIT_FALSE = false;
-const ERROR_TRUE = true;
-const ERROR_FALSE = false;
-var gomos = require("../../commanFunction/routes/commanFunction");
-var gomosSchedule = require("../../commanFunction/routes/getServiceConfig");
-var gomosDevices = require("../../commanFunction/routes/getDevices");
-
-let  aggragator = require("./aggregatorFunction");
-var dt = dateTime.create();
-var formattedDate = dt.format('Y-m-d');
-const output = fs.createWriteStream(`./aggStd${formattedDate}.log`, { flags: "a" });
-const errorOutput = fs.createWriteStream(`./aggErr${formattedDate}.log`, { flags: "a" });
-var logger = gomos.createConsole(output, errorOutput);
 const SERVICE_VALUE = 1;
 var gConsole = false;
 
-function processAggregater() {
-  var min = aggreSrvcSchedule.min;
-// second place must be 0 
+const logger = (require('./utilityFn')).CreateLogger(NAMEOFSERVICE)
+
+
+async function processAggregator() {
+  let aggreSrvcSchedul = await ServiceScheduleManager.initialize()
+  console.log("min", aggreSrvcSchedul.getAggregationSchValue())
   var schPattern = `10 ${"*"} * * * *`;
-  var tempSchedule = scheduleTemp.scheduleJob(schPattern,function () {
-    MongoClient.connect(urlConn, { useNewUrlParser: true }, async function (
-      err,
-      connection
-    ) {
-      if (err) {
-        gomos.errorCustmHandler(NAMEOFSERVICE, "module.exports", 'THIS IS MONGO CLIENT CONNECTION ERROR', ``, err, ERROR_DATABASE, ERROR_TRUE, EXIT_TRUE);
-  
+
+  var tempSchedule = scheduleTemp.scheduleJob(schPattern, async function () {
+    gomos.gomosLog(logger, gConsole, g.TRACE_PROD, "Processing Started - Aggregation Service");
+    try {
+      let endRange = moment();
+      // minute 30 for server and 0 for local machine;
+      endRange.set({ minute: 30, second: 0, millisecond: 0 })
+      let startRange = moment(endRange.toISOString()).subtract(1, "hours");
+      gomos.gomosLog(logger, gConsole, g.TRACE_PROD, ` aggregation StartRange - [${startRange.toISOString()}] and EndTime - [${endRange.toISOString()}]`);
+
+      let deviceMacDataArray = await MsgFactsModel.getDistictFactByMac(NAMEOFSERVICE, logger, gConsole, endRange, startRange);
+      gomos.gomosLog(logger, gConsole, g.TRACE_PROD, " deviceMacDataArray length of ", deviceMacDataArray.length);
+      gomos.gomosLog(logger, gConsole, g.TRACE_DEBUG, " deviceMacDataArray  array of mac ", deviceMacDataArray);
+
+      if (deviceMacDataArray.length > 0) {
+        let response = await aggragator.startProcess(NAMEOFSERVICE, logger, gConsole, startRange.toISOString(), endRange.toISOString(), deviceMacDataArray, "N")
+        gomos.gomosLog(logger, gConsole, g.TRACE_PROD, " here end response of service", response)
       }
-      dbo = connection.db(dbName);
-    gomos.gomosLog(logger, gConsole, TRACE_DEV, "This is Scheduler process started in Aggregater service")
-   // startProcess();
-   let endRenge = moment();
-   // minute 30 for server and 0 for local machine;
-   endRenge.set({ minute: 30, second: 0, millisecond: 0 })
-   let startRenge = moment(endRenge.toISOString()).subtract(1, "hours");
-   let deviceMacDataArray = await getDistinctArrayOfmacHourly(dbo, endRenge, startRenge);
-    let response   = await aggragator.startProcess(NAMEOFSERVICE,logger, gConsole ,dbo,connection,startRenge.toISOString(),endRenge.toISOString(),deviceMacDataArray,"N")
-//     if(response === "completed"){
-//       connection.close();
-//    //  gomos.gomosLog(logger,gConsole,TRACE_PROD," here end response of service", response)
-//       // res.send(response+ "   Successfully")
-//  }
- gomos.gomosLog(logger,gConsole,TRACE_PROD," here end response of service", response)
+    }
+    catch (err) {
+      gomos.errorCustmHandler(NAMEOFSERVICE, "processAggregator", 'This is Try-Catch error end of aggregator service - ', ` `, err, g.ERROR_DATABASE, g.ERROR_TRUE, g.EXIT_FALSE);
+      gomos.gomosLog(logger, gConsole, g.TRACE_PROD, " here aggregator service some error Occured end Of service in Catch", err)
+    }
   });
-});
-}
-function getDistinctArrayOfmacHourly(dbo, endTime, startTime) {
-  return new Promise((resolve, reject) => {
-    gomos.gomosLog(logger, gConsole, TRACE_DEBUG, "Entered Function - getDistinctArrayOfmacHourly");
-    dbo.collection("MsgFacts")
-      .distinct(
-        "mac", { DeviceTime: { $lte: new Date(endTime.toISOString()), $gte: new Date(startTime.toISOString()) } }
-        , function (err, result) {
-          if (err) {
-            gomos.gomosLog(logger, gConsole, TRACE_DEBUG, "Exiting Function - getDistinctArrayOfmacHourly Error");
-            reject(err)
-            //process.hasUncaughtExceptionCaptureCallback();
-          }
-          gomos.gomosLog(logger, gConsole, TRACE_TEST, `These are the devices for which aggregation needs to be done `, result);
-          gomos.gomosLog(logger, gConsole, TRACE_DEBUG, "Exiting Function - getDistinctArrayOfmacHourly Success");
-          resolve(result);
-        });
-  });
-}
 
-async function getAllconfig() {
-  aggreSrvcSchedule = await gomosSchedule.getServiceConfig(dbo, NAMEOFSERVICE, "aggrSrvc", logger, gConsole);
-  //dataFromDevices = await gomosDevices.getDevices(dbo, NAMEOFSERVICE, logger, gConsole);
+  gomos.gomosLog(logger, gConsole, g.TRACE_PROD, "Processing End - Aggregation Service");
 }
-
-module.exports = function (app) {
-  //const router = express.Router()
+module.exports = async function (app) {
   urlConn = app.locals.urlConn;
   dbName = app.locals.dbName;
   if (process.argv[4] == SERVICE_VALUE) {
-    console.log(process.argv[4]);
     gConsole = true;
-    console.log(gConsole)
   }
-  MongoClient.connect(urlConn, { useNewUrlParser: true }, function (
-    err,
-    connection
-  ) {
-    if (err) {
-      gomos.errorCustmHandler(NAMEOFSERVICE, "module.exports", 'THIS IS MONGO CLIENT CONNECTION ERROR', ``, err, ERROR_DATABASE, ERROR_TRUE, EXIT_TRUE);
 
-    }
-    dbo = connection.db(dbName);
-  });
   setTimeout(() => {
-    getAllconfig(); setTimeout(() => {
-    processAggregater();
+    processAggregator();
+  }, 1000)
 
-    }
-      , 1000)
-  }, 5000);
 };
