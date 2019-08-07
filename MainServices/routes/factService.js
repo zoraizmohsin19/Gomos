@@ -5,7 +5,7 @@ var scheduleTemp = require("node-schedule");
 const moment = require('moment');
 var urlConn, dbName;
 var dataFromDevices = [],
-  dataFromAssets = [],
+ // dataFromAssets = [],
   dataFromSubCust = [],
   dataFromPayload = [];
 var factSrvcSchedule;
@@ -33,7 +33,7 @@ const ERROR_FALSE = false;
 var gomos = require("../../commanFunction/routes/commanFunction");
 let gomosSchedule = require("../../commanFunction/routes/getServiceConfig");
 let gomosDevices = require("../../commanFunction/routes/getDevices");
-let gomosAssets = require("../../commanFunction/routes/getAssets");
+//let gomosAssets = require("../../commanFunction/routes/getAssets");
 let gomosSubCustCd = require("../../commanFunction/routes/getSubCustomers");
 let goomosPayloads = require("../../commanFunction/routes/getPayloads");
 var dt = dateTime.create();
@@ -66,9 +66,9 @@ function updateMQTT(objId, db, processedFlag) {
 //method to look into mqtt collection to get the messages which is not yet processed
 //and insert into fact collection and also update mqtt.
 function processFactMessages() {
-  var sec, min;
+  let sec, min;
   sec = min = "";
-  var time = factSrvcSchedule / 60;
+  let time = factSrvcSchedule / 60;
 
   if (time < 1) {
     sec = "*/" + factSrvcSchedule + " ";
@@ -87,10 +87,10 @@ function processFactMessages() {
       `factSrvcSchedule :${factSrvcSchedule}`, factSrvcSchedule, ERROR_APPLICATION, ERROR_FALSE, EXIT_TRUE);
     // process.exit(0);
   }
-  var schPattern = sec + min + "* * * *";
+  let schPattern = sec + min + "* * * *";
 
   //var tempSchedule = scheduleTemp.scheduleJob("*/30 * * * * *", function() {
-  var tempSchedule = scheduleTemp.scheduleJob(schPattern, function () {
+  let tempSchedule = scheduleTemp.scheduleJob(schPattern, function () {
     gomos.gomosLog(logger, gConsole, TRACE_PROD, "Processing Started - Fact Messages");
     dbo
       .collection("MqttDump")
@@ -113,13 +113,13 @@ function processFactMessages() {
               "processFactMessages - going to process for",
               result[i].mac
             );
-            var processedFlag;
-            var mac, createdTime, updatedTime, payloadId;
+            let processedFlag;
+            let mac, createdTime, updatedTime, payloadId;
             updatedTime = result[i].updatedTime;
 
-            var id = result[i]._id;
+            let id = result[i]._id;
             gomos.gomosLog(logger, gConsole, TRACE_DEV, "processFactMessages - going to process for index", i);
-            var currentTime = new Date(new Date().toISOString());
+            let currentTime = new Date(new Date().toISOString());
             gomos.gomosLog(logger, gConsole, TRACE_DEV, "This is Debug For Id Of before update", id)
             let response = await mainpipeLineProcessing(mac, processedFlag, createdTime, updatedTime, payloadId, id, currentTime, i);
             gomos.gomosLog(logger, gConsole, TRACE_PROD, "This is mainpipelineProcess response", response)
@@ -166,7 +166,7 @@ function mainpipeLineProcessing(mac, processedFlag, createdTime, updatedTime, pa
          let mac = result1.value.mac;
          let createdTime = result1.value.createdTime;
         let payloadId = result1.value.payloadId;
-          var response = {}
+          let response = {}
           gomos.gomosLog(logger, gConsole, TRACE_DEV, "processFactMessages - going to process after updation for id, mac , payloadid and CreatedTime", objId + ":" + mac + ":" + payloadId + ":" + createdTime + ": " + index);
           if (dataFromPayload.filter(item => item.mac == mac).length == 0) {
             processedFlag = "E";
@@ -175,7 +175,7 @@ function mainpipeLineProcessing(mac, processedFlag, createdTime, updatedTime, pa
             gomos.errorCustmHandler(NAMEOFSERVICE, "mainpipeLineProcessing", 'Payloads Not Present : Please associate with - ', `payload  not present For this mac ${mac} and Index ${index}`, "", ERROR_APPLICATION, ERROR_FALSE, EXIT_FALSE);
             resolve({ "macNotFount": response })
           } else {
-            var filetredPayloads = dataFromPayload.filter(item => item.mac == mac);
+            let filetredPayloads = dataFromPayload.filter(item => item.mac == mac);
             gomos.gomosLog(logger, gConsole, TRACE_DEBUG, "processFactMessages - dataFromPayload if mac present - " + mac);
             if (
               filetredPayloads.filter(item => item.payloadId == payloadId).length == 0) {
@@ -185,11 +185,11 @@ function mainpipeLineProcessing(mac, processedFlag, createdTime, updatedTime, pa
               gomos.errorCustmHandler(NAMEOFSERVICE, "mainpipeLineProcessing", 'Payloads Not Present : Please associate with - ', `payload  not present For this mac ${mac} and ${payloadId} and Index ${index}`, "", ERROR_APPLICATION, ERROR_FALSE, EXIT_FALSE);
               resolve({ "payloadNotFount": response })
             } else {
-              var sensorNms;
-              var indexOfPayLoad = filetredPayloads.findIndex(element => element.payloadId == payloadId);
-              sensorNms = filetredPayloads[indexOfPayLoad].sensors;
-              var processByFact = filetredPayloads[indexOfPayLoad].processByFact;
-              var payloadData = filetredPayloads[indexOfPayLoad];
+          
+             let indexOfPayLoad = filetredPayloads.findIndex(element => element.payloadId == payloadId);
+             let sensorNms = filetredPayloads[indexOfPayLoad].sensors;
+              let processByFact = filetredPayloads[indexOfPayLoad].processByFact;
+              let payloadData = filetredPayloads[indexOfPayLoad];
               gomos.gomosLog(logger, gConsole, TRACE_DEBUG, "processFactMessages - filteredpayloads where payloadId matched " + payloadId, sensorNms);
               if (processByFact !== "Y" || processByFact == undefined) {
                 processedFlag = "IG";
@@ -208,28 +208,12 @@ function mainpipeLineProcessing(mac, processedFlag, createdTime, updatedTime, pa
                   gomos.errorCustmHandler(NAMEOFSERVICE, "mainpipeLineProcessing", 'Device Not Present : Please add a Device for - ', `Device Not Present : Please add a Device for this processByFact ${processByFact}, mac ${mac} and ${payloadId} and Index ${index}`, "", ERROR_APPLICATION, ERROR_FALSE, EXIT_FALSE);
                   resolve({ "DeviceNotPresent": response })
                 } else {
-                  var assetsId, DeviceName;
-                  var indexOfDevice = dataFromDevices.findIndex(element => element.mac == mac);
-                  assetsId = dataFromDevices[indexOfDevice].assetId;
-                  DeviceName = dataFromDevices[indexOfDevice].DeviceName;
-                  gomos.gomosLog(logger, gConsole, TRACE_DEBUG, "processFactMessages - dataFromDevices where mac is match ", mac + ":" + assetsId + ":" + DeviceName);
-                  //filtering data which are obtained from Assets Collection to get the subCustomerCd
-                  //of particular assetId.
-                  if (dataFromAssets.filter(item => item.assetId == assetsId).length == 0) {
-                    processedFlag = "E";
-                    response = await updateMQTT(objId, dbo, processedFlag);
-                    gomos.gomosLog(logger, gConsole, TRACE_PROD, "Assets Not Present for mac ", mac + ":" + assetsId);
-                    gomos.errorCustmHandler(NAMEOFSERVICE, "mainpipeLineProcessing", 'Assets Not Present for mac - ', `Assets Not Present for mac for this  mac ${mac} and ${payloadId} and Index ${index}`, "", ERROR_APPLICATION, ERROR_FALSE, EXIT_FALSE);
-                    resolve({ "Assets": response })
-
-                  } else {
-                    var sensorKeys, msgFactsKeys, subCustCd, custCd, spCd;
-                    var indexOfAsset = dataFromAssets.findIndex(element => element.assetId == assetsId);
-                    subCustCd = dataFromAssets[indexOfAsset].subCustCd;
-                    gomos.gomosLog(logger, gConsole, TRACE_DEBUG, "processFactMessages - dataFromAssets where assetsId is match for subCustCd ", assetsId + ":" + subCustCd);
-                    //filtering data which are obtained from SubCustomer Collection to get the customerCd
-                    //and serviceProviderCd of particular subCustomerCd.
-                    if (dataFromSubCust.filter(item => item.subCustCd == subCustCd).length == 0
+              
+                  let indexOfDevice = dataFromDevices.findIndex(element => element.mac == mac);
+                  // assetsId = dataFromDevices[indexOfDevice].assetId;
+                 let DeviceName = dataFromDevices[indexOfDevice].DeviceName;
+                 let subCustCd = dataFromDevices[indexOfDevice].subCustCd;
+                 if (dataFromSubCust.filter(item => item.subCustCd == subCustCd).length == 0
                     ) {
                       processedFlag = "E";
                       response = await updateMQTT(objId, dbo, processedFlag);
@@ -237,15 +221,13 @@ function mainpipeLineProcessing(mac, processedFlag, createdTime, updatedTime, pa
                       gomos.errorCustmHandler(NAMEOFSERVICE, "mainpipeLineProcessing", 'SubCustomers Not Present for mac - ', `SubCustomers Not Present for mac  ${mac} and ${payloadId}, subCustCd ${subCustCd} and Index ${index}`, "", ERROR_APPLICATION, ERROR_FALSE, EXIT_FALSE);
                       resolve({ "SubCustNotFount": response })
                     } else {
-                      var indexOfSubCust = dataFromSubCust.findIndex(
-                        element => element.subCustCd == subCustCd
-                      );
-                      custCd = dataFromSubCust[indexOfSubCust].custCd;
-                      spCd = dataFromSubCust[indexOfSubCust].spCd;
-                      gomos.gomosLog(logger, gConsole, TRACE_DEBUG, "processFactMessages - dataFromSubCust where subCustCd is match for custCd and spCd ", custCd + ":" + spCd);
+                      let indexOfSubCust = dataFromSubCust.findIndex(element => element.subCustCd == subCustCd );
+                      let custCd = dataFromSubCust[indexOfSubCust].custCd;
+                      let spCd = dataFromSubCust[indexOfSubCust].spCd;
+                      gomos.gomosLog(logger, gConsole, TRACE_DEBUG, "processFactMessages - dataFromDevices where subCustCd is match for DeviceName custCd and spCd ", DeviceName + ":"+ custCd + ":" + spCd);
                       //if (sensorNms && assetsId && subCustCd && custCd && spCd) {
-                      if (sensorNms != undefined && assetsId != undefined && subCustCd != undefined && custCd != undefined && spCd != undefined) {
-                        gomos.gomosLog(logger, gConsole, TRACE_DEBUG, "processFactMessages -  where all conditions  passed sensorNms,assetsId,subCustCd,custCd,spCd", sensorNms + ":" + assetsId + ":" + subCustCd + ":" + custCd + ":" + spCd);
+                      if (sensorNms != undefined  && subCustCd != undefined && custCd != undefined && spCd != undefined) {
+                        gomos.gomosLog(logger, gConsole, TRACE_DEBUG, "processFactMessages -  where all conditions  passed sensorNms,subCustCd,custCd,spCd", sensorNms + ":" + subCustCd + ":" + custCd + ":" + spCd);
                         sensorKeys = Object.keys(sensorNms); //conatins only the sensor names.
                         msgFactsKeys = Object.keys(result1.value); //contains all the keys of the particular msg
                         // objId = result[index]._id;
@@ -258,24 +240,24 @@ function mainpipeLineProcessing(mac, processedFlag, createdTime, updatedTime, pa
 
                         //except the business names related keys all other keys has to be removed from the
                         //msgFactskeys,which is further used for mapping with payload business names.
-                        for (var i = 0; i < keysToRemove.length; i++) {
+                        for (let i = 0; i < keysToRemove.length; i++) {
                           if (msgFactsKeys.includes(keysToRemove[i])) {
                             gomos.gomosLog(logger, gConsole, TRACE_DEBUG, "this is condition For Checking Remove key", keysToRemove[i]);
                             msgFactsKeys.splice(msgFactsKeys.indexOf(keysToRemove[i]), 1);
                           }
                         }
-                        var finalSensors = {},
+                        let finalSensors = {},
                           dataToInsert;
 
                         //mapping of msgFactskeys with their corresponding business names which we get from payloads.
-                        for (var k = 0; k < sensorKeys.length; k++) {
-                          var sensorName = sensorKeys[k];
-                          var businessNmValue = {};
+                        for (let k = 0; k < sensorKeys.length; k++) {
+                          let sensorName = sensorKeys[k];
+                          let businessNmValue = {};
                           // Key comparisons and value replacements are done here
-                          for (var j = 0; j < msgFactsKeys.length; j++) {
+                          for (let j = 0; j < msgFactsKeys.length; j++) {
                             if (sensorNms[sensorKeys[k]][msgFactsKeys[j]]) {
-                              var businessNm = sensorNms[sensorKeys[k]][msgFactsKeys[j]];
-                              var businessValue = result1.value[msgFactsKeys[j]];
+                              let businessNm = sensorNms[sensorKeys[k]][msgFactsKeys[j]];
+                              let businessValue = result1.value[msgFactsKeys[j]];
                               businessNmValue[businessNm] = businessValue;
                             }
                           }
@@ -332,16 +314,16 @@ function mainpipeLineProcessing(mac, processedFlag, createdTime, updatedTime, pa
                       } else {
                         processedFlag = "E";
                         response = await updateMQTT(objId, dbo, processedFlag);
-                        gomos.gomosLog(logger, gConsole, TRACE_TEST, "Something is missing for this record - ", "sensors : " + sensorNms + "assets : " + assetsId + "subcust : " + subCustCd + "cust : " + custCd + "SP : " + spCd);
-                        gomos.errorCustmHandler(NAMEOFSERVICE, "mainpipeLineProcessing", 'Something is missing for this record - - ', `sensors : ${sensorNms}  assets : ${assetsId} subcust :  ${subCustCd}  cust : ${custCd} SP :  ${spCd}`, "", ERROR_APPLICATION, ERROR_FALSE, EXIT_FALSE);
+                        gomos.gomosLog(logger, gConsole, TRACE_TEST, "Something is missing for this record - ", "sensors : " + sensorNms  + "subcust : " + subCustCd + "cust : " + custCd + "SP : " + spCd);
+                        gomos.errorCustmHandler(NAMEOFSERVICE, "mainpipeLineProcessing", 'Something is missing for this record - - ', `sensors : ${sensorNms}  subcust :  ${subCustCd}  cust : ${custCd} SP :  ${spCd}`, "", ERROR_APPLICATION, ERROR_FALSE, EXIT_FALSE);
                         resolve({ "SomeThingNotFound": response })
                       }
                     }
                   }
                 }
               }
-            }
           }
+          
         } catch (err) {
           gomos.gomosLog(logger, gConsole, TRACE_DEBUG, "This is Log In Try catch for cheacking err", err);
           gomos.errorCustmHandler(NAMEOFSERVICE, "mainpipeLineProcessing", 'This is Genrated From Try Catch Error After updating with time stamp - ', `id : ${result1.value._id} and ${result1.value.mac}`, err, ERROR_RUNTIME, ERROR_TRUE, EXIT_FALSE);
@@ -1511,7 +1493,7 @@ function updatedDevinstWithCrteria(dbo, criteria, setUpdated) {
 async function getAllconfig() {
   factSrvcSchedule = await gomosSchedule.getServiceConfig(dbo, NAMEOFSERVICE, "factSrvc", logger, gConsole);
   dataFromDevices  = await gomosDevices.getDevices(dbo, NAMEOFSERVICE, logger, gConsole);
-  dataFromAssets   = await gomosAssets.getAssets(dbo, NAMEOFSERVICE, logger, gConsole);
+ // dataFromAssets   = await gomosAssets.getAssets(dbo, NAMEOFSERVICE, logger, gConsole);
   dataFromSubCust  = await gomosSubCustCd.getSubCustomers(dbo, NAMEOFSERVICE, logger, gConsole);
   dataFromPayload  = await goomosPayloads.getPayloads(dbo, NAMEOFSERVICE, logger, gConsole);
 }
