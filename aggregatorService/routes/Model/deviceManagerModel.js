@@ -42,7 +42,7 @@ var DevicesSchema = new mongoose.Schema({
 
 
 DevicesSchema.statics.readAllDevices = function (NAMEOFSERVICE,logger,gConsole) {
-    console.log("Mongoose log",mongoose)
+
     return new Promise((resolve, reject) => {
         this.find().then(res =>{
           gomos.gomosLog(logger,gConsole,g.TRACE_DEBUG," readAllDevices in DeviceModel result", res);

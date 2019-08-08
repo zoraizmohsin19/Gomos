@@ -84,7 +84,7 @@ MsgFactSchema.statics.getAggragateSensors = function (NAMEOFSERVICE,logger,gCons
         
                 }
               ]).then( (result) => {
-                gomos.gomosLog(logger,gConsole,g.TRACE_PROD," getAggragateSensors in MsgFactModel Result", result);
+                gomos.gomosLog(logger,gConsole,g.TRACE_DEBUG," getAggragateSensors in MsgFactModel Result", result);
                 resolve(result)
             }).catch( err =>{
                 gomos.errorCustmHandler(NAMEOFSERVICE, "getAggragateSensors", 'This is Catch error rejection of getAggragateSensors and  msgFactModel - ', ` `, err, g.ERROR_DATABASE,g.ERROR_TRUE, g.EXIT_FALSE);

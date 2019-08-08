@@ -95,7 +95,7 @@ module.exports.startProcess = async function (serviceName, serviceLog, logTermin
         //  await inserIntoAlert(dbo, json);
       }
       else {
-        gomos.errorCustmHandler(NAMEOFSERVICE, "startProcess", 'This key not found for processing - ', channelData, sensorsData, g.ERROR_APPLICATION, ERROR_FALSE, EXIT_FALSE);
+        gomos.errorCustmHandler(NAMEOFSERVICE, "startProcess", 'This key not found for processing - ', channelData, sensorsData, g.ERROR_APPLICATION, g.ERROR_FALSE, g.EXIT_FALSE);
       }
     }
   }
@@ -119,7 +119,7 @@ function getBsNameAndType(dataFromDevices, TypeOf) {
     }
     else {
       gomos.gomosLog(logger, gConsole, g.TRACE_DEV, "This is not Definde", dataFromDevices[TypeOf][codeKeys[k]].businessName);
-      gomos.errorCustmHandler(NAMEOFSERVICE, "getBsNameAndType", 'This is not Definde  for processing', ` `, dataFromDevices[TypeOf][codeKeys[k]].businessName, g.ERROR_APPLICATION, ERROR_FALSE, EXIT_FALSE);
+      gomos.errorCustmHandler(NAMEOFSERVICE, "getBsNameAndType", 'This is not Definde  for processing', ` `, dataFromDevices[TypeOf][codeKeys[k]].businessName, g.ERROR_APPLICATION, g.ERROR_FALSE, g.EXIT_FALSE);
 
     }
 
@@ -252,7 +252,7 @@ async function startMainProcessSensors(dataFromDevices, mac, TypeOf, endTime, st
           json["sensors"].push(tempObj)
         } else {
           gomos.gomosLog(logger, gConsole, g.TRACE_DEBUG, "This is else part Data not found", tempObj);
-          //  gomos.errorCustmHandler(NAMEOFSERVICE, "startMainProcessSensors", 'This is not data for processing', ` `, '', g.ERROR_APPLICATION, ERROR_FALSE, EXIT_FALSE);
+          //  gomos.errorCustmHandler(NAMEOFSERVICE, "startMainProcessSensors", 'This is not data for processing', ` `, '', g.ERROR_APPLICATION, g.ERROR_FALSE, g.EXIT_FALSE);
         }
       }
       gomos.gomosLog(logger, gConsole, g.TRACE_TEST, `[${mac}] - [${json["sensors"].length}] -  # of sensors with activity in the current period`);

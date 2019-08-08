@@ -3362,7 +3362,7 @@ router.post("/getDevicesIdentifier", function (req, res, next) {
           if (err) {
           }
           var deviceStateKey = Object.keys(result[0]);
-          var keysToRemove2 = ["_id", "mac","deviceTemplate","active","assetId", "DeviceName","defaultGroupInfo","roles"];
+          var keysToRemove2 = ["_id", "mac","deviceTemplate","active","assetId","subCustCd" ,"DeviceName","defaultGroupInfo","roles"];
           gomos.gomosLog( logger,gConsole,TRACE_DEV,"This Is key of identifire 1 Place",deviceStateKey);  
           for (var l = 0; l < keysToRemove2.length; l++) {
             if (deviceStateKey.includes(keysToRemove2[l])) {
