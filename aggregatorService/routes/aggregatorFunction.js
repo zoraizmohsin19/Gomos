@@ -248,7 +248,7 @@ async function startMainProcessSensors(dataFromDevices, mac, TypeOf, endTime, st
           tempObj["Min"] = utilityFn.convertIntTodecPoint(response[0]["Min"], 2);
           tempObj["Avg"] = utilityFn.convertIntTodecPoint(response[0]["Avg"], 2);
           tempObj["Sum"] = utilityFn.convertIntTodecPoint(response[0]["Sum"], 2);
-          tempObj["Count"] = response["Count"]
+          tempObj["Count"] = response[0]["Count"]
           json["sensors"].push(tempObj)
         } else {
           gomos.gomosLog(logger, gConsole, g.TRACE_DEBUG, "This is else part Data not found", tempObj);

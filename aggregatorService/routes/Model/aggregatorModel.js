@@ -40,6 +40,27 @@ var  AggregatorSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    Max:{
+        type: Number
+    },
+    Min:{
+        type: Number
+    },
+    Avg:{
+        type: Number
+    },
+    Sum:{
+        type: Number
+    },
+    duration:{
+        type: Number
+    },
+    noOfStart:{
+        type: Number
+    },
+    Count:{
+        type: Number
+    },
     createdTime: {
         type: Date,
         required: true
