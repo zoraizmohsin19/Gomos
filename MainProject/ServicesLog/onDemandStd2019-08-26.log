@@ -1,0 +1,407 @@
+11:28:28:195-getDevices - No. of devices a read from collection [19]
+11:28:28:405-getAssets - No. of assets read from collection [19]
+11:28:28:573-getSubCustomers - No. of subeCustomer read from collection [8]
+11:28:28:739-Customers - No. of Customer read from collection [6]
+11:28:28:929-ServiceProvider - No. of ServiceProvider read from collection [2]
+11:28:54:565-This is Criteria for ApiAggregator startRenge : [Thu Jul 18 2019 06:30:00 GMT+0000] -  endRenge :[Thu Jul 18 2019 16:30:00 GMT+0000] and macArray
+[ '5ccf7f5a0481_110' ]
+11:28:55:167-rengeOfTime length - [10] and Array of Time
+[
+  {
+    startTime: '2019-07-18T06:30:00.000Z',
+    endTime: '2019-07-18T07:30:00.000Z'
+  },
+  {
+    startTime: '2019-07-18T07:30:00.000Z',
+    endTime: '2019-07-18T08:30:00.000Z'
+  },
+  {
+    startTime: '2019-07-18T08:30:00.000Z',
+    endTime: '2019-07-18T09:30:00.000Z'
+  },
+  {
+    startTime: '2019-07-18T09:30:00.000Z',
+    endTime: '2019-07-18T10:30:00.000Z'
+  },
+  {
+    startTime: '2019-07-18T10:30:00.000Z',
+    endTime: '2019-07-18T11:30:00.000Z'
+  },
+  {
+    startTime: '2019-07-18T11:30:00.000Z',
+    endTime: '2019-07-18T12:30:00.000Z'
+  },
+  {
+    startTime: '2019-07-18T12:30:00.000Z',
+    endTime: '2019-07-18T13:30:00.000Z'
+  },
+  {
+    startTime: '2019-07-18T13:30:00.000Z',
+    endTime: '2019-07-18T14:30:00.000Z'
+  },
+  {
+    startTime: '2019-07-18T14:30:00.000Z',
+    endTime: '2019-07-18T15:30:00.000Z'
+  },
+  {
+    startTime: '2019-07-18T15:30:00.000Z',
+    endTime: '2019-07-18T16:30:00.000Z'
+  }
+]
+11:28:55:346-startTime [2019-07-18T06:30:00.000Z] endTime - [2019-07-18T07:30:00.000Z] - Date - [2019-07-18]  Hour - [12]  - going to process aggregation for this period.
+11:28:55:382-[5ccf7f5a0481_110] - [0]  DeviceIndex [11] - This is Device Going Process 
+11:28:55:629-[5ccf7f5a0481_110] -total # record deleted 
+{
+  n: 0,
+  opTime: {
+    ts: Timestamp { _bsontype: 'Timestamp', low_: 1, high_: 1566818926 },
+    t: 3
+  },
+  electionId: 7fffffff0000000000000003,
+  ok: 1,
+  operationTime: Timestamp { _bsontype: 'Timestamp', low_: 1, high_: 1566818926 },
+  '$clusterTime': {
+    clusterTime: Timestamp { _bsontype: 'Timestamp', low_: 1, high_: 1566818926 },
+    signature: { hash: [Binary], keyId: [Long] }
+  },
+  deletedCount: 0
+}
+11:28:55:720-[5ccf7f5a0481_110] - [10] - # of sensors associated with Device
+11:28:59:097-[5ccf7f5a0481_110] - [0] -  # of sensors with activity in the current period
+11:28:59:102-[5ccf7f5a0481_110] - [10] -  # of channels associated with Device 
+11:29:01:464-[5ccf7f5a0481_110] - [0] - # of channels with activity in the current period 
+11:29:01:466-[5ccf7f5a0481_110] - [0]  DeviceIndex [11] -total # records - ready to insert 
+11:29:01:468-startTime [2019-07-18T07:30:00.000Z] endTime - [2019-07-18T08:30:00.000Z] - Date - [2019-07-18]  Hour - [13]  - going to process aggregation for this period.
+11:29:01:513-[5ccf7f5a0481_110] - [0]  DeviceIndex [11] - This is Device Going Process 
+11:29:01:705-[5ccf7f5a0481_110] -total # record deleted 
+{
+  n: 0,
+  opTime: {
+    ts: Timestamp { _bsontype: 'Timestamp', low_: 1, high_: 1566818936 },
+    t: 3
+  },
+  electionId: 7fffffff0000000000000003,
+  ok: 1,
+  operationTime: Timestamp { _bsontype: 'Timestamp', low_: 1, high_: 1566818936 },
+  '$clusterTime': {
+    clusterTime: Timestamp { _bsontype: 'Timestamp', low_: 1, high_: 1566818936 },
+    signature: { hash: [Binary], keyId: [Long] }
+  },
+  deletedCount: 0
+}
+11:29:01:821-[5ccf7f5a0481_110] - [10] - # of sensors associated with Device
+11:29:04:074-[5ccf7f5a0481_110] - [0] -  # of sensors with activity in the current period
+11:29:04:076-[5ccf7f5a0481_110] - [10] -  # of channels associated with Device 
+11:29:06:412-[5ccf7f5a0481_110] - [0] - # of channels with activity in the current period 
+11:29:06:414-[5ccf7f5a0481_110] - [0]  DeviceIndex [11] -total # records - ready to insert 
+11:29:06:416-startTime [2019-07-18T08:30:00.000Z] endTime - [2019-07-18T09:30:00.000Z] - Date - [2019-07-18]  Hour - [14]  - going to process aggregation for this period.
+11:29:06:460-[5ccf7f5a0481_110] - [0]  DeviceIndex [11] - This is Device Going Process 
+11:29:06:648-[5ccf7f5a0481_110] -total # record deleted 
+{
+  n: 20,
+  opTime: {
+    ts: Timestamp { _bsontype: 'Timestamp', low_: 21, high_: 1566818946 },
+    t: 3
+  },
+  electionId: 7fffffff0000000000000003,
+  ok: 1,
+  operationTime: Timestamp { _bsontype: 'Timestamp', low_: 21, high_: 1566818946 },
+  '$clusterTime': {
+    clusterTime: Timestamp { _bsontype: 'Timestamp', low_: 21, high_: 1566818946 },
+    signature: { hash: [Binary], keyId: [Long] }
+  },
+  deletedCount: 20
+}
+11:29:06:683-[5ccf7f5a0481_110] - [10] - # of sensors associated with Device
+11:29:09:406-[5ccf7f5a0481_110] - [0] -  # of sensors with activity in the current period
+11:29:09:409-[5ccf7f5a0481_110] - [10] -  # of channels associated with Device 
+11:29:11:847-[5ccf7f5a0481_110] - [0] - # of channels with activity in the current period 
+11:29:11:848-[5ccf7f5a0481_110] - [0]  DeviceIndex [11] -total # records - ready to insert 
+11:29:11:849-startTime [2019-07-18T09:30:00.000Z] endTime - [2019-07-18T10:30:00.000Z] - Date - [2019-07-18]  Hour - [15]  - going to process aggregation for this period.
+11:29:11:881-[5ccf7f5a0481_110] - [0]  DeviceIndex [11] - This is Device Going Process 
+11:29:12:057-[5ccf7f5a0481_110] -total # record deleted 
+{
+  n: 20,
+  opTime: {
+    ts: Timestamp { _bsontype: 'Timestamp', low_: 20, high_: 1566818951 },
+    t: 3
+  },
+  electionId: 7fffffff0000000000000003,
+  ok: 1,
+  operationTime: Timestamp { _bsontype: 'Timestamp', low_: 20, high_: 1566818951 },
+  '$clusterTime': {
+    clusterTime: Timestamp { _bsontype: 'Timestamp', low_: 20, high_: 1566818951 },
+    signature: { hash: [Binary], keyId: [Long] }
+  },
+  deletedCount: 20
+}
+11:29:12:198-[5ccf7f5a0481_110] - [10] - # of sensors associated with Device
+11:29:14:447-[5ccf7f5a0481_110] - [10] -  # of sensors with activity in the current period
+11:29:14:450-[5ccf7f5a0481_110] - [10] -  # of channels associated with Device 
+11:29:20:822-[5ccf7f5a0481_110] - [10] - # of channels with activity in the current period 
+11:29:20:824-[5ccf7f5a0481_110] - [20]  DeviceIndex [11] -total # records - ready to insert 
+11:29:20:826-[5ccf7f5a0481_110] - [GH_Temperature] - About to insert for this Sensor/Channel
+11:29:20:885-[5ccf7f5a0481_110] - [GH_Relative_Humidity] - About to insert for this Sensor/Channel
+11:29:20:887-[5ccf7f5a0481_110] - [GH_CO2] - About to insert for this Sensor/Channel
+11:29:20:889-[5ccf7f5a0481_110] - [GH_Luminescence] - About to insert for this Sensor/Channel
+11:29:20:890-[5ccf7f5a0481_110] - [TDS] - About to insert for this Sensor/Channel
+11:29:20:891-[5ccf7f5a0481_110] - [GH_Soil_Temperature] - About to insert for this Sensor/Channel
+11:29:20:892-[5ccf7f5a0481_110] - [GH_Wind_Speed] - About to insert for this Sensor/Channel
+11:29:20:893-[5ccf7f5a0481_110] - [GH_Rain_Sensor] - About to insert for this Sensor/Channel
+11:29:20:895-[5ccf7f5a0481_110] - [External_Temperature] - About to insert for this Sensor/Channel
+11:29:20:895-[5ccf7f5a0481_110] - [External_Humidity] - About to insert for this Sensor/Channel
+11:29:20:955-[5ccf7f5a0481_110] - [GH_CO2V] - About to insert for this Sensor/Channel
+11:29:20:957-[5ccf7f5a0481_110] - [GH_Left_Curtain] - About to insert for this Sensor/Channel
+11:29:20:957-[5ccf7f5a0481_110] - [GH_Right_Curtain] - About to insert for this Sensor/Channel
+11:29:20:958-[5ccf7f5a0481_110] - [GH_Top_Curtain] - About to insert for this Sensor/Channel
+11:29:20:959-[5ccf7f5a0481_110] - [GH_Fan] - About to insert for this Sensor/Channel
+11:29:20:960-[5ccf7f5a0481_110] - [GH_Air_Circulation] - About to insert for this Sensor/Channel
+11:29:20:961-[5ccf7f5a0481_110] - [GH_Fog] - About to insert for this Sensor/Channel
+11:29:20:961-[5ccf7f5a0481_110] - [GH_Irrg_Pump] - About to insert for this Sensor/Channel
+11:29:20:962-[5ccf7f5a0481_110] - [GH_Irrig_Valve1] - About to insert for this Sensor/Channel
+11:29:21:021-[5ccf7f5a0481_110] - [GH_Irrig_Valve2] - About to insert for this Sensor/Channel
+11:29:21:335-Inserted : aggregation [20]
+11:29:21:337-startTime [2019-07-18T10:30:00.000Z] endTime - [2019-07-18T11:30:00.000Z] - Date - [2019-07-18]  Hour - [16]  - going to process aggregation for this period.
+11:29:21:339-[5ccf7f5a0481_110] - [0]  DeviceIndex [11] - This is Device Going Process 
+11:29:21:573-[5ccf7f5a0481_110] -total # record deleted 
+{
+  n: 0,
+  opTime: {
+    ts: Timestamp { _bsontype: 'Timestamp', low_: 20, high_: 1566818961 },
+    t: 3
+  },
+  electionId: 7fffffff0000000000000003,
+  ok: 1,
+  operationTime: Timestamp { _bsontype: 'Timestamp', low_: 20, high_: 1566818961 },
+  '$clusterTime': {
+    clusterTime: Timestamp { _bsontype: 'Timestamp', low_: 20, high_: 1566818961 },
+    signature: { hash: [Binary], keyId: [Long] }
+  },
+  deletedCount: 0
+}
+11:29:21:705-[5ccf7f5a0481_110] - [10] - # of sensors associated with Device
+11:29:24:219-[5ccf7f5a0481_110] - [0] -  # of sensors with activity in the current period
+11:29:24:222-[5ccf7f5a0481_110] - [10] -  # of channels associated with Device 
+11:29:27:697-[5ccf7f5a0481_110] - [0] - # of channels with activity in the current period 
+11:29:27:699-[5ccf7f5a0481_110] - [0]  DeviceIndex [11] -total # records - ready to insert 
+11:29:27:700-startTime [2019-07-18T11:30:00.000Z] endTime - [2019-07-18T12:30:00.000Z] - Date - [2019-07-18]  Hour - [17]  - going to process aggregation for this period.
+11:29:27:844-[5ccf7f5a0481_110] - [0]  DeviceIndex [11] - This is Device Going Process 
+11:29:28:094-[5ccf7f5a0481_110] -total # record deleted 
+{
+  n: 20,
+  opTime: {
+    ts: Timestamp { _bsontype: 'Timestamp', low_: 20, high_: 1566818967 },
+    t: 3
+  },
+  electionId: 7fffffff0000000000000003,
+  ok: 1,
+  operationTime: Timestamp { _bsontype: 'Timestamp', low_: 20, high_: 1566818967 },
+  '$clusterTime': {
+    clusterTime: Timestamp { _bsontype: 'Timestamp', low_: 20, high_: 1566818967 },
+    signature: { hash: [Binary], keyId: [Long] }
+  },
+  deletedCount: 20
+}
+11:29:28:185-[5ccf7f5a0481_110] - [10] - # of sensors associated with Device
+11:29:31:086-[5ccf7f5a0481_110] - [10] -  # of sensors with activity in the current period
+11:29:31:089-[5ccf7f5a0481_110] - [10] -  # of channels associated with Device 
+11:29:34:358-[5ccf7f5a0481_110] - [10] - # of channels with activity in the current period 
+11:29:34:360-[5ccf7f5a0481_110] - [20]  DeviceIndex [11] -total # records - ready to insert 
+11:29:34:362-[5ccf7f5a0481_110] - [GH_Temperature] - About to insert for this Sensor/Channel
+11:29:34:434-[5ccf7f5a0481_110] - [GH_Relative_Humidity] - About to insert for this Sensor/Channel
+11:29:34:436-[5ccf7f5a0481_110] - [GH_CO2] - About to insert for this Sensor/Channel
+11:29:34:440-[5ccf7f5a0481_110] - [GH_Luminescence] - About to insert for this Sensor/Channel
+11:29:34:539-[5ccf7f5a0481_110] - [TDS] - About to insert for this Sensor/Channel
+11:29:34:540-[5ccf7f5a0481_110] - [GH_Soil_Temperature] - About to insert for this Sensor/Channel
+11:29:34:541-[5ccf7f5a0481_110] - [GH_Wind_Speed] - About to insert for this Sensor/Channel
+11:29:34:542-[5ccf7f5a0481_110] - [GH_Rain_Sensor] - About to insert for this Sensor/Channel
+11:29:34:543-[5ccf7f5a0481_110] - [External_Temperature] - About to insert for this Sensor/Channel
+11:29:34:545-[5ccf7f5a0481_110] - [External_Humidity] - About to insert for this Sensor/Channel
+11:29:34:547-[5ccf7f5a0481_110] - [GH_CO2V] - About to insert for this Sensor/Channel
+11:29:34:548-[5ccf7f5a0481_110] - [GH_Left_Curtain] - About to insert for this Sensor/Channel
+11:29:34:548-[5ccf7f5a0481_110] - [GH_Right_Curtain] - About to insert for this Sensor/Channel
+11:29:34:550-[5ccf7f5a0481_110] - [GH_Top_Curtain] - About to insert for this Sensor/Channel
+11:29:34:551-[5ccf7f5a0481_110] - [GH_Fan] - About to insert for this Sensor/Channel
+11:29:34:553-[5ccf7f5a0481_110] - [GH_Air_Circulation] - About to insert for this Sensor/Channel
+11:29:34:554-[5ccf7f5a0481_110] - [GH_Fog] - About to insert for this Sensor/Channel
+11:29:34:555-[5ccf7f5a0481_110] - [GH_Irrg_Pump] - About to insert for this Sensor/Channel
+11:29:34:556-[5ccf7f5a0481_110] - [GH_Irrig_Valve1] - About to insert for this Sensor/Channel
+11:29:34:615-[5ccf7f5a0481_110] - [GH_Irrig_Valve2] - About to insert for this Sensor/Channel
+11:29:34:841-Inserted : aggregation [20]
+11:29:34:843-startTime [2019-07-18T12:30:00.000Z] endTime - [2019-07-18T13:30:00.000Z] - Date - [2019-07-18]  Hour - [18]  - going to process aggregation for this period.
+11:29:34:921-[5ccf7f5a0481_110] - [0]  DeviceIndex [11] - This is Device Going Process 
+11:29:35:143-[5ccf7f5a0481_110] -total # record deleted 
+{
+  n: 20,
+  opTime: {
+    ts: Timestamp { _bsontype: 'Timestamp', low_: 40, high_: 1566818974 },
+    t: 3
+  },
+  electionId: 7fffffff0000000000000003,
+  ok: 1,
+  operationTime: Timestamp { _bsontype: 'Timestamp', low_: 40, high_: 1566818974 },
+  '$clusterTime': {
+    clusterTime: Timestamp { _bsontype: 'Timestamp', low_: 40, high_: 1566818974 },
+    signature: { hash: [Binary], keyId: [Long] }
+  },
+  deletedCount: 20
+}
+11:29:35:377-[5ccf7f5a0481_110] - [10] - # of sensors associated with Device
+11:29:38:070-[5ccf7f5a0481_110] - [10] -  # of sensors with activity in the current period
+11:29:38:072-[5ccf7f5a0481_110] - [10] -  # of channels associated with Device 
+11:29:43:777-[5ccf7f5a0481_110] - [10] - # of channels with activity in the current period 
+11:29:43:779-[5ccf7f5a0481_110] - [20]  DeviceIndex [11] -total # records - ready to insert 
+11:29:43:781-[5ccf7f5a0481_110] - [GH_Temperature] - About to insert for this Sensor/Channel
+11:29:43:862-[5ccf7f5a0481_110] - [GH_Relative_Humidity] - About to insert for this Sensor/Channel
+11:29:43:866-[5ccf7f5a0481_110] - [GH_CO2] - About to insert for this Sensor/Channel
+11:29:43:927-[5ccf7f5a0481_110] - [GH_Luminescence] - About to insert for this Sensor/Channel
+11:29:43:928-[5ccf7f5a0481_110] - [TDS] - About to insert for this Sensor/Channel
+11:29:43:928-[5ccf7f5a0481_110] - [GH_Soil_Temperature] - About to insert for this Sensor/Channel
+11:29:43:929-[5ccf7f5a0481_110] - [GH_Wind_Speed] - About to insert for this Sensor/Channel
+11:29:43:932-[5ccf7f5a0481_110] - [GH_Rain_Sensor] - About to insert for this Sensor/Channel
+11:29:44:050-[5ccf7f5a0481_110] - [External_Temperature] - About to insert for this Sensor/Channel
+11:29:44:167-[5ccf7f5a0481_110] - [External_Humidity] - About to insert for this Sensor/Channel
+11:29:44:205-[5ccf7f5a0481_110] - [GH_CO2V] - About to insert for this Sensor/Channel
+11:29:44:207-[5ccf7f5a0481_110] - [GH_Left_Curtain] - About to insert for this Sensor/Channel
+11:29:44:207-[5ccf7f5a0481_110] - [GH_Right_Curtain] - About to insert for this Sensor/Channel
+11:29:44:208-[5ccf7f5a0481_110] - [GH_Top_Curtain] - About to insert for this Sensor/Channel
+11:29:44:209-[5ccf7f5a0481_110] - [GH_Fan] - About to insert for this Sensor/Channel
+11:29:44:209-[5ccf7f5a0481_110] - [GH_Air_Circulation] - About to insert for this Sensor/Channel
+11:29:44:210-[5ccf7f5a0481_110] - [GH_Fog] - About to insert for this Sensor/Channel
+11:29:44:210-[5ccf7f5a0481_110] - [GH_Irrg_Pump] - About to insert for this Sensor/Channel
+11:29:44:210-[5ccf7f5a0481_110] - [GH_Irrig_Valve1] - About to insert for this Sensor/Channel
+11:29:44:211-[5ccf7f5a0481_110] - [GH_Irrig_Valve2] - About to insert for this Sensor/Channel
+11:29:44:414-Inserted : aggregation [20]
+11:29:44:416-startTime [2019-07-18T13:30:00.000Z] endTime - [2019-07-18T14:30:00.000Z] - Date - [2019-07-18]  Hour - [19]  - going to process aggregation for this period.
+11:29:44:417-[5ccf7f5a0481_110] - [0]  DeviceIndex [11] - This is Device Going Process 
+11:29:44:654-[5ccf7f5a0481_110] -total # record deleted 
+{
+  n: 20,
+  opTime: {
+    ts: Timestamp { _bsontype: 'Timestamp', low_: 40, high_: 1566818984 },
+    t: 3
+  },
+  electionId: 7fffffff0000000000000003,
+  ok: 1,
+  operationTime: Timestamp { _bsontype: 'Timestamp', low_: 40, high_: 1566818984 },
+  '$clusterTime': {
+    clusterTime: Timestamp { _bsontype: 'Timestamp', low_: 40, high_: 1566818984 },
+    signature: { hash: [Binary], keyId: [Long] }
+  },
+  deletedCount: 20
+}
+11:29:44:778-[5ccf7f5a0481_110] - [10] - # of sensors associated with Device
+11:29:47:008-[5ccf7f5a0481_110] - [10] -  # of sensors with activity in the current period
+11:29:47:012-[5ccf7f5a0481_110] - [10] -  # of channels associated with Device 
+11:29:52:127-[5ccf7f5a0481_110] - [10] - # of channels with activity in the current period 
+11:29:52:130-[5ccf7f5a0481_110] - [20]  DeviceIndex [11] -total # records - ready to insert 
+11:29:52:220-[5ccf7f5a0481_110] - [GH_Temperature] - About to insert for this Sensor/Channel
+11:29:52:220-[5ccf7f5a0481_110] - [GH_Relative_Humidity] - About to insert for this Sensor/Channel
+11:29:52:222-[5ccf7f5a0481_110] - [GH_CO2] - About to insert for this Sensor/Channel
+11:29:52:226-[5ccf7f5a0481_110] - [GH_Luminescence] - About to insert for this Sensor/Channel
+11:29:52:291-[5ccf7f5a0481_110] - [TDS] - About to insert for this Sensor/Channel
+11:29:52:346-[5ccf7f5a0481_110] - [GH_Soil_Temperature] - About to insert for this Sensor/Channel
+11:29:52:347-[5ccf7f5a0481_110] - [GH_Wind_Speed] - About to insert for this Sensor/Channel
+11:29:52:348-[5ccf7f5a0481_110] - [GH_Rain_Sensor] - About to insert for this Sensor/Channel
+11:29:52:349-[5ccf7f5a0481_110] - [External_Temperature] - About to insert for this Sensor/Channel
+11:29:52:350-[5ccf7f5a0481_110] - [External_Humidity] - About to insert for this Sensor/Channel
+11:29:52:351-[5ccf7f5a0481_110] - [GH_CO2V] - About to insert for this Sensor/Channel
+11:29:52:352-[5ccf7f5a0481_110] - [GH_Left_Curtain] - About to insert for this Sensor/Channel
+11:29:52:353-[5ccf7f5a0481_110] - [GH_Right_Curtain] - About to insert for this Sensor/Channel
+11:29:52:353-[5ccf7f5a0481_110] - [GH_Top_Curtain] - About to insert for this Sensor/Channel
+11:29:52:355-[5ccf7f5a0481_110] - [GH_Fan] - About to insert for this Sensor/Channel
+11:29:52:356-[5ccf7f5a0481_110] - [GH_Air_Circulation] - About to insert for this Sensor/Channel
+11:29:52:356-[5ccf7f5a0481_110] - [GH_Fog] - About to insert for this Sensor/Channel
+11:29:52:357-[5ccf7f5a0481_110] - [GH_Irrg_Pump] - About to insert for this Sensor/Channel
+11:29:52:358-[5ccf7f5a0481_110] - [GH_Irrig_Valve1] - About to insert for this Sensor/Channel
+11:29:52:359-[5ccf7f5a0481_110] - [GH_Irrig_Valve2] - About to insert for this Sensor/Channel
+11:29:52:641-Inserted : aggregation [20]
+11:29:52:643-startTime [2019-07-18T14:30:00.000Z] endTime - [2019-07-18T15:30:00.000Z] - Date - [2019-07-18]  Hour - [20]  - going to process aggregation for this period.
+11:29:52:704-[5ccf7f5a0481_110] - [0]  DeviceIndex [11] - This is Device Going Process 
+11:29:52:891-[5ccf7f5a0481_110] -total # record deleted 
+{
+  n: 20,
+  opTime: {
+    ts: Timestamp { _bsontype: 'Timestamp', low_: 40, high_: 1566818992 },
+    t: 3
+  },
+  electionId: 7fffffff0000000000000003,
+  ok: 1,
+  operationTime: Timestamp { _bsontype: 'Timestamp', low_: 40, high_: 1566818992 },
+  '$clusterTime': {
+    clusterTime: Timestamp { _bsontype: 'Timestamp', low_: 40, high_: 1566818992 },
+    signature: { hash: [Binary], keyId: [Long] }
+  },
+  deletedCount: 20
+}
+11:29:52:898-[5ccf7f5a0481_110] - [10] - # of sensors associated with Device
+11:29:59:934-[5ccf7f5a0481_110] - [10] -  # of sensors with activity in the current period
+11:29:59:936-[5ccf7f5a0481_110] - [10] -  # of channels associated with Device 
+11:30:07:766-[5ccf7f5a0481_110] - [10] - # of channels with activity in the current period 
+11:30:07:768-[5ccf7f5a0481_110] - [20]  DeviceIndex [11] -total # records - ready to insert 
+11:30:07:770-[5ccf7f5a0481_110] - [GH_Temperature] - About to insert for this Sensor/Channel
+11:30:07:891-[5ccf7f5a0481_110] - [GH_Relative_Humidity] - About to insert for this Sensor/Channel
+11:30:07:894-[5ccf7f5a0481_110] - [GH_CO2] - About to insert for this Sensor/Channel
+11:30:07:895-[5ccf7f5a0481_110] - [GH_Luminescence] - About to insert for this Sensor/Channel
+11:30:07:896-[5ccf7f5a0481_110] - [TDS] - About to insert for this Sensor/Channel
+11:30:07:897-[5ccf7f5a0481_110] - [GH_Soil_Temperature] - About to insert for this Sensor/Channel
+11:30:07:898-[5ccf7f5a0481_110] - [GH_Wind_Speed] - About to insert for this Sensor/Channel
+11:30:07:956-[5ccf7f5a0481_110] - [GH_Rain_Sensor] - About to insert for this Sensor/Channel
+11:30:07:958-[5ccf7f5a0481_110] - [External_Temperature] - About to insert for this Sensor/Channel
+11:30:07:959-[5ccf7f5a0481_110] - [External_Humidity] - About to insert for this Sensor/Channel
+11:30:07:961-[5ccf7f5a0481_110] - [GH_CO2V] - About to insert for this Sensor/Channel
+11:30:07:962-[5ccf7f5a0481_110] - [GH_Left_Curtain] - About to insert for this Sensor/Channel
+11:30:07:967-[5ccf7f5a0481_110] - [GH_Right_Curtain] - About to insert for this Sensor/Channel
+11:30:08:025-[5ccf7f5a0481_110] - [GH_Top_Curtain] - About to insert for this Sensor/Channel
+11:30:08:027-[5ccf7f5a0481_110] - [GH_Fan] - About to insert for this Sensor/Channel
+11:30:08:028-[5ccf7f5a0481_110] - [GH_Air_Circulation] - About to insert for this Sensor/Channel
+11:30:08:030-[5ccf7f5a0481_110] - [GH_Fog] - About to insert for this Sensor/Channel
+11:30:08:086-[5ccf7f5a0481_110] - [GH_Irrg_Pump] - About to insert for this Sensor/Channel
+11:30:08:089-[5ccf7f5a0481_110] - [GH_Irrig_Valve1] - About to insert for this Sensor/Channel
+11:30:08:090-[5ccf7f5a0481_110] - [GH_Irrig_Valve2] - About to insert for this Sensor/Channel
+11:30:08:688-Inserted : aggregation [20]
+11:30:08:693-startTime [2019-07-18T15:30:00.000Z] endTime - [2019-07-18T16:30:00.000Z] - Date - [2019-07-18]  Hour - [21]  - going to process aggregation for this period.
+11:30:08:694-[5ccf7f5a0481_110] - [0]  DeviceIndex [11] - This is Device Going Process 
+11:30:08:934-[5ccf7f5a0481_110] -total # record deleted 
+{
+  n: 20,
+  opTime: {
+    ts: Timestamp { _bsontype: 'Timestamp', low_: 40, high_: 1566819008 },
+    t: 3
+  },
+  electionId: 7fffffff0000000000000003,
+  ok: 1,
+  operationTime: Timestamp { _bsontype: 'Timestamp', low_: 40, high_: 1566819008 },
+  '$clusterTime': {
+    clusterTime: Timestamp { _bsontype: 'Timestamp', low_: 40, high_: 1566819008 },
+    signature: { hash: [Binary], keyId: [Long] }
+  },
+  deletedCount: 20
+}
+11:30:08:940-[5ccf7f5a0481_110] - [10] - # of sensors associated with Device
+11:30:11:514-[5ccf7f5a0481_110] - [10] -  # of sensors with activity in the current period
+11:30:11:516-[5ccf7f5a0481_110] - [10] -  # of channels associated with Device 
+11:30:21:547-[5ccf7f5a0481_110] - [10] - # of channels with activity in the current period 
+11:30:21:549-[5ccf7f5a0481_110] - [20]  DeviceIndex [11] -total # records - ready to insert 
+11:30:21:549-[5ccf7f5a0481_110] - [GH_Temperature] - About to insert for this Sensor/Channel
+11:30:21:550-[5ccf7f5a0481_110] - [GH_Relative_Humidity] - About to insert for this Sensor/Channel
+11:30:21:618-[5ccf7f5a0481_110] - [GH_CO2] - About to insert for this Sensor/Channel
+11:30:21:620-[5ccf7f5a0481_110] - [GH_Luminescence] - About to insert for this Sensor/Channel
+11:30:21:622-[5ccf7f5a0481_110] - [TDS] - About to insert for this Sensor/Channel
+11:30:21:625-[5ccf7f5a0481_110] - [GH_Soil_Temperature] - About to insert for this Sensor/Channel
+11:30:21:831-[5ccf7f5a0481_110] - [GH_Wind_Speed] - About to insert for this Sensor/Channel
+11:30:21:835-[5ccf7f5a0481_110] - [GH_Rain_Sensor] - About to insert for this Sensor/Channel
+11:30:21:838-[5ccf7f5a0481_110] - [External_Temperature] - About to insert for this Sensor/Channel
+11:30:21:898-[5ccf7f5a0481_110] - [External_Humidity] - About to insert for this Sensor/Channel
+11:30:21:900-[5ccf7f5a0481_110] - [GH_CO2V] - About to insert for this Sensor/Channel
+11:30:21:901-[5ccf7f5a0481_110] - [GH_Left_Curtain] - About to insert for this Sensor/Channel
+11:30:21:902-[5ccf7f5a0481_110] - [GH_Right_Curtain] - About to insert for this Sensor/Channel
+11:30:21:902-[5ccf7f5a0481_110] - [GH_Top_Curtain] - About to insert for this Sensor/Channel
+11:30:21:903-[5ccf7f5a0481_110] - [GH_Fan] - About to insert for this Sensor/Channel
+11:30:21:905-[5ccf7f5a0481_110] - [GH_Air_Circulation] - About to insert for this Sensor/Channel
+11:30:22:025-[5ccf7f5a0481_110] - [GH_Fog] - About to insert for this Sensor/Channel
+11:30:22:026-[5ccf7f5a0481_110] - [GH_Irrg_Pump] - About to insert for this Sensor/Channel
+11:30:22:028-[5ccf7f5a0481_110] - [GH_Irrig_Valve1] - About to insert for this Sensor/Channel
+11:30:22:029-[5ccf7f5a0481_110] - [GH_Irrig_Valve2] - About to insert for this Sensor/Channel
+11:30:23:386-Inserted : aggregation [20]
+11:30:23:387-This is End OF Aggregator Function

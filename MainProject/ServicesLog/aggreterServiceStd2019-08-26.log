@@ -1,0 +1,74 @@
+01:40:21:185-Processing End - Aggregation Service
+01:41:10:009-Processing Started - Aggregation Service
+01:41:10:289- aggregation StartRange - [2019-08-26T12:30:00.000Z] and EndTime - [2019-08-26T13:30:00.000Z]
+05:42:55:690-Processing End - Aggregation Service
+05:43:10:007-Processing Started - Aggregation Service
+05:43:10:271- aggregation StartRange - [2019-08-26T04:30:00.000Z] and EndTime - [2019-08-26T05:30:00.000Z]
+05:43:10:520- deviceMacDataArray length of  [0]
+11:14:50:913-Processing End - Aggregation Service
+11:15:10:007-Processing Started - Aggregation Service
+11:15:10:857- aggregation StartRange - [2019-08-25T17:30:00.000Z] and EndTime - [2019-08-25T18:30:00.000Z]
+11:15:11:096- deviceMacDataArray length of  [0]
+11:18:20:727-Processing End - Aggregation Service
+11:20:19:833-Processing End - Aggregation Service
+11:21:10:007-Processing Started - Aggregation Service
+11:21:10:767- aggregation StartRange - [2019-08-26T04:00:00.000Z] and EndTime - [2019-08-26T05:00:00.000Z]
+11:21:11:024- deviceMacDataArray length of  [0]
+13:56:53:727-Processing End - Aggregation Service
+13:57:10:007-Processing Started - Aggregation Service
+13:57:10:442- aggregation StartRange - [2019-08-26T01:00:00.000Z] and EndTime - [2019-08-26T02:00:00.000Z]
+13:57:32:224- deviceMacDataArray length of  [0]
+13:58:10:007-Processing Started - Aggregation Service
+13:58:10:442- aggregation StartRange - [2019-08-26T01:00:00.000Z] and EndTime - [2019-08-26T02:00:00.000Z]
+13:58:10:692- deviceMacDataArray length of  [0]
+15:11:36:493-Processing End - Aggregation Service
+15:12:10:008-Processing Started - Aggregation Service
+15:12:10:024- here aggregator service some error Occured end Of service in Catch
+ReferenceError: istTimeM is not defined
+    at Job.job (C:\Users\User\Desktop\gomosserver\MainProject\baseFunction\batchServices\aggregator.js:56:35)
+    at Job.invoke (C:\Users\User\Desktop\gomosserver\MainProject\node_modules\node-schedule\lib\schedule.js:173:10)
+    at C:\Users\User\Desktop\gomosserver\MainProject\node_modules\node-schedule\lib\schedule.js:552:11
+    at Timeout._onTimeout (C:\Users\User\Desktop\gomosserver\MainProject\node_modules\node-schedule\lib\schedule.js:510:7)
+    at listOnTimeout (internal/timers.js:531:17)
+    at processTimers (internal/timers.js:475:7)
+15:12:42:790-Processing End - Aggregation Service
+15:13:10:008-Processing Started - Aggregation Service
+15:13:10:493- aggregation StartRange - [2019-08-26T08:30:00.000Z] and EndTime - [2019-08-26T09:30:00.000Z]
+15:13:11:450- deviceMacDataArray length of  [0]
+09:45:01:081-Processing End - Aggregation Service
+09:45:10:008-Processing Started - Aggregation Service
+09:45:10:281- aggregation StartRange - [2019-08-26T08:30:00.000Z] and EndTime - [2019-08-26T09:30:00.000Z]
+09:45:10:580- deviceMacDataArray length of  [0]
+09:56:38:083-Processing End - Aggregation Service
+09:57:10:009-Processing Started - Aggregation Service
+09:57:10:013- here aggregator service some error Occured end Of service in Catch
+ReferenceError: value is not defined
+    at Object.module.exports.dateFloor (C:\Users\User\Desktop\gomosserver\MainProject\baseFunction\commanUtilityFn\utilityFn.js:28:28)
+    at Job.job (C:\Users\User\Desktop\gomosserver\MainProject\baseFunction\batchServices\aggregator.js:57:34)
+    at Job.invoke (C:\Users\User\Desktop\gomosserver\MainProject\node_modules\node-schedule\lib\schedule.js:173:10)
+    at C:\Users\User\Desktop\gomosserver\MainProject\node_modules\node-schedule\lib\schedule.js:552:11
+    at Timeout._onTimeout (C:\Users\User\Desktop\gomosserver\MainProject\node_modules\node-schedule\lib\schedule.js:510:7)
+    at listOnTimeout (internal/timers.js:531:17)
+    at processTimers (internal/timers.js:475:7)
+09:58:10:008-Processing Started - Aggregation Service
+09:58:10:010- here aggregator service some error Occured end Of service in Catch
+ReferenceError: value is not defined
+    at Object.module.exports.dateFloor (C:\Users\User\Desktop\gomosserver\MainProject\baseFunction\commanUtilityFn\utilityFn.js:28:28)
+    at Job.job (C:\Users\User\Desktop\gomosserver\MainProject\baseFunction\batchServices\aggregator.js:57:34)
+    at Job.invoke (C:\Users\User\Desktop\gomosserver\MainProject\node_modules\node-schedule\lib\schedule.js:173:10)
+    at C:\Users\User\Desktop\gomosserver\MainProject\node_modules\node-schedule\lib\schedule.js:552:11
+    at Timeout._onTimeout (C:\Users\User\Desktop\gomosserver\MainProject\node_modules\node-schedule\lib\schedule.js:510:7)
+    at listOnTimeout (internal/timers.js:531:17)
+    at processTimers (internal/timers.js:475:7)
+09:58:42:963-Processing End - Aggregation Service
+09:59:10:006-Processing Started - Aggregation Service
+09:59:10:329- aggregation StartRange - [2019-08-26T08:30:00.000Z] and EndTime - [2019-08-26T09:30:00.000Z]
+09:59:10:605- deviceMacDataArray length of  [0]
+15:35:47:923-Processing End - Aggregation Service
+15:36:10:007-Processing Started - Aggregation Service
+15:36:10:421- aggregation StartRange - [2019-08-26T08:30:00.000Z] and EndTime - [2019-08-26T09:30:00.000Z]
+15:36:10:665- deviceMacDataArray length of  [0]
+16:20:37:350-Processing End - Aggregation Service
+16:21:10:008-Processing Started - Aggregation Service
+16:21:10:553- aggregation StartRange - [2019-08-26T09:30:00.000Z] and EndTime - [2019-08-26T10:30:00.000Z]
+16:21:10:811- deviceMacDataArray length of  [0]

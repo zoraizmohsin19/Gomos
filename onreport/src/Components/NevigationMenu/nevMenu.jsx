@@ -7,6 +7,7 @@ import {DropdownButton,MenuItem} from 'react-bootstrap';
 import {NavItem ,Nav} from "react-bootstrap"
 import URL from "../../Common/confile/appConfig.json";
 // import ReactMultiSelectCheckboxes from 'react-multiselect-checkboxes';
+import * as serviceWorker from '../../../src/serviceWorker';
 class NevMenu extends Component {
     constructor(){
         super();
@@ -45,6 +46,7 @@ class NevMenu extends Component {
    onChange = e => this.setState({ [e.target.name]: e.target.value });
 //ON PAGE LOAD DATA FETCH FROM SERVER FOR ALL SERVICE PROVIDER
 componentDidMount() {
+  serviceWorker.register();
   var me = this;
   var configData = JSON.parse(sessionStorage.getItem("configData"));
   var mainData = JSON.parse(sessionStorage.getItem("userDetails"));

@@ -1,0 +1,39 @@
+12:33:20:493-Processing End - Aggregation Service
+12:34:10:008-Processing Started - Aggregation Service
+12:34:10:023- aggregation StartRange - [2019-08-22T06:00:00.000Z] and EndTime - [2019-08-22T07:00:00.000Z]
+12:34:10:258- deviceMacDataArray length of  [0]
+12:35:10:006-Processing Started - Aggregation Service
+12:35:10:010- aggregation StartRange - [2019-08-22T06:00:00.000Z] and EndTime - [2019-08-22T07:00:00.000Z]
+12:35:10:269- deviceMacDataArray length of  [0]
+12:35:55:516-Processing End - Aggregation Service
+12:36:10:007-Processing Started - Aggregation Service
+12:36:10:021- aggregation StartRange - [2019-08-22T06:00:00.000Z] and EndTime - [2019-08-22T07:00:00.000Z]
+12:36:10:258- deviceMacDataArray length of  [0]
+14:16:54:180-Processing End - Aggregation Service
+14:17:10:009-Processing Started - Aggregation Service
+14:17:10:023- aggregation StartRange - [2019-08-22T08:00:00.000Z] and EndTime - [2019-08-22T09:00:00.000Z]
+14:17:10:026- getDistictFactByMac in MsgFactModel criteria
+{
+  DeviceTime: { '$lt': 2019-08-22T09:00:00.000Z, '$gte': 2019-08-22T08:00:00.000Z }
+}
+14:17:10:292- getDistictFactByMac in MsgFactModel Result
+[]
+14:17:10:294- deviceMacDataArray length of  [0]
+14:17:10:294- deviceMacDataArray  array of mac 
+[]
+14:21:28:241-Processing End - Aggregation Service
+14:28:30:729-Processing End - Aggregation Service
+14:29:43:486-Processing End - Aggregation Service
+15:45:39:513-Processing End - Aggregation Service
+15:49:15:319-Processing End - Aggregation Service
+15:50:10:008-Processing Started - Aggregation Service
+15:50:10:019- aggregation StartRange - [2019-08-22T09:00:00.000Z] and EndTime - [2019-08-22T10:00:00.000Z]
+15:50:10:022- getDistictFactByMac in MsgFactModel criteria
+{
+  DeviceTime: { '$lt': 2019-08-22T10:00:00.000Z, '$gte': 2019-08-22T09:00:00.000Z }
+}
+15:50:10:692- getDistictFactByMac in MsgFactModel Result
+[]
+15:50:10:693- deviceMacDataArray length of  [0]
+15:50:10:693- deviceMacDataArray  array of mac 
+[]
