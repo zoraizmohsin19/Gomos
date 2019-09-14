@@ -46,7 +46,7 @@ class NevMenu extends Component {
    onChange = e => this.setState({ [e.target.name]: e.target.value });
 //ON PAGE LOAD DATA FETCH FROM SERVER FOR ALL SERVICE PROVIDER
 componentDidMount() {
-  serviceWorker.register();
+ 
   var me = this;
   var configData = JSON.parse(sessionStorage.getItem("configData"));
   var mainData = JSON.parse(sessionStorage.getItem("userDetails"));
@@ -68,7 +68,7 @@ componentDidMount() {
   this.state.Menu.OpratingDashBoardEnable =  dashboardConfigobjData.OpratingDashBoardEnable
   this.setState({Menu : this.state.Menu});
 
-   
+  serviceWorker.register(mainData[0].userId);
   if (sessionData.length == 1 && sessionData[0] == "ALL") {
       fetch(`${URL.IP}:3992/getRegisterSP`)
       .then(response => response.json())

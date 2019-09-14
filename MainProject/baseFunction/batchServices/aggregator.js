@@ -24,7 +24,7 @@ async function processAggregator() {
     try {
     
         let endRange = utilityFn.dateFloor(new Date());
-          console.log("moment endRange", endRange)
+          // console.log("moment endRange", endRange)
     
       let startRange = moment(endRange.toISOString()).subtract(1, "hours");
       gomos.gomosLog(logger, gConsole, g.TRACE_PROD, ` aggregation StartRange - [${startRange.toISOString()}] and EndTime - [${endRange.toISOString()}]`);

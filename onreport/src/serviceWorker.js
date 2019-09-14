@@ -8,8 +8,9 @@
 // resources are updated in the background.
 
 // To learn more about the benefits of this model and instructions on how to
+import axios from "axios";
 // opt-in, read http://bit.ly/CRA-PWA.
-const serverUrl = 'http://localhost:3333'
+const serverUrl = 'http://localhost:3992'
 const isLocalhost = Boolean(
   window.location.hostname === 'localhost' ||
     // [::1] is the IPv6 localhost address.
@@ -23,7 +24,7 @@ const isLocalhost = Boolean(
 const getApplicationServerKey = () => {
 
   // Fetch from server
-  return fetch(`${serverUrl}/key`)
+  return fetch(`${serverUrl}/serverWorkerKey`)
 
     // Parse response body as arrayBuffer
     .then( res => res.arrayBuffer() )
@@ -111,9 +112,17 @@ function registerValidSW(swUrl, config) {
     registration.pushManager.subscribe( {userVisibleOnly: true, applicationServerKey} )
       .then( res => res.toJSON() )
       .then( subscription => {
-
+        console.log("subscription", subscription)
         // Pass subscription to server
-        fetch(`${serverUrl}/subscribe`, { method: 'POST', body: JSON.stringify(subscription) })
+      
+        // console.log("userDetails", userDetails);
+        console.log("config", config)
+        let body = {
+          subscription,
+          userId:config
+        }
+        console.log("body", body)
+        axios.post(`${serverUrl}/serverWorkerSubscribe`, body)
           .then(console.log)
           .catch(console.log)
 

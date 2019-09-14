@@ -27,8 +27,15 @@ let gomosAssets = require("../commanUtilityFn/getAssets");
 let gomosSubCustCd = require("../commanUtilityFn/getSubCustomers");
 let gomosCustCd = require("../commanUtilityFn/getCustomer");
 let gomosSpCd = require("../commanUtilityFn/getServiceProviders");
-
-
+const vapid = {"publicKey":"BE_IJC5_N-vgC_biBJAN8G7SJB6PQuZEYWequiSuQ1o35RMTT9aRjgpjWbp03-t2QssM-nsTB8g_Mcw3f8gutwQ","privateKey":"EFNLlXDg_4-pGhZIA7S-9nhqVM1buDaH-BM_Kq8kzlY"};
+const webpush = require('web-push')
+const urlsafeBase64 = require('urlsafe-base64');
+// Configure web-push
+webpush.setVapidDetails(
+  'mailto:takreem@sasyasystems.com',
+  vapid.publicKey,
+  vapid.privateKey
+)
 //var gomosDevices = require("../../commanFunction/routes/getDevices");
 var urlConn, dbName;
 var fs = require("fs");
@@ -68,6 +75,88 @@ router.post("/dummy", function (req, res, next){
 
 
 });
+router.get("/serverWorkerKey", function (req, res, next) {
+ 
+  // var query = req.body;
+  gomos.gomosLog( logger,gConsole,TRACE_DEV,"This is me serverWorkerKey" );
+ 
+
+  accessPermission(res);
+  res.end( urlsafeBase64.decode( vapid.publicKey ))
+
+
+   
+    });
+ var dummySubscription;
+    router.post("/serverWorkerSubscribe", function (req, res, next) {
+ 
+      // var query = req.body;
+      gomos.gomosLog( logger,gConsole,TRACE_DEV,"This is me serverWorkerSubscribe" );
+     
+    
+      accessPermission(res);
+    
+      // // Parse subscription body to object
+      console.log("body",req.body )
+        let subscription =  req.body.subscription;
+        let userId =  req.body.userId;
+        dummySubscription = subscription;
+      // // Store subscription for push notifications
+         console.log("subscription",subscription);
+         MongoClient.connect(
+          urlConn,
+          { useNewUrlParser: true },
+          function (err, connection) {
+            if (err) {
+              process.hasUncaughtExceptionCaptureCallback();
+            }
+            var db = connection.db(dbName);
+            db.collection("Users")
+              .find({ userId: userId})
+              .toArray(function (err, result) {
+                if (err) {
+                  process.hasUncaughtExceptionCaptureCallback();
+                }
+                if (result.length > 0) {
+                  console.log("userData", result);
+                 
+                  let array = [subscription];
+                  if(result[0].subscription !== undefined && result[0].subscription !== null ){
+                    result[0]["subscription"].map(item=> { array.push(item)});
+                  }
+                  console.log(array)
+                  db.collection("Users")
+                   .updateOne({ _id: result[0]._id}, {"$set": {"subscription":array}}).then(console.log)
+                  res.end('Subscribed')
+                }
+              })
+            });
+
+         //push.addSubscription( subscription )
+
+      // Respond
+    
+    
+       
+        });
+        router.post("/serverWorkerPush", function (req, res, next) {
+ 
+          // var query = req.body;
+          gomos.gomosLog( logger,gConsole,TRACE_DEV,"This is me serverWorkerKey" );
+         
+        
+          accessPermission(res);
+          console.log("req",req.body)
+        // Send Notification
+    let p = webpush.sendNotification( dummySubscription, "Hello Takreem" )
+    .catch( status => {
+
+  console.log("status",status);
+    })
+        
+           console.log("This is callled");
+           res.end("this is serverWorkerPush")
+            });
 
 router.delete("/deleteSentCommand", function (req, res, next) {
   var query = url.parse(req.url, true).query;

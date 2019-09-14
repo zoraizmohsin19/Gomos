@@ -335,31 +335,17 @@ function mainpipeLineProcessing(mac, processedFlag, createdTime, updatedTime, pa
 }
 function deviceDateFind(data){
   try {
-    let dateTime = data.Date
+    let dateTime = data.Date;
+    let ts = data.ts;
     let now = moment(dateTime)
-    // if(dateTime !==undefined ){
-
-    
-      return (dateTime !==undefined ) ? (now.isValid())? now.toISOString():  moment(data.createdTime).toISOString(): moment(data.createdTime).toISOString();
-    // if(  now.isValid() ) {
-    //   gomos.gomosLog(logger,gConsole,TRACE_DEV,"This is valid case",now.toISOString())
-    //   // gomos.gomosLog(logger,gConsole,TRACE_DEV,"This is valid case",moment("sdfsfdsd"))
-    //   return now.toISOString();
-
-    // }
-    // else{
-    //   gomos.gomosLog(logger,gConsole,TRACE_DEV,"This is In  valid case",now.toISOString())
-    //   return moment(data.createdTime).toISOString();
-    // }
-  // }else{
-  //   gomos.gomosLog(logger,gConsole,TRACE_DEV,"This is In  valid case",now.toISOString())
-  //     return moment(data.createdTime).toISOString(); 
-  // }
+      return (ts !== undefined && (moment(ts).isValid())) ? moment(ts).toISOString(): (dateTime !==undefined && now.isValid() ) ? now.toISOString():  moment(data.createdTime).toISOString();
+  
   } catch (err) {
-    gomos.gomosLog(logger,gConsole,TRACE_DEV,"This is catch ",now.toISOString())
+    gomos.gomosLog(logger,gConsole,TRACE_DEV,"This is catch ",data.Date)
     return moment(data.createdTime).toISOString();
   }
 }
+
 function deviceUpTimeUpdated(dbo, mac, inBootstrap, inLastbeat, duration, currentTime) {
   return new Promise((resolve, reject) => {
     dbo
@@ -499,7 +485,8 @@ async function deviceStateProcess(dbo, dataToInsert, index) {
           var devicesStateKeyValue = result2[0];
           var _id = result2[0]._id;
           gomos.gomosLog(logger, gConsole, TRACE_DEV, "This is Log For DeviceState  After  query", result2[0].updatedTime + ":" + _id + ": " + index);
-          var dateTime = new Date(new Date().toISOString());
+          let dateTime = new Date(new Date().toISOString());
+          let DeviceTime = dataToInsert.DeviceTime;
           var deviceStateKey = Object.keys(devicesStateKeyValue);
           var keysToRemove2 = ["_id", "mac", "DeviceName", "updatedTime", "createdTime"];
           for (var l = 0; l < keysToRemove2.length; l++) {
@@ -527,7 +514,7 @@ async function deviceStateProcess(dbo, dataToInsert, index) {
                     devicesStateKeyValue[deviceStateKey[i]][deviceStatecode[j]]["valueChangeAt"] = dateTime;
                   }
                   devicesStateKeyValue[deviceStateKey[i]][deviceStatecode[j]][devicebusinessNM[0]] = dataToInsert.sensors[sensorsPkey[k]][devicebusinessNM[0]];
-                  devicesStateKeyValue[deviceStateKey[i]][deviceStatecode[j]]["dateTime"] = dateTime;
+                  devicesStateKeyValue[deviceStateKey[i]][deviceStatecode[j]]["dateTime"] = DeviceTime;
 
                 }
               }

@@ -9,7 +9,7 @@ const g = require('../commanUtilityFn/gConstant')
 var logger;
 var gConsole;
 
-const DeviceModel = require("../model/deviceManagerModel");
+const DeviceModel = require("../model/deviceModel");
 const AggregatorModel = require("../model/aggregatorModel");
 
 

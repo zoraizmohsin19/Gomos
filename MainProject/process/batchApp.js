@@ -4,7 +4,9 @@ var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 // var fs = require('fs');
-var index = require('../baseFunction/batchServices/aggregator');
+var aggregator = require('../baseFunction/batchServices/aggregator');
+var alertSrvc = require('../baseFunction/batchServices/alertService');
+
 var Database = require('../baseFunction/DataBaseConnection/dataBaseConnect');
 // var usersRouter = require('../baseFunction/users');
 // var dateTime = require('node-datetime');
@@ -24,7 +26,8 @@ var app = express();
 // app.locals.urlConn = urlConn;
 // app.locals.dbName = dbName;
 Database();
-index(app);
+aggregator(app);
+alertSrvc(app);
 // view engine setup
 // app.set('views', path.join(__dirname, 'views'));
 // app.set('view engine', 'jade');
@@ -35,7 +38,9 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 // app.use(express.static(path.join(__dirname, 'public')));
 app.use('/Database', Database);
-app.use('/', index);
+app.use('/', aggregator);
+app.use('/alertSrvc', alertSrvc);
+
 // app.use('/users', usersRouter);
 
 //catch 404 and forward to error handler

@@ -4,7 +4,7 @@
  * Module dependencies.
  */
 
-var app = require('../process/AggregatorApp');
+var app = require('../process/batchApp');
 var debug = require('debug')('aggregaterservice:server');
 var http = require('http');
 
