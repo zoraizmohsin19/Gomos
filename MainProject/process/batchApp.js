@@ -39,7 +39,7 @@ app.use(cookieParser());
 // app.use(express.static(path.join(__dirname, 'public')));
 app.use('/Database', Database);
 app.use('/', aggregator);
-app.use('/alertSrvc', alertSrvc);
+//app.use('/alertSrvc', alertSrvc);
 
 // app.use('/users', usersRouter);
 

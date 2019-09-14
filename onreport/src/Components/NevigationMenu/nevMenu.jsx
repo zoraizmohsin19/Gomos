@@ -68,7 +68,7 @@ componentDidMount() {
   this.state.Menu.OpratingDashBoardEnable =  dashboardConfigobjData.OpratingDashBoardEnable
   this.setState({Menu : this.state.Menu});
 
-  serviceWorker.register(mainData[0].userId);
+ // serviceWorker.register(mainData[0].userId);
   if (sessionData.length == 1 && sessionData[0] == "ALL") {
       fetch(`${URL.IP}:3992/getRegisterSP`)
       .then(response => response.json())

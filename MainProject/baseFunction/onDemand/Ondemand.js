@@ -3670,7 +3670,7 @@ var sensorType = selectedSensorValueArray;
       .split("GMT")[0]
       .trim();
       let tempFilename  = reportName+dateFormat("yyyymmdd-HHMM") +".xlsx";
-  var fileName = "excelData/"+tempFilename;
+  var fileName = "../../../../../../var/www/html/excelData/"+tempFilename;
   workbook.xlsx.writeFile(fileName).then(data => {
     // const blob = new Blob([data], { type: "application/octet-stream" });
      // var dt = new Date();

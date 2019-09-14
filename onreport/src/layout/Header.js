@@ -64,7 +64,7 @@ class Header extends Component {
                             <p className="text-left small">{data[0].email}</p>
                               
                             <p className="text-left">
-                                 <button  onClick ={ this.handleOpen} className="btn btn-primary btn-block  btn-md">Setting &nbsp;<i class="fas fa-user-cog"></i></button>
+                                 {/* <button  onClick ={ this.handleOpen} className="btn btn-primary btn-block  btn-md">Setting &nbsp;<i class="fas fa-user-cog"></i></button> */}
                                 <button href="#" disabled className="btn btn-primary btn-block btn-md">Change Password</button>
                             </p>
                         </div>
