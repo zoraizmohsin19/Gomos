@@ -4,14 +4,17 @@ import PropTypes from 'prop-types'
 import './Header.css';
 import { Link } from 'react-router-dom';
 import {Nav, Navbar,NavItem, NavDropdown, Modal} from 'react-bootstrap';
-
-
+import * as serviceWorker from '../../src/serviceWorker';
+import axios from "axios";
+import URL from "../Common/confile/appConfig.json";
 class Header extends Component {
   // const { branding } = props;
   constructor() {
     super();
   this.state = {
-    show: false
+    show: false,
+    devicePreference: [],
+    data : [],
   };
   this.handleClose = this.handleClose.bind(this);
   this.handleOpen = this.handleOpen.bind(this);
@@ -20,22 +23,49 @@ class Header extends Component {
     this.setState({ show: false });
   }
   handleOpen() {
-    this.setState({ show: true });
+    let data = JSON.parse(sessionStorage.getItem("userDetails"));
+   
+    this.setState({data: data,  devicePreference: data[0].devicePreference, show: true  })
+   
+  
   }
-
-  render(){
-  let ActiveData = JSON.parse(sessionStorage.getItem("dashboardConfigobj"));
-  let data = JSON.parse(sessionStorage.getItem("userDetails"));
-//   var  Admin =  data[0].userType ;
-  function handleSelect(selectedKey) {
+  handleSelect(selectedKey) {
   
     if(selectedKey === 6){
      
       sessionStorage.clear();
     }
-    
-
   }
+
+  handleSubmit(){
+   console.log( "This is State",this.state.data)
+   let body = { _id : this.state.data[0].id,devicePreference: this.state.devicePreference  }
+    axios.post(`${URL.IP}:3992/users/update`,body)
+    .then(json => {
+      console.log("This is this.state.data result", json)
+     if(json.statusText === "OK"){
+        console.log("This is this.state.data result", json)
+        // let data = JSON.parse(sessionStorage.getItem("userDetails"));
+        this.state.data[0].devicePreference = this.state.devicePreference ;
+        sessionStorage.setItem("userDetails", JSON.stringify(this.state.data));
+        this.handleClose()
+
+      }
+      
+    
+    }).catch(console.log)
+  } 
+  render(){
+  let ActiveData = JSON.parse(sessionStorage.getItem("dashboardConfigobj"));
+  let data = JSON.parse(sessionStorage.getItem("userDetails"));
+//   var  Admin =  data[0].userType ;
+if (ActiveData){
+serviceWorker.register(data[0].userId);
+}
+ 
+ 
+
+  
   return (
 
 <Navbar inverse collapseOnSelect>
@@ -49,7 +79,7 @@ class Header extends Component {
   </Navbar.Header>
   {ActiveData ? ( <Navbar.Collapse>
 
-       <Nav pullRight onSelect={handleSelect}>
+       <Nav pullRight onSelect={this.handleSelect.bind(this)}>
         <NavDropdown eventKey={5} title={ "Hello"+" "+ data[0].userFN } id="basic-nav-dropdown">
         <li>
                 <div className="navbar-login">
@@ -64,8 +94,8 @@ class Header extends Component {
                             <p className="text-left small">{data[0].email}</p>
                               
                             <p className="text-left">
-                                 {/* <button  onClick ={ this.handleOpen} className="btn btn-primary btn-block  btn-md">Setting &nbsp;<i class="fas fa-user-cog"></i></button> */}
-                                <button href="#" disabled className="btn btn-primary btn-block btn-md">Change Password</button>
+                                 <button  onClick ={ this.handleOpen} className="btn btn-primary btn-block  btn-md">Setting &nbsp;<i class="fas fa-user-cog"></i></button>
+                                {/* <button href="#" disabled className="btn btn-primary btn-block btn-md">Change Password</button> */}
                             </p>
                         </div>
                     </div>
@@ -78,7 +108,7 @@ class Header extends Component {
                         <div className="col-lg-12">
                             <p>
                                 {/* <a href="#"  > */}
-                                <NavItem eventKey={6}  onSelect={handleSelect} >
+                                <NavItem eventKey={6}  onSelect={this.handleSelect.bind(this)} >
                                 <Link to="/" className="btn btn-success btn-block"><i className ="fas fa-sign-out-alt"></i> Log out</Link>
                                 
                                 </NavItem>
@@ -91,7 +121,7 @@ class Header extends Component {
         </NavDropdown>
     </Nav>
     {data[0].userType == "Admin" ? (
-        <Nav pullRight onSelect={handleSelect}>
+        <Nav pullRight onSelect={this.handleSelect.bind(this)}>
         <NavItem eventKey={1} >
           <Link to="/NevMenu">Home</Link>
            
@@ -126,44 +156,31 @@ class Header extends Component {
             {/* <div className="row"> */}
             <table>
             <tbody>
-            <tr>
-              <td colspan="6"></td>
-               <td> <label> &nbsp;&nbsp;&nbsp;&nbsp;Device Name 1 : &nbsp;&nbsp;&nbsp;&nbsp;</label> </td>
+          {this.state.devicePreference.map(  (item , i)  =><tr>
+              <td colspan="6"> &nbsp;&nbsp;&nbsp;&nbsp;{ i + 1} &nbsp;&nbsp;&nbsp;&nbsp;</td>
+               <td> <label> &nbsp;&nbsp;&nbsp;&nbsp;{item.DeviceName} &nbsp;&nbsp;&nbsp;&nbsp;</label> </td>
               <td colspan="6">  <label className="switch  headersetting">
-                <input type="checkbox" value="Text" 
+                <input type="checkbox"  value="Text"  checked={item.pusNotification} 
+                onChange={e => {
+                  
+                  this.state.devicePreference[i].pusNotification   = !this.state.devicePreference[i].pusNotification;
+                  
+                  this.setState({ devicePreference:  this.state.devicePreference })
+                }}
                    />
                 <span className="slider round"></span>
               </label>
               </td>
-              </tr>
-              <tr>
-              <td colspan="6"></td>
-               <td> <label> &nbsp;&nbsp;&nbsp;&nbsp;Device Name 2 : &nbsp;&nbsp;&nbsp;&nbsp;</label> </td>
-              <td colspan="6">  <label className="switch  headersetting">
-                <input type="checkbox" value="Text" 
-                   />
-                <span className="slider round"></span>
-              </label>
-              </td>
-              </tr>
-              <tr>
-              <td colspan="6"></td>
-               <td> <label> &nbsp;&nbsp;&nbsp;&nbsp;Device Name 3 : &nbsp;&nbsp;&nbsp;&nbsp;</label> </td>
-              <td colspan="6">  <label className="switch  headersetting">
-                <input type="checkbox" value="Text" 
-                   />
-                <span className="slider round"></span>
-              </label>
-              </td>
-              </tr>
+              </tr>)}
+           
               </tbody>
            </table>
           
           </Modal.Body>
           <Modal.Footer>
             {/* <label className="Mlabel">Action Requested: <u> Switch {(this.state.channelAlerrModel.currentStatus === 1) ? "OFF" : "ON"}</u> And <u>Manual</u> Please Confirm ?</label> */}
-            {/* <button className="btn btn-sm " onClick={this.handleClose}>Cancel</button>
-            <button className="btn btn-sm btn-success" onClick={this.handleSubmit} >Submit</button> */}
+            <button className="btn btn-sm " onClick={this.handleClose}>Cancel</button>
+            <button className="btn btn-sm btn-success" onClick={this.handleSubmit.bind(this)} >Submit</button>
           </Modal.Footer>
         </Modal>
 </Navbar>
