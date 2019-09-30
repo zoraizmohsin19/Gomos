@@ -1,14 +1,29 @@
-import React from 'react';
+import React , { Component } from 'react';
 import PropTypes from 'prop-types'
 // import { Link } from 'react-router-dom';
 import './Header.css';
 import { Link } from 'react-router-dom';
-import {Nav, Navbar,NavItem, NavDropdown, MenuItem} from 'react-bootstrap';
+import {Nav, Navbar,NavItem, NavDropdown, Modal} from 'react-bootstrap';
 
 
+class Header extends Component {
+  // const { branding } = props;
+  constructor() {
+    super();
+  this.state = {
+    show: false
+  };
+  this.handleClose = this.handleClose.bind(this);
+  this.handleOpen = this.handleOpen.bind(this);
+  }
+  handleClose() {
+    this.setState({ show: false });
+  }
+  handleOpen() {
+    this.setState({ show: true });
+  }
 
-const Header = props => {
-  const { branding } = props;
+  render(){
   let ActiveData = JSON.parse(sessionStorage.getItem("dashboardConfigobj"));
   let data = JSON.parse(sessionStorage.getItem("userDetails"));
 //   var  Admin =  data[0].userType ;
@@ -47,8 +62,10 @@ const Header = props => {
                         <div className="col-lg-8">
                             <p className="text-left"><strong>{data[0].userFN+" "+data[0].userLN}</strong></p>
                             <p className="text-left small">{data[0].email}</p>
+                              
                             <p className="text-left">
-                                <a href="#" disabled className="btn btn-primary btn-block btn-md">Change Password</a>
+                                 {/* <button  onClick ={ this.handleOpen} className="btn btn-primary btn-block  btn-md">Setting &nbsp;<i class="fas fa-user-cog"></i></button> */}
+                                <button href="#" disabled className="btn btn-primary btn-block btn-md">Change Password</button>
                             </p>
                         </div>
                     </div>
@@ -99,7 +116,56 @@ const Header = props => {
     
        
   </Navbar.Collapse>) : null}
- 
+  <Modal show={this.state.show} onHide={this.handleClose}
+          dialogClassName=""
+          aria-labelledby="example-custom-modal-styling-title">
+          <Modal.Header closeButton>
+            <Modal.Title id="example-custom-modal-styling-title" ></Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            {/* <div className="row"> */}
+            <table>
+            <tbody>
+            <tr>
+              <td colspan="6"></td>
+               <td> <label> &nbsp;&nbsp;&nbsp;&nbsp;Device Name 1 : &nbsp;&nbsp;&nbsp;&nbsp;</label> </td>
+              <td colspan="6">  <label className="switch  headersetting">
+                <input type="checkbox" value="Text" 
+                   />
+                <span className="slider round"></span>
+              </label>
+              </td>
+              </tr>
+              <tr>
+              <td colspan="6"></td>
+               <td> <label> &nbsp;&nbsp;&nbsp;&nbsp;Device Name 2 : &nbsp;&nbsp;&nbsp;&nbsp;</label> </td>
+              <td colspan="6">  <label className="switch  headersetting">
+                <input type="checkbox" value="Text" 
+                   />
+                <span className="slider round"></span>
+              </label>
+              </td>
+              </tr>
+              <tr>
+              <td colspan="6"></td>
+               <td> <label> &nbsp;&nbsp;&nbsp;&nbsp;Device Name 3 : &nbsp;&nbsp;&nbsp;&nbsp;</label> </td>
+              <td colspan="6">  <label className="switch  headersetting">
+                <input type="checkbox" value="Text" 
+                   />
+                <span className="slider round"></span>
+              </label>
+              </td>
+              </tr>
+              </tbody>
+           </table>
+          
+          </Modal.Body>
+          <Modal.Footer>
+            {/* <label className="Mlabel">Action Requested: <u> Switch {(this.state.channelAlerrModel.currentStatus === 1) ? "OFF" : "ON"}</u> And <u>Manual</u> Please Confirm ?</label> */}
+            {/* <button className="btn btn-sm " onClick={this.handleClose}>Cancel</button>
+            <button className="btn btn-sm btn-success" onClick={this.handleSubmit} >Submit</button> */}
+          </Modal.Footer>
+        </Modal>
 </Navbar>
 
   //  <div>
@@ -152,13 +218,14 @@ const Header = props => {
    
   );
 };
+}
 
-Header.defaultProps = {
-  branding: 'My App'
-};
+// Header.defaultProps = {
+//   branding: 'My App'
+// };
 
-Header.propTypes = {
-  branding: PropTypes.string.isRequired
-};
+// Header.propTypes = {
+//   branding: PropTypes.string.isRequired
+// };
 
 export default Header;

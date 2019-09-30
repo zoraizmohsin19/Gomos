@@ -692,13 +692,14 @@ getAllDataApi(SendForSp,SendFroCustCD,SendForSbCd,SendForSensor,SendForStartDate
         // Disabledsubmit=null;
        }
        var table = null;
-       if(this.state.fileName !=""){
+       if(this.state.fileName !==""){
           table = <div className="row bg">
-               <div className= "custNav btn-group">
-               <button className="btn btn-sm btn-secondary"
+               <div className= "custNav ">
+               {/* <button className="btn btn-sm btn-secondary"
                 onClick={this.displayChart.bind(this)
-              } disabled><i class="far fa-chart-bar iconfont"></i></button>
-               <button onClick= {()=> window.location = `excelData/${this.state.fileName}`} className="btn btn-sm btn-secondary" ><i class="far fa-file-excel iconfont"></i></button>
+              } disabled><i class="far fa-chart-bar iconfont"></i></button> */}
+              <label>Your excel report generated, please click to download.</label><br/>
+               <button onClick= {()=> window.location = `excelData/${this.state.fileName}`} className="btn btn-xs btn-secondary chartbtn" ><img src={require('../layout/Nms-excel.png')} alt="Excel"/></button>
               </div>
               </div>;
           }

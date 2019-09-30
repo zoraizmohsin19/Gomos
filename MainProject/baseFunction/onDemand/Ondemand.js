@@ -19,25 +19,31 @@ const TRACE_STAGE = 2;
 const TRACE_TEST  = 3;
 const TRACE_DEV   = 4;
 const TRACE_DEBUG = 5; 
-var  gomos = require("../../commanFunction/routes/commanFunction");
-var midllelayer = require("../../EndPointMiddlelayer/routes/middlelayer");
-var aggragator = require("../../aggregatorService/routes/aggregatorFunction");
-let gomosDevices = require("../../commanFunction/routes/getDevices");
-let gomosAssets = require("../../commanFunction/routes/getAssets");
-let gomosSubCustCd = require("../../commanFunction/routes/getSubCustomers");
-let gomosCustCd = require("../../commanFunction/routes/getCustomer");
-let gomosSpCd = require("../../commanFunction/routes/getServiceProviders");
-
-
+var  gomos = require("../commanUtilityFn/commanFunction");
+var deviceNotification = require("../batchServices/deviceNotification");
+var aggragator = require("../batchServices/aggregatorFunction");
+let gomosDevices = require("../commanUtilityFn/getDevices");
+let gomosAssets = require("../commanUtilityFn/getAssets");
+let gomosSubCustCd = require("../commanUtilityFn/getSubCustomers");
+let gomosCustCd = require("../commanUtilityFn/getCustomer");
+let gomosSpCd = require("../commanUtilityFn/getServiceProviders");
+const vapid = {"publicKey":"BE_IJC5_N-vgC_biBJAN8G7SJB6PQuZEYWequiSuQ1o35RMTT9aRjgpjWbp03-t2QssM-nsTB8g_Mcw3f8gutwQ","privateKey":"EFNLlXDg_4-pGhZIA7S-9nhqVM1buDaH-BM_Kq8kzlY"};
+const webpush = require('web-push')
+const urlsafeBase64 = require('urlsafe-base64');
+// Configure web-push
+webpush.setVapidDetails(
+  'mailto:takreem@sasyasystems.com',
+  vapid.publicKey,
+  vapid.privateKey
+)
 //var gomosDevices = require("../../commanFunction/routes/getDevices");
 var urlConn, dbName;
-var  gomos = require("../../commanFunction/routes/commanFunction");
 var fs = require("fs");
 let dateTime = require("node-datetime");
 var dt = dateTime.create();
 var formattedDate = dt.format('Y-m-d');
-const output = fs.createWriteStream(`./onDemandStd${formattedDate}.log`, { flags: "a" });
-const errorOutput = fs.createWriteStream(`./onDemand${formattedDate}.log`, { flags: "a" });
+const output = fs.createWriteStream(`./ServicesLog/onDemandStd${formattedDate}.log`, { flags: "a" });
+const errorOutput = fs.createWriteStream(`./ServicesLog/onDemand${formattedDate}.log`, { flags: "a" });
 var logger = gomos.createConsole(output,errorOutput);
 const SERVICE_VALUE = 1;
 var gConsole = false;
@@ -69,6 +75,88 @@ router.post("/dummy", function (req, res, next){
 
 
 });
+router.get("/serverWorkerKey", function (req, res, next) {
+ 
+  // var query = req.body;
+  gomos.gomosLog( logger,gConsole,TRACE_DEV,"This is me serverWorkerKey" );
+ 
+
+  accessPermission(res);
+  res.end( urlsafeBase64.decode( vapid.publicKey ))
+
+
+   
+    });
+ var dummySubscription;
+    router.post("/serverWorkerSubscribe", function (req, res, next) {
+ 
+      // var query = req.body;
+      gomos.gomosLog( logger,gConsole,TRACE_DEV,"This is me serverWorkerSubscribe" );
+     
+    
+      accessPermission(res);
+    
+      // // Parse subscription body to object
+      console.log("body",req.body )
+        let subscription =  req.body.subscription;
+        let userId =  req.body.userId;
+        dummySubscription = subscription;
+      // // Store subscription for push notifications
+         console.log("subscription",subscription);
+         MongoClient.connect(
+          urlConn,
+          { useNewUrlParser: true },
+          function (err, connection) {
+            if (err) {
+              process.hasUncaughtExceptionCaptureCallback();
+            }
+            var db = connection.db(dbName);
+            db.collection("Users")
+              .find({ userId: userId})
+              .toArray(function (err, result) {
+                if (err) {
+                  process.hasUncaughtExceptionCaptureCallback();
+                }
+                if (result.length > 0) {
+                  console.log("userData", result);
+                 
+                  let array = [subscription];
+                  if(result[0].subscription !== undefined && result[0].subscription !== null ){
+                    result[0]["subscription"].map(item=> { array.push(item)});
+                  }
+                  console.log(array)
+                  db.collection("Users")
+                   .updateOne({ _id: result[0]._id}, {"$set": {"subscription":array}}).then(console.log)
+                  res.end('Subscribed')
+                }
+              })
+            });
+
+         //push.addSubscription( subscription )
+
+      // Respond
+    
+    
+       
+        });
+        router.post("/serverWorkerPush", function (req, res, next) {
+ 
+          // var query = req.body;
+          gomos.gomosLog( logger,gConsole,TRACE_DEV,"This is me serverWorkerKey" );
+         
+        
+          accessPermission(res);
+          console.log("req",req.body)
+        // Send Notification
+    let p = webpush.sendNotification( dummySubscription, "Hello Takreem" )
+    .catch( status => {
+
+  console.log("status",status);
+    })
+        
+           console.log("This is callled");
+           res.end("this is serverWorkerPush")
+            });
 
 router.delete("/deleteSentCommand", function (req, res, next) {
   var query = url.parse(req.url, true).query;
@@ -1729,7 +1817,7 @@ router.post("/ActiveDAction", function (req, res, next) {
               gomos.gomosLog( logger,gConsole,TRACE_DEBUG, "this err", err);
             }
             gomos.gomosLog( logger,gConsole,TRACE_DEBUG, "this is message Value 2", message);
-            midllelayer.endPointMiddelayerFn(urlConn, dbName, res, CustCd, subCustCd, DeviceName, payloadId, dataTime, message, Token);
+            deviceNotification.endPointMiddelayerFn(urlConn, dbName, res, CustCd, subCustCd, DeviceName, payloadId, dataTime, message, Token);
           })
     });
 });
@@ -1784,7 +1872,7 @@ router.post("/ActiveAPiForLevel4", function (req, res, next) {
               gomos.gomosLog( logger,gConsole,TRACE_DEBUG, "this err", err);
             }
             gomos.gomosLog( logger,gConsole,TRACE_DEBUG, "this is message Value 2", message);
-            midllelayer.endPointMiddelayerFnWithRemark(urlConn, dbName, res, CustCd, subCustCd, DeviceName, payloadId, dataTime, message, Token,body.remark);
+            deviceNotification.endPointMiddelayerFnWithRemark(urlConn, dbName, res, CustCd, subCustCd, DeviceName, payloadId, dataTime, message, Token,body.remark);
           })
     });
 });
@@ -2576,6 +2664,7 @@ router.post("/getAlert", function (req, res, next) {
 });
 
 //get the dashoboard details of perticular Sensor based on given data
+//get the dashoboard details of perticular Sensor based on given data
 router.post("/getdashboard", function (req, res, next) {
   accessPermission(res);
 
@@ -2620,7 +2709,7 @@ gomos.gomosLog( logger,gConsole,TRACE_DEBUG,"this is debuging in starting",senso
         mac: mac,
        }
     if(body.startTime != "" && body.startTime != undefined && body.startTime != null && body.endTime != "" && body.endTime != undefined && body.endTime != null ){
-      criteria["createdTime"] = {$lte : new Date(body.endTime) , $gte: new Date(body.startTime)}
+      criteria["DeviceTime"] = {$lte : new Date(body.endTime) , $gte: new Date(body.startTime)}
     }
 
     // if( body.TypeOfData === "Normal"){
@@ -2659,8 +2748,8 @@ gomos.gomosLog( logger,gConsole,TRACE_DEBUG,"this is debuging in starting",senso
 function monthlyDataProcessing(db, res, criteria, offset, page_size) {
 
   let NewCriteria = { mac: criteria.mac };
-  if (criteria.createdTime != "" && criteria.createdTime != undefined && criteria.createdTime != null) {
-    NewCriteria["createdTime"] = criteria["createdTime"];
+  if (criteria.DeviceTime != "" && criteria.DeviceTime != undefined && criteria.DeviceTime != null) {
+    NewCriteria["DeviceTime"] = criteria["DeviceTime"];
   }
   console.log(NewCriteria)
   db.collection("AggregatedData")
@@ -2713,7 +2802,7 @@ function monthlyDataProcessing(db, res, criteria, offset, page_size) {
 
 
           let tempObj = {};
-          let createdTime = result1[i]._id.Year+"-"+result1[i]._id.Month;
+          let DeviceTime = result1[i]._id.Year+"-"+result1[i]._id.Month;
           let mac ="";
           let DeviceName ="";
          // let hours = result1[i]._id.Hour;
@@ -2740,7 +2829,7 @@ function monthlyDataProcessing(db, res, criteria, offset, page_size) {
             tempObj[bsName] = tempNewObj;
           }
          // console.log(tempObj)
-          array.push([mac, DeviceName, "", tempObj, createdTime])
+          array.push([mac, DeviceName, "", tempObj, DeviceTime])
         }
        //console.log(result1)
         let finalResult = array;
@@ -2772,8 +2861,8 @@ function monthlyDataProcessing(db, res, criteria, offset, page_size) {
 function weeklyDataProcessing(db, res, criteria, offset, page_size) {
 
   let NewCriteria = { mac: criteria.mac };
-  if (criteria.createdTime != "" && criteria.createdTime != undefined && criteria.createdTime != null) {
-    NewCriteria["createdTime"] = criteria["createdTime"];
+  if (criteria.DeviceTime != "" && criteria.DeviceTime != undefined && criteria.DeviceTime != null) {
+    NewCriteria["DeviceTime"] = criteria["DeviceTime"];
   }
   console.log(NewCriteria)
   db.collection("AggregatedData")
@@ -2826,7 +2915,7 @@ function weeklyDataProcessing(db, res, criteria, offset, page_size) {
 
 
           let tempObj = {};
-          let createdTime = result1[i]._id.Year+"-"+ result1[i]._id.Week;
+          let DeviceTime = result1[i]._id.Year+"-"+ result1[i]._id.Week;
           let mac ="";
           let DeviceName ="";
          // let hours = result1[i]._id.Hour;
@@ -2853,7 +2942,7 @@ function weeklyDataProcessing(db, res, criteria, offset, page_size) {
             tempObj[bsName] = tempNewObj;
           }
          // console.log(tempObj)
-          array.push([mac, DeviceName, "", tempObj, createdTime])
+          array.push([mac, DeviceName, "", tempObj, DeviceTime])
         }
        //console.log(result1)
         let finalResult = array;
@@ -2885,8 +2974,8 @@ function weeklyDataProcessing(db, res, criteria, offset, page_size) {
 function dailyDataProcessing(db, res, criteria, offset, page_size) {
 
   let NewCriteria = { mac: criteria.mac };
-  if (criteria.createdTime != "" && criteria.createdTime != undefined && criteria.createdTime != null) {
-    NewCriteria["createdTime"] = criteria["createdTime"];
+  if (criteria.DeviceTime != "" && criteria.DeviceTime != undefined && criteria.DeviceTime != null) {
+    NewCriteria["DeviceTime"] = criteria["DeviceTime"];
   }
   console.log(NewCriteria)
   db.collection("AggregatedData")
@@ -2939,7 +3028,7 @@ function dailyDataProcessing(db, res, criteria, offset, page_size) {
 
 
           let tempObj = {};
-          let createdTime = "";
+          let DeviceTime = "";
           let mac ="";
           let DeviceName ="";
          // let hours = result1[i]._id.Hour;
@@ -2957,7 +3046,7 @@ function dailyDataProcessing(db, res, criteria, offset, page_size) {
             };
             // if(0 == j){
            
-              createdTime = tempArray[j].Date
+              DeviceTime = tempArray[j].Date
               //console.log(tempArray[j].Date)
               mac =  tempArray[j].mac;
               DeviceName = tempArray[j].DeviceName;
@@ -2966,7 +3055,7 @@ function dailyDataProcessing(db, res, criteria, offset, page_size) {
             tempObj[bsName] = tempNewObj;
           }
          // console.log(tempObj)
-          array.push([mac, DeviceName, "", tempObj, createdTime])
+          array.push([mac, DeviceName, "", tempObj, DeviceTime])
         }
        //console.log(result1)
         let finalResult = array;
@@ -3000,8 +3089,8 @@ function dailyDataProcessing(db, res, criteria, offset, page_size) {
 function hourlyDataProcessing(db, res, criteria, offset, page_size) {
  
   let NewCriteria = { mac: criteria.mac };
-  if (criteria.createdTime != "" && criteria.createdTime != undefined && criteria.createdTime != null) {
-    NewCriteria["createdTime"] = criteria["createdTime"];
+  if (criteria.DeviceTime != "" && criteria.DeviceTime != undefined && criteria.DeviceTime != null) {
+    NewCriteria["DeviceTime"] = criteria["DeviceTime"];
   }
   console.log(NewCriteria)
   db.collection("AggregatedData")
@@ -3054,10 +3143,10 @@ function hourlyDataProcessing(db, res, criteria, offset, page_size) {
 
 
           let tempObj = {};
-          let createdTime = "";
+          let DeviceTime = "";
           let mac ="";
           let DeviceName ="";
-            createdTime = result1[i]._id.Date + " "+ result1[i]._id.Hour+":00";
+          DeviceTime = result1[i]._id.Date + " "+ result1[i]._id.Hour+":00";
           let tempArray = result1[i].processedData;
           for (let j = 0; j < tempArray.length; j++) {
             let bsName = tempArray[j].bsName;
@@ -3078,7 +3167,7 @@ function hourlyDataProcessing(db, res, criteria, offset, page_size) {
             tempObj[bsName] = tempNewObj;
           }
          // console.log(tempObj)
-          array.push([mac, DeviceName, "", tempObj, createdTime])
+          array.push([mac, DeviceName, "", tempObj, DeviceTime])
         }
        //console.log(result1)
         let finalResult = array;
@@ -3114,7 +3203,7 @@ function normalDataProcessing(db,res,criteria,offset,sensorsBSN,sensorNm,page_si
   var sensorp = "sensors."+sensorNm
 
       db.collection("MsgFacts")
-      .find(criteria,{projection: {mac:1,createdTime:1, sensors :1,DeviceName:1} }).skip( offset ).limit( page_size ).sort({createdTime:-1})
+      .find(criteria,{projection: {mac:1,DeviceTime:1, sensors :1,DeviceName:1} }).skip( offset ).limit( page_size ).sort({DeviceTime:-1})
       .toArray(function (err, result1) {
         if (err) {
           process.hasUncaughtExceptionCaptureCallback();
@@ -3143,11 +3232,11 @@ function normalDataProcessing(db,res,criteria,offset,sensorsBSN,sensorNm,page_si
                 
                   }
                 finalResult.push([resultCopy[i].mac,resultCopy[i].DeviceName,sensorsBSN, 
-                  tempArray, resultCopy[i].createdTime]);
+                  tempArray, resultCopy[i].DeviceTime]);
                 
           }
 
-         db.collection("MsgFacts").find(criteria,{ limit: 1 } ).sort({ createdTime : -1 }).toArray(function (err, result2) {
+         db.collection("MsgFacts").find(criteria,{ limit: 1 } ).sort({ DeviceTime : -1 }).toArray(function (err, result2) {
           if (err) {
             process.hasUncaughtExceptionCaptureCallback();
           }
@@ -3326,7 +3415,7 @@ router.post("/apiAggregator", function (req, res, next) {
        gomos.gomosLog(logger,gConsole,TRACE_TEST,`This is Criteria for ApiAggregator startRenge : [${startRenge}] -  endRenge :[${endRenge}] and macArray`,macArray, "Y")
 
          // let  dataFromDevices = await gomosDevices.getDevices(dbo, NAMEOFSERVICE, logger, gConsole);
-    aggragator.startProcess(NAMEOFSERVICE,logger, gConsole ,dbo,connection,startRenge,endRenge,macArray)
+      aggragator.startProcess(NAMEOFSERVICE,logger, gConsole,startRenge,endRenge,macArray,"Y")
   //  console.log(response)
   //  if(response === "completed"){
   //       // connection.close();
@@ -3581,7 +3670,7 @@ var sensorType = selectedSensorValueArray;
       .split("GMT")[0]
       .trim();
       let tempFilename  = reportName+dateFormat("yyyymmdd-HHMM") +".xlsx";
-  var fileName = "excelData/"+tempFilename;
+  var fileName = "../../../../../../var/www/html/excelData/"+tempFilename;
   workbook.xlsx.writeFile(fileName).then(data => {
     // const blob = new Blob([data], { type: "application/octet-stream" });
      // var dt = new Date();

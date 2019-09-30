@@ -1,16 +1,16 @@
 // 'use strict';
 
 const moment = require('moment');
-const utilityFn = require('./utilityFn')
+const utilityFn = require('../commanUtilityFn/utilityFn')
 
-var gomos = require("../../commanFunction/routes/commanFunction");
-const MsgFactModel = require('./Model/msgFactModel')
-const g = require('./gConstant')
+var gomos = require("../commanUtilityFn/commanFunction");
+const MsgFactModel = require('../model/msgFactModel')
+const g = require('../commanUtilityFn/gConstant')
 var logger;
 var gConsole;
 
-const DeviceModel = require("./Model/deviceManagerModel");
-const AggregatorModel = require("./Model/aggregatorModel");
+const DeviceModel = require("../model/deviceModel");
+const AggregatorModel = require("../model/aggregatorModel");
 
 
 
@@ -172,7 +172,7 @@ function aggragateChannel(mac, endRange, startRange, arrayBSName, Type, bsName) 
   return new Promise((resolve, reject) => {
     MsgFactModel.getAggragateChannel(NAMEOFSERVICE, logger, gConsole, mac, endRange, startRange, arrayBSName)
       .then(async function (result) {
-
+ try{
         gomos.gomosLog(logger, gConsole, g.TRACE_DEV, "This is result of aggregation", result);
         if (result.length > 0) {
           let dateArray = [];
@@ -216,6 +216,10 @@ function aggragateChannel(mac, endRange, startRange, arrayBSName, Type, bsName) 
         else {
           resolve({ result: "err" })
         }
+      }
+        catch(err){
+          console.log("error", err);
+        }
       }).catch(err => { console.log("error", err) });
   });
 }
@@ -241,8 +245,9 @@ async function startMainProcessSensors(dataFromDevices, mac, TypeOf, endTime, st
         // let response = await aggragateSensors(dbo, mac, endTime, startTime, arrayBSName[j])
         let response = await MsgFactModel.getAggragateSensors(NAMEOFSERVICE, logger, gConsole, mac, endTime, startTime, arrayBSName[j]);
 
-        gomos.gomosLog(logger, gConsole, g.TRACE_DEBUG, "This is Response", response)
-        if (response.result !== "err") {
+        gomos.gomosLog(logger, gConsole, g.TRACE_DEV, "This is Response sensors", response)
+        try{
+        if ( response.length > 0 ){
 
           tempObj["Max"] = utilityFn.convertIntTodecPoint(response[0]["Max"], 2);
           tempObj["Min"] = utilityFn.convertIntTodecPoint(response[0]["Min"], 2);
@@ -254,6 +259,10 @@ async function startMainProcessSensors(dataFromDevices, mac, TypeOf, endTime, st
           gomos.gomosLog(logger, gConsole, g.TRACE_DEBUG, "This is else part Data not found", tempObj);
           //  gomos.errorCustmHandler(NAMEOFSERVICE, "startMainProcessSensors", 'This is not data for processing', ` `, '', g.ERROR_APPLICATION, g.ERROR_FALSE, g.EXIT_FALSE);
         }
+      }catch(err){
+        gomos.gomosLog(logger, gConsole, g.TRACE_TEST, "catch error in startMainProcessSensors function", err);
+        gomos.errorCustmHandler(NAMEOFSERVICE, "startMainProcessSensors", 'This is catch Error', ` `, '', g.ERROR_APPLICATION, g.ERROR_FALSE, g.EXIT_FALSE);
+      }
       }
       gomos.gomosLog(logger, gConsole, g.TRACE_TEST, `[${mac}] - [${json["sensors"].length}] -  # of sensors with activity in the current period`);
 
