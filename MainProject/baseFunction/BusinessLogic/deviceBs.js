@@ -18,3 +18,19 @@ module.exports.fetchDeviceBymac = function (NAMEOFSERVICE,logger,gConsole,mac) {
         })
     });
 }
+
+module.exports.fetchDeviceBysubCustCd = function (NAMEOFSERVICE,logger,gConsole,subCustCd) {
+ 
+    return new Promise((resolve, reject) => {
+        DeviceModel.find({subCustCd: subCustCd}).then(res =>{
+          gomos.gomosLog(logger,gConsole,g.TRACE_TEST,"fetchDeviceBysubCustCd in DeviceModel result length", res.length);
+          gomos.gomosLog(logger,gConsole,g.TRACE_DEBUG,"fetchDeviceBysubCustCd in DeviceModel result", res);
+            resolve(res)
+        }).catch(err => {
+            gomos.gomosLog(logger,gConsole,g.TRACE_DEBUG," fetchDeviceBysubCustCd in DeviceModel err", err);
+       gomos.errorCustmHandler(NAMEOFSERVICE, "fetchDeviceBysubCustCd", 'This is Catch error end of fetchDeviceBysubCustCd and  DeviceModle - ', ` `, err, g.ERROR_DATABASE, g.ERROR_TRUE, g.EXIT_FALSE);
+       reject(err)
+        })
+    });
+}
+

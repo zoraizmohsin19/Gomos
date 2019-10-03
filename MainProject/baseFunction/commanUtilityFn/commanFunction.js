@@ -58,7 +58,7 @@ exports.gomosLog = function(x){
  
   exports.unWantedLog = function(functionName,message){
     var DateTime = moment().format("YYYY-MM-DD HH:mm:ss:SSS");
-    let writeStream = fs.createWriteStream("../unWantedLogCommanlog-" +  moment().format("YYYY-MM-DD")+ ".log", { flags: "a" });
+    let writeStream = fs.createWriteStream("./CommanErrorLog/unWantedLogCommanlog-" +  moment().format("YYYY-MM-DD")+ ".log", { flags: "a" });
 
   // write some data with a base64 encoding
   writeStream.write(
@@ -79,7 +79,7 @@ exports.gomosLog = function(x){
   }
   exports.errorCustmHandler =  function(x){
     // console.log(typeofError);
-      let writeStream = fs.createWriteStream("../commanError-" + moment().format("YYYY-MM-DD")+ ".log", { flags: "a" });
+      let writeStream = fs.createWriteStream("./CommanErrorLog/commanError-" + moment().format("YYYY-MM-DD")+ ".log", { flags: "a" });
       var dateTime =  moment().format("YYYY-MM-DD HH:mm:ss:SSS");
     // write some data with a base64 encoding
     // var errors = typeofError.toS
