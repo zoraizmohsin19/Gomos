@@ -4,7 +4,7 @@ import PropTypes from 'prop-types'
 import './Header.css';
 import { Link } from 'react-router-dom';
 import {Nav, Navbar,NavItem, NavDropdown, Modal} from 'react-bootstrap';
-import * as serviceWorker from '../../src/serviceWorker';
+// import * as serviceWorker from '../../src/serviceWorker';
 import axios from "axios";
 import URL from "../Common/confile/appConfig.json";
 class Header extends Component {
@@ -60,7 +60,7 @@ class Header extends Component {
   let data = JSON.parse(sessionStorage.getItem("userDetails"));
 //   var  Admin =  data[0].userType ;
 if (ActiveData){
-serviceWorker.register(data[0].userId);
+//serviceWorker.register(data[0].userId);
 }
  
  

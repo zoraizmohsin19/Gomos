@@ -21,7 +21,7 @@ async function processAggregator() {
   let aggreSrvcSchedul = await ServiceScheduleManager.initialize()
   console.log("min", aggreSrvcSchedul.getAggregationSchValue())
   var schPattern = `0 ${aggreSrvcSchedul.getAggregationSchValue()} * * * *`;
-  //var schPattern = `10 * * * * *`;
+ // var schPattern = `10 * * * * *`;
 
   var tempSchedule = scheduleTemp.scheduleJob(schPattern, async function () {
     gomos.gomosLog(logger, gConsole, g.TRACE_PROD, "Processing Started - Aggregation Service");
@@ -36,12 +36,12 @@ async function processAggregator() {
       let deviceMacDataArray = await MsgFactsModel.getDistictFactByMac(NAMEOFSERVICE, logger, gConsole, endRange, startRange);
       gomos.gomosLog(logger, gConsole, g.TRACE_PROD, " deviceMacDataArray length of ", deviceMacDataArray.length);
       gomos.gomosLog(logger, gConsole, g.TRACE_DEBUG, " deviceMacDataArray  array of mac ", deviceMacDataArray);
+       let resAlert = await alertGeneratorForDevice(deviceMacDataArray, startRange.toISOString());
 
       if (deviceMacDataArray.length > 0) {
         let response = await aggragator.startProcess(NAMEOFSERVICE, logger, gConsole, startRange.toISOString(), endRange.toISOString(), deviceMacDataArray, "N")
         gomos.gomosLog(logger, gConsole, g.TRACE_PROD, " here end response of service", response)
       }
-      let resAlert = await alertGeneratorForDevice(deviceMacDataArray, startRange.toISOString());
 
       gomos.gomosLog(logger, gConsole, g.TRACE_DEBUG, " alertGeneratorForDevice  array of promise ", resAlert);
 
