@@ -65,6 +65,7 @@ import URL from "../Common/confile/appConfig.json";
             //  alert(response);
             console.log(response["data"]);
              if (response["data"] != 0) {
+                console.log("userData",  JSON.stringify(response["data"].userDtls))
                 sessionStorage.setItem("userDetails", JSON.stringify(response["data"].userDtls));
                 sessionStorage.setItem("dashboardConfigobj", JSON.stringify(response["data"].dashboardConfigobj));
                 console.log(JSON.stringify(response["data"].configData))

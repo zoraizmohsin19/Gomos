@@ -31,10 +31,9 @@ module.exports.activeUers = function (NAMEOFSERVICE,logger,gConsole,email) {
 
 
 module.exports.getUsersBymac = function (NAMEOFSERVICE,logger,gConsole,mac) {
- 
   return new Promise((resolve, reject) => {
     //  console.log("email",email)
-      UsersModel.find({'Devicepreference.mac': mac}).then(res =>{
+      UsersModel.find({'devicePreference.mac': mac, 'devicePreference.pusNotification': true}).then(res =>{
            console.log("this is  getUsersBymac ", res)
          
         
@@ -44,6 +43,19 @@ module.exports.getUsersBymac = function (NAMEOFSERVICE,logger,gConsole,mac) {
       }).catch(err => {
           gomos.gomosLog(logger,gConsole,g.TRACE_DEBUG," activeUsers error", err);
      gomos.errorCustmHandler(NAMEOFSERVICE, "activeBs", 'This is Catch error end of activeUsers - ', ` `, err, g.ERROR_DATABASE, g.ERROR_TRUE, g.EXIT_FALSE);
+     reject(err)
+      })
+  });
+}
+module.exports.updateUser = function (NAMEOFSERVICE,logger,gConsole,query,updateData) {
+  return new Promise((resolve, reject) => {
+    UsersModel.updateOne(query,updateData ).then(res =>{
+          gomos.gomosLog(logger,gConsole,g.TRACE_DEBUG,"updateUser Update result", res);
+          resolve(res)
+        
+      }).catch(err => {
+          gomos.gomosLog(logger,gConsole,g.TRACE_DEBUG," updateUser error", err);
+     gomos.errorCustmHandler(NAMEOFSERVICE, "activeBs", 'This is Catch error end of updateUser - ', ` `, err, g.ERROR_DATABASE, g.ERROR_TRUE, g.EXIT_FALSE);
      reject(err)
       })
   });

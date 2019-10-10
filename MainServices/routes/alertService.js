@@ -14,7 +14,7 @@ var dateTime = require("node-datetime");
 var dbo ;
 let gomosSchedule = require("../../commanFunction/routes/getServiceConfig");
 // Mailing Details
-var mailFrom = '"AS Agri Alert"<asagrialert@gmail.com>';
+var mailFrom = '"Sasya Systems Alert"<sasyasystemsalert@gmail.com>';
 var mailTo = 'takreem@asagrisystems.com';
 var  gomos = require("../../commanFunction/routes/commanFunction");
 const NAMEOFSERVICE = "alertService";
@@ -45,8 +45,10 @@ var transporter = nodemailer.createTransport({
   auth: {
     // user: 'vidzai.iot@gmail.com',
     // pass: 'vidzai123'
-    user: 'asagrialert@gmail.com',
-    pass: 'snch2000'
+    // user: 'asagrialert@gmail.com',
+    // pass: 'snch2000'
+    user: 'sasyasystemsalert@gmail.com',
+    pass: 'sasya123!'
   }
 });
 
@@ -96,7 +98,7 @@ function processAlerts() {
                     gomos.gomosLog( logger,gConsole,TRACE_DEV,"This is response of getRecipientMail",response);
                   sendAlertMail(result[i].DeviceName, result[i].alertText, result[i].type,
                     result[i].subCustCd, result[i]._id, dbo, result[i].businessNm,
-                    result[i].businessNmValues, response.emailRecipient);
+                    result[i].businessNmValues,result[i].shortName, response.emailRecipient);
                 } catch (err) {
                   gomos.gomosLog(logger,gConsole,TRACE_DEV,"This is Error Try catch in index level",result[i])
                   updateAlertsForError(result[i]._id, dbo);
@@ -179,19 +181,19 @@ function updateAlertsForError(objId, dbo) {
   );
 }
 
-function sendAlertMail(DeviceName, strText, level, custCode, objId, dbo, businessName,businessNmValues,emailsToSend) {
+function sendAlertMail(DeviceName, strText, level, custCode, objId, dbo, businessName,businessNmValues,shortName,emailsToSend) {
   try {
     let mailOptions = {
       from: mailFrom, // sender address
       // to: emailsToSend, // list of receivers
       bcc: emailsToSend,
-      subject: 'Alert : ' + level + " : " + businessName + " : " + DeviceName, // Subject line
+      subject: 'Alert : ' + level + " : " + businessName + " : " + DeviceName + " : " + shortName , // Subject line
       //text: strText + " : mac :" + mac + " subCustCode : " + custCode,
-      html: '<p style="font-family:TimesNewRoman;font-size:15px"><B>Customer : ' + custCode + '</B></p>' +
-        '<p style="font-family:TimesNewRoman;font-size:15px"><B> DeviceName : ' + DeviceName + '</B></p>' +
-        '<p style="font-family:TimesNewRoman;font-size:15px"><B>Level : ' + level + '</B></p>' +
-        '<p style="font-family:TimesNewRoman;font-size:15px"><B>Values : ' + businessNmValues + '</B></p>' +
-        '<p style="font-family:TimesNewRoman;font-size:15px"><B>Message : ' + strText + '</B></p>'
+       html: '<p style="font-family:TimesNewRoman;font-size:15px"><B>Customer : </B>' + custCode + '</p>' +
+       '<p style="font-family:TimesNewRoman;font-size:15px"><B> DeviceName : </B>' + DeviceName + '</p>' +
+       '<p style="font-family:TimesNewRoman;font-size:15px"><B>Level : </B>' + level + '</p>' +
+       '<p style="font-family:TimesNewRoman;font-size:15px"><B>Values : </B>' + businessNmValues + '</p>' +
+       '<p style="font-family:TimesNewRoman;font-size:15px"><B>Message : </B>' + strText + '</p>'
     };
   
     // send mail with defined transport object

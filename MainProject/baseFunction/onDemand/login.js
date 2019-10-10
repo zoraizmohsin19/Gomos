@@ -34,6 +34,7 @@ router.post("/authenticate", function (req, res, next) {
             if (result.length > 0) {
               for (var index = 0; index < result.length; index++) {
                 userDtls.push({
+                  id: result[index]._id,
                   userId: result[index].userId,
                   serviceProviders: result[index].spCds,
                   customers: result[index].custCds,
@@ -43,6 +44,7 @@ router.post("/authenticate", function (req, res, next) {
                   email: result[index].email,
                   userFN: result[index].userFN,
                   userLN: result[index].userLN,
+                  devicePreference: result[index].devicePreference,
                   userType : result[index].userType
                 });  
                 let dashboardConfigId = result[0].dashboardConfigId;

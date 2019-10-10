@@ -27,7 +27,7 @@ var app = express();
 // app.locals.dbName = dbName;
 Database();
 aggregator(app);
-alertSrvc(app);
+//alertSrvc(app);
 // view engine setup
 // app.set('views', path.join(__dirname, 'views'));
 // app.set('view engine', 'jade');
@@ -39,7 +39,7 @@ app.use(cookieParser());
 // app.use(express.static(path.join(__dirname, 'public')));
 app.use('/Database', Database);
 app.use('/', aggregator);
-//app.use('/alertSrvc', alertSrvc);
+// app.use('/alertSrvc', alertSrvc);
 
 // app.use('/users', usersRouter);
 

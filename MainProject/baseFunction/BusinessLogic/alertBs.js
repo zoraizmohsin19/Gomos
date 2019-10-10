@@ -63,3 +63,22 @@ module.exports.updateAlertsErrorL1 = function (NAMEOFSERVICE,logger,gConsole, ob
       
     })
 }
+
+module.exports.saveAlert = function (NAMEOFSERVICE,logger,gConsole, alertObject) {
+    return new Promise((resolve, reject) => {
+        let alertInstance =  new AlertModel(alertObject);
+        alertInstance.save((err,res)=>{
+                if(err){
+                    gomos.gomosLog(logger,gConsole,g.TRACE_DEBUG," saveAlert in AlertModel err", err);    
+                    gomos.errorCustmHandler(NAMEOFSERVICE, "AlertModel", 'This is find  Catch error saveAlert and  Alert Model - ', ` `, err, g.ERROR_DATABASE, g.ERROR_TRUE, g.EXIT_FALSE);
+                    reject(err); 
+                }
+             gomos.gomosLog(logger,gConsole,g.TRACE_DEBUG," fetched all level1  saveAlert  Result", res);    
+            resolve(res)
+
+        })
+    }).catch(err=> {
+        gomos.errorCustmHandler(NAMEOFSERVICE, "AlertModel", 'This is Promise  Catch error saveAlert and  AlertModel - ', ` `, err, g.ERROR_DATABASE, g.ERROR_TRUE, g.EXIT_FALSE);
+      
+    })
+}

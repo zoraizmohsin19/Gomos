@@ -89,7 +89,7 @@ router.get("/serverWorkerKey", function (req, res, next) {
     });
  var dummySubscription;
     router.post("/serverWorkerSubscribe", function (req, res, next) {
- 
+
       // var query = req.body;
       gomos.gomosLog( logger,gConsole,TRACE_DEV,"This is me serverWorkerSubscribe" );
      
@@ -182,6 +182,37 @@ router.delete("/deleteSentCommand", function (req, res, next) {
       }
     );
     });
+router.post("/users/update", function (req, res, next) {
+
+  gomos.gomosLog(logger, gConsole, TRACE_DEV, "This is me users/update");
+
+
+  accessPermission(res);
+  console.log("req", req.body)
+  MongoClient.connect(
+    urlConn,
+    { useNewUrlParser: true },
+    function (err, connection) {
+      if (err) {
+        process.hasUncaughtExceptionCaptureCallback();
+      }
+      //"ProgramDetails","ActiveJob"
+      var db = connection.db(dbName);
+      let data = req.body
+      if(data){
+      db.collection("Users").updateOne({ _id : ObjectId(data._id)}, { $set: { devicePreference: data.devicePreference}},(err, result) => {
+         if (err){
+          console.log("error", err)
+           res.json(err);
+         }else{
+           console.log("result", result)
+           res.json(result);
+         }
+      })
+      }
+    })
+
+});
 router.get("/flashPrograms", function (req, res, next) {
   var query = url.parse(req.url, true).query;
   var mac = query.mac;
@@ -349,102 +380,103 @@ router.post("/dummy1", function (req, res, next){
         });
 });
 });
-//checks whether given userId and password is valid or not if valid pass the user details
-router.post("/authenticate", function (req, res, next) {
-  // var query = url.parse(req.url, true).query;
-   let body = req.body.body
-  let userId = body.email;
-  let password = body.password;
-  console.log(userId +" ,"+ password );
-  userDtls = [];
-  accessPermission(res);
-  MongoClient.connect(
-    urlConn,
-    { useNewUrlParser: true },
-    function (err, connection) {
-      if (err) {
-        process.hasUncaughtExceptionCaptureCallback();
-      }
-      var db = connection.db(dbName);
-      db.collection("Users")
-        .find({ userId: userId, password: password })
-        .toArray(function (err, result) {
-          if (err) {
-            process.hasUncaughtExceptionCaptureCallback();
-          }
-          if (result.length > 0) {
-            for (var index = 0; index < result.length; index++) {
-              userDtls.push({
-                userId: result[index].userId,
-                serviceProviders: result[index].spCds,
-                customers: result[index].custCds,
-                subCustomers: result[index].subCustCds,
-                Assets: result[index].Assets,
-                Devices: result[index].Devices,
-                email: result[index].email,
-                userFN: result[index].userFN,
-                userLN: result[index].userLN,
-                userType : result[index].userType
-              });  
-              let dashboardConfigId = result[0].dashboardConfigId;
-              let clientID = result[0].clientID;
-              db.collection("DashboardConfig")
-              .find({ dashboardConfigId: dashboardConfigId })
-              .toArray(function (err, result1) {
-                if (err) {
-                  process.hasUncaughtExceptionCaptureCallback();
-                } 
+// //checks whether given userId and password is valid or not if valid pass the user details
+// router.post("/authenticate", function (req, res, next) {
+//   // var query = url.parse(req.url, true).query;
+//    let body = req.body.body
+//   let userId = body.email;
+//   let password = body.password;
+//   console.log(userId +" ,"+ password );
+//   userDtls = [];
+//   accessPermission(res);
+//   MongoClient.connect(
+//     urlConn,
+//     { useNewUrlParser: true },
+//     function (err, connection) {
+//       if (err) {
+//         process.hasUncaughtExceptionCaptureCallback();
+//       }
+//       var db = connection.db(dbName);
+//       db.collection("Users")
+//         .find({ userId: userId, password: password })
+//         .toArray(function (err, result) {
+//           if (err) {
+//             process.hasUncaughtExceptionCaptureCallback();
+//           }
+//           if (result.length > 0) {
+//             for (var index = 0; index < result.length; index++) {
+//               userDtls.push({
+//                 userId: result[index].userId,
+//                 serviceProviders: result[index].spCds,
+//                 customers: result[index].custCds,
+//                 subCustomers: result[index].subCustCds,
+//                 Assets: result[index].Assets,
+//                 Devices: result[index].Devices,
+//                 email: result[index].email,
+//                 userFN: result[index].userFN,
+//                 userLN: result[index].userLN,
+//                 devicePreference: result[index].devicePreference,
+//                 userType : result[index].userType
+//               });  
+//               let dashboardConfigId = result[0].dashboardConfigId;
+//               let clientID = result[0].clientID;
+//               db.collection("DashboardConfig")
+//               .find({ dashboardConfigId: dashboardConfigId })
+//               .toArray(function (err, result1) {
+//                 if (err) {
+//                   process.hasUncaughtExceptionCaptureCallback();
+//                 } 
 
-                 dashboardConfigobj = {
-                  ActiveSpCd: result1[0].ActiveSpCd,
-                  ActiveCustCd: result1[0].ActiveCustCd,
-                  ActiveSubCustCd: result1[0].ActiveSubCustCd,
-                  Assets: result1[0].Assets,
-                  ActiveAssets: result1[0].ActiveAssets,
-                  Devices: result1[0].Devices,
-                  ActiveDevice: result1[0].ActiveDeviceName,
-                  ActiveMac:  result1[0].ActiveMac,
-                  SensorsBgC: result1[0].SensorsBgC,
-                  Nevigation : result1[0].Nevigation,
-                  ActiveDashBoardEnable: result1[0].ActiveDashBoardEnable,
-                  OpratingDashBoardEnable: result1[0].OpratingDashBoardEnable
-                 }
-                  gomos.gomosLog( logger,gConsole,TRACE_DEBUG,"This is result1[0].deviceType", result1[0].deviceType)
-                 var  configData = {
-                  DeviceName: result1[0].ActiveDeviceName,
-                  mac:  result1[0].ActiveMac,
-                  assetId: result1[0].ActiveAssets,
-                  custCd: result1[0].ActiveCustCd,
-                  spCd: result1[0].ActiveSpCd,
+//                  dashboardConfigobj = {
+//                   ActiveSpCd: result1[0].ActiveSpCd,
+//                   ActiveCustCd: result1[0].ActiveCustCd,
+//                   ActiveSubCustCd: result1[0].ActiveSubCustCd,
+//                   Assets: result1[0].Assets,
+//                   ActiveAssets: result1[0].ActiveAssets,
+//                   Devices: result1[0].Devices,
+//                   ActiveDevice: result1[0].ActiveDeviceName,
+//                   ActiveMac:  result1[0].ActiveMac,
+//                   SensorsBgC: result1[0].SensorsBgC,
+//                   Nevigation : result1[0].Nevigation,
+//                   ActiveDashBoardEnable: result1[0].ActiveDashBoardEnable,
+//                   OpratingDashBoardEnable: result1[0].OpratingDashBoardEnable
+//                  }
+//                   gomos.gomosLog( logger,gConsole,TRACE_DEBUG,"This is result1[0].deviceType", result1[0].deviceType)
+//                  var  configData = {
+//                   DeviceName: result1[0].ActiveDeviceName,
+//                   mac:  result1[0].ActiveMac,
+//                   assetId: result1[0].ActiveAssets,
+//                   custCd: result1[0].ActiveCustCd,
+//                   spCd: result1[0].ActiveSpCd,
                 
-                  subCustCd: result1[0].ActiveSubCustCd
-                 }
-                 gomos.gomosLog( logger,gConsole,TRACE_DEBUG,"This is Config Data",configData )
-                 db.collection("ClientMenuConfig")
-                 .find({ clientID: clientID })
-                 .toArray(function (err, clientData) {
-                   if (err) {
-                     process.hasUncaughtExceptionCaptureCallback();
-                   } 
+//                   subCustCd: result1[0].ActiveSubCustCd
+//                  }
+//                  gomos.gomosLog( logger,gConsole,TRACE_DEBUG,"This is Config Data",configData )
+//                  db.collection("ClientMenuConfig")
+//                  .find({ clientID: clientID })
+//                  .toArray(function (err, clientData) {
+//                    if (err) {
+//                      process.hasUncaughtExceptionCaptureCallback();
+//                    } 
 
-                  gomos.gomosLog( logger,gConsole,TRACE_DEV,"This is clientID ",clientData);
-                  var ClientObj =  clientData[0]
-                  gomos.gomosLog( logger,gConsole,TRACE_DEV,"This is ClientObj",ClientObj)
-                res.json({userDtls, dashboardConfigobj, configData,ClientObj});
-              });
-            });
+//                   gomos.gomosLog( logger,gConsole,TRACE_DEV,"This is clientID ",clientData);
+//                   var ClientObj =  clientData[0]
+//                   gomos.gomosLog( logger,gConsole,TRACE_DEV,"This is ClientObj",ClientObj)
+//                 res.json({userDtls, dashboardConfigobj, configData,ClientObj});
+//               });
+//             });
 
 
 
-            }
+//             }
            
-          } else {
-            res.json(0);
-          }
-        });
-    }
-  );
-});
+//           } else {
+//             res.json(0);
+//           }
+//         });
+//     }
+//   );
+// });
 
 // method for Register Service Provider...
 router.post("/registerSP", function (req, res, next) {

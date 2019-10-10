@@ -7,7 +7,7 @@ import {DropdownButton,MenuItem} from 'react-bootstrap';
 import {NavItem ,Nav} from "react-bootstrap"
 import URL from "../../Common/confile/appConfig.json";
 // import ReactMultiSelectCheckboxes from 'react-multiselect-checkboxes';
-import * as serviceWorker from '../../../src/serviceWorker';
+
 class NevMenu extends Component {
     constructor(){
         super();
@@ -68,7 +68,7 @@ componentDidMount() {
   this.state.Menu.OpratingDashBoardEnable =  dashboardConfigobjData.OpratingDashBoardEnable
   this.setState({Menu : this.state.Menu});
 
- // serviceWorker.register(mainData[0].userId);
+ 
   if (sessionData.length == 1 && sessionData[0] == "ALL") {
       fetch(`${URL.IP}:3992/getRegisterSP`)
       .then(response => response.json())
