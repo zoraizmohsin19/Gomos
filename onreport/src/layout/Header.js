@@ -119,13 +119,15 @@ if (ActiveData){
                 </div>
             </li>
         </NavDropdown>
+       
     </Nav>
+   
     {data[0].userType == "Admin" ? (
         <Nav pullRight onSelect={this.handleSelect.bind(this)}>
-        <NavItem eventKey={1} >
+        {/* <NavItem eventKey={1} >
           <Link to="/NevMenu">Home</Link>
            
-          </NavItem>
+          </NavItem> */}
           <NavItem eventKey={2} >
           <Link to="/aggregator">Aggregator</Link>
           </NavItem>
@@ -143,6 +145,12 @@ if (ActiveData){
           </NavItem> */}
           </Nav>)
         : null}
+         <Nav pullRight onSelect={this.handleSelect.bind(this)}>
+    <NavItem eventKey={1} >
+          <Link to="/NevMenu">Home</Link>
+           
+          </NavItem>
+      </Nav>
     
        
   </Navbar.Collapse>) : null}

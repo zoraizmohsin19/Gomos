@@ -39,7 +39,6 @@ if(b[1] > 30){
     return myTime;
 }
 
-
 // THIS IS METHOD FOR CALCULATE INDIAN STANDER TIME
 module.exports.calcIST = function (date) {
     let d = new Date(date);
@@ -47,6 +46,14 @@ module.exports.calcIST = function (date) {
     let utc = d.getTime() + (d.getTimezoneOffset() * 60000);
 
     return new Date(utc + (3600000 * 5.5));
+}
+// THIS IS METHOD FOR CALCULATE ANY REGION TIME
+module.exports.calcWATZ = function (date,offset) {
+    let d = new Date(date);
+  // let utc = d.getTime() + (d.getTimezoneOffset() * 60000);
+    let utc = d.getTime() + (d.getTimezoneOffset() * 60000);
+
+    return new Date(utc + (3600000 * offset));
 }
 
 
