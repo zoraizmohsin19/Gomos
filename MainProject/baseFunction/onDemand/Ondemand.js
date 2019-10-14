@@ -3609,7 +3609,7 @@ var formattedDate = requiredDateTime.create(utilityFn.calcWATZ(new Date(),TimeZo
     ["Sub Customer Name", selectedSubCustValue],
     ["Asset Name", selectedAssetValue],
     ["Device Name", selectedDeviceValue],
-    ["Sensors Type", sensorType.join(",")],
+    ["Selected Group", sensorType.join(",")],
     ["Time Interval", dateFormat(startDate,"dd-mmm HH:MM")+","+dateFormat(endDate,"dd-mmm HH:MM")]
     // ["Class", this.std]
   ];
@@ -3917,8 +3917,8 @@ function factsOperations(db, sensorsDetails, startFactValue, endFactValue, conne
 
   db.collection("MsgFacts")
     .find(criteria,{
-      projection: { "sensors": 1,"mac":1,"DeviceName": 1,"createdTime":1} 
-    }).sort({createdTime:-1})
+      projection: { "sensors": 1,"mac":1,"DeviceName": 1,"DeviceTime":1} 
+    }).sort({DeviceTime:-1})
     .toArray(function (err, result) {
       if (err) {
         next(err);
@@ -3942,7 +3942,7 @@ function factsOperations(db, sensorsDetails, startFactValue, endFactValue, conne
         }else{
           console.log('This is else part')
           for (i = 0; i < result.length; i++) {
-            let dt = requiredDateTime.create(utilityFn.calcWATZ(result[i].createdTime,TimeZone));
+            let dt = requiredDateTime.create(utilityFn.calcWATZ(result[i].DeviceTime,TimeZone));
             let formattedDate = dt.format("d-m-Y H:M:S");
             let sensorNmKeys = Object.keys(result[i].sensors);
             // console.log(sensorNmKeys);
@@ -3954,7 +3954,7 @@ function factsOperations(db, sensorsDetails, startFactValue, endFactValue, conne
 
               for(let k = 0; k < businessNameKey.length; k++){
                   if(businessNameKey.includes(sensorsDetails[l].sensorsBs)){
-                  temp[businessNameKey[k]] = result[i]["sensors"][sensorsDetails[l].SensorsType][businessNameKey[k]]
+                  temp[sensorsDetails[l].sensorsBs] = result[i]["sensors"][sensorsDetails[l].SensorsType][sensorsDetails[l].sensorsBs]
                   }
                 
                 }
@@ -3985,7 +3985,7 @@ function factsOperations(db, sensorsDetails, startFactValue, endFactValue, conne
                 for(var j = 0; j< keysofbussinessName.length; j++){
                   tempobj[keysofbussinessName[j]] = finalResult[i][2][keysofbussinessName[j]];
                 }
-                tempobj["CreatedTime"] =  finalResult[i][3]
+                tempobj["TIME"] =  finalResult[i][3]
                 FdataArray.push(tempobj)}
 
                 downloadToExcel(FdataArray,criteria.custCd,criteria.subCustCd,criteria.DeviceName,selectedGroupName,assetId,utilityFn.calcWATZ(startDate,TimeZone),utilityFn.calcWATZ(endDate,TimeZone),res,TimeZone)

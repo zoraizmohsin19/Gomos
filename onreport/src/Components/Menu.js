@@ -820,7 +820,7 @@ if(this.state.mainGroupSensors.length != 0){
                         <MenuItem eventKey={item}>{item}</MenuItem>
                         )}
                         </DropdownButton> */}
-                     <ReactMultiSelectCheckboxes placeholderButtonLabel= "SELECT THE SENSOR" disabled onChange= {this.handleSensorNm.bind(this)} options={sensorsObj} />
+                     <ReactMultiSelectCheckboxes placeholderButtonLabel= "SELECT THE GROUP" disabled onChange= {this.handleSensorNm.bind(this)} options={sensorsObj} />
 
                         </div>
                      {/* <SelectionInput 
