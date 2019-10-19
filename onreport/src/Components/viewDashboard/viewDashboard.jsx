@@ -411,12 +411,12 @@ dataTypeDisable(){
           for (let k = 0; k < sensorsKeys.length; k++) {
             jsontemp[sensorsKeys[k]] = json1[i][3][sensorsKeys[k]];
           }
-           arrayHeder = ["SI", "DEVICE NAME"];
+           arrayHeder = ["SN", "DEVICE NAME"];
           for (let l = 0; l < sensorsKeys.length; l++) {
   
             arrayHeder.push(sensorsKeys[l]);
           }
-          arrayHeder.push("CREATED TIME");
+          arrayHeder.push("TIME");
           dataArray.push(
             jsontemp
           )

@@ -15,7 +15,7 @@ import {DropdownButton,MenuItem} from 'react-bootstrap';
 import dateFormat  from  "dateformat";
 import ReactMultiSelectCheckboxes from 'react-multiselect-checkboxes';
 import URL from "../Common/confile/appConfig.json";
-
+import axios from "axios";
 class Menu extends Component {
     constructor(){
         super();
@@ -32,6 +32,8 @@ class Menu extends Component {
             operations: [],
             tableDataToSend: [],
             result: [],
+            mainGroupSensors: [],
+            selectedGroupName: [],
             selectedSPValue:'',
             selectedCustValue :'',
             selectedSubCustValue:'',
@@ -108,7 +110,7 @@ this.handleCutMr(configData.custCd);
 this.handleSubCs(configData.subCustCd);
 this.handleAsset(configData.assetId);
 // this.handleDevice(configData.DeviceName);
-var json = {DeviceName: configData.DeviceName}
+var json = {DeviceName: configData.DeviceName , mac : configData.mac}
 this.handleDevice(json);
     // this.setState({
     //     selectedSPValue      : configData.spCd,
@@ -118,7 +120,7 @@ this.handleDevice(json);
     //     selectedDeviceValue  : configData.DeviceName,
     //     sensorDisable : null
     //   })
-    this.getSensor(configData.spCd,configData.custCd,configData.subCustCd )
+    this.getSensor( configData.mac)
 
 
 
@@ -166,21 +168,26 @@ onSubmit = (e) => {
     this.setState({ deviceDisable : null})
    }
    handleDevice =(value) =>{
-    const {selectedSPValue,selectedCustValue,selectedSubCustValue} = this.state;
       // alert(value)
-    this.setState({ selectedDeviceValue : value.DeviceName, })
-    this.getSensor(selectedSPValue,selectedCustValue,selectedSubCustValue )
+    this.setState({ selectedDeviceValue : value.DeviceName })
+    this.getSensor(value.mac)
     this.setState({ sensorDisable : null})
    }
  //THIS IS FOR HANDLE  SENSOR  
    handleSensorNm(obj){
     const {selectedSPValue,selectedCustValue,selectedSubCustValue} = this.state;
     // // // alert(e.target.value)
-    var tempArray= []
+    //console.log("this is click of sensors", obj)
+    var tempArray= [];
+    let selectedGroupName =[]
     for(var i =0; i< obj.length; i++){
-      tempArray.push(obj[i].label);
+      selectedGroupName.push(obj[i].label)
+      for(let j =0; j< obj[i].value.length; j++){
+        tempArray.push(obj[i].value[j]);
+      }
     }
-    this.setState({ selectedSensorValueArray : tempArray,Disabledsubmit : null })
+   // console.log("this is log of last OutPut", tempArray)
+    this.setState({ selectedSensorValueArray : tempArray,Disabledsubmit : null, selectedGroupName: selectedGroupName })
     // this.selectOpertion(selectedSPValue,selectedCustValue,selectedSubCustValue,value)
     // // console.log(this.state.selectedSPValue , "hello sensorNm");
     
@@ -296,20 +303,18 @@ getDeviceApi(Asset){
  
 }
 //THIS API FOR GET SENSOR  BASED ON SERVICE PROVIDER , CUSTOMER CODE, SUBCUSTOMER CODE
-getSensorApi(SendForSp,SendFroCustCD,SendForSbCd){
-  fetch(`${URL.IP}:3992/getSensorNames?spCode=` +SendForSp +
-         "&&custCd=" + SendFroCustCD + "&&subCustCd=" + SendForSbCd)
-       .then(response => response.json())
+getSensorApi(mac){
+  axios.post(`${URL.IP}:3992/getDevicesWithgroup`,{ mac: mac })
+      //  .then(response =>response.json())
        .then(json =>  {
-       var sensorNm =  json.map( x =>  { return  x  });
-       this.setState({sensorNm : sensorNm});
-       // console.log(json );
+      //  console.log(json );
+       this.setState({mainGroupSensors :json["data"] });
      });
 }
 
 //THIS IS SELECTION OF SENSORE BASED ON SERVICE PROVIDER , CUSTOMER CODE, SUBCUSTOMER CODE
-  getSensor( selectedSPValue,selectedCustValue, selectedSubCustValue){
-        this.getSensorApi(selectedSPValue, selectedCustValue,selectedSubCustValue)
+  getSensor(mac){
+        this.getSensorApi(mac)
       
   }
   //THIS IS API FOR OPERTION SELECTION BASED ON SERVICE PROVIDER , CUSTOMER CODE, SUBCUSTOMER AND SELECTED SENSORE CODE
@@ -339,7 +344,7 @@ getAllDetails(){
   const {startDate,endDate,selectedSPValue,
     selectedCustValue,selectedSubCustValue,
     selectedSensorValueArray,ArrayOfSPs,selectedAssetValue,selectedDeviceValue,
-    ArrayOfCusts,ArrayOfSubCusts ,operationSelected ,equalsValue, startRange, endRange } =this.state;
+    ArrayOfCusts,ArrayOfSubCusts ,operationSelected ,equalsValue, startRange, endRange , selectedGroupName} =this.state;
     var dateTime1 = new Date(startDate).toISOString();
     var dateTime2 = new Date(endDate).toISOString();
   var spToSend = [], custToSend = [], subCustToSend = [];
@@ -347,18 +352,22 @@ getAllDetails(){
   custToSend.push(selectedCustValue);
   subCustToSend.push(selectedSubCustValue);
       this.getAllDataApi(spToSend,custToSend,subCustToSend,selectedSensorValueArray,dateTime1,
-        dateTime2, operationSelected,equalsValue,startRange,endRange,selectedAssetValue,selectedDeviceValue)
+        dateTime2, operationSelected,equalsValue,startRange,endRange,selectedAssetValue,selectedDeviceValue, selectedGroupName)
   // }
 }
 //THIS IS API METHOD FOR FETCH ALL DATA FROM SERVER BASED ON SELECTED CRITERIA.
 getAllDataApi(SendForSp,SendFroCustCD,SendForSbCd,SendForSensor,SendForStartDate,
-  SendForEndDate,SendForOperation,SendForEqual,SendForStartRange,SendforEndRange,sendforAsset,sendforDevice){
+  SendForEndDate,SendForOperation,SendForEqual,SendForStartRange,SendforEndRange,sendforAsset,sendforDevice,selectedGroupName){
+    let timezone = (((new Date()).getTimezoneOffset())*-1)/60;
+    let sensorsStrings= JSON.stringify(SendForSensor)
+    let selectedGroupName1 = JSON.stringify(selectedGroupName);
+    // console.log("group Name",selectedGroupName)
     fetch(`${URL.IP}:3992/getFacts?spCode=` + SendForSp + "&&custCd=" +
-    SendFroCustCD + "&&subCustCd=" + SendForSbCd + "&&sensorNm=" + SendForSensor +
+    SendFroCustCD + "&&subCustCd=" + SendForSbCd + "&&sensorNm=" + sensorsStrings +
   "&&startDate=" + SendForStartDate + "&&endDate=" + SendForEndDate + 
   "&&operation=" + SendForOperation + "&&equalsFacts=" +
   SendForEqual + "&&startFactValue=" + SendForStartRange + "&&Asset="+sendforAsset + "&&Device=" + sendforDevice +
-  "&&endFactValue=" +  SendforEndRange)
+  "&&endFactValue=" +  SendforEndRange +"&&TimeZone="+ timezone + "&&selectedGroupName="+ selectedGroupName1)
     .then(response => response.json())
     .then(json =>  {
       if(json !=0){
@@ -377,8 +386,14 @@ getAllDataApi(SendForSp,SendFroCustCD,SendForSbCd,SendForSensor,SendForStartDate
         //   tempobj["CreatedTime"] =  json[i][3]
         //   FdataArray.push(tempobj)}
         // // console.log("this json data");
-        this.setState({fileName: json.fileName})
-         console.log(json);
+        console.log(json)
+        if(json["fileName"] !== undefined){
+          this.setState({fileName: json.fileName})
+        }else{
+          swal("Sorry!", json.message, "error");
+          this.setState({fileName: ""})
+        }
+       //  console.log(json);
         // // alert(json)
         // // console.log("end json");
         //HERE WE UPDATTING STATE FOR TABLE DATA FOR tableDataToSend AND RESUALT FOR CHART AND EXCEL
@@ -703,11 +718,11 @@ getAllDataApi(SendForSp,SendFroCustCD,SendForSbCd,SendForSensor,SendForStartDate
               </div>
               </div>;
           }
-if(this.state.sensorNm.length != 0){
+if(this.state.mainGroupSensors.length != 0){
   var sensorsObj = [];
-  this.state.sensorNm.map((item,i) => {
+  this.state.mainGroupSensors.map((item,i) => {
     var obj = {
-      "label": item, "value": i
+      "label": item.group, "value": item.devicebusinessNM
     }
     sensorsObj.push(obj);
   })
@@ -811,7 +826,7 @@ if(this.state.sensorNm.length != 0){
                         <MenuItem eventKey={item}>{item}</MenuItem>
                         )}
                         </DropdownButton> */}
-                     <ReactMultiSelectCheckboxes placeholderButtonLabel= "SELECT THE SENSOR" disabled onChange= {this.handleSensorNm.bind(this)} options={sensorsObj} />
+                     <ReactMultiSelectCheckboxes placeholderButtonLabel= "SELECT THE GROUP" disabled onChange= {this.handleSensorNm.bind(this)} options={sensorsObj} />
 
                         </div>
                      {/* <SelectionInput 
@@ -825,7 +840,7 @@ if(this.state.sensorNm.length != 0){
                      <div className="col-sm-6">
                      <div className= "sensors">
                      <div className= "senosrs">
-                   <span className= "senosrs">{(this.state.selectedSensorValueArray.length !=0)?"Selected Sensors :"+this.state.selectedSensorValueArray.join(" , ") :"" }</span>
+                   <span className= "senosrs">{(this.state.selectedGroupName.length !=0)?"Selected Group :"+this.state.selectedGroupName.join(" , ") :"" }</span>
                      </div>
                      </div>
                      </div>

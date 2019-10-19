@@ -22,7 +22,7 @@ module.exports.fetchDeviceBymac = function (NAMEOFSERVICE,logger,gConsole,mac) {
 module.exports.fetchDeviceBysubCustCd = function (NAMEOFSERVICE,logger,gConsole,subCustCd) {
  
     return new Promise((resolve, reject) => {
-        DeviceModel.find({subCustCd: subCustCd}).then(res =>{
+        DeviceModel.find({subCustCd: subCustCd,"active": "Y"}).then(res =>{
           gomos.gomosLog(logger,gConsole,g.TRACE_TEST,"fetchDeviceBysubCustCd in DeviceModel result length", res.length);
           gomos.gomosLog(logger,gConsole,g.TRACE_DEBUG,"fetchDeviceBysubCustCd in DeviceModel result", res);
             resolve(res)
