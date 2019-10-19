@@ -3587,13 +3587,31 @@ router.post("/getDevicesWithgroup", function (req, res, next) {
 });
  //export To Excel and Save it to server and add the Details to Collection
  function exportToExcel(arColumns, arKeys, arWidths, reportName, dataSet,selectedCustValue,selectedSubCustValue,selectedAssetValue,selectedDeviceValue,selectedGroupName,startDate,endDate,res,TimeZone) {
+  var dt = new Date();
+  var strdt;
+    strdt = dt
+      .toString()
+      .split("GMT")[0]
+      .trim();
+    //   var tempFilename  = reportName+dateFormat("yyyymmdd-HHMM") +".xlsx";
+    // //  var fileName = "../../../../../../var/www/html/excelData/"+tempFilename;
+    //   var fileName = "./"+tempFilename;
+    //   var options = {
+    //     filename: fileName,
+    //     useStyles: true,
+    //     useSharedStrings: true
+    //   };
   var workbook = new ExcelJs.Workbook();
   workbook.created = new Date();
-
+  // var workbook = new ExcelJs.stream.xlsx.WorkbookWriter(options);
+  var ws1 = workbook.addWorksheet("REPORT_HEADER", {
+    properties: { tabColor: { argb: "1E1E90FF" } }
+  });
   // create a sheet with blue tab colour
   var ws = workbook.addWorksheet("DATA_RECORDING", {
     properties: { tabColor: { argb: "1E1E90FF" } }
   });
+
 var sensorType = selectedGroupName;
 // if(this.state.selectedDeviceValue !=0){
 // for(var i = 0; i< this.state.selectedDeviceValue.length; i++){
@@ -3615,46 +3633,56 @@ var formattedDate = requiredDateTime.create(utilityFn.calcWATZ(new Date(),TimeZo
   ];
 
   // Add title rows
-  ws.addRows(titleRows);
+  // for(let T = 0; T< titleRows.length ; T++){
+   ws1.addRows(titleRows);
+  
+  // }
+ 
 
   for (i = 1; i <= titleRows.length; ++i) {
-    ws.getRow(i).font = { size: 12, bold: true };
-    ws.getRow(i).alignment = {
+    ws1.getRow(i).font = { size: 12, bold: true };
+    ws1.getRow(i).alignment = {
       vertical: "middle",
       horizontal: "center",
-      wrapText: true
+       wrapText: true
     };
-    ws.getCell("A" + i).fill = {
+   
+    ws1.getCell("A" + i).fill = {
       type: "pattern",
       pattern: "solid",
       fgColor: { argb: "8787CEFA" }
     };
-    ws.getCell("A" + i).border = ws.getCell("B" + i).border = {
+    ws1.getCell("A" + i).border = ws1.getCell("B" + i).border = {
       left: { style: "thin" },
       top: { style: "thin" },
       bottom: { style: "thin" },
       right: { style: "thin" }
     };
   }
-
+  ws1.getColumn("A").width = 35;
+  ws1.getColumn("B").width = 35;
+  // ws1.commit();
   /*Set Column headers and keys*/
   for (let i = 0; i < arColumns.length; ++i) {
     ws.getColumn(i + 1).key = arKeys[i];
     ws.getColumn(i + 1).width = arWidths[i];
   }
 
-  ws.getRow(titleRows.length + 2).height = 40;
-  ws.getRow(titleRows.length + 2).font = { size: 12, bold: true };
-  ws.getRow(titleRows.length + 2).values = arColumns;
+  ws.getRow(1).height = 40;
+  ws.getRow(1).font = { size: 12, bold: true };
+  ws.getRow(1).values = arColumns;
 
   // add all the rows in datasource to sheet - make sure keys are matching
-  ws.addRows(dataSet);
+  // for(let d = 0; d < dataSet.length; d++){
+     ws.addRows(dataSet)
+  // }
+ 
 
   // loop through and style all the cells - Optimize this loop later.
-  var j = titleRows.length + 2;
+  var j = 1;
   for (
-    var i = titleRows.length + 2;
-    i <= dataSet.length + titleRows.length + 2;
+    var i = 1;
+    i <= dataSet.length + 1;
     ++i
   ) {
     ws.getRow(i).alignment = {
@@ -3662,7 +3690,7 @@ var formattedDate = requiredDateTime.create(utilityFn.calcWATZ(new Date(),TimeZo
       horizontal: "center",
       wrapText: true
     };
-    if (i == titleRows.length + 2) {
+    if (i == 1) {
       var strDataCol = "A";
       for (var k = 0; k < arColumns.length; ++k) {
         if (k == 0) {
@@ -3716,6 +3744,11 @@ var formattedDate = requiredDateTime.create(utilityFn.calcWATZ(new Date(),TimeZo
               bottom: { style: "medium" },
               right: { style: "thin" }
             };
+            ws.getCell(strDataCol + j).dataValidation = {
+              type: 'date',
+            
+            }
+            ws.getCell(strDataCol + j).numFmt = 'm/d/yyyy\\ h:mm:ss\\ AM/PM';
           } else if (k == arColumns.length - 1) {
             ws.getCell(strDataCol + j).border = {
               left: { style: "thin" },
@@ -3743,6 +3776,11 @@ var formattedDate = requiredDateTime.create(utilityFn.calcWATZ(new Date(),TimeZo
               bottom: { style: "thin" },
               right: { style: "thin" }
             };
+            ws.getCell(strDataCol + j).dataValidation = {
+              type: 'date',
+             
+            }
+            ws.getCell(strDataCol + j).numFmt = 'm/d/yyyy\\ h:mm:ss\\ AM/PM';
           } else if (k == arColumns.length - 1) {
             ws.getCell(strDataCol + j).border = {
               left: { style: "thin" },
@@ -3750,6 +3788,7 @@ var formattedDate = requiredDateTime.create(utilityFn.calcWATZ(new Date(),TimeZo
               bottom: { style: "thin" },
               right: { style: "medium" }
             };
+            
           } else {
             ws.getCell(strDataCol + j).border = {
               left: { style: "thin" },
@@ -3764,15 +3803,26 @@ var formattedDate = requiredDateTime.create(utilityFn.calcWATZ(new Date(),TimeZo
     }
     j = j + 1;
   }
-  var dt = new Date();
-  var strdt;
-    strdt = dt
-      .toString()
-      .split("GMT")[0]
-      .trim();
-      let tempFilename  = reportName+dateFormat("yyyymmdd-HHMM") +".xlsx";
-  var fileName = "../../../../../../var/www/html/excelData/"+tempFilename;
-  workbook.xlsx.writeFile(fileName).then(data => {
+  // var dt = new Date();
+  // var strdt;
+  //   strdt = dt
+  //     .toString()
+  //     .split("GMT")[0]
+  //     .trim();
+  //     let tempFilename  = reportName+dateFormat("yyyymmdd-HHMM") +".xlsx";
+//  var fileName = "../../../../../../var/www/html/excelData/"+tempFilename;
+// ws.commit();
+// workbook.commit()
+//   .then(function() {
+//     // the stream has been written
+//     res.json({fileName: tempFilename})
+//      console.log("inner functions")
+//   });
+let tempFilename  = reportName+dateFormat("yyyymmdd-HHMM") +".xlsx";
+  let fileName = "../../../../../../var/www/html/excelData/"+tempFilename;
+// let fileName = "./"+tempFilename;
+const stream = fs.createWriteStream(fileName);
+  workbook.xlsx.write(stream).then(data => {
     // const blob = new Blob([data], { type: "application/octet-stream" });
      // var dt = new Date();
      // var strdt;
@@ -3785,7 +3835,20 @@ var formattedDate = requiredDateTime.create(utilityFn.calcWATZ(new Date(),TimeZo
      res.json({fileName: tempFilename})
      console.log("inner functions")
    });
-}
+//   workbook.xlsx.writeFile("./"+tempFilename).then(data => {
+//     // const blob = new Blob([data], { type: "application/octet-stream" });
+//      // var dt = new Date();
+//      // var strdt;
+//      // strdt = dt
+//      //   .toString()
+//      //   .split("GMT")[0]
+//      //   .trim();
+//      // var fileName =  "takreem.xlsx";
+//      // FileSaver.saveAs(data, fileName);
+//      res.json({fileName: tempFilename})
+//      console.log("inner functions")
+//    });
+ }
 function downloadToExcel(result,selectedCustValue,selectedSubCustValue,selectedDeviceValue,selectedGroupName,assetId,startDate,endDate,res,TimeZone) {
   
   //HERE PUTING RESULT DATA WHICH STORED IN STATE VARIABLE AND ASSIGN TO LOCAL VARIABLE dataForExcel
@@ -3941,9 +4004,18 @@ function factsOperations(db, sensorsDetails, startFactValue, endFactValue, conne
           processOperation( startFactValue, endFactValue, connection, next, equalsFacts, operation, res ,finalResult,result,ltdttm)
         }else{
           console.log('This is else part')
+          if(result.length > 1000){
+          //  console.log("this is Exceeded Limit For Excel")
+            // let temp =`For given criteria, Record count [${result.length}]exceeds the limit set (1000 rows). Please alter the criteria and try again.`;
+
+            res.json({message: `For given criteria, Record count [${result.length}] exceeds the limit set (1000 rows). Please alter the criteria and try again.` })
+          }else{
+            console.log("Processing ...")
           for (i = 0; i < result.length; i++) {
             let dt = requiredDateTime.create(utilityFn.calcWATZ(result[i].DeviceTime,TimeZone));
-            let formattedDate = dt.format("d-m-Y H:M:S");
+        //    let formattedDate = dt.format("d-m-Y H:M:S");
+           //   let formattedDate = (moment(utilityFn.calcWATZ(result[i].DeviceTime,TimeZone))).format("M/D/YYYY  H:mm");
+            let formattedDate = utilityFn.calcWATZ(result[i].DeviceTime,TimeZone);
             let sensorNmKeys = Object.keys(result[i].sensors);
             // console.log(sensorNmKeys);
             let temp ={}
@@ -3964,12 +4036,13 @@ function factsOperations(db, sensorsDetails, startFactValue, endFactValue, conne
               }
 
             }
-            finalResult.push([result[i].mac,result[i].DeviceName, temp, formattedDate]);
+            finalResult.push([formattedDate,result[i].mac,result[i].DeviceName, temp]);
              
                 // finalResult.push([result[i].mac,result[i].name, sensorNmKeys[j], result[i]._id[sensorNmKeys[j]], formattedDate]);
             }
         
-          }
+          
+        
           if (finalResult.length != 0) {
             finalResult.push([ltdttm, 0, 0]);
             gomos.gomosLog( logger,gConsole,TRACE_DEBUG,"This is Final result of GetFact", finalResult);
@@ -3981,20 +4054,23 @@ function factsOperations(db, sensorsDetails, startFactValue, endFactValue, conne
          
               for (var i = 0; i < finalResult.length - 1; i++) {
                 var tempobj ={}
-                var  keysofbussinessName = Object.keys(finalResult[i][2]);
+                tempobj["TIME"] =  finalResult[i][0]
+                var  keysofbussinessName = Object.keys(finalResult[i][3]);
                 for(var j = 0; j< keysofbussinessName.length; j++){
-                  tempobj[keysofbussinessName[j]] = finalResult[i][2][keysofbussinessName[j]];
+                  tempobj[keysofbussinessName[j]] = finalResult[i][3][keysofbussinessName[j]];
                 }
-                tempobj["TIME"] =  finalResult[i][3]
+                // tempobj["TIME"] =  finalResult[i][3]
                 FdataArray.push(tempobj)}
 
                 downloadToExcel(FdataArray,criteria.custCd,criteria.subCustCd,criteria.DeviceName,selectedGroupName,assetId,utilityFn.calcWATZ(startDate,TimeZone),utilityFn.calcWATZ(endDate,TimeZone),res,TimeZone)
             // res.json(finalResult);
+            
           }
           else {
             res.json(0);
          }
-          // }
+        } 
+      }
         } else {
           res.json(0);
           connection.close();

@@ -20,8 +20,8 @@ const logger = (require('../commanUtilityFn/utilityFn')).CreateLogger(NAMEOFSERV
 async function processAggregator() {
   let aggreSrvcSchedul = await ServiceScheduleManager.initialize()
   console.log("min", aggreSrvcSchedul.getAggregationSchValue())
-  var schPattern = `0 ${aggreSrvcSchedul.getAggregationSchValue()} * * * *`;
- // var schPattern = `10 * * * * *`;
+ //  var schPattern = `0 ${aggreSrvcSchedul.getAggregationSchValue()} * * * *`;
+   var schPattern = `10 * * * * *`;
 
   var tempSchedule = scheduleTemp.scheduleJob(schPattern, async function () {
     gomos.gomosLog(logger, gConsole, g.TRACE_PROD, "Processing Started - Aggregation Service");

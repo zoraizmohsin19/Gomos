@@ -386,7 +386,13 @@ getAllDataApi(SendForSp,SendFroCustCD,SendForSbCd,SendForSensor,SendForStartDate
         //   tempobj["CreatedTime"] =  json[i][3]
         //   FdataArray.push(tempobj)}
         // // console.log("this json data");
-        this.setState({fileName: json.fileName})
+        console.log(json)
+        if(json["fileName"] !== undefined){
+          this.setState({fileName: json.fileName})
+        }else{
+          swal("Sorry!", json.message, "error");
+          this.setState({fileName: ""})
+        }
        //  console.log(json);
         // // alert(json)
         // // console.log("end json");
