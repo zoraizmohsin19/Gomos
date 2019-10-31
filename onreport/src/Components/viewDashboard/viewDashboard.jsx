@@ -21,7 +21,7 @@ class viewDashboard extends Component {
       open: true,
       openChartMenu: true,
       body: {
-        endpoint: `${URL.IP}:4001`,
+        endpoint: `${URL.SIP}`,
         socket1: {},
         arrData: [],
         arrLabels: [],
@@ -201,7 +201,7 @@ dataTypeDisable(){
   callDeviceIdentifier() {
     return new Promise((resolve, reject) => {
       var me = this;
-      axios.post(`${URL.IP}:3992/getDevicesIdentifier`, { mac: this.state.body.mac })
+      axios.post(`${URL.IP}/getDevicesIdentifier`, { mac: this.state.body.mac })
         .then(json => {
           me.state.body.DeviceIdentifierForSensors = json["data"].sensors;
           json["data"].sensors.map(item => {item["BsType"]= "sensors"});
@@ -313,7 +313,7 @@ dataTypeDisable(){
     me.setState({ body: me.state.body });
     // var FdataArray = [];
     // var dataArray = [];
-    axios.post(`${URL.IP}:3992/getdashboard`, body)
+    axios.post(`${URL.IP}/getdashboard`, body)
       .then(json => {
           me.state.body.mainjson= json;
           //console(json)
@@ -855,7 +855,7 @@ dataTypeDisable(){
     var me = this;
     const { endpoint } = this.state.body;
     var body = { custCd, subCustCd, mac }
-    // axios.post("http://URL.IP:3992/getdashbordlastalert", body)
+    // axios.post("http://URL.IP/getdashbordlastalert", body)
     // .then(json =>  {
     var lastError = socketIOClient(endpoint + "/ActivelastError", {
       reconnection: true,

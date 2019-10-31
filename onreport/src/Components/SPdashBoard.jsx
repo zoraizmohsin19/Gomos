@@ -40,11 +40,11 @@ componentDidMount() {
 fetch(){
     var items=[];
     this.setState({'in_prog':true});
-    // fetch('http://13.127.10.197:3992/getRegisterSP')
+    // fetch('http://13.127.10.197/getRegisterSP')
     // .then(response => response.json())
     // .then(json =>  {
         var me = this;
-        axios.post(`${URL.IP}:3992/getRegisterSP`, {
+        axios.post(`${URL.IP}/getRegisterSP`, {
             body: this.state.filter
            })
            .then(function (result) {
@@ -66,9 +66,9 @@ changePage(page){
     }
 onDeleteClick(_id){
     var me = this;
-    // delete('http://13.127.10.197:3992/delRegisterSPbyId?id='+ _id
+    // delete('http://13.127.10.197/delRegisterSPbyId?id='+ _id
     // this is Working 
-    // axios.delete('http://18.203.28.35:3992/delRegisterSPbyId?id='+ _id, {
+    // axios.delete('http://18.203.28.35/delRegisterSPbyId?id='+ _id, {
        
     //    })
     //    .then(function (response) {

@@ -40,7 +40,7 @@ class Header extends Component {
   handleSubmit(){
    console.log( "This is State",this.state.data)
    let body = { _id : this.state.data[0].id,devicePreference: this.state.devicePreference  }
-    axios.post(`${URL.IP}:3992/users/update`,body)
+    axios.post(`${URL.IP}/users/update`,body)
     .then(json => {
       console.log("This is this.state.data result", json)
      if(json.statusText === "OK"){

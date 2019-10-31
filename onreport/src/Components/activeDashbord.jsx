@@ -18,7 +18,7 @@ class activeDashbord extends Component {
     super();
     this.state = {
       value: { min: 2, max: 10 },
-      endpoint: `${URL.IP}:4001`,
+      endpoint: `${URL.SIP}`,
       channelName: [],
       actionTypes: [],
       deviceUpTime:'',
@@ -392,7 +392,7 @@ class activeDashbord extends Component {
   }
   callApiForClimateSave() {
     var me = this;
-    axios.post(`${URL.IP}:3992/ActiveClimatesave`, me.state.submitDataObj)
+    axios.post(`${URL.IP}/ActiveClimatesave`, me.state.submitDataObj)
       .then(json => {
         // if(json["data"] == "success"){
 
@@ -420,7 +420,7 @@ class activeDashbord extends Component {
       dataToSendApi[configkeyInput[key]] = configkeyInputKeyValue[configkeyInput[key]]
     }
     Obj.dataBody = dataToSendApi;
-    axios.post(`${URL.IP}:3992/ActivesaveForManualOver`, Obj)
+    axios.post(`${URL.IP}/ActivesaveForManualOver`, Obj)
       .then(json => {
         // if(json["data"] == "success"){
         me.handleChange(this.state.selectedevent)
@@ -434,7 +434,7 @@ class activeDashbord extends Component {
   }
   callApiForManoverrideForTiles() {
     var me = this;
-    axios.post(`${URL.IP}:3992/ActivesaveForManualOverForTiles`, me.state.submitDataObj)
+    axios.post(`${URL.IP}/ActivesaveForManualOverForTiles`, me.state.submitDataObj)
       .then(json => {
         // if(json["data"] == "success"){
 
@@ -446,7 +446,7 @@ class activeDashbord extends Component {
   }
   callApiForAction() {
     var me = this;
-    axios.post(`${URL.IP}:3992/ActiveDAction`, me.state.submitDataObj)
+    axios.post(`${URL.IP}/ActiveDAction`, me.state.submitDataObj)
       .then(json => {
         if (json["data"] === "success") {
 
@@ -466,7 +466,7 @@ class activeDashbord extends Component {
     temp.remark = remark
     //console.log("This is callApiLevel4");
     //console.log(temp)
-    axios.post(`${URL.IP}:3992/ActiveAPiForLevel4`, temp)
+    axios.post(`${URL.IP}/ActiveAPiForLevel4`, temp)
       .then(json => {
         if (json["data"] === "success") {
 
@@ -479,7 +479,7 @@ class activeDashbord extends Component {
       });
   }
   callApiForActionForButtonclick(submitDataObj) {
-    axios.post(`${URL.IP}:3992/ActiveDAction`, submitDataObj)
+    axios.post(`${URL.IP}/ActiveDAction`, submitDataObj)
       .then(json => {
         if (json["data"] === "success") {
 
@@ -692,7 +692,7 @@ callApiForProgramFetch(objectpayload, selectedAtionType, selectedevent) {
   // console.log(me.state.submitDataObj.mac)
   // alert(me.state.submitDataObj.mac)
   // return new Promise((resolve, reject)=>{
-  // axios.post(`${URL.IP}:3992/ActiveProgrameFetch", { mac: me.state.submitDataObj.mac })
+  // axios.post(`${URL.IP}/ActiveProgrameFetch", { mac: me.state.submitDataObj.mac })
   //   .then(json => {
       // console.log(json["data"]);
 
@@ -821,7 +821,7 @@ callApiForProgramFetch(objectpayload, selectedAtionType, selectedevent) {
     //  me.setState({configkeyInputKeyValue: configkeyInputKeyValue})
     SendObj["mac"] = me.state.submitDataObj.mac;
     SendObj["dataBody"] = temp
-    axios.post(`${URL.IP}:3992/ActiveProgrameSave`, SendObj)
+    axios.post(`${URL.IP}/ActiveProgrameSave`, SendObj)
       .then(json => {
         // console.log("This is data of save to DeviceIntruction for ProgramDEtails")
         // console.log(json["data"])
@@ -957,7 +957,7 @@ callApiForProgramFetch(objectpayload, selectedAtionType, selectedevent) {
             currentState: configkeyInputKeyValue["ArrayOfProg"][index].currentState,
             pendingConfirmation: configkeyInputKeyValue["ArrayOfProg"][index].pendingConfirmation
           }
-          axios.post(`${URL.IP}:3992/ActiveProgramRuleUpdate`, obj)
+          axios.post(`${URL.IP}/ActiveProgramRuleUpdate`, obj)
             .then(json => {
               swal("Poof! Your imaginary file has been sent!", {
                 icon: "success",
@@ -1023,7 +1023,7 @@ callApiForProgramFetch(objectpayload, selectedAtionType, selectedevent) {
   manualOverrideProcess(objectpayload, selectedAtionType, selectedevent) {
     var configkeyInputKeyValue = {};
 
-    axios.post(`${URL.IP}:3992/getAManualOverride`, { mac: this.state.CriteriaForOP.mac })
+    axios.post(`${URL.IP}/getAManualOverride`, { mac: this.state.CriteriaForOP.mac })
       .then(json => {
         //console.log("This is all json data for getmanualoverride");
         //console.log(json["data"])
@@ -1112,7 +1112,7 @@ callApiForProgramFetch(objectpayload, selectedAtionType, selectedevent) {
     callDeviceIdentifier(){
       return new Promise((resolve, reject) => {
       var me = this;
-      axios.post(`${URL.IP}:3992/getDevicesIdentifier`,{mac:  me.state.submitDataObj.mac})
+      axios.post(`${URL.IP}/getDevicesIdentifier`,{mac:  me.state.submitDataObj.mac})
       .then(json =>  {
       let temp = JSON.parse(sessionStorage.getItem("ClientObj"));
   
@@ -1162,7 +1162,7 @@ callApiForProgramFetch(objectpayload, selectedAtionType, selectedevent) {
       return this;
     }
   
-    axios.post(`${URL.IP}:3992/getActiveDashBoardDevice`, { mac: this.state.CriteriaForOP.mac })
+    axios.post(`${URL.IP}/getActiveDashBoardDevice`, { mac: this.state.CriteriaForOP.mac })
 
       .then(json => {
         //console.log("this componentDidMount getActiveDashBoardDevice");
@@ -1273,7 +1273,7 @@ callApiForProgramFetch(objectpayload, selectedAtionType, selectedevent) {
     var me = this;
    let startTime =moment().startOf('day');
    let endTime = moment().endOf('day')
-    axios.post(`${URL.IP}:3992/getDeviceUpTime`, { mac: this.state.CriteriaForOP.mac,startTime:startTime.toISOString(),endTime:endTime.toISOString()})
+    axios.post(`${URL.IP}/getDeviceUpTime`, { mac: this.state.CriteriaForOP.mac,startTime:startTime.toISOString(),endTime:endTime.toISOString()})
     .then(json => {
      let deviceUpTime = json["data"]
       me.setState({deviceUpTime: deviceUpTime})
@@ -1282,7 +1282,7 @@ callApiForProgramFetch(objectpayload, selectedAtionType, selectedevent) {
   fetchPayload() {
     var me = this;
     var body = { mac: this.state.CriteriaForOP.mac }
-    axios.post(`${URL.IP}:3992/ActiveActionTypeCall`, body)
+    axios.post(`${URL.IP}/ActiveActionTypeCall`, body)
       .then(json => {
         if (json.length !== 0) {
           // console.log("This is payload Data")
@@ -1383,7 +1383,7 @@ callApiForProgramFetch(objectpayload, selectedAtionType, selectedevent) {
       me.setState({ lastAlertData: lastAlertData });
       //console.log(data)
     });
-    // axios.post(`${URL.IP}:3992/getdashbordlastalert`, body)
+    // axios.post(`${URL.IP}/getdashbordlastalert`, body)
     // .then(json =>  {
     //   // alert("This is last Alert Object Data ");
     //   //console.log("This is log of Alert Object ")
@@ -1422,7 +1422,7 @@ callApiForProgramFetch(objectpayload, selectedAtionType, selectedevent) {
   });
     payloadData.emit('lastPayloadClient', body);
     payloadData.on('lastPayloadServerData', function (data) {
-      // axios.post(`${URL.IP}:3992/lastpayloadTime",body)
+      // axios.post(`${URL.IP}/lastpayloadTime",body)
       // .then(json =>  {
       if (data.length > 0) {
         var datedata = [];
@@ -1487,7 +1487,7 @@ callApiForProgramFetch(objectpayload, selectedAtionType, selectedevent) {
           let Obj = {};
           Obj = JSON.parse(JSON.stringify(data));
           Obj.mac = me.state.submitDataObj.mac;
-          axios.post(`${URL.IP}:3992/ActiveProgramerevert`,Obj)
+          axios.post(`${URL.IP}/ActiveProgramerevert`,Obj)
           .then(json => {
             // console.log(json.data.n)
             if(json.data.n > 0){
@@ -1512,7 +1512,7 @@ callApiForProgramFetch(objectpayload, selectedAtionType, selectedevent) {
   
   }
   deleteDeviceSentInstruction(data){
-    axios.delete(`${URL.IP}:3992/deleteSentCommand?id=` + data._id)
+    axios.delete(`${URL.IP}/deleteSentCommand?id=` + data._id)
     .then(json => {
       swal("Poof! Your SentCommand  Info has been deleted!", {
         icon: "success",
@@ -1543,7 +1543,7 @@ callApiForProgramFetch(objectpayload, selectedAtionType, selectedevent) {
             swal("Poof! Your SentCommand  Info has been Sent!", {
               icon: "success",
           });
-          // axios.delete(`${URL.IP}:3992/deleteSentCommand?id=" + dataToResand._id)
+          // axios.delete(`${URL.IP}/deleteSentCommand?id=" + dataToResand._id)
           // .then(json => 
           //  console.log(json)
           // );
@@ -1595,7 +1595,7 @@ callApiForProgramFetch(objectpayload, selectedAtionType, selectedevent) {
     swal("Oops", values, "error")
   }
   fetchClimateControlDevice() {
-    axios.post(`${URL.IP}:3992/getActiveDAction`, { mac: this.state.CriteriaForOP.mac })
+    axios.post(`${URL.IP}/getActiveDAction`, { mac: this.state.CriteriaForOP.mac })
       .then(json => {
         this.setState({ deviceAllData: json["data"] })
         // console.log("fetchClimateControlDevice");
@@ -1603,7 +1603,7 @@ callApiForProgramFetch(objectpayload, selectedAtionType, selectedevent) {
       })
   }
   fetchClimateParameter() {
-    axios.post(`${URL.IP}:3992/getAClimateparameter`, { mac: this.state.CriteriaForOP.mac })
+    axios.post(`${URL.IP}/getAClimateparameter`, { mac: this.state.CriteriaForOP.mac })
       .then(json => {
         var keys1 = Object.keys(json["data"]);
         var obj = {}
@@ -1617,7 +1617,7 @@ callApiForProgramFetch(objectpayload, selectedAtionType, selectedevent) {
       })
   }
   fetchFromManualOverride() {
-    axios.post(`${URL.IP}:3992/getAManualOverride`, { mac: this.state.CriteriaForOP.mac })
+    axios.post(`${URL.IP}/getAManualOverride`, { mac: this.state.CriteriaForOP.mac })
       .then(json => {
         //console.log("This is all json data for getmanualoverride");
         //console.log(json["data"])
@@ -1628,7 +1628,7 @@ callApiForProgramFetch(objectpayload, selectedAtionType, selectedevent) {
     var me = this;
     //alert("Hello This Working")
     //  THIS IS GETING SENSORNAME BASED ON SPCD,CUSTCD,SUBCUSTCD
-    fetch(`${URL.IP}:3992/getSensorNames?spCode=` + this.state.CriteriaForOP.spCd +
+    fetch(`${URL.IP}/getSensorNames?spCode=` + this.state.CriteriaForOP.spCd +
       "&&custCd=" + this.state.CriteriaForOP.CustCd + "&&subCustCd=" + this.state.CriteriaForOP.subCustCd)
       .then(response => response.json())
       .then(json => {
@@ -1728,7 +1728,7 @@ callApiForProgramFetch(objectpayload, selectedAtionType, selectedevent) {
       }
       return temp;
     }
-    axios.post(`${URL.IP}:3992/getAllClimateControl`, { subCustCd: this.state.CriteriaForOP.subCustCd, custCd: this.state.CriteriaForOP.CustCd })
+    axios.post(`${URL.IP}/getAllClimateControl`, { subCustCd: this.state.CriteriaForOP.subCustCd, custCd: this.state.CriteriaForOP.CustCd })
       .then(json => {
         //console.log("This fetchClimateControlAllData");
         var temp = [];
@@ -1773,7 +1773,7 @@ callApiForProgramFetch(objectpayload, selectedAtionType, selectedevent) {
       startDate: this.state.startDatelimit,
       endDate: this.state.endDatelimit,
     }
-    axios.post(`${URL.IP}:3992/ActiveJobs`, ActiveBody)
+    axios.post(`${URL.IP}/ActiveJobs`, ActiveBody)
       .then(json => {
         var ActiveJobsArray = json["data"]["ActiveJob"];
         if (json["data"]["ActiveJob"].length !== 0) {
@@ -1804,7 +1804,7 @@ callApiForProgramFetch(objectpayload, selectedAtionType, selectedevent) {
     };
     if (this.state.filter.TypeOfJobs === "ExecutedJob") {
 
-      axios.post(`${URL.IP}:3992/executedJob`, body)
+      axios.post(`${URL.IP}/executedJob`, body)
         .then(function (result) {
           var mainActiveJobdata = result.data;
           items = result.data.executedJob;
@@ -1815,7 +1815,7 @@ callApiForProgramFetch(objectpayload, selectedAtionType, selectedevent) {
           me.setState({ mAOfInactivejob: [], 'in_prog': false });
         });
     } else if (this.state.filter.TypeOfJobs === "PendingJob") {
-      axios.post(`${URL.IP}:3992/PendingJob`, body)
+      axios.post(`${URL.IP}/PendingJob`, body)
         .then(function (result) {
           var mainActiveJobdata = result.data;
           items = result.data.PendingJob;

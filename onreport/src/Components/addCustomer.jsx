@@ -67,7 +67,7 @@ class addCustomer extends Component {
            
             }
         getAllSpApi(){
-            fetch('http://13.127.10.197:3992/getRegisterSP')
+            fetch('http://13.127.10.197/getRegisterSP')
             .then(response => response.json())
             .then(json =>  {
             var spCd =  json.map( x =>  { return  x.spCd  });
@@ -186,7 +186,7 @@ class addCustomer extends Component {
         alert(arrayOfdata);
 
       
-        axios.post('http://13.127.10.197:3992/customerReg', {
+        axios.post('http://13.127.10.197/customerReg', {
            body:arrayOfdata
           })
           .then(function (response) {
