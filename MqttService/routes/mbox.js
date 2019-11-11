@@ -267,7 +267,7 @@ function checkCriteria(db,passedAssetId, custId, subCustId,businessNmValues,  ma
             { subCustCd: subCustId },
             {$or:[
               {type: "level3"}, 
-              {type: "level1"}
+              {type: "level1",alertTriggeredBy: "sensorsValue"}
             ]}
           ]
       }
@@ -312,13 +312,22 @@ function checkCriteria(db,passedAssetId, custId, subCustId,businessNmValues,  ma
         } 
         catch(err){
   
-          gomos.errorCustmHandler(NAMEOFSERVICE,"checkCriteria",'TRY CATCH ERROR',message,err,ERROR_RUNTIME,ERROR_TRUE,EXIT_TRUE);    
+          gomos.errorCustmHandler(NAMEOFSERVICE,"checkCriteria",'TRY CATCH ERROR',message,err,ERROR_RUNTIME,ERROR_TRUE,EXIT_FALSE);    
         }
       }      
       else{
             try{
-            var alertsBNm = result[i].businessNm.split(",");//gets all businessNms of particular message from alertsConfig
-            var bNmConfig = result[i].configBNm.split(",");//gets all configBNm of particular message from alertsConfig
+          var alertsBNm = [];
+          var bNmConfig  = [];
+              if(result[i].businessNm == '' || result[i].configBNm == ''){
+              gomos.gomosLog( logger,gConsole, TRACE_PROD,"This is warnnig  businessNm or configBNm  not present ",`businessNm : [${result[i].businessNm}] or configBNm : [${result[i].configBNm}] `)
+              gomos.errorCustmHandler(NAMEOFSERVICE,"checkCriteria",'This is warnnig  businessNm or configBNm  not present',result[i],"warring for level1 alertConfig not valid",ERROR_RUNTIME,ERROR_FALSE,EXIT_FALSE);    
+               return
+
+              }else{     
+                alertsBNm = result[i].businessNm.split(",");//gets all businessNms of particular message from alertsConfig
+                bNmConfig =  result[i].configBNm.split(",");//gets all configBNm of particular message from alertsConfig
+              }
             var strbusinessNmValues="";
             var shortName =  result[i].shortName;
             gomos.gomosLog(logger,gConsole,TRACE_DEBUG,"This is message Print",message);
@@ -345,7 +354,7 @@ function checkCriteria(db,passedAssetId, custId, subCustId,businessNmValues,  ma
           gomos.errorCustmHandler(NAMEOFSERVICE,"checkCriteria",'TRY CATCH ERROR',message,err,ERROR_RUNTIME,ERROR_TRUE,EXIT_TRUE);    
           }
           gomos.gomosLog( logger,gConsole, TRACE_DEV,"This is Criteria", result[i].criteria)
-          gomos.gomosLog(logger,gConsole,TRACE_DEBUG,"This is alert eval method ",eval(result[i].alertText))
+       //   gomos.gomosLog(logger,gConsole,TRACE_DEBUG,"This is alert eval method ",eval(result[i].alertText))
 
           gomos.gomosLog( logger,gConsole, TRACE_DEV,"This is Criteria", eval(result[i].criteria))
           gomos.gomosLog(logger,gConsole,TRACE_DEV,"This is  result[i].emailRecipientRole", result[i].emailRecipientRole)
@@ -387,10 +396,10 @@ function checkCriteria(db,passedAssetId, custId, subCustId,businessNmValues,  ma
           }
         }
       }
-    });
+    })
   }
   catch(err){
-    gomos.errorCustmHandler(NAMEOFSERVICE,"checkCriteria",'THIS IS TRY CATCH ERROR IN checkCriteria At Function Level',message,err,ERROR_RUNTIME,ERROR_TRUE,EXIT_TRUE);    
+    gomos.errorCustmHandler(NAMEOFSERVICE,"checkCriteria",'THIS IS TRY CATCH ERROR IN checkCriteria At Function Level',message,err,ERROR_RUNTIME,ERROR_TRUE,EXIT_FALSE);    
   }
 }
 function onMqttDisconnect() {
