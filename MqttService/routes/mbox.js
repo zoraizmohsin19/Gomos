@@ -267,7 +267,7 @@ function checkCriteria(db,passedAssetId, custId, subCustId,businessNmValues,  ma
             { subCustCd: subCustId },
             {$or:[
               {type: "level3"}, 
-              {type: "level1",alertTriggeredBy: "sensorsValue"}
+              {type: "level1",alertTriggeredBy: "sensorsValue",deleted: false}
             ]}
           ]
       }
@@ -337,7 +337,7 @@ function checkCriteria(db,passedAssetId, custId, subCustId,businessNmValues,  ma
             for (var k = 0; k < alertsBNm.length; k++) {
             gomos.gomosLog(logger,gConsole,TRACE_DEBUG,"this is log for  message[bNmConfig[k]]", message[bNmConfig[k]])
          //   gomos.gomosLog( logger,gConsole, TRACE_DEV,"This is Criteria alertsBNm[k]", eval(alertsBNm[k]))
-
+  
              eval("var " + alertsBNm[k] + " = " + JSON.stringify(message[bNmConfig[k]]));
              gomos.gomosLog( logger,gConsole, TRACE_DEV,"This is Criteria  message[bNmConfig[k]]", message[bNmConfig[k]])
              gomos.gomosLog( logger,gConsole, TRACE_DEV,"This is Criteria alertsBNm[k]", eval(alertsBNm[k]))
@@ -372,12 +372,11 @@ function checkCriteria(db,passedAssetId, custId, subCustId,businessNmValues,  ma
                 businessNm: result[i].businessNm,
                 businessNmValues : strbusinessNmValues,
                 shortName: shortName,
-                user: result[i].user,
+                user: "mqqtService",
                 type: result[i].type,
                 criteria: result[i].criteria,
                 alertText:  eval(result[i].alertText),
                 processed: "N",
-                dtTime: result[i].dtTime,
                 createdTime: nowDateTime,
                 updatedTime: nowDateTime
               };
