@@ -2754,19 +2754,19 @@ gomos.gomosLog( logger,gConsole,TRACE_DEBUG,"this is debuging in starting",senso
           break;
         case "Hourly":
           gomos.gomosLog(logger, gConsole, TRACE_DEV, "this is Log for Hourly");
-          hourlyDataProcessing(db, res, criteria, offset, page_size);
+          hourlyDataProcessing(db, res, criteria, body.startTime,body.endTime, offset, page_size);
           break;
         case "Daily":
           gomos.gomosLog(logger, gConsole, TRACE_DEV, "this is Log for Daily");
-          dailyDataProcessing(db, res, criteria, offset, page_size);
+          dailyDataProcessing(db, res,criteria, body.startTime,body.endTime, offset, page_size);
           break;
         case "Weekly":
           gomos.gomosLog(logger, gConsole, TRACE_DEV, "this is Log for Weekly");
-          weeklyDataProcessing(db, res, criteria, offset, page_size);
+          weeklyDataProcessing(db, res, criteria,  body.startTime,body.endTime, offset, page_size);
           break;
         case "Monthly":
           gomos.gomosLog(logger, gConsole, TRACE_DEV, "this is Log for Monthly");
-          monthlyDataProcessing(db, res, criteria, offset, page_size);
+          monthlyDataProcessing(db, res, criteria, body.startTime,body.endTime, offset, page_size);
           break;
           default: 
           gomos.gomosLog(logger, gConsole, TRACE_DEV, "this is Log for Nothing Is Selected");
@@ -2778,12 +2778,12 @@ gomos.gomosLog( logger,gConsole,TRACE_DEBUG,"this is debuging in starting",senso
 )
 }
 );
-function monthlyDataProcessing(db, res, criteria, offset, page_size) {
+function monthlyDataProcessing(db, res, criteria, startTime,endTime, offset, page_size) {
 
   let NewCriteria = { mac: criteria.mac };
-  if (criteria.DeviceTime != "" && criteria.DeviceTime != undefined && criteria.DeviceTime != null) {
-    NewCriteria["DeviceTime"] = criteria["DeviceTime"];
-  }
+  if (startTime != "" && startTime != undefined && startTime != null && endTime != "" && endTime != undefined && endTime != null) {
+    NewCriteria["Date"] = {"$gte": ((moment(utilityFn.calcIST(startTime))).format("YYYY-MM-DD")) , "$lte": ((moment(utilityFn.calcIST(endTime))).format("YYYY-MM-DD"))}
+ }
   console.log(NewCriteria)
   db.collection("AggregatedData")
     .aggregate([{$match: NewCriteria},
@@ -2891,12 +2891,12 @@ function monthlyDataProcessing(db, res, criteria, offset, page_size) {
     });
 
 }
-function weeklyDataProcessing(db, res, criteria, offset, page_size) {
+function weeklyDataProcessing(db, res, criteria, startTime,endTime, offset, page_size) {
 
   let NewCriteria = { mac: criteria.mac };
-  if (criteria.DeviceTime != "" && criteria.DeviceTime != undefined && criteria.DeviceTime != null) {
-    NewCriteria["DeviceTime"] = criteria["DeviceTime"];
-  }
+  if (startTime != "" && startTime != undefined && startTime != null && endTime != "" && endTime != undefined && endTime != null) {
+    NewCriteria["Date"] = {"$gte": ((moment(utilityFn.calcIST(startTime))).format("YYYY-MM-DD")) , "$lte": ((moment(utilityFn.calcIST(endTime))).format("YYYY-MM-DD"))}
+ }
   console.log(NewCriteria)
   db.collection("AggregatedData")
     .aggregate([{$match: NewCriteria},
@@ -3004,12 +3004,12 @@ function weeklyDataProcessing(db, res, criteria, offset, page_size) {
     });
 
 }
-function dailyDataProcessing(db, res, criteria, offset, page_size) {
+function dailyDataProcessing(db, res,criteria, startTime,endTime, offset, page_size) {
 
   let NewCriteria = { mac: criteria.mac };
-  if (criteria.DeviceTime != "" && criteria.DeviceTime != undefined && criteria.DeviceTime != null) {
-    NewCriteria["DeviceTime"] = criteria["DeviceTime"];
-  }
+  if (startTime != "" && startTime != undefined && startTime != null && endTime != "" && endTime != undefined && endTime != null) {
+    NewCriteria["Date"] = {"$gte": ((moment(utilityFn.calcIST(startTime))).format("YYYY-MM-DD")) , "$lte": ((moment(utilityFn.calcIST(endTime))).format("YYYY-MM-DD"))}
+ }
   console.log(NewCriteria)
   db.collection("AggregatedData")
     .aggregate([{$match: NewCriteria},
@@ -3119,11 +3119,11 @@ function dailyDataProcessing(db, res, criteria, offset, page_size) {
 }
 
 
-function hourlyDataProcessing(db, res, criteria, offset, page_size) {
+function hourlyDataProcessing(db, res, criteria,startTime,endTime, offset, page_size) {
  
   let NewCriteria = { mac: criteria.mac };
-  if (criteria.DeviceTime != "" && criteria.DeviceTime != undefined && criteria.DeviceTime != null) {
-    NewCriteria["DeviceTime"] = criteria["DeviceTime"];
+  if (startTime != "" && startTime != undefined && startTime != null && endTime != "" && endTime != undefined && endTime != null) {
+     NewCriteria["Date"] = {"$gte": ((moment(utilityFn.calcIST(startTime))).format("YYYY-MM-DD")) , "$lte": ((moment(utilityFn.calcIST(endTime))).format("YYYY-MM-DD"))}
   }
   console.log(NewCriteria)
   db.collection("AggregatedData")
