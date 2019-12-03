@@ -245,13 +245,13 @@ dataTypeDisable(){
   DisplayChart() {
     let me = this;
     let result = JSON.parse(JSON.stringify(me.state.body.DataArray))
-    //  console.log(result)
+ //     console.log(result)
     if (result.length > 0) {
       let arrData = [];
       let arrLabels = [];
       let dataToSend1 = [];
       let dataToSend2 = [];
-      (me.state.body.selectedNevData === "Normal")?  result.sort((a, b) => new Date(a.column5).getTime() - new Date(b.column5).getTime()):result.sort()
+      (me.state.body.selectedNevData === "Weekly")?  result.sort((a, b) => (a.column5 < b.column5)? -1: ((a.column5 > b.column5)? 1: 0 )):result.sort((a, b) => new Date(a.column5).getTime() - new Date(b.column5).getTime())
       for (let i = 0; i < result.length; i++) {
         let formattedDate =  (me.state.body.selectedNevData === "Normal")? dateFormat(result[i]["column5"], "dd-mmm HH:MM"): result[i]["column5"];
         //  var arrayforsend= [];
