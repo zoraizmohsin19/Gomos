@@ -209,10 +209,12 @@ dataTypeDisable(){
         
           let tempArray = (json["data"].sensors).concat(json["data"].channel)
 
-          //console("This is Device Identifier json");
-          // //console(tempSdata);
+          console.log("This is Device Identifier json");
+          console.log("this is tempArray",tempArray);
           //console(tempArray)
           // let tempCSArray = [];
+          tempArray.sort((a,b) => a["displayPosition"] - b["displayPosition"]); 
+          console.log("this is tempArray 2",tempArray);
               me.state.body.deviceIdentifier = tempArray;
           var groupedData = this.groupingDataArray(tempArray)
           let index = groupedData.findIndex(item => item.group === json["data"].defaultGroupInfo);
@@ -220,7 +222,7 @@ dataTypeDisable(){
 
           me.state.body.sensorsGroups = groupedData;
           //console("This is Group Data");
-          //console(groupedData);
+          console.log("This is Group Data",groupedData);
           me.state.body.selectedGroups = groupedData[index];
           me.state.body.selectedGroupsitem = groupedData[index].group;
           me.state.body.selectedSensorsType1 = tempArray[index2].Type;
