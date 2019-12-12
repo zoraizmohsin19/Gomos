@@ -131,6 +131,7 @@ var me   = this;
        
      },
      options: {
+      spanGaps: true,
        responsive: true,
        maintainAspectRatio: true,
        tooltips: {
