@@ -3505,6 +3505,7 @@ router.post("/getDevicesIdentifier", function (req, res, next) {
                ActiveIdentifier["group"]    =  result[0][deviceStateKey[k]][keyofCode[i]]["group"];
                ActiveIdentifier["Type"]    =  result[0][deviceStateKey[k]][keyofCode[i]]["Type"];
                ActiveIdentifier["displayPosition"] = result[0][deviceStateKey[k]][keyofCode[i]]["displayPosition"]
+               ActiveIdentifier["transformExpr"] = result[0][deviceStateKey[k]][keyofCode[i]]["transformExpr"]
                sensorsArray.push(ActiveIdentifier);
           }
           json[name] = sensorsArray;

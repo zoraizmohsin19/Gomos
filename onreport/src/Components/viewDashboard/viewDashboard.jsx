@@ -428,10 +428,26 @@ dataTypeDisable(){
       //console(arrayHeder)
       //console("This is Data Array")
       //console(dataArray)
-
+      let {deviceIdentifier, selectedDeviceName} =this.state.body;
       let lastUpdatedTime = "";
       // console.log("This is dataArray");
-      // console.log(dataArray);
+      if( selectedDeviceName == 'Bed3_ec63' || selectedDeviceName == "Bed1_3bd1" || selectedDeviceName == "Bed2_427f" ){
+      var key = Object.keys(dataArray[0])
+      key.splice(key.indexOf("column1"), 1);
+      key.splice(key.indexOf("column2"), 1);
+      key.splice(key.indexOf("column5"), 1);
+
+      for(let j =0; j< key.length; j++){
+        let objtemp = deviceIdentifier.find( item => item.devicebusinessNM ==  key[j]);
+        if(objtemp.transformExpr != undefined && objtemp.transformExpr != "" ){
+        for(let i =0; i< dataArray.length; i++){
+            dataArray[i][key[j]] = me.transformExprFun(objtemp.transformExpr, dataArray[i][key[j]])
+          }
+        }
+
+      }
+    }
+        
       me.state.body.headerTable = arrayHeder
       me.state.body.DataArray = dataArray;
       me.state.body.in_prog = false;
@@ -461,6 +477,17 @@ dataTypeDisable(){
     //console("This is Call of CallMainDataProcess Try")
     me.errorganerator()
   }
+  }
+  transformExprFun(expression,value){
+   
+    try {
+        let fun = eval("("+ expression +")")
+            return fun(value);
+    } catch (error) {
+      console.log("error", error)
+      return value
+    }
+  
   }
 
   callToSocket() {
@@ -515,15 +542,23 @@ dataTypeDisable(){
         // me.setState({body: me.state.body})
         var array = [];
         // console.log(dataofSensors)
+        let {deviceIdentifier, selectedDeviceName} =this.state.body;
         for (var i = 0; i < dataofSensors.length; i++) {
-          array.push({
+          let dataObj ={
             "sensorsNM": dataofSensors[i].type,
             "bgClass": arrayofbgClass[i],
             nameofbsnm: dataofSensors[i].devicebusinessNM,
             valuseS: dataofSensors[i].Value,
             lastUpdatedTime: dateFormat(dataofSensors[i].dateTime, "dd-mmm-yy HH:MM:ss")
-          });
+          }
+          let objtemp = deviceIdentifier.find( item => item.devicebusinessNM ==  dataofSensors[i].devicebusinessNM);
+          if(objtemp.transformExpr != undefined && objtemp.transformExpr != "" ){
+            dataObj["valuseS"]   =  me.transformExprFun(objtemp.transformExpr, dataofSensors[i].Value)
+          }
+
+          array.push(dataObj);
         }
+   
         for (var j = 0; j < array.length; j++) {
           if (array[j].lastUpdatedTime !== me.state.body.Sensors[j].lastUpdatedTime) {
             me.state.body.Sensors = array;
@@ -921,6 +956,7 @@ dataTypeDisable(){
       selectedSPValue, selectedCustValue, selectedSubCustValue, selectedAssets, selectedDeviceName, selectedSensorsName
     } = this.state.body;
     var state = this.state.body;
+    console.log("state ",this.state)
     var total_page = Math.ceil(this.state.body.total_count / this.state.body.page_size);
     var page_start_index = ((state.page - 1) * state.page_size);
     if (this.state.body.Spinnerdata == true) {
