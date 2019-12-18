@@ -99,7 +99,7 @@ class viewDashboard extends Component {
     this.state.body.page = page
     this.setState({ body: this.state.body });
    // this.fetchdata();
-   this.submit();
+   this.startProcess();
   }
   toggle() {
     this.setState({
@@ -118,7 +118,7 @@ class viewDashboard extends Component {
     me.state.body.page = page;
     me.setState({ body: me.state.body });
     //this.fetchdata()
-    this.submit();
+    this.startProcess();
   }
   handler(selectedSensorsType1, selectedSensorsName) {
     var me = this;
@@ -160,7 +160,7 @@ class viewDashboard extends Component {
     // me.graphProcess();
     //  var result1 = this.groupingDataArray();
     //  //console.log(result1)
-    // me.submit()
+    // me.startProcess()
     this.startFunction()
 
   }
@@ -255,7 +255,7 @@ dataTypeDisable(){
       let dataToSend2 = [];
       (me.state.body.selectedNevData === "Weekly")?  result.sort((a, b) => (a.column5 < b.column5)? -1: ((a.column5 > b.column5)? 1: 0 )):result.sort((a, b) => new Date(a.column5).getTime() - new Date(b.column5).getTime())
       for (let i = 0; i < result.length; i++) {
-        let formattedDate =  (me.state.body.selectedNevData === "Normal")? dateFormat(result[i]["column5"], "dd-mmm HH:MM"): result[i]["column5"];
+        let formattedDate =  (me.state.body.selectedNevData === "Normal")? moment(result[i]["column5"], "DD-MMM-YY HH:mm:ss").format("DD-MMM-YY HH:mm"): result[i]["column5"];
         //  var arrayforsend= [];
         let temp = {};
         for (let j = 0; j < me.state.body.tableSecondKeyArray.length; j++) {
@@ -431,7 +431,7 @@ dataTypeDisable(){
       let {deviceIdentifier, selectedDeviceName} =this.state.body;
       let lastUpdatedTime = "";
       // console.log("This is dataArray");
-      if( selectedDeviceName == 'Bed3_ec63' || selectedDeviceName == "Bed1_3bd1" || selectedDeviceName == "Bed2_427f" ){
+      if( selectedDeviceName == 'Bed3_ec63' || selectedDeviceName == "Bed1_3bd1" || selectedDeviceName == "Bed2_427f" || selectedDeviceName == "CONT_e737" ){
       var key = Object.keys(dataArray[0])
       key.splice(key.indexOf("column1"), 1);
       key.splice(key.indexOf("column2"), 1);
@@ -551,10 +551,12 @@ dataTypeDisable(){
             valuseS: dataofSensors[i].Value,
             lastUpdatedTime: dateFormat(dataofSensors[i].dateTime, "dd-mmm-yy HH:MM:ss")
           }
+          if( selectedDeviceName == 'Bed3_ec63' || selectedDeviceName == "Bed1_3bd1" || selectedDeviceName == "Bed2_427f" || selectedDeviceName == "CONT_e737" ){
           let objtemp = deviceIdentifier.find( item => item.devicebusinessNM ==  dataofSensors[i].devicebusinessNM);
           if(objtemp.transformExpr != undefined && objtemp.transformExpr != "" ){
             dataObj["valuseS"]   =  me.transformExprFun(objtemp.transformExpr, dataofSensors[i].Value)
           }
+        }
 
           array.push(dataObj);
         }
@@ -589,8 +591,8 @@ dataTypeDisable(){
     me.setState({ body: me.state.body })
 
   }
-  submit(){
-    // alert("This is Submit Call")
+  startProcess(){
+    // alert("This is startProcess Call")
      let me = this;
     // if(me.state.body.selectedNevData ==="Normal"){
     //   me.state.body.selectedDataInfoTypeValues = ["Values"];
@@ -601,10 +603,18 @@ dataTypeDisable(){
 
     //   }
     // }
+    // me.state.body.page = 1; 
+    // // me.setState({body : me.state.body})
     me.dataTypeDisable();
-     me.setState({body : me.state.body})
+    
     this.graphProcess();
     this.fetchdata();
+  }
+  onSubmin(){
+    var me = this;
+    me.state.body.page = 1; 
+    me.setState({body : me.state.body});
+    me.startProcess()
   }
   methodForDataDisplayBySingleTypeProcess(value){
     let me = this;
@@ -863,9 +873,10 @@ dataTypeDisable(){
       me.state.body.selectedSensorsType1 = dataofSensors[0].type;
       me.state.body.selectedSensorsName = dataofSensors[0].devicebusinessNM;
       me.state.body.Sensors = array;
+      me.state.body.page = 1;
       me.setState({ body: me.state.body })
     //  me.fetchdata();
-    me.submit()
+    me.startProcess()
     } catch (error) {
       //console(error)
       this.errorganerator()
@@ -1116,7 +1127,7 @@ dataTypeDisable(){
               </div>
               <div className="width1">
                 <button
-                  className="btn btn-xm btn-default" onClick={this.submit.bind(this)}>Submit</button>
+                  className="btn btn-xm btn-default" onClick={this.onSubmin.bind(this)}>Submit</button>
               </div>
             </div>
             {/* <div className=""> */}
