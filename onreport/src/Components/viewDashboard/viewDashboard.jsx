@@ -1023,11 +1023,11 @@ dataTypeDisable(){
                   </Nav>
                 </div>
               </div>
-              <div className="col-lg-9 col-sm-6 col-xs-12">
+              <div className="col-lg-9 col-md-9 col-sm-6 col-xs-12">
                 <div className="custmDivSensorUpper">
                   <div className="wrapperSenSors">
                     {this.state.body.Sensors.map(item =>
-                      <span className=" custmDivSensor">
+                      <span className=" custmDivSensor ">
                         <Sensors key={item.nameofbsnm}
                           bgclass={item.bgClass}
                           label={"Sensor" + " " + item.nameofbsnm}
@@ -1047,7 +1047,7 @@ dataTypeDisable(){
                 </div>
               </div>
 
-              <div className="col-lg-3 col-sm-4 col-xs-12">
+              <div className="col-lg-3 col-md-3 col-sm-4 col-xs-12">
                 <div className="small-box bg-red" title={lastAlertData.alertText} >
                   <div className="inner"><p className="color12 dashlastAlert ">{(lastAlertData.shortName) ? lastAlertData.shortName : "No Alerts Triggered"}</p>
                     <p className="criteriaClass ">{(lastAlertData.criteria) ? lastAlertData.criteria : "  "} &nbsp;</p>
@@ -1206,27 +1206,28 @@ dataTypeDisable(){
                 )}
               </div>
             </div>
-            <div className="col-sm-8 col-lg-8 col-xs-12 col-md-8">
-
-
-
-
-              <div className="chart-container" >
-
-                <Chartcom
-                  type="line"
-                  arrData={arrData}
-                  chartAxis={deviceTypeObj}
-                  arrLabels={arrLabels}
-                  legend={yaxisName}
-                  xAxisLbl="Date and Time"
-                  yAxisLbl={yaxisName}
-                  // bgColors ={bgColors}
-                  borderColors={borderColors}
-                />
-              </div>
-            </div>
+       
           </div>
+          <div className="container chartCantainer">
+
+
+
+
+<div className="chart-container" style={{position: "relative", height:"70vh", width:"80vw"}} >
+
+  <Chartcom
+    type="line"
+    arrData={arrData}
+    chartAxis={deviceTypeObj}
+    arrLabels={arrLabels}
+    legend={yaxisName}
+    xAxisLbl="Date and Time"
+    yAxisLbl={yaxisName}
+    // bgColors ={bgColors}
+    borderColors={borderColors}
+  />
+</div>
+</div>
           {/* <div className= "custNav btn-group">
       
          <button  className="btn btn-sm btn-secondary" onClick={this.downloadToExcel.bind(this)}><i class="far fa-file-excel iconfont"></i></button>
