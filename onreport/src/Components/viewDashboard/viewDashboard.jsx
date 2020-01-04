@@ -120,14 +120,14 @@ class viewDashboard extends Component {
     //this.fetchdata()
     this.startProcess();
   }
-  handler(selectedSensorsType1, selectedSensorsName) {
-    var me = this;
-    me.state.body.page = 1;
-    me.state.body.selectedSensorsType1 = selectedSensorsType1;
-    me.state.body.selectedSensorsName = selectedSensorsName;
-    this.setState({ body: me.state.body });
-    this.fetchdata();
-  }
+  // handler(selectedSensorsType1, selectedSensorsName) {
+  //   var me = this;
+  //   me.state.body.page = 1;
+  //   me.state.body.selectedSensorsType1 = selectedSensorsType1;
+  //   me.state.body.selectedSensorsName = selectedSensorsName;
+  //   this.setState({ body: me.state.body });
+  //   this.fetchdata();
+  // }
 
   chartsIdbyDeviceType(deviceType) {
     let tempData = JSON.parse(sessionStorage.getItem("ClientObj"));
@@ -216,7 +216,8 @@ dataTypeDisable(){
           tempArray.sort((a,b) => a["displayPosition"] - b["displayPosition"]); 
           console.log("this is tempArray 2",tempArray);
               me.state.body.deviceIdentifier = tempArray;
-          var groupedData = this.groupingDataArray(tempArray)
+          var groupedData = this.groupingDataArray(tempArray);
+          console.log("this is groupeData",groupedData)
           let index = groupedData.findIndex(item => item.group === json["data"].defaultGroupInfo);
           let index2 = tempArray.findIndex(item => item.group === json["data"].defaultGroupInfo);
 
@@ -378,7 +379,7 @@ dataTypeDisable(){
           for (let l = 0; l < arrayOfDisplayData.length; l++) {
             arrayHeder.push(arrayOfDisplayData[l]);
           }
-          arrayHeder.push("CREATED TIME");
+          arrayHeder.push("TIME");
           dataArray.push(
             jsontemp
           )
@@ -402,7 +403,7 @@ dataTypeDisable(){
             for (let l = 0; l < sensorsKeys.length; l++) {
               arrayHeder.push(sensorsKeys[l]);
             }
-            arrayHeder.push("CREATED TIME");
+            arrayHeder.push("TIME");
             dataArray.push(
               jsontemp
             )
@@ -431,7 +432,7 @@ dataTypeDisable(){
       let {deviceIdentifier, selectedDeviceName} =this.state.body;
       let lastUpdatedTime = "";
       // console.log("This is dataArray");
-      if( selectedDeviceName == 'Bed3_ec63' || selectedDeviceName == "Bed1_3bd1" || selectedDeviceName == "Bed2_427f" || selectedDeviceName == "CONT_e737" ){
+      // if( selectedDeviceName == 'Bed3_ec63' || selectedDeviceName == "Bed1_3bd1" || selectedDeviceName == "Bed2_427f" || selectedDeviceName == "CONT_e737" ){
       var key = Object.keys(dataArray[0])
       key.splice(key.indexOf("column1"), 1);
       key.splice(key.indexOf("column2"), 1);
@@ -446,7 +447,7 @@ dataTypeDisable(){
         }
 
       }
-    }
+    // }
         
       me.state.body.headerTable = arrayHeder
       me.state.body.DataArray = dataArray;
@@ -551,16 +552,16 @@ dataTypeDisable(){
             valuseS: dataofSensors[i].Value,
             lastUpdatedTime: dateFormat(dataofSensors[i].dateTime, "dd-mmm-yy HH:MM:ss")
           }
-          if( selectedDeviceName == 'Bed3_ec63' || selectedDeviceName == "Bed1_3bd1" || selectedDeviceName == "Bed2_427f" || selectedDeviceName == "CONT_e737" ){
+          // if( selectedDeviceName == 'Bed3_ec63' || selectedDeviceName == "Bed1_3bd1" || selectedDeviceName == "Bed2_427f" || selectedDeviceName == "CONT_e737" ){
           let objtemp = deviceIdentifier.find( item => item.devicebusinessNM ==  dataofSensors[i].devicebusinessNM);
           if(objtemp.transformExpr != undefined && objtemp.transformExpr != "" ){
             dataObj["valuseS"]   =  me.transformExprFun(objtemp.transformExpr, dataofSensors[i].Value)
           }
-        }
-
+        // }
+  
           array.push(dataObj);
         }
-   
+        console.log("this array",array)
         for (var j = 0; j < array.length; j++) {
           if (array[j].lastUpdatedTime !== me.state.body.Sensors[j].lastUpdatedTime) {
             me.state.body.Sensors = array;
@@ -859,15 +860,24 @@ dataTypeDisable(){
       //  console.log(dataofSensors[0].devicebusinessNM)
       var array = [];
 
-      for (let i = 0; i < dataofSensors.length; i++) {
-        array.push({
-          "sensorsNM": dataofSensors[i].type,
-          "bgClass": arrayofbgClass[i],
-          nameofbsnm: dataofSensors[i].devicebusinessNM,
-          valuseS: dataofSensors[i].Value,
-          lastUpdatedTime: dateFormat(dataofSensors[i].dateTime, "dd-mmm-yy HH:MM:ss")
-        });
-      }
+      let {deviceIdentifier, selectedDeviceName} =this.state.body;
+        for (var i = 0; i < dataofSensors.length; i++) {
+          let dataObj ={
+            "sensorsNM": dataofSensors[i].type,
+            "bgClass": arrayofbgClass[i],
+            nameofbsnm: dataofSensors[i].devicebusinessNM,
+            valuseS: dataofSensors[i].Value,
+            lastUpdatedTime: dateFormat(dataofSensors[i].dateTime, "dd-mmm-yy HH:MM:ss")
+          }
+          // if( selectedDeviceName == 'Bed3_ec63' || selectedDeviceName == "Bed1_3bd1" || selectedDeviceName == "Bed2_427f" || selectedDeviceName == "CONT_e737" ){
+          let objtemp = deviceIdentifier.find( item => item.devicebusinessNM ==  dataofSensors[i].devicebusinessNM);
+          if(objtemp.transformExpr != undefined && objtemp.transformExpr != "" ){
+            dataObj["valuseS"]   =  me.transformExprFun(objtemp.transformExpr, dataofSensors[i].Value)
+          }
+        // }
+  
+          array.push(dataObj);
+        }
       me.state.body.selectedSensorsDataArray = dataofSensors.map(item => item.devicebusinessNM);
       //console(me.state.body.selectedSensorsDataArray)
       me.state.body.selectedSensorsType1 = dataofSensors[0].type;
@@ -897,7 +907,9 @@ dataTypeDisable(){
     var groups = Object.keys(group_to_values).map(function (key) {
       return { group: key, devicebusinessNM: group_to_values[key] };
     });
-    return groups;
+
+    let tem = groups.filter(item => item.group !== "Not displayed in dashboard" )
+    return tem;
   }
   callForlastAlert(custCd, subCustCd, mac) {
     var me = this;
