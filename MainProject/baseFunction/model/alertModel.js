@@ -46,7 +46,7 @@ var  AlertSchema = new mongoose.Schema({
         type: String 
     },
     emailRecipientRole: {
-        type: String,
+        type: schemaTypes.Mixed,
        
     },
     sensorNm: {

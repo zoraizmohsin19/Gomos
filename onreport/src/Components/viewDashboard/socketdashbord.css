@@ -45,6 +45,7 @@
 }
 .small-box>.inner {
     padding: 10px;
+    width: 255px;
 }
 .small-box .icon {
     -webkit-transition: all .3s linear;
@@ -67,6 +68,7 @@
     z-index: 10;
     background: rgba(0,0,0,0.1);
     text-decoration: none;
+    
 }
 .bg-green, .callout.callout-success, .alert-success, .label-success, .modal-success .modal-body {
     background-color: #00a65a !important;
@@ -111,9 +113,8 @@
     margin: 10px;
 }
 .sokettablemr {
-    /* display: grid; */
-    position: relative;
-    margin-top: 30%;
+
+    margin-top: 5vh;
 }
 .takenclass {
     color: white;
@@ -122,7 +123,7 @@
 
 .chart-container{
     position: relative; 
-    height:40vh; 
+    height:60vh; 
     width:80vw
 }
 p.line2 {
@@ -137,36 +138,50 @@ select#Page_Size {
 span.spanchart {
     color: #337ab7;
 }
-
+/* @media (max-width: 1199px) and (min-width: 769px) {
+    .custmDivSensor {
+        width: max-content !important;
+    }
+    .wrapperSenSors {
+        width: max-content !important;
+    }
+} */
 @media (max-width: 768px) {
     /* For mobile phones: */
-    .chart-container {
-        position: relative;
-        height: 60vh;
-        width: 90vw;
-        /* background-color: white; */
+    /* .chart-container {
+    
+        height:60vh; 
+        width:80vw
+        
+    } */
+    .chart-container{
+        /* position: relative; 
+        height:60vh;  */
+        width:92vw !important
     }
-    canvas#barchart1 {
+    .chartCantainer {
+    margin-left:0px ;
+    padding-left: 0px;
+    }
+    /* canvas#barchart1 {
         height: 289px !important;
         width: 362px !important;
-    }
-    .sokettablemr {
-        /* display: grid; */
-        position: relative;
-        margin-top: 0%;
-    }
+    } */
+    .ViewBredCum {
+        height: 100px;
+    } 
     .btnalig {
         /* text-align: right; */
         float: left;
         margin-top: 2px;
         margin-bottom: 20px;
     }
-    .wrapperSenSors {
-        width: 1500% !important;
+    /* .wrapperSenSors {
+        width: max-content !important;
     }
     .custmDivSensor {
-        width: 6%;
-    }
+        width: max-content;
+    } */
   }
 .custmcolor1{
 background: #00C0EF !important;
@@ -183,18 +198,18 @@ background: #00C0EF !important;
 
 
      .custmDivSensor {
-        width: 6%;
+        width: max-content !important;
         display: inline-block;
         margin-left: 15px;
         margin-right: 15px;
     }
     .wrapperSenSors {
-        width: 506%;
+        width: max-content !important;
         overflow: auto;
     }
     .custmDivSensorUpper {
         max-width: auto;
-        overflow-x: scroll;
+        overflow-x: auto;
     }
 
     .dashlastAlert {

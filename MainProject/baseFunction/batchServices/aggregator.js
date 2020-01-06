@@ -20,8 +20,8 @@ const logger = (require('../commanUtilityFn/utilityFn')).CreateLogger(NAMEOFSERV
 async function processAggregator() {
   let aggreSrvcSchedul = await ServiceScheduleManager.initialize()
   console.log("min", aggreSrvcSchedul.getAggregationSchValue())
- //  var schPattern = `0 ${aggreSrvcSchedul.getAggregationSchValue()} * * * *`;
-   var schPattern = `10 * * * * *`;
+   var schPattern = `0 ${aggreSrvcSchedul.getAggregationSchValue()} * * * *`;
+ //  var schPattern = `10 * * * * *`;
 
   var tempSchedule = scheduleTemp.scheduleJob(schPattern, async function () {
     gomos.gomosLog(logger, gConsole, g.TRACE_PROD, "Processing Started - Aggregation Service");
@@ -82,10 +82,11 @@ function alertGeneratorForDevice(deviceMacDataArray, startRange) {
                     alertObject["DeviceName"] = result2[j]["DeviceName"];
                     alertObject["emailRecipientRole"] = result[i]["emailRecipientRole"];
                     alertObject["shortName"] = result[i]["shortName"];
+                    alertObject["sensorNm"] =  result[i]["sensorNm"];
                     alertObject["businessNm"] = "Device"
                     alertObject["businessNmValues"] =`Date : ${date} and Hour:  ${hour}`;
 
-                    alertObject["user"] = '';
+                    alertObject["user"] = 'aggregatorService';
                     alertObject["type"] = result[i]["type"];
                     try {
                     alertObject["criteria"] = eval(result[i]["criteria"]);
