@@ -131,7 +131,7 @@ function getRecipientMail(dbo, data){
       try {
         let emailRecipientRole = data.emailRecipientRole;
         var emails = "";
-        if(emailRecipientRole !== "ALL"){
+        if(emailRecipientRole[0] !== "ALL"){
          
           for(let i =0 ; i< emailRecipientRole.length; i++){
             emails += result1[0].roles[emailRecipientRole[i]] +",";
