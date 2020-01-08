@@ -55,10 +55,12 @@ Certbot verifies that the host is accessible with the specified servername,
 and then generates the certificate files and updates the configuration.
 
 # Current Status
-1. EC2 instance 34.244.151.117 mapped to the domain test.sasyasystems.com
-using AWS route 53 service.
-2. The steps described above are run on the EC2 instance.
+1. Map EC2 instance 34.244.151.117 to the domain test.sasyasystems.com
+using AWS route 53 service. <-- by Takreem
+  > Presumes static addressing.
+2. Setup the apache SSL on the EC2 instance, as per the steps described above.
 3. The instance is now accessible via both HTTP and HTTPS.
+> TODO: HTTP access might be disabled, or redirected back to HTTPS.
 
 # References
 
