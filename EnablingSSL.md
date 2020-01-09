@@ -1,6 +1,6 @@
 # Background
-1. We need our websites to be encrypted (accessible via https).
-  * The site need not be certified by a recognized CA.
+  * We need our websites to be encrypted (accessible via https).
+    - The site need not be certified by a recognized CA.
 
 # Platform
 
@@ -47,6 +47,7 @@ ServerName test.sasyasystems.com:80
 2. Open port 443 to enable SSL access in the target machine
 
 3. Run `certbot`. Enter below details as prompted:
+
   * whether both HTTP and HTTPS should exist
     - for now `Both` option has been selected
     - you might want to change the DocumentRoot of HTTP to generic content
@@ -55,12 +56,30 @@ Certbot verifies that the host is accessible with the specified servername,
 and then generates the certificate files and updates the configuration.
 
 # Current Status
-1. Map EC2 instance 34.244.151.117 to the domain test.sasyasystems.com
+1. Mapped EC2 instance 34.244.151.117 to the domain test.sasyasystems.com
 using AWS route 53 service. <-- by Takreem
   > Presumes static addressing.
 2. Setup the apache SSL on the EC2 instance, as per the steps described above.
 3. The instance is now accessible via both HTTP and HTTPS.
-> TODO: HTTP access might be disabled, or redirected back to HTTPS.
+
+## TODOs
+  * HTTP access is still there. This might have to be modified.
+    - Change the DocumentRoot to harmless static content, or...
+    - Redirect HTTP traffic automatically to HTTPS.
+      - https://www.namecheap.com/support/knowledgebase/article.aspx/9821/38/apache-redirect-to-https has information on redirection
+```
+<VirtualHost *:80>
+ServerName test.sasyasystems.com
+Redirect permanent / https://test.sasyasystems.com/
+</VirtualHost>
+
+<VirtualHost _default_:443>
+ServerName test.sasyasystems.com
+DocumentRoot ...
+SSLEngine On
+...
+</VirtualHost>
+```
 
 # References
 
