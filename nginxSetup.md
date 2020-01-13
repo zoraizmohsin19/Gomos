@@ -2,7 +2,7 @@ This documents essential setup being done on nginx, for repeatability.
 
 # SSL Enabling
 
-Refer to [./EnablingSSL.md] for SSL enabling.
+Refer to [separate document](./EnablingSSL.md) for SSL enabling.
 
 # Services Mapping
 
@@ -21,8 +21,6 @@ browser <==> nginx server <==> service2
                                service3
 ```
 
-All mappings are moved out to a separate sasya.conf file (which is included in
-the main conf file). It is located as `/home/ec2-user/.redirect/sasya.conf`.
 Excerpt from the mapping is:
 ```
 location /api/mqttService/ {
@@ -41,7 +39,15 @@ location /api/onDemandService/ {
 ```
 All APIs are mapped under `/api/<apiname>` and are further redirected to the
 service running on the same machine and the given port number.
-> This is to be cleaned up and tested.
+> This is to be tweaked to Gomos server structure for correctness and comleteness, and tested.
+
+# Effecting the Changes
+All mappings are moved out to a separate `sasya.conf` file (which is included in
+the main nginx.conf file).
+It is located as `/home/ec2-user/.redirect/sasya.conf`.
+Once the file is changed, you should restart nginx using `service nginx restart`
+to have an effect.
+These activities should be done under `sudo` mode.
 
 # TODO
 
@@ -51,6 +57,5 @@ Passing authentication details across services.
   * introduction on proxy: https://www.keycdn.com/support/nginx-reverse-proxy
   * advanced nginx modules: https://github.com/openresty/set-misc-nginx-module
   * on hardwired proxy authentication: http://shairosenfeld.blogspot.com/search?q=nginx
-  * nginx proxy module: http://nginx.org/en/docs/http/ngx_http_proxy_module.html
-documentation
+  * nginx proxy module documentation: http://nginx.org/en/docs/http/ngx_http_proxy_module.html
   * nginx configuration advanced: https://support.hypernode.com/knowledgebase/create-reusable-config-for-custom-snippets/
