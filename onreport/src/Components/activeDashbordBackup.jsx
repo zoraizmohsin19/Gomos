@@ -193,7 +193,7 @@ for(var key =0; key < configkeyInput.length; key++) {
 }
     callApiForAction(){
     var me = this;
-      axios.post("http://localhost:3992/ActiveDAction",me.state.submitDataObj)
+      axios.post("http://localhost/ActiveDAction",me.state.submitDataObj)
       .then(json =>  {
         alert(json)
   
@@ -334,7 +334,7 @@ for(var key =0; key < configkeyInput.length; key++) {
     return this;
 }
      var ActiveJobsArray = [];
-    axios.post("http://localhost:3992/getActiveDashBoardDevice",{})
+    axios.post("http://localhost/getActiveDashBoardDevice",{})
 
     .then(json =>  {
       console.log("this componentDidMount getActiveDashBoardDevice");
@@ -377,7 +377,7 @@ onDeviceinstruction.on('DeviceInstruction',function(data) {
    fetchPayload(){
      var me = this;
     var body = {mac: "5ccf7f0015bc"}
-    axios.post("http://localhost:3992/ActiveActionTypeCall",body)
+    axios.post("http://localhost/ActiveActionTypeCall",body)
 
     .then(json =>  {
       if(json.length !=0){
@@ -400,7 +400,7 @@ fetchActiveJob(){
     startDate : this.state.startDatelimit,
     endDate: this.state.endDatelimit,
   }
-    axios.post("http://localhost:3992/ActiveJobs",ActiveBody)
+    axios.post("http://localhost/ActiveJobs",ActiveBody)
     .then(json =>  {
        var ActiveJobsArray = json["data"]["ActiveJob"];
         if(json["data"]["ActiveJob"].length != 0){
@@ -431,7 +431,7 @@ fetchActiveJob(){
   };
     if(this.state.filter.TypeOfJobs == "ExecutedJob"){
      
-        axios.post("http://localhost:3992/executedJob",body)
+        axios.post("http://localhost/executedJob",body)
             .then(function (result) {
               var mainActiveJobdata  =   result.data;
               items   =   result.data.executedJob;
@@ -440,7 +440,7 @@ fetchActiveJob(){
         me.setState({mAOfInactivejob:[],'in_prog':false});
       });
     }else if(this.state.filter.TypeOfJobs == "PendingJob"){
-      axios.post("http://localhost:3992/PendingJob",body)
+      axios.post("http://localhost/PendingJob",body)
       .then(function (result) {
         var mainActiveJobdata  =   result.data;
         items   =   result.data.PendingJob;
