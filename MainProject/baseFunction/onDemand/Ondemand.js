@@ -2845,9 +2845,9 @@ function monthlyDataProcessing(db, res, criteria, startTime,endTime, offset, pag
           for (let j = 0; j < tempArray.length; j++) {
             let bsName = tempArray[j].bsName;
             let tempNewObj = {
-              Avg: (tempArray[j].Avg == null) ? "" : (tempArray[j].Avg).toFixed(2),
-              Min: (tempArray[j].Min == null) ? "" : (tempArray[j].Min).toFixed(2),
-              Max: (tempArray[j].Max == null) ? "" : (tempArray[j].Max).toFixed(2),
+              Avg: (tempArray[j].Avg == null) ? null : (tempArray[j].Avg).toFixed(2),
+              Min: (tempArray[j].Min == null) ? null : (tempArray[j].Min).toFixed(2),
+              Max: (tempArray[j].Max == null) ? null : (tempArray[j].Max).toFixed(2),
               Durations: (tempArray[j].Duration == null) ? "" : tempArray[j].Duration,
               Count: (tempArray[j].Count == null) ? "" : tempArray[j].Count
             };
@@ -2958,11 +2958,11 @@ function weeklyDataProcessing(db, res, criteria, startTime,endTime, offset, page
           for (let j = 0; j < tempArray.length; j++) {
             let bsName = tempArray[j].bsName;
             let tempNewObj = {
-              Avg: (tempArray[j].Avg == null) ? "" : (tempArray[j].Avg).toFixed(2),
-              Min: (tempArray[j].Min == null) ? "" : (tempArray[j].Min).toFixed(2),
-              Max: (tempArray[j].Max == null) ? "" : (tempArray[j].Max).toFixed(2),
-              Durations: (tempArray[j].Duration == null) ? "" : tempArray[j].Duration,
-              Count: (tempArray[j].Count == null) ? "" : tempArray[j].Count
+              Avg: (tempArray[j].Avg == null) ? null : (tempArray[j].Avg).toFixed(2),
+              Min: (tempArray[j].Min == null) ? null : (tempArray[j].Min).toFixed(2),
+              Max: (tempArray[j].Max == null) ? null : (tempArray[j].Max).toFixed(2),
+              Durations: (tempArray[j].Duration == null) ? null : tempArray[j].Duration,
+              Count: (tempArray[j].Count == null) ? null : tempArray[j].Count
             };
             // if(0 == j){
            
@@ -3071,11 +3071,11 @@ function dailyDataProcessing(db, res,criteria, startTime,endTime, offset, page_s
           for (let j = 0; j < tempArray.length; j++) {
             let bsName = tempArray[j].bsName;
             let tempNewObj = {
-              Avg: (tempArray[j].Avg == null) ? "" :(tempArray[j].Avg).toFixed(2),
-              Min: (tempArray[j].Min == null) ? "" : (tempArray[j].Min).toFixed(2),
-              Max: (tempArray[j].Max == null) ? "" : (tempArray[j].Max).toFixed(2),
-              Durations: (tempArray[j].Duration == null) ? "" : tempArray[j].Duration,
-              Count: (tempArray[j].Count == null) ? "" : tempArray[j].Count
+              Avg: (tempArray[j].Avg == null) ? null :(tempArray[j].Avg).toFixed(2),
+              Min: (tempArray[j].Min == null) ? null : (tempArray[j].Min).toFixed(2),
+              Max: (tempArray[j].Max == null) ? null : (tempArray[j].Max).toFixed(2),
+              Durations: (tempArray[j].Duration == null) ? null : tempArray[j].Duration,
+              Count: (tempArray[j].Count == null) ? null : tempArray[j].Count
             };
             // if(0 == j){
            
