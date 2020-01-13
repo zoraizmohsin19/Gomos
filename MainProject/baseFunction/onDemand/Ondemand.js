@@ -3184,11 +3184,16 @@ function hourlyDataProcessing(db, res, criteria,startTime,endTime, offset, page_
           for (let j = 0; j < tempArray.length; j++) {
             let bsName = tempArray[j].bsName;
             let tempNewObj = {
-              Avg: (tempArray[j].Avg == null) ? "" : (tempArray[j].Avg).toFixed(2),
-              Min: (tempArray[j].Min == null) ? "" : (tempArray[j].Min).toFixed(2),
-              Max: (tempArray[j].Max == null) ? "" : (tempArray[j].Max).toFixed(2),
-              Durations: (tempArray[j].Duration == null) ? "" : tempArray[j].Duration,
-              Count: (tempArray[j].Count == null) ? "" : tempArray[j].Count
+              // Avg: (tempArray[j].Avg == null) ? "" : (tempArray[j].Avg).toFixed(2),
+              // Min: (tempArray[j].Min == null) ? "" : (tempArray[j].Min).toFixed(2),
+              // Max: (tempArray[j].Max == null) ? "" : (tempArray[j].Max).toFixed(2),
+              // Durations: (tempArray[j].Duration == null) ? "" : tempArray[j].Duration,
+              // Count: (tempArray[j].Count == null) ? "" : tempArray[j].Count
+              Avg: tempArray[j].Avg,
+              Min:tempArray[j].Min ,
+              Max: tempArray[j].Max ,
+              Durations: tempArray[j].Duration,
+              Count: tempArray[j].Count             
             };
             // if(0 == j){
            

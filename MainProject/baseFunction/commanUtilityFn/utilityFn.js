@@ -69,7 +69,12 @@ module.exports.calcUtc = function (date) {
 
 // THIS IS TAKE INT VALUE AND CONVERT TO 2 DECIMAL POINT 
 module.exports.convertIntTodecPoint = function (value, decimals) {
-    return Math.floor(value * (Math.pow(10, decimals))) / (Math.pow(10, decimals));
+    if(value != null){
+        return Math.floor(value * (Math.pow(10, decimals))) / (Math.pow(10, decimals));
+    }
+    else{
+        return value
+    }
 }
 
 
