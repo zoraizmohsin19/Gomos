@@ -10,7 +10,7 @@
 // To learn more about the benefits of this model and instructions on how to
 import axios from "axios";
 // opt-in, read http://bit.ly/CRA-PWA.
-const serverUrl = 'http://localhost'
+const serverUrl = "http://localhost:3992"
 const isLocalhost = Boolean(
   window.location.hostname === 'localhost' ||
   // [::1] is the IPv6 localhost address.
@@ -35,7 +35,7 @@ const getApplicationServerKey = () => {
 
 export function register(config) {
   // process.env.NODE_ENV === 'production' &&
-  if ('serviceWorker' in navigator) {
+  if ( process.env.NODE_ENV === 'production' &&'serviceWorker' in navigator) {
     // The URL constructor is available in all browsers that support SW.
     const publicUrl = new URL(process.env.PUBLIC_URL, window.location);
     if (publicUrl.origin !== window.location.origin) {
