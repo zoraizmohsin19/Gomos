@@ -1,7 +1,7 @@
 'use strict'
 const mongoose = require("mongoose");
 const schemaTypes = require("mongoose").Schema.Types;
-var gomos = require("../../../commanFunction/routes/commanFunction");
+var gomos = require("../../../commanfunction/routes/commanFunction");
 const g = require('../commanUtilityFn/gConstant')
 
 let MsgFactSchema = new mongoose.Schema({

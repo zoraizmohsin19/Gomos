@@ -2,7 +2,7 @@
 'use strict'
 const DeviceModel = require("../model/deviceModel");
 const g = require('../commanUtilityFn/gConstant');
-const gomos = require("../../../commanFunction/routes/commanFunction");
+const gomos = require("../../../commanfunction/routes/commanFunction");
 
 module.exports.fetchDeviceBymac = function (NAMEOFSERVICE,logger,gConsole,mac) {
  

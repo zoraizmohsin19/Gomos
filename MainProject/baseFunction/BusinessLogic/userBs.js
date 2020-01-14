@@ -2,7 +2,7 @@
 'use strict'
 const UsersModel = require("../model/usersModel");
 const g = require('../commanUtilityFn/gConstant');
-const gomos = require("../../../commanFunction/routes/commanFunction");
+const gomos = require("../../../commanfunction/routes/commanFunction");
 
 
 

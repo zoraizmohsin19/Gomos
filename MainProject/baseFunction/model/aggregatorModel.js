@@ -1,7 +1,7 @@
 'use strict'
 const mongoose = require("mongoose");
 const g = require('../commanUtilityFn/gConstant');
-var gomos = require("../../../commanFunction/routes/commanFunction");
+var gomos = require("../../../commanfunction/routes/commanFunction");
 
 var  AggregatorSchema = new mongoose.Schema({
     DeviceName: {

@@ -11,7 +11,7 @@ const EXIT_TRUE = true;
 const EXIT_FALSE = false;
 const ERROR_TRUE = true;
 const ERROR_FALSE = false;
-var gomos = require("../../commanFunction/routes/commanFunction");
+var gomos = require("../../commanfunction/routes/commanFunction");
 var MongoClient = require("mongodb").MongoClient;
 var urlConn, dbName, dbo;
 var fs = require("fs");

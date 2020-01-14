@@ -9,7 +9,7 @@ var forwardNotification = require('./routes/forwardNotification');
 var factService = require('./routes/factService');
 var usersRouter = require('./routes/users');
 var dateTime = require('node-datetime');
-var  gomos = require("../commanFunction/routes/commanFunction");
+var  gomos = require("../commanfunction/routes/commanFunction");
 
 //reads the data from config file which contains DB connection url and the DB Name.
 var appConfig = JSON.parse(fs.readFileSync(process.cwd() + '/appConfig.json', 'utf8'));

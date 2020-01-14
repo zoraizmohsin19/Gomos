@@ -11,7 +11,7 @@ var userViewDashboard = require('./routes/viewDashSocket');
 var app = express();
 var dt = dateTime.create();
 var formattedDate = dt.format("Y-m-d");
-var  gomos = require("../commanFunction/routes/commanFunction");
+var  gomos = require("../commanfunction/routes/commanFunction");
 
 //creates the file to write all errors that occurs,which will be usefull for debugging.
 var log_file_err = fs.createWriteStream(
