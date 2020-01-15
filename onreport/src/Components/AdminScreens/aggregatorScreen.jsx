@@ -68,7 +68,7 @@ class aggregatorScreen extends Component {
   }
   apiForAggregator(){
     let me  = this;
-    axios.post(`${URL.IP}:3992/apiAggregator`, {startRenge: moment(me.state.Menu.startTime).toISOString(),
+    axios.post(`${URL.IP}/apiAggregator`, {startRenge: moment(me.state.Menu.startTime).toISOString(),
       endRenge: moment(me.state.Menu.endTime).toISOString(),macArray:me.state.Menu.selectedEntitiesValues })
     .then(json => {
       // if(json["data"] == "success"){
@@ -177,7 +177,7 @@ let me = this;
   if(data[0].userType !== "Admin"){me.state.Menu.error = "You Are Not Admin";me.setState({Menu: me.state.Menu}); me.errorganerator();me.props.history.push("/NevMenu")}
  
     
-    fetch(`${URL.IP}:3992/getRegisterSP`)
+    fetch(`${URL.IP}/getRegisterSP`)
       .then(response => response.json())
       .then(json => {
 
@@ -187,7 +187,7 @@ let me = this;
         this.setState({ Menu: this.state.Menu });
       }
       );
-    axios.post(`${URL.IP}:3992/adminAggregator`, {})
+    axios.post(`${URL.IP}/adminAggregator`, {})
       .then(async (json) => {
         console.log(json);
         json["data"].map(item => item["flag"] = false);

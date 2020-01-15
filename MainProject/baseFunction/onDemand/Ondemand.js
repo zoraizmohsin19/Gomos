@@ -2798,7 +2798,7 @@ function monthlyDataProcessing(db, res, criteria, startTime,endTime, offset, pag
            "Max" :  "$max" ,
            "Min" : "$min",
            "Sum": "$sum1",
-           "Avg": { $divide: [ "$sum1", "$Count" ] },
+           "Avg": { $cond: [ { $eq: [ "$Count", 0 ] }, null ,{ $divide: [ "$sum1", "$Count" ]} ] },
            "Duration": "$Duration",
            "Count": "$Count",
           //  "createdTime": "$createdTime",
@@ -2846,9 +2846,9 @@ function monthlyDataProcessing(db, res, criteria, startTime,endTime, offset, pag
             let bsName = tempArray[j].bsName;
             let tempNewObj = {
               Avg: (tempArray[j].Avg == null) ? null : (tempArray[j].Avg).toFixed(2),
-              Min: (tempArray[j].Min == null) ? null : (tempArray[j].Min).toFixed(2),
-              Max: (tempArray[j].Max == null) ? null : (tempArray[j].Max).toFixed(2),
-              Durations: (tempArray[j].Duration == null) ? "" : tempArray[j].Duration,
+              Min: (tempArray[j].Min == null) ? null :  tempArray[j].Min,
+              Max: (tempArray[j].Max == null) ? null : tempArray[j].Max,
+              Durations: (tempArray[j].Duration == null) ? "" :  utilityFn.convertIntTodecPoint(tempArray[j].Duration, 2),
               Count: (tempArray[j].Count == null) ? "" : tempArray[j].Count
             };
             // if(0 == j){
@@ -2911,7 +2911,7 @@ function weeklyDataProcessing(db, res, criteria, startTime,endTime, offset, page
            "Max" :  "$max" ,
            "Min" : "$min",
            "Sum": "$sum1",
-           "Avg": { $divide: [ "$sum1", "$Count" ] },
+           "Avg": { $cond: [ { $eq: [ "$Count", 0 ] }, null ,{ $divide: [ "$sum1", "$Count" ]} ] },
            "Duration": "$Duration",
            "Count": "$Count",
           //  "createdTime": "$createdTime",
@@ -2959,9 +2959,9 @@ function weeklyDataProcessing(db, res, criteria, startTime,endTime, offset, page
             let bsName = tempArray[j].bsName;
             let tempNewObj = {
               Avg: (tempArray[j].Avg == null) ? null : (tempArray[j].Avg).toFixed(2),
-              Min: (tempArray[j].Min == null) ? null : (tempArray[j].Min).toFixed(2),
-              Max: (tempArray[j].Max == null) ? null : (tempArray[j].Max).toFixed(2),
-              Durations: (tempArray[j].Duration == null) ? null : tempArray[j].Duration,
+              Min: (tempArray[j].Min == null) ? null :  tempArray[j].Min,
+              Max: (tempArray[j].Max == null) ? null :  tempArray[j].Max,
+              Durations: (tempArray[j].Duration == null) ? null : utilityFn.convertIntTodecPoint(tempArray[j].Duration, 2),
               Count: (tempArray[j].Count == null) ? null : tempArray[j].Count
             };
             // if(0 == j){
@@ -3024,7 +3024,7 @@ function dailyDataProcessing(db, res,criteria, startTime,endTime, offset, page_s
            "Max" :  "$max" ,
            "Min" : "$min",
            "Sum": "$sum1",
-           "Avg": { $divide: [ "$sum1", "$Count" ] },
+           "Avg": { $cond: [ { $eq: [ "$Count", 0 ] }, null ,{ $divide: [ "$sum1", "$Count" ]} ] },
            "Duration": "$Duration",
            "Count": "$Count",
           //  "createdTime": "$createdTime",
@@ -3072,9 +3072,9 @@ function dailyDataProcessing(db, res,criteria, startTime,endTime, offset, page_s
             let bsName = tempArray[j].bsName;
             let tempNewObj = {
               Avg: (tempArray[j].Avg == null) ? null :(tempArray[j].Avg).toFixed(2),
-              Min: (tempArray[j].Min == null) ? null : (tempArray[j].Min).toFixed(2),
-              Max: (tempArray[j].Max == null) ? null : (tempArray[j].Max).toFixed(2),
-              Durations: (tempArray[j].Duration == null) ? null : tempArray[j].Duration,
+              Min: (tempArray[j].Min == null) ? null : tempArray[j].Min,
+              Max: (tempArray[j].Max == null) ? null : tempArray[j].Max,
+              Durations: (tempArray[j].Duration == null) ? null : utilityFn.convertIntTodecPoint(tempArray[j].Duration, 2),
               Count: (tempArray[j].Count == null) ? null : tempArray[j].Count
             };
             // if(0 == j){

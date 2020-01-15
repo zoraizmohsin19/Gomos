@@ -10,7 +10,7 @@
 // To learn more about the benefits of this model and instructions on how to
 import axios from "axios";
 // opt-in, read http://bit.ly/CRA-PWA.
-const serverUrl = "http://localhost:3992"
+const serverUrl = "/api/onDemandService"
 const isLocalhost = Boolean(
   window.location.hostname === 'localhost' ||
   // [::1] is the IPv6 localhost address.
