@@ -769,7 +769,6 @@ dataTypeDisable(){
     //console(value)
     let me = this
     me.state.body.selectedgraphType = value;
-    me.state.activeChartLegend =  me.state.body.chartLegendNames[value]
    
     me.setState({ body: me.state.body })
     me.graphProcess();
@@ -850,11 +849,15 @@ dataTypeDisable(){
       var dashboardData = JSON.parse(sessionStorage.getItem("dashboardConfigobj"));
       var arrayofbgClass = dashboardData.SensorsBgC;
       me.state.body.selectedGroupsitem = value;
+      console.log("this is chart chartLegendNames", me.state.body.chartLegendNames)
+      me.state.body.activeChartLegend =  me.state.body.chartLegendNames[value]
+      console.log("this is chart chartLegendNames12",  me.state.body.activeChartLegend)
       let index = me.state.body.sensorsGroups.findIndex(item => item.group == value);
 
       me.state.body.selectedGroups = me.state.body.sensorsGroups[index];
       //console(me.state.body.sensorsMainData)
       //  alert(value);
+      me.setState({ body: me.state.body })
       var dataofSensors = [];
       for (let i = 0; i < me.state.body.selectedGroups.devicebusinessNM.length; i++) {
         dataofSensors.push(me.state.body.sensorsMainData.filter(item => item.devicebusinessNM == me.state.body.selectedGroups.devicebusinessNM[i])[0])
@@ -986,6 +989,7 @@ dataTypeDisable(){
  if (selectedNevData == "Normal"){
    legend = activeChartLegend["normal"]
  }
+ console.log("this is selected", activeChartLegend)
  if (selectedNevData != "Normal"){
   legend = activeChartLegend["aggregated"];
 }
@@ -1052,7 +1056,7 @@ dataTypeDisable(){
                       <span className=" custmDivSensor ">
                         <Sensors key={item.nameofbsnm}
                           bgclass={item.bgClass}
-                          label={"Sensor" + " " + item.nameofbsnm}
+                          label={" " + item.nameofbsnm}
                           P_name_class="color12 "
                           dateTime={item.lastUpdatedTime}
                           takenClass="takenclass"

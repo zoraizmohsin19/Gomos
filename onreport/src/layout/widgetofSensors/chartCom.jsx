@@ -1,246 +1,266 @@
-import React, { Component } from 'react'
+import PropTypes from 'prop-types';
+import React, { Component } from 'react';
 import { Chart } from "chart.js";
-import './chartcomp.css';
 
- class chartcomp extends Component {
-     constructor(){
-         super()
-         this.state ={
-            barchart:'',
-            title: '',
-            type: '',
-            legend:'',
-            yAxisLbl:'',
-            xAxisLbl:'',
-            arrData: [],
-            arrLabels: [],
-            fromDate:'',
-            toDate:'',
-            imageUrl:'',
-            bar: "bar",
-            pie : "pie",
-            line: "line",
-            doughnut: "doughnut",
-            radar: "radar",
-            polarArea : "polarArea",
-            bgColors : [],
-            borderColors : [],
-            yaxisName:'',
-            myChart: Chart,
-          
-         }
-     }
-  
-     //gives random BackgroundColors for each dataSets in the chart each time when the chart is generated.
-        getRandomBgColor() {
-            var letters = "0123456789ABCDEF";
-            var color = "#";
-            for (var i = 0; i < 6; i++) {
-            color += letters[Math.floor(Math.random() * 16)];
-            }
-            return color;
-        }
-            //gives random Colors for each dataSets in the chart each time when the chart is generated.
-        getRandomBorColor() {
-        var letters = "0123456789ABCDEF";
-        var color = "#";
-        for (var i = 0; i < 6; i++) {
-        color += letters[Math.floor(Math.random() * 12)];
-        }
-        return color;
-       }
-        
-    //Defines the type of chart to be generated and displays the chart.
-    getChart(chartType) {
-        // console.log(this.state.arrData, this.state.arrLabels, this.state.yaxisName, this.state.fromDate , this.state.toDate)
-        // if (this.state.myChart) this.state.myChart.destroy();
-        this.state.title = chartType + " " + "chart";
-        // if (chartType == "polarArea") {
-        // this.setState({title : "Polar Area" + " " + "chart"});
-        // }
-        // this.state.type = chartType;
-        this.state.legend = this.state.yaxisName;
-        this.state.xAxisLbl = "Date and Time";
-        this.state.yAxisLbl = this.state.yaxisName;
-        this.genearteGraphs(
-          chartType,
-        this.state.arrData, 
-        this.state.arrLabels,
-        this.state.legend,
-        this.state.xAxisLbl,
-        this.state.yAxisLbl
-        );
-    console.log(this.state.arrData, this.state.arrLabels, this.state.legend) 
-      
-    }
-componentDidMount(){
-    var arrData = [];
-    var arrLabels =[];
-    // if(sessionStorage.getItem("dataToSend1")){
-      arrLabels = sessionStorage.getItem("dataToSend1");
-      arrData= sessionStorage.getItem("dataToSend2");
-    var yaxisName = sessionStorage.getItem("yaxisName");
-    var fromDate = sessionStorage.getItem("formDate");
-    var  toDate = sessionStorage.getItem("toDate");
-    arrData =  arrData
-    arrLabels =  arrLabels.split(",");
-    console.log(arrData[0])
-    var bgColors =[];
-    var borderColors =[];
-    for (var i = 0; i <  arrData.length; i++) {
-        bgColors.push(this.getRandomBgColor());
-        borderColors.push(this.getRandomBorColor());
-        // sessionStorage.clear();
-    
-    }
-  
-    this.updateState(arrData, arrLabels, yaxisName, fromDate ,toDate ,bgColors, borderColors);
-    //   console.log(arrData, arrLabels, yaxisName, fromDate , toDate)
-//    console.log(arrData,arrLabels);
-       console.log("hello Takreem this is componentDidmount");
-  // }    
-    
-}
-componentDidUpdate(){
-   this.getChart("line");
-}
-updateState(arrData, arrLabels, yaxisName, fromDate ,toDate ,bgColors, borderColors){
-    this.setState({arrData: arrData,
-        arrLabels: arrLabels,
-         yaxisName: yaxisName,
-         fromDate:fromDate,
-         toDate: toDate,
-         bgColors: bgColors,
-         borderColors: borderColors
-        });
-        // console.log(arrData, arrLabels, yaxisName, fromDate ,toDate ,bgColors, borderColors+"this i Want");
-}     
- //generates the chart object based on the given properties.
- genearteGraphs(type, arrData, arrLabels, legend, xAxisLbl, yAxisLbl) {
-  //  if(this.state.myChart != null){
-  //    if(this.state.myChart.destroy != undefined)
-  //    this.state.myChart.destroy();
-  //     this.setState({myChart:null});
-  //  }
-  var dataset = [];
-for(var i = 0 ; i< arrData.length ;i++){
-  var tempob=   {
-    label: legend,
-    // data: arrData,
-    backgroundColor: this.state.bgColors,
-    borderColor: this.state.borderColors,
-    pointBorderWidth: 3,
-    pointBorderColor: "red",
-    fontSize: 100,
-    borderWidth: 2
+
+class Chartcom extends Component {
+  state = {
+    body: { myChart: {} }
+
   }
-  var key = Object.keys(arrData); 
-  for(var j =0; j< key.length ; j++){
-    tempob["data"] = arrData[i][key[j]];
-    
+  // getRandomBackgroundColor() {
+  //   var letters = "0123456789ABCDEF";
+  //   var color = "#";
+  //   for (var i = 0; i < 6; i++) {
+  //   color += letters[Math.floor(Math.random() * 12)];
+  //   }
+  //   return color;
+  //   }
+  //   getRandomBordergroundColor() {
+  //     var letters = "0123456789ABCDEF";
+  //     var color = "#";
+  //     for (var i = 0; i < 6; i++) {
+  //     color += letters[Math.floor(Math.random() * 12)];
+  //     }
+  //     return color;
+  //     }
+
+  getIdForChart(chartAxis, keysofBsName) {
+    let array = [{ businessName: "Values", axisY: "first-y-axis" },
+    { businessName: "Min", axisY: "first-y-axis" },
+    { businessName: "Max", axisY: "second-y-axis" },
+    { businessName: "Avg", axisY: "first-y-axis" },
+    { businessName: "Durations", axisY: "first-y-axis" },
+    { businessName: "Count", axisY: "second-y-axis" }];
+    let temp = chartAxis.concat(array)
+    //  console.log(temp)
+    let index = temp.findIndex(item => item.businessName === keysofBsName);
+    return temp[index].axisY
   }
-}
-
-
-   console.log(type + "this name of chart");
-
-    this.state.myChart = new Chart("barchart", {
-      type: type, 
-      data: {
-        labels: arrLabels,
-        datasets: [
-          {
-            label: legend,
-            data: arrData,
-            backgroundColor: this.state.bgColors,
-            borderColor: this.state.borderColors,
-            pointBorderWidth: 3,
-            pointBorderColor: "red",
-            fontSize: 100,
-            borderWidth: 2
-          }
-        ]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: true,
-        
-        scales: {
-          xAxes: [
-            {
-              ticks: {
-                beginAtZero: true,
-                fontSize: 18,
-                tickColor: "red"
-              },
-              scaleLabel: {
-                display: true,
-                labelString: xAxisLbl,
-                fontSize: 30,
-                fontColor: "red"
-              }
-            }
-          ],
-          yAxes: [
-            {
-              ticks: {
-                beginAtZero: true,
-                fontSize: 18
-              },
-              scaleLabel: {
-                display: true,
-                labelString: yAxisLbl,
-                fontSize: 30,
-                fontColor: "red"
-              }
-            }
-          ]
-        }
-      }
-    });
- }
- distroChart(){
- 
-  this.props.history.push("/Menu");
-  // sessionStorage.clear();
- }
-
-
-
   render() {
-    
+    const { chartAxis, arrData, arrLabels, legend, xAxisLbl, yAxisLbl, bgColors, borderColors } = this.props
+    var backgroundColor = [
+      'rgba(255, 222, 0, 0.2)',
+      'rgba(0, 255, 0, 0.2)',
+      'rgba(255, 0, 255, 0.2)',
+      'rgba(255, 0, 0, 0.2)',
+      'rgba(255, 128, 0, 0.2)',
+      'rgba(0, 255, 255, 0.2)',
+      'rgba(0, 0, 255, 0.2)',
+      'rgba(168, 98, 255, 0.2)',
+      'rgba(98, 255, 167, 0.2)',
+      'rgba(255, 189, 220, 0.2)',
+      'rgba(121, 56, 45, 0.2)',
+      'rgba(178, 89, 22, 0.2)',
+      'rgba(67, 230, 188, 0.2)',
+      'rgba(98, 255, 21, 0.2)',
+      'rgba(129, 121, 255, 0.2)',
+
+    ];
+    var borderColor = [
+      'rgba(255, 222, 0, 1)',
+      'rgba(0, 255, 0, 1)',
+      'rgba(255, 0, 255, 1)',
+      'rgba(255, 0, 0, 1)',
+      'rgba(255, 128, 0, 1)',
+      'rgba(0, 255, 255, 1)',
+      'rgba(0, 0, 255, 1)',
+      'rgba(168, 98, 255, 1)',
+      'rgba(98, 255, 167, 1)',
+      'rgba(255, 189, 220, 1)',
+      'rgba(121, 56, 45, 1)',
+      'rgba(178, 89, 22, 1)',
+      'rgba(67, 230, 188, 1)',
+      'rgba(98, 255, 21, 1)',
+      'rgba(129, 121, 255, 1)',
+    ];
+    var dataArray = []
+    // console.log("This is Chart componenet data ")
+    // console.log(arrData);
+
+    if (arrData !== undefined && arrData.length !== 0 && arrData !== null && legend !== null) {
+      var axisY = ["first-y-axis", "second-y-axis", "thired-y-axis"]
+      var labelName = [];
+      var keysofBsName = Object.keys(arrData[0])
+      // console.log(keysofBsName)
+      // var labelName1 = legend.primaryLegend;
+      // var labelName2 = legend.seconderyLegend;
+
+      for (var i = 0; i < keysofBsName.length; i++) {
+        //   console.log(this.getIdForChart(chartAxis,keysofBsName[i]));
+
+        // if (this.getIdForChart(chartAxis, keysofBsName[i]) === "second-y-axis") {
+        //   labelName2 += keysofBsName[i] + " ; ";
+        // }
+        // else {
+        //   labelName1 += keysofBsName[i] + " ; ";
+        // }
+        var json = {};
+        json["label"] = keysofBsName[i];
+        json["data"] = [];
+        //  json["fill"]  = false;
+        json["backgroundColor"] = backgroundColor[i];
+        //json["yAxisID"] = (axisY[i])?axisY[i] : '';
+        json["yAxisID"] = this.getIdForChart(chartAxis, keysofBsName[i])
+        json["borderColor"] = borderColor[i];
+        json["pointBorderWidth"] = .1;
+        // json["pointBorderColor"]  = this.getRandomBackgroundColor();
+        json["fontSize"] = 7;
+        json["borderWidth"] = 1.2;
+        for (var k = 0; k < arrData.length; k++) {
+          json["data"].push(arrData[k][keysofBsName[i]])
+
+        }
+        dataArray.push(json)
+      }
+      // console.log(dataArray)
+      var me = this;
+      // console.log(me.state.body.myChart) 
+      // console.log(type + "this name of chart");
+
+      if (me.state.body.myChart != null && me.state.body.myChart !== undefined && me.state.body.myChart instanceof Chart) {
+
+        me.state.body.myChart.destroy();
+      }
+      let yAxesArray = [
+        // {
+        //   // stacked: true,
+        //   position: "left",
+        //   type: 'linear',
+        //   id: axisY[0],
+        //   scaleLabel: {
+        //     display: true,
+        //     labelString: labelName1,
+        //     fontSize: 13,
+        //     fontColor: "red"
+        //   }
+        // }, {
+        //   // stacked: false,
+        //   position: "right",
+        //   type: 'linear',
+        //   id: axisY[axisY.length - 1],
+        //   scaleLabel: {
+        //     display: true,
+        //     labelString: labelName2,
+        //     fontSize: 13,
+        //     fontColor: "red"
+        //   },
+        //   ticks: {
+        //     beginAtZero: true,
+        //     fontSize: 11,
+
+        //   }
+        // },
+        // {
+        //   // stacked: false,
+        //   position: "right",
+        //   type: 'linear',
+        //   id: "thired-y-axis",
+        //   scaleLabel: {
+        //     display: true,
+        //     labelString: labelName2,
+        //     fontSize: 13,
+        //     fontColor: "red"
+        //   },
+        //   ticks: {
+        //     beginAtZero: true,
+        //     fontSize: 11,
+
+        //   }
+        // }
+      ];
+      for(let i =0 ; i< legend.length; i++){
+        console.log( "This is Called ",legend[i].position);
+
+        console.log( "This is Called ",legend[i].axis)
+        console.log( "This is Called ",legend[i].legend)
+
+        yAxesArray.push({
+          // stacked: true,
+          position: legend[i].position,
+          type: 'linear',
+          id: legend[i].axis,
+          scaleLabel: {
+            display: true,
+            labelString: legend[i].legend,
+            fontSize: 13,
+            fontColor: "red"
+          }
+        })
+
+      }
+      me.state.body.myChart = new Chart("barchart1", {
+        type: "line",
+        data: {
+          labels: arrLabels,
+          datasets:
+            dataArray
+
+        },
+        options: {
+          spanGaps: true,
+          responsive: true,
+          maintainAspectRatio: false,
+          tooltips: {
+            mode: 'label'
+          },
+          legend: {
+            labels: {
+              boxWidth: 10
+            }
+          },
+          scales: {
+            xAxes: [
+              {
+
+                // stacked: true,
+                ticks: {
+                  beginAtZero: true,
+                  fontSize: 11,
+                  tickColor: "red"
+                },
+                scaleLabel: {
+
+                  display: true,
+                  labelString: xAxisLbl,
+                  fontSize: 13,
+                  fontColor: "red"
+                }
+              }
+            ],
+            yAxes:yAxesArray
+          }
+        }
+      });
+
+      //  me.setState({body: me.state.body})
+      //  }
+    }
+
+
+
+
     return (
-      <div>
-       {/* <button onClick={this.distroChart.bind(this)}>Back</button> */}
-      
-        <div className="row mb-4">
-    
-        {/* <div className="col-sm-2">
-        <button className="btn btn-lg btn-danger ml-4 pad pie" onClick={this.getChart.bind(this,"pie")}>Pie Chart</button>
-        </div>
-        <div className="col-sm-2">
-        <button className="btn btn-lg btn-danger Radar pad" onClick={this.getChart.bind(this,"radar")}>Radar Chart</button>
-        </div>
-        <div className="col-sm-2">
-        <button className="btn btn-lg btn-danger doughnut  pad" onClick={this.getChart.bind(this,"doughnut")}>Doughnut Chart</button>
-        </div>
-        <div className="col-sm-2">
-        <button className="btn btn-lg btn-danger polarArea pad" onClick={this.getChart.bind(this,"polarArea")}>Polar Area Chart</button>
-        </div>
-         <div className="col-sm-2">
-        <button className="btn btn-lg btn-danger bar pad" onClick={this.getChart.bind(this,"bar")}>Bar Chart</button>
-         </div> */}
-        {/* <div className="col-sm-2">
-        <button className="btn btn-lg btn-danger line pad" onClick={this.getChart.bind(this,"line")}>Line Chart</button>
-        </div> */}
-        </div>
-        
-        <div className="cus">
-        <p className="text-center" style={{fontWeight: "bolder", color: "black"}}>{this.state.fromDate}&nbsp;to&nbsp; {this.state.toDate}</p>
-        <canvas id="barchart"></canvas>
-        </div>
-      </div>
-    )
-  }
+      // <div >
+      <canvas id="barchart1"></canvas>
+      // </div>
+
+    );
+  };
+
 }
-export default chartcomp;
+
+
+Chartcom.propTypes = {
+  type: PropTypes.string.isRequired,
+  arrData: PropTypes.array.isRequired,
+  arrLabels: PropTypes.array.isRequired,
+  legend: PropTypes.string.isRequired,
+  xAxisLbl: PropTypes.string.isRequired,
+  yAxisLbl: PropTypes.string.isRequired,
+  // bgColors: PropTypes.array.isRequired,
+  borderColors: PropTypes.array.isRequired
+
+
+};
+export default Chartcom;
