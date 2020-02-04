@@ -1,6 +1,6 @@
 {
 	"comments": "This is Ip Address for servers",
-     "IP": "http://localhost:3992",
-     "SIP":  "http://localhost:4001"
+     "IP": "https://test.sasyasystems.com/api/onDemandService",
+     "SIP":  "https://test.sasyasystems.com/api/soketForOnreport"
      
 }
