@@ -34,19 +34,16 @@ class viewDashboard extends Component {
         'total_count': 0,
         'page_size': 10,
         'page': 1,
-        selectedSPValue: '',
-        selectedCustValue: '',
-        selectedSubCustValue: '',
-        spDisable: null,
-        subCustDisable: null,
-        custDisable: null,
+     
         Sensors: [],
         selectedSensorsType1: '',
-        mac: '',
+        // mac: '',
         deviceType: "",
         deviceTypeObj: {},
-        selectedAssets: '',
-        excelresult: [],
+        chartLegendNames: {},
+        activeChartLegend: {},
+        // selectedAssets: '',
+        //excelresult: [],
         lastupdatedData: [],
         lastUpdatedTime: '',
         Spinnerdata: false,
@@ -133,7 +130,7 @@ class viewDashboard extends Component {
     let tempData = JSON.parse(sessionStorage.getItem("ClientObj"));
     //console("chartsIdbyDeviceType");
     //console(tempData)
-    let obj = tempData.viewDashBoard.deviceTypes[deviceType].map(item => { return { "businessName": item.businessName, "axisY": item.axisY } })
+    let obj = tempData.viewDashBoard[deviceType].chartAxis.map(item => { return { "businessName": item.businessName, "axisY": item.axisY } })
 
     return obj;
   }
@@ -156,6 +153,7 @@ class viewDashboard extends Component {
     //  me.state.body.selectedgraphType = "MULTI";
     // // me.state.body.Spinnerdata = false
     // // console.log(URL.IP);
+  
     me.setState({ body: me.state.body });
     // me.graphProcess();
     //  var result1 = this.groupingDataArray();
@@ -190,7 +188,6 @@ dataTypeDisable(){
     me.state.body.selectedgraphType = "MULTI";
     // me.state.body.Spinnerdata = false
     // console.log(URL.IP);
-    
     
     me.setState({ body: me.state.body });
     me.graphProcess();
@@ -233,6 +230,11 @@ dataTypeDisable(){
           //console(groupedData[index].devicebusinessNM)
           me.state.body.deviceType = json["data"].deviceTypes;
           me.state.body.deviceTypeObj = this.chartsIdbyDeviceType(json["data"].deviceTypes);
+          let ClientObj = JSON.parse(sessionStorage.getItem("ClientObj"));
+          me.state.body.chartLegendNames =  ClientObj.viewDashBoard[json["data"].deviceTypes].chartLegend
+        console.log("ClientObj.viewDashBoard[json[data].deviceTypes].chartLegend", ClientObj.viewDashBoard[json["data"].deviceTypes].chartLegend)
+        me.state.body.activeChartLegend = ClientObj.viewDashBoard[json["data"].deviceTypes].chartLegend[groupedData[index].group]
+        console.log("This is group", me.state.body.activeChartLegend)
           me.setState({ body: me.state.body })
           // let json1 =[];
           resolve({ "get": "success" })
@@ -847,11 +849,15 @@ dataTypeDisable(){
       var dashboardData = JSON.parse(sessionStorage.getItem("dashboardConfigobj"));
       var arrayofbgClass = dashboardData.SensorsBgC;
       me.state.body.selectedGroupsitem = value;
+      console.log("this is chart chartLegendNames", me.state.body.chartLegendNames)
+      me.state.body.activeChartLegend =  me.state.body.chartLegendNames[value]
+      console.log("this is chart chartLegendNames12",  me.state.body.activeChartLegend)
       let index = me.state.body.sensorsGroups.findIndex(item => item.group == value);
 
       me.state.body.selectedGroups = me.state.body.sensorsGroups[index];
       //console(me.state.body.sensorsMainData)
       //  alert(value);
+      me.setState({ body: me.state.body })
       var dataofSensors = [];
       for (let i = 0; i < me.state.body.selectedGroups.devicebusinessNM.length; i++) {
         dataofSensors.push(me.state.body.sensorsMainData.filter(item => item.devicebusinessNM == me.state.body.selectedGroups.devicebusinessNM[i])[0])
@@ -975,10 +981,18 @@ dataTypeDisable(){
   }
 
   render() {
-    const { arrData, deviceTypeObj, arrLabels, yaxisName, lastAlertData, fromDate, toDate, bgColors, selectedSensorsType1, borderColors, DataArray, in_prog,
-      selectedSPValue, selectedCustValue, selectedSubCustValue, selectedAssets, selectedDeviceName, selectedSensorsName
+    const { arrData, deviceTypeObj, arrLabels, yaxisName, activeChartLegend, lastAlertData, fromDate, toDate, bgColors, selectedSensorsType1, borderColors, DataArray, in_prog,
+      selectedSPValue, selectedCustValue, selectedSubCustValue, selectedAssets, selectedDeviceName, selectedSensorsName, selectedNevData
     } = this.state.body;
     var state = this.state.body;
+    var legend = null;
+ if (selectedNevData == "Normal"){
+   legend = activeChartLegend["normal"]
+ }
+ console.log("this is selected", activeChartLegend)
+ if (selectedNevData != "Normal"){
+  legend = activeChartLegend["aggregated"];
+}
     console.log("state ",this.state)
     var total_page = Math.ceil(this.state.body.total_count / this.state.body.page_size);
     var page_start_index = ((state.page - 1) * state.page_size);
@@ -1042,7 +1056,7 @@ dataTypeDisable(){
                       <span className=" custmDivSensor ">
                         <Sensors key={item.nameofbsnm}
                           bgclass={item.bgClass}
-                          label={"Sensor" + " " + item.nameofbsnm}
+                          label={" " + item.nameofbsnm}
                           P_name_class="color12 "
                           dateTime={item.lastUpdatedTime}
                           takenClass="takenclass"
@@ -1115,7 +1129,10 @@ dataTypeDisable(){
                   showMonthDropdown
                   showYearDropdown
                   showTimeSelect
-                  dateFormat="DD/MM/YYYY hh:mm a"
+                  timeIntervals={5}
+                  isClearable={true}
+                  timeFormat="HH:mm"
+                  dateFormat="DD/MM/YYYY HH:mm"
                   className="startendTime"
                 />
               </div>
@@ -1131,7 +1148,10 @@ dataTypeDisable(){
                   showMonthDropdown
                   showYearDropdown
                   showTimeSelect
-                  dateFormat="DD/MM/YYYY hh:mm a"
+                  isClearable={true}
+                  timeIntervals={5}
+                  timeFormat="HH:mm"
+                  dateFormat="DD/MM/YYYY HH:mm"
                   className="startendTime"
                 />
 
@@ -1181,7 +1201,9 @@ dataTypeDisable(){
           <div className="container">
             <div className="mb-2">  <label className="text-center">CHART MENU
            <button className=' toggleButton' onClick={this.toggleChartMenu.bind(this)}><i className={(this.state.openChartMenu ? "fas fa-caret-up" : "fas fa-caret-down")}></i></button>
-            </label> {(this.state.openChartMenu )? "" :<span className="ml-6 font-12 color-grey"> <span className="labeltoggal">GRAPH : </span> <span className="valuetoggal">{this.state.body.selectedgraphType}</span>
+            </label> {(this.state.openChartMenu )? "" :<span className="ml-6 font-12 color-grey">
+            <span className="labeltoggal">DeviceName : </span> <span className="valuetoggal"> {(selectedDeviceName != "") ? selectedDeviceName : ""}</span>
+             <span className="labeltoggal">GRAPH : </span> <span className="valuetoggal">{this.state.body.selectedgraphType}</span>
              <span className="labeltoggal">ENTITIES : </span> <span className="valuetoggal">{this.state.body.selectedEntitiesValues.map((item,i) => item +",")}</span> 
              <span className="labeltoggal">DISPLAY : </span> <span className="valuetoggal">{this.state.body.selectedDataInfoTypeValues.map((item,i) => item +",")}</span> </span>}
          
@@ -1232,7 +1254,7 @@ dataTypeDisable(){
     arrData={arrData}
     chartAxis={deviceTypeObj}
     arrLabels={arrLabels}
-    legend={yaxisName}
+    legend={legend}
     xAxisLbl="Date and Time"
     yAxisLbl={yaxisName}
     // bgColors ={bgColors}

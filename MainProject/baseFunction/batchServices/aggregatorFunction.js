@@ -210,7 +210,7 @@ function aggragateChannel(mac, endRange, startRange, arrayBSName, Type, bsName) 
               }
             }
           }
-          resolve({ duration, noOfStart, Count })
+          resolve({ duration: utilityFn.convertIntTodecPoint(duration, 2), noOfStart, Count })
 
         }
         else {

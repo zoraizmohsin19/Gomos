@@ -78,23 +78,23 @@ class Chartcom extends Component {
     // console.log("This is Chart componenet data ")
     // console.log(arrData);
 
-    if (arrData !== undefined && arrData.length !== 0 && arrData !== null) {
-      var axisY = ["first-y-axis", "first-y-axis", "second-y-axis"]
+    if (arrData !== undefined && arrData.length !== 0 && arrData !== null && legend !== null) {
+      var axisY = ["first-y-axis", "second-y-axis", "thired-y-axis"]
       var labelName = [];
       var keysofBsName = Object.keys(arrData[0])
       // console.log(keysofBsName)
-      var labelName1 = '';
-      var labelName2 = '';
+      // var labelName1 = legend.primaryLegend;
+      // var labelName2 = legend.seconderyLegend;
 
       for (var i = 0; i < keysofBsName.length; i++) {
         //   console.log(this.getIdForChart(chartAxis,keysofBsName[i]));
 
-        if (this.getIdForChart(chartAxis, keysofBsName[i]) === "second-y-axis") {
-          labelName2 += keysofBsName[i] + " ; ";
-        }
-        else {
-          labelName1 += keysofBsName[i] + " ; ";
-        }
+        // if (this.getIdForChart(chartAxis, keysofBsName[i]) === "second-y-axis") {
+        //   labelName2 += keysofBsName[i] + " ; ";
+        // }
+        // else {
+        //   labelName1 += keysofBsName[i] + " ; ";
+        // }
         var json = {};
         json["label"] = keysofBsName[i];
         json["data"] = [];
@@ -121,6 +121,73 @@ class Chartcom extends Component {
       if (me.state.body.myChart != null && me.state.body.myChart !== undefined && me.state.body.myChart instanceof Chart) {
 
         me.state.body.myChart.destroy();
+      }
+      let yAxesArray = [
+        // {
+        //   // stacked: true,
+        //   position: "left",
+        //   type: 'linear',
+        //   id: axisY[0],
+        //   scaleLabel: {
+        //     display: true,
+        //     labelString: labelName1,
+        //     fontSize: 13,
+        //     fontColor: "red"
+        //   }
+        // }, {
+        //   // stacked: false,
+        //   position: "right",
+        //   type: 'linear',
+        //   id: axisY[axisY.length - 1],
+        //   scaleLabel: {
+        //     display: true,
+        //     labelString: labelName2,
+        //     fontSize: 13,
+        //     fontColor: "red"
+        //   },
+        //   ticks: {
+        //     beginAtZero: true,
+        //     fontSize: 11,
+
+        //   }
+        // },
+        // {
+        //   // stacked: false,
+        //   position: "right",
+        //   type: 'linear',
+        //   id: "thired-y-axis",
+        //   scaleLabel: {
+        //     display: true,
+        //     labelString: labelName2,
+        //     fontSize: 13,
+        //     fontColor: "red"
+        //   },
+        //   ticks: {
+        //     beginAtZero: true,
+        //     fontSize: 11,
+
+        //   }
+        // }
+      ];
+      for(let i =0 ; i< legend.length; i++){
+        console.log( "This is Called ",legend[i].position);
+
+        console.log( "This is Called ",legend[i].axis)
+        console.log( "This is Called ",legend[i].legend)
+
+        yAxesArray.push({
+          // stacked: true,
+          position: legend[i].position,
+          type: 'linear',
+          id: legend[i].axis,
+          scaleLabel: {
+            display: true,
+            labelString: legend[i].legend,
+            fontSize: 13,
+            fontColor: "red"
+          }
+        })
+
       }
       me.state.body.myChart = new Chart("barchart1", {
         type: "line",
@@ -156,55 +223,12 @@ class Chartcom extends Component {
 
                   display: true,
                   labelString: xAxisLbl,
-                  fontSize: 11,
+                  fontSize: 13,
                   fontColor: "red"
                 }
               }
             ],
-            yAxes: [
-              // {
-              //   // stacked: true,
-              //   ticks: {
-              //     beginAtZero: true,
-              //     fontSize: 12,
-
-              //   },
-              //   scaleLabel: {
-              //     display: true,
-              //     labelString: "Values",
-              //     fontSize: 12,
-              //     fontColor: "red"
-              //   }
-              // },
-              {
-                // stacked: true,
-                position: "left",
-                type: 'linear',
-                id: axisY[0],
-                scaleLabel: {
-                  display: true,
-                  labelString: labelName1.substring(0, labelName1.length - 2),
-                  fontSize: 11,
-                  fontColor: "red"
-                }
-              }, {
-                // stacked: false,
-                position: "right",
-                type: 'linear',
-                id: axisY[axisY.length - 1],
-                scaleLabel: {
-                  display: true,
-                  labelString: labelName2.substring(0, labelName2.length - 2),
-                  fontSize: 11,
-                  fontColor: "red"
-                },
-                ticks: {
-                  beginAtZero: true,
-                  fontSize: 11,
-
-                }
-              }
-            ]
+            yAxes:yAxesArray
           }
         }
       });

@@ -67,7 +67,7 @@ MsgFactSchema.statics.getDistictFactByMac = function (NAMEOFSERVICE,logger,gCons
 MsgFactSchema.statics.getAggragateSensors = function (NAMEOFSERVICE,logger,gConsole,mac, endTime, startTime, bsName) {
   let criteria  =  { mac: mac, DeviceTime: { $lt: new Date(endTime), $gte: new Date(startTime) } }
       gomos.gomosLog(logger,gConsole,g.TRACE_DEBUG," getAggragateSensors in MsgFactModel Criteria", criteria);
-
+      criteria[`sensors.${bsName}`] = { $exists: true }
         return new Promise((resolve, reject) => {
             this.aggregate([
                 { $match:criteria},
@@ -83,9 +83,22 @@ MsgFactSchema.statics.getAggragateSensors = function (NAMEOFSERVICE,logger,gCons
         
                 }
               ]).then( (result) => {
-                 
+                 if(result.length > 0){
                     gomos.gomosLog(logger,gConsole,g.TRACE_DEBUG," getAggragateSensors in MsgFactModel Result", result);
                     resolve(result);
+                 }else{
+                     let temp = [{
+                        _id: mac,
+                        Max: null,
+                        Min: null,
+                        Avg: null,
+                        Sum: null,
+                        Count:0
+                     }];
+                     gomos.gomosLog(logger,gConsole,g.TRACE_DEBUG," getAggragateSensors in MsgFactModel for not getting Result", temp);
+                     resolve(temp);
+                 }
+                   
                
                  
                
