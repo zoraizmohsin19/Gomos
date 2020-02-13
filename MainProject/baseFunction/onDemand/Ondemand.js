@@ -2696,6 +2696,150 @@ router.post("/getAlert", function (req, res, next) {
   );
 });
 
+
+//This is use for update 
+router.post("/comment/update",(req,res,  next)=> {
+  accessPermission(res);
+  let body = req.body;
+  gomos.gomosLog(logger,gConsole,TRACE_DEBUG, "This is body of comment/save", body)
+  let data = {};
+  if(body.DeviceTime.trim().length == 0){
+    res.send("DeviceTime not valid");
+  }
+  data["DeviceTime"] =  new Date(body.DeviceTime);
+  if(body.DeviceName.trim().length == 0){
+    res.send("DeviceName not valid");
+  }
+  data["DeviceName"] =  body.DeviceName;
+
+  // if(body.data.length == 0){
+  //   res.send("No comment preasent ");
+  // }
+  data["_id"] = ObjectId(body._id);
+
+  data["data"] = []
+  body.data.map((item, i )=> {
+  let tem={
+      deleted: item.deleted,
+      user: item.user,
+      comment:  item.comment,
+     updatedTime:  new Date(item.updatedTime), 
+     createdTime:  new Date(item.createdTime)
+    }
+    data["data"].push(tem)
+   
+   } )
+console.log("data", data)
+
+MongoClient.connect(
+  urlConn,
+  { useNewUrlParser: true },
+  function (err, connection) {
+    if (err) {
+      process.hasUncaughtExceptionCaptureCallback();
+    }
+    var db = connection.db(dbName);
+    db.collection("Comment")
+    .updateOne({_id: data["_id"]}, {"$set": {data: data["data"],updatedTime: new Date() }},function (err, result) {
+      if (err) {
+        process.hasUncaughtExceptionCaptureCallback();
+      } else {console.log("Entry update in  Comment Collection",result);
+
+      res.json(result);
+    }
+    });
+  }
+);
+
+
+
+})
+router.get("/comment/byfactId",(req,res,  next)=> {
+  accessPermission(res);
+  var body = req.query;
+  gomos.gomosLog(logger,gConsole,TRACE_DEBUG, "This is body of comment/byfactId", body)
+
+MongoClient.connect(
+  urlConn,
+  { useNewUrlParser: true },
+  function (err, connection) {
+    if (err) {
+      process.hasUncaughtExceptionCaptureCallback();
+    }
+    var db = connection.db(dbName);
+    db.collection("Comment")
+    .find({factId: ObjectId(body["factId"])}).toArray(function (err, result) {
+      if (err) {
+        process.hasUncaughtExceptionCaptureCallback();
+      } else {console.log("Entry fetch in  Comment Collection",result);
+
+      res.json(result);
+    }
+    });
+  }
+);
+
+})
+
+//This is use for save comment 
+router.post("/comment/save",(req,res,  next)=> {
+  accessPermission(res);
+  let body = req.body;
+  gomos.gomosLog(logger,gConsole,TRACE_DEBUG, "This is body of comment/save", body)
+  let data = {};
+  if(body.DeviceTime.trim().length == 0){
+    res.send("DeviceTime not valid");
+  }
+  data["DeviceTime"] =  new Date(body.DeviceTime);
+  if(body.DeviceName.trim().length == 0){
+    res.send("DeviceName not valid");
+  }
+  data["DeviceName"] =  body.DeviceName;
+
+  if(body.data.length == 0){
+    res.send("No comment preasent ");
+  }
+  data["factId"] = ObjectId(body.factId);
+  data["createdTime"] = new Date(body.createdTime);
+  data["updatedTime"] = new Date(body.updatedTime);
+  data["data"] = []
+  body.data.map((item, i )=> {
+  let tem={
+      deleted: item.deleted,
+      user: item.user,
+      comment:  item.comment,
+     updatedTime:  new Date(item.updatedTime), 
+     createdTime:  new Date(item.createdTime)
+    }
+    data["data"].push(tem)
+   
+   } )
+console.log("data", data)
+
+MongoClient.connect(
+  urlConn,
+  { useNewUrlParser: true },
+  function (err, connection) {
+    if (err) {
+      process.hasUncaughtExceptionCaptureCallback();
+    }
+    var db = connection.db(dbName);
+    db.collection("Comment")
+    .insert(data,function (err, result) {
+      if (err) {
+        process.hasUncaughtExceptionCaptureCallback();
+      } else {console.log("Entry saved in  Comment Collection",result);
+
+      res.json(result);
+    }
+    });
+  }
+);
+
+
+
+})
+
 //get the dashoboard details of perticular Sensor based on given data
 //get the dashoboard details of perticular Sensor based on given data
 router.post("/getdashboard", function (req, res, next) {
@@ -2778,13 +2922,49 @@ gomos.gomosLog( logger,gConsole,TRACE_DEBUG,"this is debuging in starting",senso
 )
 }
 );
+function getCommentDataMonthly(db, criteria){
+  return new Promise((resolve, reject)=> {
+ //   console.log("criteria", criteria)
+ db.collection("Comment")   
+ .aggregate([{$match: criteria},
+  {"$group": { "_id":{ "Month": {"$month": {"$add": [ "$DeviceTime", 5.5 * 60 * 60 * 1000 ] }}, "Year": {"$year": {"$add": [ "$DeviceTime", 5.5 * 60 * 60 * 1000 ] }}  },
+  "processedData": {
+    "$push": {
+       "data": "$data",
+       "DeviceTime": "$DeviceTime"
+    }
+
+  }
+}
+}])
+ .toArray(function (err, result){
+  
+   if (err) {
+     console.log(err)
+     gomos.errorCustmHandler( NAMEOFSERVICE,"Comment err ","This is fetching comment","", err);
+     process.hasUncaughtExceptionCaptureCallback();
+     reject(err)
+   }else
+   {
+    if(result.length> 0){
+
+  // console.log("This is result",result[0].processedData)
+      resolve(result)
+    }else{
+      resolve([])
+    }
+   }
+  }
+ )
+})
+}
 function monthlyDataProcessing(db, res, criteria, startTime,endTime, offset, page_size) {
 
   let NewCriteria = { mac: criteria.mac };
   if (startTime != "" && startTime != undefined && startTime != null && endTime != "" && endTime != undefined && endTime != null) {
     NewCriteria["Date"] = {"$gte": ((moment(utilityFn.calcIST(startTime))).format("YYYY-MM-DD")) , "$lte": ((moment(utilityFn.calcIST(endTime))).format("YYYY-MM-DD"))}
  }
-  console.log(NewCriteria)
+ // console.log(NewCriteria)
   db.collection("AggregatedData")
     .aggregate([{$match: NewCriteria},
     { $group : { _id:  {  "Month":"$Month","Year": "$Year","bsName":"$bsName" } ,"max" : { $max :"$Max"} ,"min" : { $min :"$Min"}, 
@@ -2822,7 +3002,7 @@ function monthlyDataProcessing(db, res, criteria, startTime,endTime, offset, pag
     {
       $skip : offset,
     }
-    ]).toArray(function (err, result1){
+    ]).toArray( async function (err, result1){
      //  console.log(result1)
       if (err) {
         console.log(err)
@@ -2830,6 +3010,26 @@ function monthlyDataProcessing(db, res, criteria, startTime,endTime, offset, pag
       }
 
       else if (result1.length > 0) {
+       // console.log("This is called  resul1 Monthly",result1 )
+        var criteriaForComment = {};
+        criteriaForComment["DeviceName"] =  result1[0].processedData[0].DeviceName;
+     //   console.log("This is processedData[0].Date ", result1[0].processedData[0].Date )
+         criteriaForComment["DeviceTime"] = {
+           "$lte":  utilityFn.calcUtc(moment(result1[0]._id.Year+'-'+ result1[0]._id.Month+'-'+01 + ' 00:00:00').endOf('month').toISOString()),
+           "$gte": utilityFn.calcUtc(moment(result1[result1.length - 1]._id.Year+'-'+ result1[result1.length - 1]._id.Month+'-'+01 + ' 00:00:00').toISOString()),
+         }
+         let resulComment = await  getCommentDataMonthly(db, criteriaForComment);
+         gomos.gomosLog( logger,gConsole,TRACE_DEBUG,"this is Comment Data ", resulComment);
+         for(let t=0 ; t < resulComment.length; t++ ){
+        let index =   result1.findIndex(item =>  item._id.Month == resulComment[t]._id.Month &&  item._id.Year == resulComment[t]._id.Year);
+      //   console.log("this is index", index)
+         if(index != -1){
+
+          result1[index]["CommentData"] = [];
+          resulComment[t].processedData.map(item =>{ item.data.map( item2 =>{item2["DeviceTime"] = item["DeviceTime"]; result1[index]["CommentData"].push(item2)}) })
+          // console.log("This is where match",result1[index]) 
+         }
+      }
         let array = []
         for (let i = 0; i < result1.length; i++) {
 
@@ -2840,6 +3040,10 @@ function monthlyDataProcessing(db, res, criteria, startTime,endTime, offset, pag
           let DeviceName ="";
          // let hours = result1[i]._id.Hour;
           let hours = "";
+          let  CommentData = [];
+          if(result1[i].CommentData !== undefined && result1[i].CommentData.length > 0){
+            CommentData = result1[i]["CommentData"];
+          }
 
           let tempArray = result1[i].processedData;
           for (let j = 0; j < tempArray.length; j++) {
@@ -2862,7 +3066,7 @@ function monthlyDataProcessing(db, res, criteria, startTime,endTime, offset, pag
             tempObj[bsName] = tempNewObj;
           }
          // console.log(tempObj)
-          array.push([mac, DeviceName, "", tempObj, DeviceTime])
+          array.push([mac, DeviceName, "", tempObj, DeviceTime,CommentData])
         }
        //console.log(result1)
         let finalResult = array;
@@ -2890,6 +3094,43 @@ function monthlyDataProcessing(db, res, criteria, startTime,endTime, offset, pag
  }
     });
 
+}
+function getCommentDataWeekly(db, criteria){
+  return new Promise((resolve, reject)=> {
+//  console.log("criteria", criteria)
+ db.collection("Comment")   
+ .aggregate([{$match: criteria},
+  {"$group": { "_id":{ "Week": {"$isoWeek": {"$add": [ "$DeviceTime", 5.5 * 60 * 60 * 1000 ] }}, "Year": {"$year": {"$add": [ "$DeviceTime", 5.5 * 60 * 60 * 1000 ] }}  },
+  "processedData": {
+    "$push": {
+       "data": "$data",
+       "DeviceTime": "$DeviceTime"
+    }
+
+  }
+}
+}])
+ .toArray(function (err, result){
+
+   if (err) {
+  //   console.log(err)
+     gomos.errorCustmHandler( NAMEOFSERVICE,"Comment err ","This is fetching comment","", err);
+     process.hasUncaughtExceptionCaptureCallback();
+     reject(err)
+   }else
+   {
+ //   console.log("This is data", result)
+    if(result.length> 0){
+
+ 
+      resolve(result)
+    }else{
+      resolve([])
+    }
+   }
+  }
+ )
+})
 }
 function weeklyDataProcessing(db, res, criteria, startTime,endTime, offset, page_size) {
 
@@ -2935,7 +3176,7 @@ function weeklyDataProcessing(db, res, criteria, startTime,endTime, offset, page
     {
       $skip : offset,
     }
-    ]).toArray(function (err, result1){
+    ]).toArray( async function (err, result1){
      //  console.log(result1)
       if (err) {
         console.log(err)
@@ -2943,6 +3184,26 @@ function weeklyDataProcessing(db, res, criteria, startTime,endTime, offset, page
       }
 
       else if (result1.length > 0) {
+      //  console.log("This is called  resul1 Weekly",result1 )
+        var criteriaForComment = {};
+        criteriaForComment["DeviceName"] =  result1[0].processedData[0].DeviceName;
+      //  console.log("This is processedData[0].Date ", result1[0].processedData[0].Date )
+         criteriaForComment["DeviceTime"] = {
+           "$lte":  utilityFn.calcUtc(moment(result1[0]._id.Year).add(result1[0]._id.Week, 'weeks').startOf('week').toISOString()),
+           "$gte": utilityFn.calcUtc(moment(result1[result1.length-1]._id.Year).add(result1[result1.length-1]._id.Week, 'weeks').startOf('week').toISOString()),
+         }
+         let resulComment = await  getCommentDataWeekly(db, criteriaForComment);
+         gomos.gomosLog( logger,gConsole,TRACE_DEBUG,"this is Comment Data ", resulComment);
+         for(let t=0 ; t < resulComment.length; t++ ){
+        let index =   result1.findIndex(item =>  item._id.Week == resulComment[t]._id.Week &&  item._id.Year == resulComment[t]._id.Year);
+       //  console.log("this is index", index)
+        if(index != -1){
+
+         result1[index]["CommentData"] = [];
+         resulComment[t].processedData.map(item =>{ item.data.map( item2 =>{item2["DeviceTime"] = item["DeviceTime"] ; result1[index]["CommentData"].push(item2)}) })
+         // console.log("This is where match",result1[index]) 
+        }
+      }
         let array = []
         for (let i = 0; i < result1.length; i++) {
 
@@ -2953,7 +3214,10 @@ function weeklyDataProcessing(db, res, criteria, startTime,endTime, offset, page
           let DeviceName ="";
          // let hours = result1[i]._id.Hour;
           let hours = "";
-
+          let  CommentData = [];
+          if(result1[i].CommentData !== undefined && result1[i].CommentData.length > 0){
+            CommentData = result1[i]["CommentData"];
+          }
           let tempArray = result1[i].processedData;
           for (let j = 0; j < tempArray.length; j++) {
             let bsName = tempArray[j].bsName;
@@ -2975,7 +3239,7 @@ function weeklyDataProcessing(db, res, criteria, startTime,endTime, offset, page
             tempObj[bsName] = tempNewObj;
           }
          // console.log(tempObj)
-          array.push([mac, DeviceName, "", tempObj, DeviceTime])
+          array.push([mac, DeviceName, "", tempObj, DeviceTime,CommentData])
         }
        //console.log(result1)
         let finalResult = array;
@@ -3003,6 +3267,43 @@ function weeklyDataProcessing(db, res, criteria, startTime,endTime, offset, page
  }
     });
 
+}
+function getCommentDataDaily(db, criteria){
+  return new Promise((resolve, reject)=> {
+    console.log("criteria", criteria)
+ db.collection("Comment")   
+ .aggregate([{$match: criteria},
+  {"$group": { "_id":{ "Day": {"$dayOfYear": {"$add": [ "$DeviceTime", 5.5 * 60 * 60 * 1000 ] }}  },
+  "processedData": {
+    "$push": {
+       "data": "$data",
+       "DeviceTime": "$DeviceTime"
+      //  "factId": "$factId"
+    }
+
+  }
+}
+}])
+ .toArray(function (err, result){
+  
+   if (err) {
+     console.log(err)
+     gomos.errorCustmHandler( NAMEOFSERVICE,"Comment err ","This is fetching comment","", err);
+     process.hasUncaughtExceptionCaptureCallback();
+     reject(err)
+   }else
+   {
+    if(result.length> 0){
+
+   
+      resolve(result)
+    }else{
+      resolve([])
+    }
+   }
+  }
+ )
+})
 }
 function dailyDataProcessing(db, res,criteria, startTime,endTime, offset, page_size) {
 
@@ -3048,7 +3349,7 @@ function dailyDataProcessing(db, res,criteria, startTime,endTime, offset, page_s
     {
       $skip : offset,
     }
-    ]).toArray(function (err, result1){
+    ]).toArray(async function (err, result1){
      //  console.log(result1)
       if (err) {
         console.log(err)
@@ -3056,6 +3357,28 @@ function dailyDataProcessing(db, res,criteria, startTime,endTime, offset, page_s
       }
 
       else if (result1.length > 0) {
+       // console.log("This is called  resul1 daily",result1 )
+        var criteriaForComment = {};
+        criteriaForComment["DeviceName"] =  result1[0].processedData[0].DeviceName;
+      //  console.log("This is processedData[0].Date ", result1[0].processedData[0].Date )
+         criteriaForComment["DeviceTime"] = {
+           "$lte":  utilityFn.calcUtc(result1[0].processedData[0].Date +"T00:00:00Z"),
+           "$gte": utilityFn.calcUtc(result1[result1.length-1].processedData[0].Date +"T00:00:00Z"),
+         }
+         let resulComment = await  getCommentDataDaily(db, criteriaForComment);
+         gomos.gomosLog( logger,gConsole,TRACE_DEBUG,"this is Comment Data ", resulComment);
+         for(let t=0 ; t < resulComment.length; t++ ){
+           console.log("resulComment[t]._id.Day", (resulComment[t]._id.Day.toString()))
+        let index =   result1.findIndex(item =>  item._id == resulComment[t]._id.Day);
+        // console.log("this is index", index)
+        if(index != -1){
+
+       
+         result1[index]["CommentData"] = [];
+         resulComment[t].processedData.map(item =>{ item.data.map( item2 =>{ item2["DeviceTime"] = item["DeviceTime"]; result1[index]["CommentData"].push(item2) }) })
+        //  console.log("This is where match",result1[index]) 
+        }
+       }
         let array = []
         for (let i = 0; i < result1.length; i++) {
 
@@ -3066,7 +3389,10 @@ function dailyDataProcessing(db, res,criteria, startTime,endTime, offset, page_s
           let DeviceName ="";
          // let hours = result1[i]._id.Hour;
           let hours = "";
-
+          let  CommentData = [];
+          if(result1[i].CommentData !== undefined && result1[i].CommentData.length > 0){
+            CommentData = result1[i]["CommentData"];
+          }
           let tempArray = result1[i].processedData;
           for (let j = 0; j < tempArray.length; j++) {
             let bsName = tempArray[j].bsName;
@@ -3088,9 +3414,9 @@ function dailyDataProcessing(db, res,criteria, startTime,endTime, offset, page_s
             tempObj[bsName] = tempNewObj;
           }
          // console.log(tempObj)
-          array.push([mac, DeviceName, "", tempObj, DeviceTime])
+          array.push([mac, DeviceName, "", tempObj, DeviceTime,CommentData])
         }
-       //console.log(result1)
+       // console.log("This array of ",array)
         let finalResult = array;
         let data_count;
         let lastdataObj = {};
@@ -3118,6 +3444,42 @@ function dailyDataProcessing(db, res,criteria, startTime,endTime, offset, page_s
 
 }
 
+function getCommentDataHourly(db, criteria){
+  return new Promise((resolve, reject)=> {
+  //  console.log("criteria", criteria)
+ db.collection("Comment")   
+ .aggregate([{$match: criteria},
+  {"$group": { "_id":{"Date":{$dateToString: { format: "%Y-%m-%d", date: {"$add": [ "$DeviceTime", 5.5 * 60 * 60 * 1000 ] } }}, "Hour": {"$hour": {"$add": [ "$DeviceTime", 5.5 * 60 * 60 * 1000 ] }}  },
+  "processedData": {
+    "$push": {
+       "data": "$data",
+       "DeviceTime": "$DeviceTime"
+    }
+
+  }
+}
+}])
+ .toArray(function (err, result){
+ 
+   if (err) {
+     console.log(err)
+     gomos.errorCustmHandler( NAMEOFSERVICE,"Comment err ","This is fetching comment","", err);
+     process.hasUncaughtExceptionCaptureCallback();
+     reject(err)
+   }else
+   {
+    if(result.length> 0){
+
+   
+      resolve(result)
+    }else{
+      resolve([])
+    }
+   }
+  }
+ )
+})
+}
 
 function hourlyDataProcessing(db, res, criteria,startTime,endTime, offset, page_size) {
  
@@ -3145,13 +3507,15 @@ function hourlyDataProcessing(db, res, criteria,startTime,endTime, offset, page_
            "Count": "$Count",
           //  "createdTime": "$createdTime",
         //   "DateTime": {$dateToString: { format: "%Y-%m-%d", date: "$Date" } },
+           "CommentData": [],
            "mac": "$mac",
            "DeviceName": "$DeviceName"
 
         }
     
       }
-    }},
+    }
+  },
     {
       $sort:{ "_id.Date": -1, "_id.Hour": -1}
     },
@@ -3163,7 +3527,7 @@ function hourlyDataProcessing(db, res, criteria,startTime,endTime, offset, page_
     {
       $skip : offset,
     }
-    ]).toArray(function (err, result1){
+    ]).toArray( async function (err, result1){
      //  console.log(result1)
       if (err) {
         console.log(err)
@@ -3171,15 +3535,35 @@ function hourlyDataProcessing(db, res, criteria,startTime,endTime, offset, page_
       }
 
       else if (result1.length > 0) {
+       // console.log("This is result of result ", result1[0].processedData[0])
+        var criteriaForComment = {};
+        criteriaForComment["DeviceName"] =  result1[0].processedData[0].DeviceName;
+         criteriaForComment["DeviceTime"] = {
+           "$lte":  utilityFn.calcUtc(result1[0]._id.Date +"T"+ result1[0]._id.Hour+":00:00Z"),
+           "$gte": utilityFn.calcUtc(result1[result1.length-1]._id.Date +"T"+ result1[result1.length-1]._id.Hour+":00:00Z"),
+         }
+         let resulComment = await  getCommentDataHourly(db, criteriaForComment);
+          gomos.gomosLog( logger,gConsole,TRACE_DEBUG,"this is Comment Data ", resulComment);
+          for(let t=0 ; t < resulComment.length; t++ ){
+         let index =   result1.findIndex(item => item._id.Date == resulComment[t]._id.Date && item._id.Hour == resulComment[t]._id.Hour);
+         if(index != -1){
+         result1[index]["CommentData"] = [];
+          resulComment[t].processedData.map(item =>{ item.data.map( item2 =>{item2["DeviceTime"]  = item["DeviceTime"]; result1[index]["CommentData"].push(item2) }) })
+        //  console.log("This is where match",result1[index]) 
+         }
+        }
         let array = []
         for (let i = 0; i < result1.length; i++) {
 
 
           let tempObj = {};
-          let DeviceTime = "";
           let mac ="";
           let DeviceName ="";
-          DeviceTime = result1[i]._id.Date + " "+ result1[i]._id.Hour+":00";
+          let DeviceTime = result1[i]._id.Date + " "+ result1[i]._id.Hour+":00";
+          let  CommentData = [];
+          if(result1[i].CommentData !== undefined && result1[i].CommentData.length > 0){
+            CommentData = result1[i]["CommentData"];
+          }
           let tempArray = result1[i].processedData;
           for (let j = 0; j < tempArray.length; j++) {
             let bsName = tempArray[j].bsName;
@@ -3205,9 +3589,9 @@ function hourlyDataProcessing(db, res, criteria,startTime,endTime, offset, page_
             tempObj[bsName] = tempNewObj;
           }
          // console.log(tempObj)
-          array.push([mac, DeviceName, "", tempObj, DeviceTime])
+          array.push([mac, DeviceName, "", tempObj, DeviceTime, CommentData])
         }
-       //console.log(result1)
+        // console.log("This is Array",array)
         let finalResult = array;
         let data_count;
         let lastdataObj = {};
@@ -3225,7 +3609,7 @@ function hourlyDataProcessing(db, res, criteria,startTime,endTime, offset, page_
     ]).toArray(function (err, result2){
       data_count  = result2[0].totalCount;
     //   console.log(result1)
-      let json = { finalResult, data_count, lastdataObj, lastCreatedTime}
+      let json = { finalResult, data_count, lastdataObj, lastCreatedTime,}
       res.json(json)
     });
  }else{
@@ -3233,6 +3617,31 @@ function hourlyDataProcessing(db, res, criteria,startTime,endTime, offset, page_
  }
     });
 
+}
+function getCommentDataNormal(db, criteria){
+  return new Promise((resolve, reject)=> {
+    console.log("criteria", criteria)
+ db.collection("Comment")   
+ .find(criteria)
+ .toArray(function (err, result){
+   if (err) {
+     console.log(err)
+     gomos.errorCustmHandler( NAMEOFSERVICE,"Comment err ","This is fetching comment","", err);
+     process.hasUncaughtExceptionCaptureCallback();
+     reject(err)
+   }else
+   {
+     if(result.length> 0){
+
+   
+    resolve(result)
+  }else{
+    resolve([])
+  }
+   }
+  }
+ )
+})
 }
 function normalDataProcessing(db,res,criteria,offset,sensorsBSN,sensorNm,page_size){
   criteria["sensors."+sensorNm+"."+sensorsBSN]  = {$exists: true}
@@ -3242,11 +3651,38 @@ function normalDataProcessing(db,res,criteria,offset,sensorsBSN,sensorNm,page_si
 
       db.collection("MsgFacts")
       .find(criteria,{projection: {mac:1,DeviceTime:1, sensors :1,DeviceName:1} }).skip( offset ).limit( page_size ).sort({DeviceTime:-1})
-      .toArray(function (err, result1) {
+      .toArray(async function (err, result1) {
         if (err) {
           process.hasUncaughtExceptionCaptureCallback();
         }
         if (result1.length > 0) {
+          // console.log("This is called  resul1 normal",result1 )
+          var criteriaForComment = {};
+          criteriaForComment["DeviceName"] =  result1[0].DeviceName;
+          let arrobj = result1.map(item => item._id);
+          criteriaForComment["factId"] = { "$in" :arrobj }
+          //  criteriaForComment["DeviceTime"] = {
+          //    "$lte":  new Date(result1[0].DeviceTime),
+          //    "$gte": new Date(result1[result1.length-1].DeviceTime)
+          //  }
+          //  console.log("This is criteriaForComment", criteriaForComment)
+           let resulComment = await  getCommentDataNormal(db, criteriaForComment);
+           gomos.gomosLog( logger,gConsole,TRACE_DEBUG,"this is Comment Data ", resulComment);
+           for(let t=0 ; t < resulComment.length; t++ ){
+          let index =   result1.findIndex(item =>  ObjectId(item._id).equals(ObjectId(resulComment[t].factId)))
+          // console.log("this is index", index)
+          if(index != -1){
+  
+         
+          //  result1[index]["CommentData"] = {};
+          //  resulComment[t].map(item =>{ item.data.map( item2 => result1[index]["CommentData"].push(item2)) })
+          // resulComment[t].data.map(item1 => {
+            result1[index]["CommentData"] =  resulComment[t]
+          // })
+         
+          // console.log("This is where match",result1[index]) 
+          }
+         }
           var resultCopy = result1;
           // console.log(resultCopy);
           result = [];
@@ -3254,14 +3690,18 @@ function normalDataProcessing(db,res,criteria,offset,sensorsBSN,sensorNm,page_si
           var finalResult =[];
           //copy all data from the copy of result to remove json with in json.
           for (let i = 0; i < resultCopy.length; i++) {
+            let  CommentData = {};
+            if(result1[i].CommentData !== undefined && Object.keys(result1[i].CommentData).length > 0 ){
+              CommentData = result1[i]["CommentData"];
+            }
             var sensorNmKeys = Object.keys(resultCopy[i]["sensors"]);
-            gomos.gomosLog( logger,gConsole,TRACE_DEBUG,"this is debuging for resultCopy",i);
-            gomos.gomosLog( logger,gConsole,TRACE_DEBUG,"this is debuging for sensorNmKeys",sensorNmKeys);
+            // gomos.gomosLog( logger,gConsole,TRACE_DEBUG,"this is debuging for resultCopy",i);
+            // gomos.gomosLog( logger,gConsole,TRACE_DEBUG,"this is debuging for sensorNmKeys",sensorNmKeys);
               // if (sensorNmKeys.includes(sensorNm)){
                 let  tempArray = {}
                 for(let j = 0 ;  j< sensorNmKeys.length; j++){
-                  gomos.gomosLog( logger,gConsole,TRACE_DEBUG,"This is Debug For sensorNmKeys[j]",sensorNmKeys[j]);
-                  gomos.gomosLog( logger,gConsole,TRACE_DEBUG,"this is debuging for resultCopy[i][sensors][sensorNmKeys[j]]",resultCopy[i]["sensors"][sensorNmKeys[j]]);
+                  // gomos.gomosLog( logger,gConsole,TRACE_DEBUG,"This is Debug For sensorNmKeys[j]",sensorNmKeys[j]);
+                  // gomos.gomosLog( logger,gConsole,TRACE_DEBUG,"this is debuging for resultCopy[i][sensors][sensorNmKeys[j]]",resultCopy[i]["sensors"][sensorNmKeys[j]]);
           
                   for (let [key, value] of Object.entries(resultCopy[i]["sensors"][sensorNmKeys[j]])){
                     tempArray[key] = value;
@@ -3270,7 +3710,7 @@ function normalDataProcessing(db,res,criteria,offset,sensorsBSN,sensorNm,page_si
                 
                   }
                 finalResult.push([resultCopy[i].mac,resultCopy[i].DeviceName,sensorsBSN, 
-                  tempArray, resultCopy[i].DeviceTime]);
+                  tempArray, resultCopy[i].DeviceTime,CommentData, resultCopy[i]._id]);
                 
           }
 
