@@ -170,10 +170,10 @@ class Chartcom extends Component {
         // }
       ];
       for(let i =0 ; i< legend.length; i++){
-        console.log( "This is Called ",legend[i].position);
+        // console.log( "This is Called ",legend[i].position);
 
-        console.log( "This is Called ",legend[i].axis)
-        console.log( "This is Called ",legend[i].legend)
+        // console.log( "This is Called ",legend[i].axis)
+        // console.log( "This is Called ",legend[i].legend)
 
         yAxesArray.push({
           // stacked: true,

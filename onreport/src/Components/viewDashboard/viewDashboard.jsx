@@ -7,13 +7,15 @@ import axios from "axios";
 import moment from 'moment';
 import CPagination from "../../layout/Pagination";
 import DatePicker from 'react-datepicker';
+import { Button, Badge } from 'react-bootstrap'
 // import * as ExcelJs from "exceljs/dist/exceljs.min.js";
 // import * as FileSaver from "file-saver";
 import dateFormat from "dateformat";
 import swal from 'sweetalert';
 import Spinner from '../../layout/Spinner';
-import {Table, NavItem, Nav } from "react-bootstrap";
+import { Table, NavItem, Nav } from "react-bootstrap";
 import URL from "../../Common/confile/appConfig.json";
+import Comment from "./Component/Comment"
 class viewDashboard extends Component {
   constructor() {
     super();
@@ -34,7 +36,7 @@ class viewDashboard extends Component {
         'total_count': 0,
         'page_size': 10,
         'page': 1,
-     
+
         Sensors: [],
         selectedSensorsType1: '',
         // mac: '',
@@ -59,6 +61,7 @@ class viewDashboard extends Component {
           sensorNm: "",
           shortName: ""
         },
+        CommentInfo: {show: false},
         deviceIdentifier: [],
         DeviceIdentifierForSensors: [],
         sensorsGroups: [],
@@ -68,7 +71,7 @@ class viewDashboard extends Component {
         selectedSensorsDataArray: [],
         headerTable: [],
         OpratingDashBoardEnable: Boolean,
-        typeOfNavData: [{type:"Normal", disable: ["Max","Avg","Min","Durations","Count"]},{ type:"Hourly", disable: ["Values"]},{type:"Daily", disable: ["Values"]}, {type:"Weekly", disable: ["Values"]}, {type:"Monthly", disable: ["Values"]}],
+        typeOfNavData: [{ type: "Normal", disable: ["Max", "Avg", "Min", "Durations", "Count"] }, { type: "Hourly", disable: ["Values"] }, { type: "Daily", disable: ["Values"] }, { type: "Weekly", disable: ["Values"] }, { type: "Monthly", disable: ["Values"] }],
         selectedNevData: "",
         typeOfGraph: ["MULTI", "SINGLE"],
         selectedgraphType: "",
@@ -82,11 +85,11 @@ class viewDashboard extends Component {
         selectedDataInfoTypeValues: [],
         selectedDataInfoDefault: "Avg",
         selectedDataInfoClass: "",
-        arrayOfDataIfoDisplay: [{"type":"Values","name":"name1", "disable": false}, {"type":"Max","name":"name1", "disable": false}, {"type":"Avg","name":"name1", "disable": false}, {"type": "Min","name":"name1","disable": false},{"type": "Count","name":"name1","disable": false},{"type":"Durations", "name":"name1","disable": false}],
+        arrayOfDataIfoDisplay: [{ "type": "Values", "name": "name1", "disable": false }, { "type": "Max", "name": "name1", "disable": false }, { "type": "Avg", "name": "name1", "disable": false }, { "type": "Min", "name": "name1", "disable": false }, { "type": "Count", "name": "name1", "disable": false }, { "type": "Durations", "name": "name1", "disable": false }],
         startTime: "",
         endTime: "",
         mainjson: {},
-        tableSecondKeyArray:[]
+        tableSecondKeyArray: []
       }
     }
     this.changePage = this.changePage.bind(this);
@@ -95,8 +98,8 @@ class viewDashboard extends Component {
   changePage(page) {
     this.state.body.page = page
     this.setState({ body: this.state.body });
-   // this.fetchdata();
-   this.startProcess();
+    // this.fetchdata();
+    this.startProcess();
   }
   toggle() {
     this.setState({
@@ -153,7 +156,7 @@ class viewDashboard extends Component {
     //  me.state.body.selectedgraphType = "MULTI";
     // // me.state.body.Spinnerdata = false
     // // console.log(URL.IP);
-  
+
     me.setState({ body: me.state.body });
     // me.graphProcess();
     //  var result1 = this.groupingDataArray();
@@ -162,17 +165,18 @@ class viewDashboard extends Component {
     this.startFunction()
 
   }
-dataTypeDisable(){
-  let me = this;
-  let dataInfo=  me.state.body.typeOfNavData.find(item => item.type === me.state.body.selectedNevData);
-  // if(value ==="Normal"){
+  dataTypeDisable() {
+    let me = this;
+    let dataInfo = me.state.body.typeOfNavData.find(item => item.type === me.state.body.selectedNevData);
+    // if(value ==="Normal"){
     me.state.body.arrayOfDataIfoDisplay.findIndex(i => i.disable = false);
     dataInfo.disable.map(item => {
-      let index =  me.state.body.arrayOfDataIfoDisplay.findIndex(i => i.type === item);
-      me.state.body.arrayOfDataIfoDisplay[index].disable = true; });
+      let index = me.state.body.arrayOfDataIfoDisplay.findIndex(i => i.type === item);
+      me.state.body.arrayOfDataIfoDisplay[index].disable = true;
+    });
     me.setState({ body: me.state.body });
 
-}
+  }
   async startFunction() {
     var me = this;
     let response = await me.callDeviceIdentifier();
@@ -188,7 +192,7 @@ dataTypeDisable(){
     me.state.body.selectedgraphType = "MULTI";
     // me.state.body.Spinnerdata = false
     // console.log(URL.IP);
-    
+
     me.setState({ body: me.state.body });
     me.graphProcess();
     me.callForlastAlert(me.state.body.selectedCustValue, me.state.body.selectedSubCustValue, me.state.body.mac);
@@ -201,40 +205,40 @@ dataTypeDisable(){
       axios.post(`${URL.IP}:3992/getDevicesIdentifier`, { mac: this.state.body.mac })
         .then(json => {
           me.state.body.DeviceIdentifierForSensors = json["data"].sensors;
-          json["data"].sensors.map(item => {item["BsType"]= "sensors"});
-          json["data"].channel.map(item => {item["BsType"]= "channel"});
-        
+          json["data"].sensors.map(item => { item["BsType"] = "sensors" });
+          json["data"].channel.map(item => { item["BsType"] = "channel" });
+
           let tempArray = (json["data"].sensors).concat(json["data"].channel)
 
           console.log("This is Device Identifier json");
-          console.log("this is tempArray",tempArray);
+          console.log("this is tempArray", tempArray);
           //console(tempArray)
           // let tempCSArray = [];
-          tempArray.sort((a,b) => a["displayPosition"] - b["displayPosition"]); 
-          console.log("this is tempArray 2",tempArray);
-              me.state.body.deviceIdentifier = tempArray;
+          tempArray.sort((a, b) => a["displayPosition"] - b["displayPosition"]);
+          console.log("this is tempArray 2", tempArray);
+          me.state.body.deviceIdentifier = tempArray;
           var groupedData = this.groupingDataArray(tempArray);
-          console.log("this is groupeData",groupedData)
+          console.log("this is groupeData", groupedData)
           let index = groupedData.findIndex(item => item.group === json["data"].defaultGroupInfo);
           let index2 = tempArray.findIndex(item => item.group === json["data"].defaultGroupInfo);
 
           me.state.body.sensorsGroups = groupedData;
           //console("This is Group Data");
-          console.log("This is Group Data",groupedData);
+          console.log("This is Group Data", groupedData);
           me.state.body.selectedGroups = groupedData[index];
           me.state.body.selectedGroupsitem = groupedData[index].group;
           me.state.body.selectedSensorsType1 = tempArray[index2].Type;
           me.state.body.selectedSensorsName = tempArray[index2].devicebusinessNM;
           me.state.body.selectedSensorsDataArray = groupedData[index].devicebusinessNM;
-          me.state.body.selectedEntitiesValues= groupedData[index].devicebusinessNM;
+          me.state.body.selectedEntitiesValues = groupedData[index].devicebusinessNM;
           //console(groupedData[index].devicebusinessNM)
           me.state.body.deviceType = json["data"].deviceTypes;
           me.state.body.deviceTypeObj = this.chartsIdbyDeviceType(json["data"].deviceTypes);
           let ClientObj = JSON.parse(sessionStorage.getItem("ClientObj"));
-          me.state.body.chartLegendNames =  ClientObj.viewDashBoard[json["data"].deviceTypes].chartLegend
-        console.log("ClientObj.viewDashBoard[json[data].deviceTypes].chartLegend", ClientObj.viewDashBoard[json["data"].deviceTypes].chartLegend)
-        me.state.body.activeChartLegend = ClientObj.viewDashBoard[json["data"].deviceTypes].chartLegend[groupedData[index].group]
-        console.log("This is group", me.state.body.activeChartLegend)
+          me.state.body.chartLegendNames = ClientObj.viewDashBoard[json["data"].deviceTypes].chartLegend
+          console.log("ClientObj.viewDashBoard[json[data].deviceTypes].chartLegend", ClientObj.viewDashBoard[json["data"].deviceTypes].chartLegend)
+          me.state.body.activeChartLegend = ClientObj.viewDashBoard[json["data"].deviceTypes].chartLegend[groupedData[index].group]
+          console.log("This is group", me.state.body.activeChartLegend)
           me.setState({ body: me.state.body })
           // let json1 =[];
           resolve({ "get": "success" })
@@ -244,8 +248,8 @@ dataTypeDisable(){
           this.errorganerator()
           me.setState({ body: me.state.body });
           reject(error)
+        })
     })
-  })
   }
   DisplayChart() {
     let me = this;
@@ -256,9 +260,9 @@ dataTypeDisable(){
       let arrLabels = [];
       let dataToSend1 = [];
       let dataToSend2 = [];
-      (me.state.body.selectedNevData === "Weekly")?  result.sort((a, b) => (a.column5 < b.column5)? -1: ((a.column5 > b.column5)? 1: 0 )):result.sort((a, b) => new Date(a.column5).getTime() - new Date(b.column5).getTime())
+      (me.state.body.selectedNevData === "Weekly") ? result.sort((a, b) => (a.column5 < b.column5) ? -1 : ((a.column5 > b.column5) ? 1 : 0)) : result.sort((a, b) => new Date(a.column5).getTime() - new Date(b.column5).getTime())
       for (let i = 0; i < result.length; i++) {
-        let formattedDate =  (me.state.body.selectedNevData === "Normal")? moment(result[i]["column5"], "DD-MMM-YY HH:mm:ss").format("DD-MMM-YY HH:mm"): result[i]["column5"];
+        let formattedDate = (me.state.body.selectedNevData === "Normal") ? moment(result[i]["column5"], "DD-MMM-YY HH:mm:ss").format("DD-MMM-YY HH:mm") : result[i]["column5"];
         //  var arrayforsend= [];
         let temp = {};
         for (let j = 0; j < me.state.body.tableSecondKeyArray.length; j++) {
@@ -276,7 +280,7 @@ dataTypeDisable(){
       // var yaxisName = valueSensoor;
       let fromDate = new Date();
       // var toDate = new Date();
-      let  borderColors = [];
+      let borderColors = [];
       // for (var i = 0; i <  arrData.length; i++) {
       borderColors.push(this.getRandomBorColor());
       me.state.body.arrData = arrData;
@@ -320,10 +324,10 @@ dataTypeDisable(){
     // var dataArray = [];
     axios.post(`${URL.IP}:3992/getdashboard`, body)
       .then(json => {
-          me.state.body.mainjson= json;
-          //console(json)
-          me.setState({ body: me.state.body })
-          // me.DisplayChart();
+        me.state.body.mainjson = json;
+        //console(json)
+        me.setState({ body: me.state.body })
+        // me.DisplayChart();
         // }
         me.callMainDataProcess()
       })
@@ -331,166 +335,207 @@ dataTypeDisable(){
         // me.DisplayChart();
         me.callMainDataProcess()
         me.state.body.Spinnerdata = true;
-        me.state.body.mainjson= {};
+        me.state.body.mainjson = {};
         me.setState({ body: me.state.body });
         this.errorganerator()
-       
+
       })
   }
-  callMainDataProcess(){
+  CommentStateUpdate(data){
+    let me = this;
+    me.state.body.CommentInfo = data;
+    this.setState({body:  me.state.body})
+
+  }
+  callMainDataProcess() {
     let me = this;
     //console("This is Call of CallMainDataProcess")
-    try{
+    try {
       //console("This is Call of CallMainDataProcess Try")
       me.state.body.Spinnerdata = true;
       me.setState({ body: me.state.body })
-    let json = me.state.body.mainjson;
-    let json1 = [];
-    let dataArray = [];
-    let arrayHeder = [];
-     //console("this is Source of data ");
-     //console(json["data"]);
-    json1 = json["data"]["finalResult"]
-    if (json1 !== 0) {
-      for (let i = 0; i < json1.length; i++) {
-        let jsontemp = {
-          column1: json1[i][0],
-          column2: json1[i][1],
-         column5: (me.state.body.selectedNevData === "Normal")? dateFormat(json1[i][4], "dd-mmm-yy HH:MM:ss") :json1[i][4]
-        };
-        //console("This Debug For Date")
-          //console(json1[i][4])
+      let json = me.state.body.mainjson;
+      let json1 = [];
+      let dataArray = [];
+      let arrayHeder = [];
+      //console("this is Source of data ");
+      console.log("This is", json["data"]["finalResult"])
+      json1 = json["data"]["finalResult"]
+      if (json1 !== 0) {
+        for (let i = 0; i < json1.length; i++) {
+          let jsontemp = {
+            column1: json1[i][0],
+            column2: json1[i][1],
+            column5: ((me.state.body.selectedNevData === "Normal") ? dateFormat(json1[i][4], "dd-mmm-yy HH:MM:ss") : json1[i][4]),
+          
+            column7: json1[i][6]
+          };
+          //console("This Debug For Date")
+          console.log(json1[i][5])
           // alert("Alert")
-        arrayHeder = ["SI", "DEVICE NAME"];
-        let sensorsKeys =  me.state.body.selectedEntitiesValues;
-        let arrayOfDisplayData = me.state.body.selectedDataInfoTypeValues.map(item => item);
-        //console("arrayOfDisplayData");
-        //console(arrayOfDisplayData);
-        if(me.state.body.selectedNevData !== "Normal"){
-          // if(arrayOfDisplayData.filter(item => item == "Values").length !== 0){
-          //  arrayOfDisplayData = arrayOfDisplayData.splice(arrayOfDisplayData.findIndex(item => item == "Values"),1);
-          // }
-          if( me.state.body.selectedgraphType !== "MULTI"){
-            me.state.body.tableSecondKeyArray = arrayOfDisplayData;
-          for (let k = 0; k < sensorsKeys.length; k++) {
-            for(let j =0 ; j< arrayOfDisplayData.length;j++){
-              jsontemp[arrayOfDisplayData[j]] = json1[i][3][sensorsKeys[k]][arrayOfDisplayData[j]];
-            }
-          }
-         
-          for (let l = 0; l < arrayOfDisplayData.length; l++) {
-            arrayHeder.push(arrayOfDisplayData[l]);
-          }
-          arrayHeder.push("TIME");
-          dataArray.push(
-            jsontemp
-          )
-     
-          }
-          else{
-            me.state.body.tableSecondKeyArray = sensorsKeys;
-            for (let k = 0; k < sensorsKeys.length; k++) {
-              let temD =   me.getBsType(sensorsKeys[k]);
-              if(temD === "channel"){
-              for(let j =0 ; j< arrayOfDisplayData.length;j++){
-                jsontemp[sensorsKeys[k]] = json1[i][3][sensorsKeys[k]]["Durations"];
+          arrayHeder = ["SI", "DEVICE NAME"];
+          let sensorsKeys = me.state.body.selectedEntitiesValues;
+          let arrayOfDisplayData = me.state.body.selectedDataInfoTypeValues.map(item => item);
+          //console("arrayOfDisplayData");
+          //console(arrayOfDisplayData);
+          if (me.state.body.selectedNevData !== "Normal") {
+            //TTHIS COMMENT FOR AGGREAGATED DATA WHICH COMMING FORM OF ARRAY;
+            jsontemp["column6"] =  json1[i][5];
+            jsontemp["column6"].sort((a, b) => new Date(b.DeviceTime).getTime() - new Date(a.DeviceTime).getTime())
+            jsontemp["commentOtherInfo"] ={
+              createdTime: new Date(),
+              updatedTime : new Date()
+           }
+            // if(arrayOfDisplayData.filter(item => item == "Values").length !== 0){
+            //  arrayOfDisplayData = arrayOfDisplayData.splice(arrayOfDisplayData.findIndex(item => item == "Values"),1);
+            // }
+            if (me.state.body.selectedgraphType !== "MULTI") {
+              me.state.body.tableSecondKeyArray = arrayOfDisplayData;
+              for (let k = 0; k < sensorsKeys.length; k++) {
+                for (let j = 0; j < arrayOfDisplayData.length; j++) {
+                  jsontemp[arrayOfDisplayData[j]] = json1[i][3][sensorsKeys[k]][arrayOfDisplayData[j]];
+                }
               }
-            }else{
-              for(let j =0 ; j< arrayOfDisplayData.length;j++){
-                jsontemp[sensorsKeys[k]] = json1[i][3][sensorsKeys[k]][arrayOfDisplayData[j]];
+
+              for (let l = 0; l < arrayOfDisplayData.length; l++) {
+                arrayHeder.push(arrayOfDisplayData[l]);
               }
-            }
+              arrayHeder.push("TIME");
+              arrayHeder.push("Comment");
+              dataArray.push(
+                jsontemp
+              )
 
             }
+            else {
+              me.state.body.tableSecondKeyArray = sensorsKeys;
+              for (let k = 0; k < sensorsKeys.length; k++) {
+                let temD = me.getBsType(sensorsKeys[k]);
+                if (temD === "channel") {
+                  for (let j = 0; j < arrayOfDisplayData.length; j++) {
+                    jsontemp[sensorsKeys[k]] = json1[i][3][sensorsKeys[k]]["Durations"];
+                  }
+                } else {
+                  for (let j = 0; j < arrayOfDisplayData.length; j++) {
+                    jsontemp[sensorsKeys[k]] = json1[i][3][sensorsKeys[k]][arrayOfDisplayData[j]];
+                  }
+                }
+
+              }
+              for (let l = 0; l < sensorsKeys.length; l++) {
+                arrayHeder.push(sensorsKeys[l]);
+              }
+              arrayHeder.push("TIME");
+              arrayHeder.push("Comment");
+              dataArray.push(
+                jsontemp
+              )
+            }
+          }
+          else {
+            jsontemp["column6"]= [];
+            if(json1[i][5]["data"] != undefined &&  json1[i][5]["data"].length > 0){
+              json1[i][5]["data"].map( item2=> {
+                jsontemp["column6"].push(item2);
+              })
+              jsontemp["commentOtherInfo"] ={
+                 _id: json1[i][5]["_id"],
+                 createdTime: json1[i][5]["createdTime"],
+                 updatedTime : new Date()
+              }
+            }else{
+              jsontemp["column6"] = [];
+              jsontemp["commentOtherInfo"] ={
+                
+                createdTime: new Date(),
+                updatedTime : new Date()
+             }
+            }
+         
+            me.state.body.tableSecondKeyArray = sensorsKeys;
+            for (let k = 0; k < sensorsKeys.length; k++) {
+              jsontemp[sensorsKeys[k]] = json1[i][3][sensorsKeys[k]];
+            }
+            arrayHeder = ["SN", "DEVICE NAME"];
             for (let l = 0; l < sensorsKeys.length; l++) {
+
               arrayHeder.push(sensorsKeys[l]);
             }
             arrayHeder.push("TIME");
+            arrayHeder.push("Comment");
             dataArray.push(
               jsontemp
             )
           }
         }
-        else{
-          me.state.body.tableSecondKeyArray = sensorsKeys;
-          for (let k = 0; k < sensorsKeys.length; k++) {
-            jsontemp[sensorsKeys[k]] = json1[i][3][sensorsKeys[k]];
+        //console("This is header Of table")
+        //console(arrayHeder)
+        //console("This is Data Array")
+        console.log("This is dataArray", dataArray)
+        let { deviceIdentifier, selectedDeviceName } = this.state.body;
+        let lastUpdatedTime = "";
+        // console.log("This is dataArray");
+        // if( selectedDeviceName == 'Bed3_ec63' || selectedDeviceName == "Bed1_3bd1" || selectedDeviceName == "Bed2_427f" || selectedDeviceName == "CONT_e737" ){
+        var key = Object.keys(dataArray[0])
+        key.splice(key.indexOf("column1"), 1);
+        key.splice(key.indexOf("column2"), 1);
+        key.splice(key.indexOf("column5"), 1);
+        key.splice(key.indexOf("column6"), 1);
+        key.splice(key.indexOf("column7"), 1);
+        key.splice(key.indexOf("commentOtherInfo"),1);
+        console.log("deviceIdentifier", deviceIdentifier)
+        for (let j = 0; j < key.length; j++) {
+          let objtemp = deviceIdentifier.find(item => item.devicebusinessNM == key[j]);
+          console.log("This is objetemp", objtemp)
+          if (objtemp.transformExpr != undefined && objtemp.transformExpr != "") {
+            for (let i = 0; i < dataArray.length; i++) {
+              dataArray[i][key[j]] = me.transformExprFun(objtemp.transformExpr, dataArray[i][key[j]])
+            }
           }
-           arrayHeder = ["SN", "DEVICE NAME"];
-          for (let l = 0; l < sensorsKeys.length; l++) {
-  
-            arrayHeder.push(sensorsKeys[l]);
-          }
-          arrayHeder.push("TIME");
-          dataArray.push(
-            jsontemp
-          )
-        }
-      }
-      //console("This is header Of table")
-      //console(arrayHeder)
-      //console("This is Data Array")
-      //console(dataArray)
-      let {deviceIdentifier, selectedDeviceName} =this.state.body;
-      let lastUpdatedTime = "";
-      // console.log("This is dataArray");
-      // if( selectedDeviceName == 'Bed3_ec63' || selectedDeviceName == "Bed1_3bd1" || selectedDeviceName == "Bed2_427f" || selectedDeviceName == "CONT_e737" ){
-      var key = Object.keys(dataArray[0])
-      key.splice(key.indexOf("column1"), 1);
-      key.splice(key.indexOf("column2"), 1);
-      key.splice(key.indexOf("column5"), 1);
 
-      for(let j =0; j< key.length; j++){
-        let objtemp = deviceIdentifier.find( item => item.devicebusinessNM ==  key[j]);
-        if(objtemp.transformExpr != undefined && objtemp.transformExpr != "" ){
-        for(let i =0; i< dataArray.length; i++){
-            dataArray[i][key[j]] = me.transformExprFun(objtemp.transformExpr, dataArray[i][key[j]])
-          }
         }
+        // }
+
+        me.state.body.headerTable = arrayHeder
+        me.state.body.DataArray = dataArray;
+        me.state.body.in_prog = false;
+        me.state.body.total_count = json["data"]["data_count"];
+        me.state.body.lastupdatedData = json["data"]["lastdataObj"];
+        me.state.body.lastUpdatedTime = lastUpdatedTime;
 
       }
-    // }
-        
-      me.state.body.headerTable = arrayHeder
-      me.state.body.DataArray = dataArray;
-      me.state.body.in_prog = false;
-      me.state.body.total_count = json["data"]["data_count"];
-      me.state.body.lastupdatedData = json["data"]["lastdataObj"];
-      me.state.body.lastUpdatedTime = lastUpdatedTime;
-    
+      else {
+        me.state.body.DataArray = [];
+        me.state.body.in_prog = false;
+        me.state.body.total_count = 0;
+        me.state.body.Spinnerdata = true;
+        // me.state.body.in_prog = false;
+        // me.setState({ body: me.state.body })
+      }
+      me.setState({ body: me.state.body })
+      me.DisplayChart();
     }
-    else{
+    catch (err) {
       me.state.body.DataArray = [];
       me.state.body.in_prog = false;
       me.state.body.total_count = 0;
       me.state.body.Spinnerdata = true;
       // me.state.body.in_prog = false;
-      // me.setState({ body: me.state.body })
+      me.setState({ body: me.state.body })
+      console.log("This is Call of CallMainDataProcess Try", err)
+      me.errorganerator()
     }
-    me.setState({ body: me.state.body })
-    me.DisplayChart();
   }
-  catch(err){
-    me.state.body.DataArray = [];
-    me.state.body.in_prog = false;
-    me.state.body.total_count = 0;
-    me.state.body.Spinnerdata = true;
-    // me.state.body.in_prog = false;
-    me.setState({ body: me.state.body })
-    //console("This is Call of CallMainDataProcess Try")
-    me.errorganerator()
-  }
-  }
-  transformExprFun(expression,value){
-   
+  transformExprFun(expression, value) {
+
     try {
-        let fun = eval("("+ expression +")")
-            return fun(value);
+      let fun = eval("(" + expression + ")")
+      return fun(value);
     } catch (error) {
       console.log("error", error)
       return value
     }
-  
+
   }
 
   callToSocket() {
@@ -545,9 +590,9 @@ dataTypeDisable(){
         // me.setState({body: me.state.body})
         var array = [];
         // console.log(dataofSensors)
-        let {deviceIdentifier, selectedDeviceName} =this.state.body;
+        let { deviceIdentifier, selectedDeviceName } = this.state.body;
         for (var i = 0; i < dataofSensors.length; i++) {
-          let dataObj ={
+          let dataObj = {
             "sensorsNM": dataofSensors[i].type,
             "bgClass": arrayofbgClass[i],
             nameofbsnm: dataofSensors[i].devicebusinessNM,
@@ -555,15 +600,15 @@ dataTypeDisable(){
             lastUpdatedTime: dateFormat(dataofSensors[i].dateTime, "dd-mmm-yy HH:MM:ss")
           }
           // if( selectedDeviceName == 'Bed3_ec63' || selectedDeviceName == "Bed1_3bd1" || selectedDeviceName == "Bed2_427f" || selectedDeviceName == "CONT_e737" ){
-          let objtemp = deviceIdentifier.find( item => item.devicebusinessNM ==  dataofSensors[i].devicebusinessNM);
-          if(objtemp.transformExpr != undefined && objtemp.transformExpr != "" ){
-            dataObj["valuseS"]   =  me.transformExprFun(objtemp.transformExpr, dataofSensors[i].Value)
+          let objtemp = deviceIdentifier.find(item => item.devicebusinessNM == dataofSensors[i].devicebusinessNM);
+          if (objtemp.transformExpr != undefined && objtemp.transformExpr != "") {
+            dataObj["valuseS"] = me.transformExprFun(objtemp.transformExpr, dataofSensors[i].Value)
           }
-        // }
-  
+          // }
+
           array.push(dataObj);
         }
-        console.log("this array",array)
+        console.log("this array", array)
         for (var j = 0; j < array.length; j++) {
           if (array[j].lastUpdatedTime !== me.state.body.Sensors[j].lastUpdatedTime) {
             me.state.body.Sensors = array;
@@ -589,14 +634,14 @@ dataTypeDisable(){
 
     //   }
     // }
-// }
-// console.log(dataInfo)
+    // }
+    // console.log(dataInfo)
     me.setState({ body: me.state.body })
 
   }
-  startProcess(){
+  startProcess() {
     // alert("This is startProcess Call")
-     let me = this;
+    let me = this;
     // if(me.state.body.selectedNevData ==="Normal"){
     //   me.state.body.selectedDataInfoTypeValues = ["Values"];
     // }else{
@@ -609,159 +654,162 @@ dataTypeDisable(){
     // me.state.body.page = 1; 
     // // me.setState({body : me.state.body})
     me.dataTypeDisable();
-    
+
     this.graphProcess();
     this.fetchdata();
   }
-  onSubmin(){
+  onSubmin() {
     var me = this;
-    me.state.body.page = 1; 
-    me.setState({body : me.state.body});
+    me.state.body.page = 1;
+    me.setState({ body: me.state.body });
     me.startProcess()
   }
-  methodForDataDisplayBySingleTypeProcess(value){
+  methodForDataDisplayBySingleTypeProcess(value) {
     let me = this;
-    if(me.state.body.selectedNevData !== "Normal"){
-    // if (me.state.body.selectedgraphType === "MULTI") {
+    if (me.state.body.selectedNevData !== "Normal") {
+      // if (me.state.body.selectedgraphType === "MULTI") {
       // me.state.body.selectedSensorsDataArray.map( key => {
-        // me.state.body.arrayOfDataIfoDisplay.map(item => {me.state.body.selectedDataInfoTypeValuesflag[item.type] = false });
-        me.state.body.selectedDataInfoTypeValues = [];
-        let index =  me.state.body.deviceIdentifier.findIndex(item => item.devicebusinessNM === value );
-       let temV =  me.state.body.deviceIdentifier[index].BsType;
-       if(temV === "channel"){
-        me.state.body.arrayOfDataIfoDisplay.map(i => {i.disable = false});
-     ["Values","Max","Min","Avg"].map(item => {  
-        let index =  me.state.body.arrayOfDataIfoDisplay.findIndex(i => i.type === item);
-        me.state.body.arrayOfDataIfoDisplay[index].disable = true;
-         me.state.body.selectedDataInfoTypeValuesflag[item] = false;
-      });
-      // me.state.body.selectedDataInfoTypeValues = ["Durations","Count"];
-      ["Durations","Count"].map(item =>{  me.state.body.selectedDataInfoTypeValuesflag[item] = true ;
-        me.state.body.selectedDataInfoTypeValues.push(item)}); 
-
-
-       }else{
-        
-        me.state.body.arrayOfDataIfoDisplay.map(i => {i.disable = false});   
-        ["Values","Durations"].map(item => {  
-          let index =  me.state.body.arrayOfDataIfoDisplay.findIndex(i => i.type === item);
+      // me.state.body.arrayOfDataIfoDisplay.map(item => {me.state.body.selectedDataInfoTypeValuesflag[item.type] = false });
+      me.state.body.selectedDataInfoTypeValues = [];
+      let index = me.state.body.deviceIdentifier.findIndex(item => item.devicebusinessNM === value);
+      let temV = me.state.body.deviceIdentifier[index].BsType;
+      if (temV === "channel") {
+        me.state.body.arrayOfDataIfoDisplay.map(i => { i.disable = false });
+        ["Values", "Max", "Min", "Avg"].map(item => {
+          let index = me.state.body.arrayOfDataIfoDisplay.findIndex(i => i.type === item);
           me.state.body.arrayOfDataIfoDisplay[index].disable = true;
-           me.state.body.selectedDataInfoTypeValuesflag[item] = false;
+          me.state.body.selectedDataInfoTypeValuesflag[item] = false;
+        });
+        // me.state.body.selectedDataInfoTypeValues = ["Durations","Count"];
+        ["Durations", "Count"].map(item => {
+          me.state.body.selectedDataInfoTypeValuesflag[item] = true;
+          me.state.body.selectedDataInfoTypeValues.push(item)
+        });
+
+
+      } else {
+
+        me.state.body.arrayOfDataIfoDisplay.map(i => { i.disable = false });
+        ["Values", "Durations"].map(item => {
+          let index = me.state.body.arrayOfDataIfoDisplay.findIndex(i => i.type === item);
+          me.state.body.arrayOfDataIfoDisplay[index].disable = true;
+          me.state.body.selectedDataInfoTypeValuesflag[item] = false;
         });
         // me.state.body.selectedDataInfoTypeValues = ["Max","Min","Avg","Count"];
-        ["Max","Min","Avg","Count"].map(item => {  me.state.body.selectedDataInfoTypeValuesflag[item] = true ;
+        ["Max", "Min", "Avg", "Count"].map(item => {
+          me.state.body.selectedDataInfoTypeValuesflag[item] = true;
           me.state.body.selectedDataInfoTypeValues.push(item)
-        }); 
-       }
-   
-       me.setState({ body: me.state.body })
-        // })
-    // }
-    // else{
-
-    // }
+        });
       }
-     
+
+      me.setState({ body: me.state.body })
+      // })
+      // }
+      // else{
+
+      // }
+    }
+
   }
-  getBsType(value){
+  getBsType(value) {
     let me = this;
-    let index =  me.state.body.deviceIdentifier.findIndex(item => item.devicebusinessNM === value );
+    let index = me.state.body.deviceIdentifier.findIndex(item => item.devicebusinessNM === value);
     return me.state.body.deviceIdentifier[index].BsType;
   }
-  graphProcessForMultiCase(){
+  graphProcessForMultiCase() {
     let me = this;
-    if(me.state.body.selectedNevData !== "Normal"){
+    if (me.state.body.selectedNevData !== "Normal") {
       me.state.body.selectedDataInfoTypeValuesflag[me.state.body.selectedDataInfoDefault] = true
-      me.state.body.selectedDataInfoTypeValues =  [me.state.body.selectedDataInfoDefault] 
-   let temD =  me.state.body.selectedSensorsDataArray.find( item =>  me.getBsType(item) === "channel" );
-   if(temD !== undefined){
-     let index = me.state.body.arrayOfDataIfoDisplay.findIndex(item => item.type === "Durations");
-     me.state.body.arrayOfDataIfoDisplay[index].name = "name4";
-     me.state.body.arrayOfDataIfoDisplay[index].disable = false;
-     me.state.body.selectedDataInfoTypeValuesflag["Durations"] = true
+      me.state.body.selectedDataInfoTypeValues = [me.state.body.selectedDataInfoDefault]
+      let temD = me.state.body.selectedSensorsDataArray.find(item => me.getBsType(item) === "channel");
+      if (temD !== undefined) {
+        let index = me.state.body.arrayOfDataIfoDisplay.findIndex(item => item.type === "Durations");
+        me.state.body.arrayOfDataIfoDisplay[index].name = "name4";
+        me.state.body.arrayOfDataIfoDisplay[index].disable = false;
+        me.state.body.selectedDataInfoTypeValuesflag["Durations"] = true
 
-   //  me.state.body.selectedDataInfoTypeValues.push("Durations") 
-   
-   }
-   else{
-    let index = me.state.body.arrayOfDataIfoDisplay.findIndex(item => item.type === "Durations");
-    me.state.body.arrayOfDataIfoDisplay[index].name = "name1";
-    me.state.body.arrayOfDataIfoDisplay[index].disable = true;
-    me.state.body.selectedDataInfoTypeValuesflag["Durations"] = false
-   }
-   //console("This is graphProcessForMultiCase")
-    //console(temD);
-    let index = me.state.body.arrayOfDataIfoDisplay.findIndex(item => item.type === "Count");
-    me.state.body.arrayOfDataIfoDisplay[index].disable = true;
-    me.state.body.selectedDataInfoTypeValuesflag["Count"] = false
-  
+        //  me.state.body.selectedDataInfoTypeValues.push("Durations") 
+
+      }
+      else {
+        let index = me.state.body.arrayOfDataIfoDisplay.findIndex(item => item.type === "Durations");
+        me.state.body.arrayOfDataIfoDisplay[index].name = "name1";
+        me.state.body.arrayOfDataIfoDisplay[index].disable = true;
+        me.state.body.selectedDataInfoTypeValuesflag["Durations"] = false
+      }
+      //console("This is graphProcessForMultiCase")
+      //console(temD);
+      let index = me.state.body.arrayOfDataIfoDisplay.findIndex(item => item.type === "Count");
+      me.state.body.arrayOfDataIfoDisplay[index].disable = true;
+      me.state.body.selectedDataInfoTypeValuesflag["Count"] = false
+
     }
-    else{
+    else {
       me.state.body.selectedDataInfoTypeValuesflag["Values"] = true
-      me.state.body.selectedDataInfoTypeValues =  ["Values"] 
+      me.state.body.selectedDataInfoTypeValues = ["Values"]
     }
     me.setState({ body: me.state.body })
   }
-  graphProcess(){
+  graphProcess() {
     let me = this;
     if (me.state.body.selectedgraphType === "MULTI") {
       me.state.body.selectedEntitiesType = "checkbox";
       me.state.body.selectedEntitiesClass = "checkbox-inline";
       me.state.body.selectedSensorsDataArray.map(item => { me.state.body.selectedEntitiesValuesflag[item] = true });
-      me.state.body.selectedEntitiesValues =  me.state.body.selectedSensorsDataArray.map(item => item)
+      me.state.body.selectedEntitiesValues = me.state.body.selectedSensorsDataArray.map(item => item)
       me.state.body.selectedDataInfoType = "radio";
       me.state.body.selectedDataInfoClass = "radio-inline";
       //console("This is Log For graph Values")
       //console(me.state.body.selectedDataInfoDefault)
-      me.state.body.arrayOfDataIfoDisplay.map(item => { me.state.body.selectedDataInfoTypeValuesflag[item.type] =false});
-      me.state.body.selectedDataInfoTypeValues  = [];
-  
+      me.state.body.arrayOfDataIfoDisplay.map(item => { me.state.body.selectedDataInfoTypeValuesflag[item.type] = false });
+      me.state.body.selectedDataInfoTypeValues = [];
+
       //console(  me.state.body.selectedDataInfoTypeValuesflag)
       me.setState({ body: me.state.body })
       me.graphProcessForMultiCase();
-   
-     }
+
+    }
     else {
       me.state.body.selectedEntitiesType = "radio";
       me.state.body.selectedEntitiesClass = "radio-inline";
       me.state.body.selectedSensorsDataArray.map(item => { me.state.body.selectedEntitiesValuesflag[item] = false });
 
       // if(me.state.body.selectedEntitiesValues.length === 0){
-        let temSensorsName = (me.state.body.selectedEntity == "" || me.state.body.selectedEntity == undefined )? me.state.body.selectedSensorsName :  me.state.body.selectedEntity;
-        
+      let temSensorsName = (me.state.body.selectedEntity == "" || me.state.body.selectedEntity == undefined) ? me.state.body.selectedSensorsName : me.state.body.selectedEntity;
+
       me.state.body.selectedEntitiesValues = [temSensorsName];
       me.state.body.selectedEntitiesValuesflag[temSensorsName] = true;
-        
+
       // }else{
-        //console("This is Single Bs Selected Data")
-        //console(me.state.body.selectedEntity);
-        //console( me.state.body.selectedEntitiesValues);
-        //console(temSensorsName)
-        // me.state.body.selectedEntitiesValues = [me.state.body.selectedEntity];
-        // me.state.body.selectedEntitiesValuesflag[me.state.body.selectedEntity] = true;
+      //console("This is Single Bs Selected Data")
+      //console(me.state.body.selectedEntity);
+      //console( me.state.body.selectedEntitiesValues);
+      //console(temSensorsName)
+      // me.state.body.selectedEntitiesValues = [me.state.body.selectedEntity];
+      // me.state.body.selectedEntitiesValuesflag[me.state.body.selectedEntity] = true;
       // }
       me.state.body.selectedDataInfoType = "checkbox";
       me.state.body.selectedDataInfoClass = "checkbox-inline";
-        me.state.body.arrayOfDataIfoDisplay.map(item => {me.state.body.selectedDataInfoTypeValuesflag[item.type] = true });
-       // me.state.body.selectedDataInfoTypeValues =  me.state.body.arrayOfDataIfoDisplay.map(item => item.type);
-     
+      me.state.body.arrayOfDataIfoDisplay.map(item => { me.state.body.selectedDataInfoTypeValuesflag[item.type] = true });
+      // me.state.body.selectedDataInfoTypeValues =  me.state.body.arrayOfDataIfoDisplay.map(item => item.type);
+
 
       me.methodForDataDisplayBySingleTypeProcess(me.state.body.selectedSensorsName)
       me.setState({ body: me.state.body })
-      if(me.state.body.selectedNevData !== "Normal"){
-     //   me.state.body.selectedDataInfoTypeValues.splice(me.state.body.selectedDataInfoTypeValues.findIndex(item => item =="Values"),1)
+      if (me.state.body.selectedNevData !== "Normal") {
+        //   me.state.body.selectedDataInfoTypeValues.splice(me.state.body.selectedDataInfoTypeValues.findIndex(item => item =="Values"),1)
       }
-      else{
-        me.state.body.arrayOfDataIfoDisplay.map(item => {me.state.body.selectedDataInfoTypeValuesflag[item.type] = false });
+      else {
+        me.state.body.arrayOfDataIfoDisplay.map(item => { me.state.body.selectedDataInfoTypeValuesflag[item.type] = false });
         me.state.body.selectedDataInfoTypeValues.push("Values");
         me.state.body.selectedDataInfoTypeValuesflag["Values"] = true;
-        
+
       }
       me.setState({ body: me.state.body })
-      }
-      //console("This is default SensorsName")
-      //console(me.state.body.selectedSensorsName)
-   
+    }
+    //console("This is default SensorsName")
+    //console(me.state.body.selectedSensorsName)
+
   }
   graphType = (value) => {
     //alert(value)
@@ -769,7 +817,7 @@ dataTypeDisable(){
     //console(value)
     let me = this
     me.state.body.selectedgraphType = value;
-   
+
     me.setState({ body: me.state.body })
     me.graphProcess();
     me.callMainDataProcess()
@@ -799,7 +847,7 @@ dataTypeDisable(){
       me.state.body.selectedEntity = value;
     }
 
-    
+
     //console(value)
     //console(me.state.body.selectedEntitiesValues)
     me.setState({ body: me.state.body })
@@ -825,14 +873,14 @@ dataTypeDisable(){
       me.state.body.arrayOfDataIfoDisplay.map(item => { me.state.body.selectedDataInfoTypeValuesflag[item.type] = false });
       me.state.body.selectedDataInfoTypeValuesflag[value] = !me.state.body.selectedDataInfoTypeValuesflag[value];
       me.state.body.selectedDataInfoTypeValues.push(value);
-      let temD =  me.state.body.selectedSensorsDataArray.find( item =>  me.getBsType(item) === "channel" );
-      if(temD !== undefined){
-      //  let index = me.state.body.arrayOfDataIfoDisplay.findIndex(item => item.type === "Durations");
-     //   me.state.body.arrayOfDataIfoDisplay[index].name = "name4";
-//me.state.body.arrayOfDataIfoDisplay[index].disable = false;
+      let temD = me.state.body.selectedSensorsDataArray.find(item => me.getBsType(item) === "channel");
+      if (temD !== undefined) {
+        //  let index = me.state.body.arrayOfDataIfoDisplay.findIndex(item => item.type === "Durations");
+        //   me.state.body.arrayOfDataIfoDisplay[index].name = "name4";
+        //me.state.body.arrayOfDataIfoDisplay[index].disable = false;
         me.state.body.selectedDataInfoTypeValuesflag["Durations"] = true
-      // me.state.body.selectedDataInfoTypeValues.push("Durations") 
-      
+        // me.state.body.selectedDataInfoTypeValues.push("Durations") 
+
       }
     }
 
@@ -850,8 +898,8 @@ dataTypeDisable(){
       var arrayofbgClass = dashboardData.SensorsBgC;
       me.state.body.selectedGroupsitem = value;
       console.log("this is chart chartLegendNames", me.state.body.chartLegendNames)
-      me.state.body.activeChartLegend =  me.state.body.chartLegendNames[value]
-      console.log("this is chart chartLegendNames12",  me.state.body.activeChartLegend)
+      me.state.body.activeChartLegend = me.state.body.chartLegendNames[value]
+      console.log("this is chart chartLegendNames12", me.state.body.activeChartLegend)
       let index = me.state.body.sensorsGroups.findIndex(item => item.group == value);
 
       me.state.body.selectedGroups = me.state.body.sensorsGroups[index];
@@ -866,24 +914,24 @@ dataTypeDisable(){
       //  console.log(dataofSensors[0].devicebusinessNM)
       var array = [];
 
-      let {deviceIdentifier, selectedDeviceName} =this.state.body;
-        for (var i = 0; i < dataofSensors.length; i++) {
-          let dataObj ={
-            "sensorsNM": dataofSensors[i].type,
-            "bgClass": arrayofbgClass[i],
-            nameofbsnm: dataofSensors[i].devicebusinessNM,
-            valuseS: dataofSensors[i].Value,
-            lastUpdatedTime: dateFormat(dataofSensors[i].dateTime, "dd-mmm-yy HH:MM:ss")
-          }
-          // if( selectedDeviceName == 'Bed3_ec63' || selectedDeviceName == "Bed1_3bd1" || selectedDeviceName == "Bed2_427f" || selectedDeviceName == "CONT_e737" ){
-          let objtemp = deviceIdentifier.find( item => item.devicebusinessNM ==  dataofSensors[i].devicebusinessNM);
-          if(objtemp.transformExpr != undefined && objtemp.transformExpr != "" ){
-            dataObj["valuseS"]   =  me.transformExprFun(objtemp.transformExpr, dataofSensors[i].Value)
-          }
-        // }
-  
-          array.push(dataObj);
+      let { deviceIdentifier, selectedDeviceName } = this.state.body;
+      for (var i = 0; i < dataofSensors.length; i++) {
+        let dataObj = {
+          "sensorsNM": dataofSensors[i].type,
+          "bgClass": arrayofbgClass[i],
+          nameofbsnm: dataofSensors[i].devicebusinessNM,
+          valuseS: dataofSensors[i].Value,
+          lastUpdatedTime: dateFormat(dataofSensors[i].dateTime, "dd-mmm-yy HH:MM:ss")
         }
+        // if( selectedDeviceName == 'Bed3_ec63' || selectedDeviceName == "Bed1_3bd1" || selectedDeviceName == "Bed2_427f" || selectedDeviceName == "CONT_e737" ){
+        let objtemp = deviceIdentifier.find(item => item.devicebusinessNM == dataofSensors[i].devicebusinessNM);
+        if (objtemp.transformExpr != undefined && objtemp.transformExpr != "") {
+          dataObj["valuseS"] = me.transformExprFun(objtemp.transformExpr, dataofSensors[i].Value)
+        }
+        // }
+
+        array.push(dataObj);
+      }
       me.state.body.selectedSensorsDataArray = dataofSensors.map(item => item.devicebusinessNM);
       //console(me.state.body.selectedSensorsDataArray)
       me.state.body.selectedSensorsType1 = dataofSensors[0].type;
@@ -891,8 +939,8 @@ dataTypeDisable(){
       me.state.body.Sensors = array;
       me.state.body.page = 1;
       me.setState({ body: me.state.body })
-    //  me.fetchdata();
-    me.startProcess()
+      //  me.fetchdata();
+      me.startProcess()
     } catch (error) {
       //console(error)
       this.errorganerator()
@@ -914,7 +962,7 @@ dataTypeDisable(){
       return { group: key, devicebusinessNM: group_to_values[key] };
     });
 
-    let tem = groups.filter(item => item.group !== "Not displayed in dashboard" )
+    let tem = groups.filter(item => item.group !== "Not displayed in dashboard")
     return tem;
   }
   callForlastAlert(custCd, subCustCd, mac) {
@@ -979,6 +1027,13 @@ dataTypeDisable(){
     }
     return color;
   }
+  CommentUpdateRowTable(factId, commentdata){
+var me = this;    
+ let index = me.state.body.DataArray.findIndex(item =>  item.column7 == factId);
+ me.state.body.DataArray[index].column6 = commentdata;
+ me.state.body.CommentInfo.comment = commentdata;
+ me.setState({body : me.state.body});
+  }
 
   render() {
     const { arrData, deviceTypeObj, arrLabels, yaxisName, activeChartLegend, lastAlertData, fromDate, toDate, bgColors, selectedSensorsType1, borderColors, DataArray, in_prog,
@@ -986,14 +1041,14 @@ dataTypeDisable(){
     } = this.state.body;
     var state = this.state.body;
     var legend = null;
- if (selectedNevData == "Normal"){
-   legend = activeChartLegend["normal"]
- }
- console.log("this is selected", activeChartLegend)
- if (selectedNevData != "Normal"){
-  legend = activeChartLegend["aggregated"];
-}
-    console.log("state ",this.state)
+    if (selectedNevData == "Normal") {
+      legend = activeChartLegend["normal"]
+    }
+    console.log("this is selected", activeChartLegend)
+    if (selectedNevData != "Normal") {
+      legend = activeChartLegend["aggregated"];
+    }
+    console.log("state ", this.state)
     var total_page = Math.ceil(this.state.body.total_count / this.state.body.page_size);
     var page_start_index = ((state.page - 1) * state.page_size);
     if (this.state.body.Spinnerdata == true) {
@@ -1052,9 +1107,9 @@ dataTypeDisable(){
               <div className="col-lg-9 col-md-9 col-sm-6 col-xs-12">
                 <div className="custmDivSensorUpper">
                   <div className="wrapperSenSors">
-                    {this.state.body.Sensors.map(item =>
+                    {this.state.body.Sensors.map((item, k) =>
                       <span className=" custmDivSensor ">
-                        <Sensors key={item.nameofbsnm}
+                        <Sensors key={k}
                           bgclass={item.bgClass}
                           label={" " + item.nameofbsnm}
                           P_name_class="color12 "
@@ -1091,8 +1146,8 @@ dataTypeDisable(){
           <div className="container">
             <div className="mb-2">  <label className="text-center ">VIEW MENU
            <button className=' toggleButton' onClick={this.toggle.bind(this)}><i className={(this.state.open ? "fas fa-caret-up" : "fas fa-caret-down")}></i></button>
-            </label> &nbsp;&nbsp; {(this.state.open )? "" :<span className="ml-6 font-12 color-grey"> <span className="labeltoggal">VIEW : </span> <span className="valuetoggal">{this.state.body.selectedNevData}</span> 
-                 {(this.state.body.startTime !=="" && this.state.body.endTime!=="")?<span> <span className="labeltoggal">INTERVAL : </span> <span className="valuetoggal">{moment(this.state.body.startTime).format("L hh:mm a") +" To "+moment(this.state.body.endTime).format("L hh:mm a")}</span></span> : "" }</span>}
+            </label> &nbsp;&nbsp; {(this.state.open) ? "" : <span className="ml-6 font-12 color-grey"> <span className="labeltoggal">VIEW : </span> <span className="valuetoggal">{this.state.body.selectedNevData}</span>
+              {(this.state.body.startTime !== "" && this.state.body.endTime !== "") ? <span> <span className="labeltoggal">INTERVAL : </span> <span className="valuetoggal">{moment(this.state.body.startTime).format("L hh:mm a") + " To " + moment(this.state.body.endTime).format("L hh:mm a")}</span></span> : ""}</span>}
             </div>
             <div className={"ml-5 mb-2 collapse" + (this.state.open ? ' in' : '')}>
               {/* <label className="text-center">SELECT VIEW </label>
@@ -1107,11 +1162,11 @@ dataTypeDisable(){
                 )}
               </Nav> */}
               <div>
-              <label className="text-center">SELECT VIEW  &nbsp; : </label> &nbsp; &nbsp;
+                <label className="text-center">SELECT VIEW  &nbsp; : </label> &nbsp; &nbsp;
               {this.state.body.typeOfNavData.map(item =>
-                  <label className= "radio-inline"   >
+                  <label className="radio-inline"   >
                     <input type="radio"
-                      onClick={this.handleNavForData.bind(this, item.type)} name="optradio4" 
+                      onClick={this.handleNavForData.bind(this, item.type)} name="optradio4"
                       checked={item.type === this.state.body.selectedNevData} />{item.type}
                   </label>
                 )}
@@ -1187,9 +1242,9 @@ dataTypeDisable(){
               </div>
               <div className="col-lg-3 col-md-3 col-sm-3 col-xs-2">
                 <div className="align-right">  <button title="Download Report In Excel Formate" className="btn btn-xs btn-secondary chartbtn" onClick={() => {
-                this.props.history.push("/menu")
-              }
-              }><img src={require('../../layout/Nms-excel.png')} alt="Excel"/></button>
+                  this.props.history.push("/menu")
+                }
+                }><img src={require('../../layout/Nms-excel.png')} alt="Excel" /></button>
 
                 </div>
               </div>
@@ -1201,12 +1256,12 @@ dataTypeDisable(){
           <div className="container">
             <div className="mb-2">  <label className="text-center">CHART MENU
            <button className=' toggleButton' onClick={this.toggleChartMenu.bind(this)}><i className={(this.state.openChartMenu ? "fas fa-caret-up" : "fas fa-caret-down")}></i></button>
-            </label> {(this.state.openChartMenu )? "" :<span className="ml-6 font-12 color-grey">
-            <span className="labeltoggal">DeviceName : </span> <span className="valuetoggal"> {(selectedDeviceName != "") ? selectedDeviceName : ""}</span>
-             <span className="labeltoggal">GRAPH : </span> <span className="valuetoggal">{this.state.body.selectedgraphType}</span>
-             <span className="labeltoggal">ENTITIES : </span> <span className="valuetoggal">{this.state.body.selectedEntitiesValues.map((item,i) => item +",")}</span> 
-             <span className="labeltoggal">DISPLAY : </span> <span className="valuetoggal">{this.state.body.selectedDataInfoTypeValues.map((item,i) => item +",")}</span> </span>}
-         
+            </label> {(this.state.openChartMenu) ? "" : <span className="ml-6 font-12 color-grey">
+              <span className="labeltoggal">DeviceName : </span> <span className="valuetoggal"> {(selectedDeviceName != "") ? selectedDeviceName : ""}</span>
+              <span className="labeltoggal">GRAPH : </span> <span className="valuetoggal">{this.state.body.selectedgraphType}</span>
+              <span className="labeltoggal">ENTITIES : </span> <span className="valuetoggal">{this.state.body.selectedEntitiesValues.map((item, i) => item + ",")}</span>
+              <span className="labeltoggal">DISPLAY : </span> <span className="valuetoggal">{this.state.body.selectedDataInfoTypeValues.map((item, i) => item + ",")}</span> </span>}
+
             </div>
             <div className={"ml-5 mb-2 collapse" + (this.state.openChartMenu ? ' in' : '')}>
               <div className="">
@@ -1230,38 +1285,38 @@ dataTypeDisable(){
               <div className="">
                 <label className="text-center">INFO TO DISPLAY : </label> &nbsp; &nbsp;
                   {this.state.body.arrayOfDataIfoDisplay.map(item =>
-                  <label className={ this.state.body.selectedDataInfoClass || "radio-inline"  }  style= {{color: (item.disable)? "#ccc": "" }}>
+                  <label className={this.state.body.selectedDataInfoClass || "radio-inline"} style={{ color: (item.disable) ? "#ccc" : "" }}>
                     <input type={this.state.body.selectedDataInfoType || "radio"}
-                   checked= { this.state.body.selectedDataInfoTypeValuesflag[item.type]}
+                      checked={this.state.body.selectedDataInfoTypeValuesflag[item.type]}
                       onClick={this.ClickInfoDisplay.bind(this, item.type)}
-                       name= {item.name} 
-                      disabled = {item.disable}/>{item.type}
+                      name={item.name}
+                      disabled={item.disable} />{item.type}
                   </label>
                 )}
               </div>
             </div>
-       
+
           </div>
           <div className="container chartCantainer">
 
 
 
 
-<div className="chart-container" style={{position: "relative", height:"70vh", width:"80vw"}} >
+            <div className="chart-container" style={{ position: "relative", height: "70vh", width: "80vw" }} >
 
-  <Chartcom
-    type="line"
-    arrData={arrData}
-    chartAxis={deviceTypeObj}
-    arrLabels={arrLabels}
-    legend={legend}
-    xAxisLbl="Date and Time"
-    yAxisLbl={yaxisName}
-    // bgColors ={bgColors}
-    borderColors={borderColors}
-  />
-</div>
-</div>
+              <Chartcom
+                type="line"
+                arrData={arrData}
+                chartAxis={deviceTypeObj}
+                arrLabels={arrLabels}
+                legend={legend}
+                xAxisLbl="Date and Time"
+                yAxisLbl={yaxisName}
+                // bgColors ={bgColors}
+                borderColors={borderColors}
+              />
+            </div>
+          </div>
           {/* <div className= "custNav btn-group">
       
          <button  className="btn btn-sm btn-secondary" onClick={this.downloadToExcel.bind(this)}><i class="far fa-file-excel iconfont"></i></button>
@@ -1296,6 +1351,24 @@ dataTypeDisable(){
                       {/* </td> */}
                       {/* <td className='text-center'>{user.column4}</td> */}
                       <td className='text-center'>{user.column5}</td>
+                      <td className=''>
+                        {/* <Button variant="success">
+                        Comment <Badge variant="success" >{user.column6.length}</Badge>
+                      </Button> */}
+                      
+                      &nbsp;&nbsp;  &nbsp;&nbsp; <span  onClick ={() => {
+                      this.state.body.CommentInfo._id =   user.commentOtherInfo._id; 
+                      this.state.body.CommentInfo.createdTime =   user.commentOtherInfo.createdTime; 
+                      this.state.body.CommentInfo.updatedTime =   user.commentOtherInfo.updatedTime; 
+                      this.state.body.CommentInfo.factId =   user.column7; 
+                      this.state.body.CommentInfo.DeviceName =  selectedDeviceName;  
+                      this.state.body.CommentInfo.DeviceTime =  user.column5;  
+                      this.state.body.CommentInfo.comment = user.column6;
+                      this.state.body.CommentInfo.show = true;
+                      this.setState({body: this.state.body})}} className= {"commentIcon"} ><i class="far fa-comment-dots commentIcon"></i>
+                      </span>
+                      &nbsp;&nbsp; &nbsp;&nbsp;  {user.column6.length > 0 ? <span className="badge commentBadge">{ user.column6.length}</span>: ""}
+                      </td>
                     </tr>
                     )
                   })
@@ -1305,33 +1378,40 @@ dataTypeDisable(){
               </Table>
             </div>
             <div className="col-lg-3 col-md-3 col-sm-3 col-xs-2">
-                {/* <div className="align-center">  */}
-                <span className="spanchart">#ROWS </span>
-                <select onChange={this.changePagesize} className=" selectcolor" value={this.state.body.page_size} id="Page_Size">{this.state.body.page_size}
+              {/* <div className="align-center">  */}
+              <span className="spanchart">#ROWS </span>
+              <select onChange={this.changePagesize} className=" selectcolor" value={this.state.body.page_size} id="Page_Size">{this.state.body.page_size}
 
-                  {["10", "20", "50", "100"].map(n =>
-                    <option className="selectcolor " value={n}>{n}</option>)
-                  }
+                {["10", "20", "50", "100"].map(n =>
+                  <option className="selectcolor " value={n}>{n}</option>)
+                }
 
-                </select>
-                {/* <button type="button" onClick={this.downloadToExcel.bind(this)}>downloadToExcel</button>  */}
-                {/* </div> */}
+              </select>
+              {/* <button type="button" onClick={this.downloadToExcel.bind(this)}>downloadToExcel</button>  */}
+              {/* </div> */}
+            </div>
+            <div className="col-sm-6 col-lg-5  col-md-6  col-xs-8">
+              <div className='align-center'>
+                {total_page > 1 && <CPagination page={state.page} totalpages={total_page} onPageChange={this.changePage} />}
               </div>
-              <div className="col-sm-6 col-lg-5  col-md-6  col-xs-8">
-                <div className='align-center'>
-                  {total_page > 1 && <CPagination page={state.page} totalpages={total_page} onPageChange={this.changePage} />}
-                </div>
-              </div>
-              <div className="col-lg-3 col-md-3 col-sm-3 col-xs-2">
-                <div className="align-right">  <button title="Download Report In Excel Formate" className="btn btn-xs btn-secondary chartbtn" onClick={() => {
+            </div>
+            <div className="col-lg-3 col-md-3 col-sm-3 col-xs-2">
+              <div className="align-right">  <button title="Download Report In Excel Formate" className="btn btn-xs btn-secondary chartbtn" onClick={() => {
                 this.props.history.push("/menu")
               }
-              }><img src={require('../../layout/Nms-excel.png')} alt="Excel"/></button>
+              }><img src={require('../../layout/Nms-excel.png')} alt="Excel" /></button>
 
-                </div>
               </div>
+            </div>
 
           </div>
+          <Comment 
+          key ={ this.state.body.CommentInfo.DeviceTime }
+           nevInfo={this.state.body.selectedNevData} 
+          startProcess ={() => {this.startProcess()}}
+           CommentInfo ={this.state.body.CommentInfo} 
+           CommentUpdateRowTable={this.CommentUpdateRowTable.bind(this)}
+           CommentStateUpdate = {this.CommentStateUpdate.bind(this)}/>
         </div>
 
 
