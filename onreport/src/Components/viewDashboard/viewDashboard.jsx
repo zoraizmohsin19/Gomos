@@ -1027,11 +1027,17 @@ class viewDashboard extends Component {
     }
     return color;
   }
-  CommentUpdateRowTable(factId, commentdata){
+  CommentUpdateRowTable(factId, commentdata,_id,createdTime,updatedTime){
 var me = this;    
  let index = me.state.body.DataArray.findIndex(item =>  item.column7 == factId);
  me.state.body.DataArray[index].column6 = commentdata;
+ me.state.body.DataArray[index].commentOtherInfo["_id"] = _id;
+ me.state.body.DataArray[index].commentOtherInfo["createdTime"] = createdTime;
+ me.state.body.DataArray[index].commentOtherInfo["updatedTime"] = updatedTime;
  me.state.body.CommentInfo.comment = commentdata;
+ me.state.body.CommentInfo["_id"] = _id;
+ me.state.body.CommentInfo["createdTime"] = createdTime;
+ me.state.body.CommentInfo["updatedTime"] = updatedTime;
  me.setState({body : me.state.body});
   }
 

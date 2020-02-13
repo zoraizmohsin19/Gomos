@@ -92,6 +92,9 @@ var me  = this;
     .then(json => {
     //  console.log("This is json Called", json)
        let comment = json["data"][0].data;
+       let _id = json["data"][0]._id;
+       let createdTime = json["data"][0].createdTime;
+       let updatedTime = json["data"][0].updatedTime;
        let factId  = json["data"][0].factId;
        let obj = [];
        comment.map( (item , i) =>{
@@ -102,7 +105,7 @@ var me  = this;
       //  console.log("This is comment", comment);
       //  console.log("This is CommentInfo", me.state.CommentInfo)
        if(comment !== undefined){
-        me.props.CommentUpdateRowTable(factId ,comment);
+        me.props.CommentUpdateRowTable(factId ,comment,_id,createdTime,updatedTime);
           // this.onUpdate(comment)  
      //  this.onUpdate(comment)
        }
