@@ -710,7 +710,8 @@ callApiForProgramFetch(objectpayload, selectedAtionType, selectedevent) {
         reconnection: true,
         reconnectionDelay: 1000,
         reconnectionDelayMax : 5000,
-        reconnectionAttempts: 99999})
+        reconnectionAttempts: 99999,
+        path: "/api/soketForOnreport"})
         me.setState({setProgramFetchSoketObj: setProgramFetch})
       setProgramFetch.emit('setProgramFetch', { mac: this.state.CriteriaForOP.mac });
       setProgramFetch.on("setProgramEmit", data => {
@@ -1186,7 +1187,8 @@ callApiForProgramFetch(objectpayload, selectedAtionType, selectedevent) {
       reconnection: true,
       reconnectionDelay: 1000,
       reconnectionDelayMax : 5000,
-      reconnectionAttempts: 99999
+      reconnectionAttempts: 99999,
+      path: "/api/soketForOnreport"
   } );
     socket.emit('clientEvent', { mac: this.state.CriteriaForOP.mac });
     socket.on("FromAPI", data => {
@@ -1231,7 +1233,8 @@ callApiForProgramFetch(objectpayload, selectedAtionType, selectedevent) {
       reconnection: true,
       reconnectionDelay: 1000,
       reconnectionDelayMax : 5000,
-      reconnectionAttempts: 99999
+      reconnectionAttempts: 99999,
+      path: "/api/soketForOnreport"
   });
     onDeviceinstruction.emit('onDeviceinstructionClientEvent', { mac: this.state.CriteriaForOP.mac, type: "SentInstruction" });
     onDeviceinstruction.on('DeviceInstruction', function (data) {
@@ -1369,7 +1372,8 @@ callApiForProgramFetch(objectpayload, selectedAtionType, selectedevent) {
       reconnection: true,
       reconnectionDelay: 1000,
       reconnectionDelayMax : 5000,
-      reconnectionAttempts: 99999
+      reconnectionAttempts: 99999,
+      path: "/api/soketForOnreport"
   });
     lastError.emit('lastErrorClientEmit', body);
     lastError.on('lastErrorServerEmit', function (data) {
@@ -1418,7 +1422,8 @@ callApiForProgramFetch(objectpayload, selectedAtionType, selectedevent) {
       reconnection: true,
       reconnectionDelay: 1000,
       reconnectionDelayMax : 5000,
-      reconnectionAttempts: 99999
+      reconnectionAttempts: 99999,
+      path: "/api/soketForOnreport"
   });
     payloadData.emit('lastPayloadClient', body);
     payloadData.on('lastPayloadServerData', function (data) {

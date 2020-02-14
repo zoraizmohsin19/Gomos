@@ -24,7 +24,7 @@ app.set('port', port);
 
 // var server = http.createServer(app);
 var server = http.Server(app);
-var io = require('socket.io')(server);
+var io = require('socket.io')(server,{path: '/api/soketForOnreport'});
 
 app.set('io',io);
 

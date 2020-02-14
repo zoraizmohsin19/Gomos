@@ -561,7 +561,8 @@ class viewDashboard extends Component {
       reconnection: true,
       reconnectionDelay: 1000,
       reconnectionDelayMax: 5000,
-      reconnectionAttempts: 99999
+      reconnectionAttempts: 99999,
+      path: "/api/soketForOnreport"
     });
     // console.log("This is log of socket");
     // console.log(socket)
@@ -975,7 +976,8 @@ class viewDashboard extends Component {
       reconnection: true,
       reconnectionDelay: 1000,
       reconnectionDelayMax: 5000,
-      reconnectionAttempts: 99999
+      reconnectionAttempts: 99999,
+      path: "/api/soketForOnreport"
     });
     lastError.emit('lastErrorClientEmit', body);
     lastError.on('lastErrorServerEmit', function (data) {
