@@ -46,7 +46,7 @@ class CustdashBoard extends Component {
 componentDidMount() {
   this.fetch();
 
-  fetch(`${URL.IP}:3992/getRegisterSP`)
+  fetch(`${URL.IP}/getRegisterSP`)
   .then(response => response.json())
   .then(json =>  {
   var spCd =  json.map( x =>  { return  x.spCd  });
@@ -62,11 +62,11 @@ componentDidMount() {
 fetch(){
     var items=[];
     this.setState({'in_prog':true});
-    // fetch('http://18.203.28.35:3992/getRegisterSP')
+    // fetch('http://18.203.28.35/getRegisterSP')
     // .then(response => response.json())
     // .then(json =>  {
         var me = this;
-        axios.post(`${URL.IP}:3992/getCustomerData`, {
+        axios.post(`${URL.IP}/getCustomerData`, {
             body: this.state.filter
            })
            .then(function (result) {
@@ -90,8 +90,8 @@ changePage(page){
     }
 onDeleteClick(_id){
     // var me = this;
-    // // delete('http://18.203.28.35:3992/delRegisterSPbyId?id='+ _id
-    // axios.delete('http://18.203.28.35:3992/delRegisterSPbyId?id='+ _id, {
+    // // delete('http://18.203.28.35/delRegisterSPbyId?id='+ _id
+    // axios.delete('http://18.203.28.35/delRegisterSPbyId?id='+ _id, {
        
     //    })
     //    .then(function (response) {

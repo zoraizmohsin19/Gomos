@@ -117,7 +117,7 @@ import axios from "axios";
         // alert(Phone);
    
      var me = this; 
-        axios.post('http://18.203.28.35:3992/registerSP', {
+        axios.post('http://18.203.28.35/registerSP', {
            body:arrayOfdata
           })
           .then(function (response) {

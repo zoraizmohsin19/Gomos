@@ -19,19 +19,19 @@ const TRACE_STAGE = 2;
 const TRACE_TEST  = 3;
 const TRACE_DEV   = 4;
 const TRACE_DEBUG = 5; 
-var  gomos = require("../../commanFunction/routes/commanFunction");
+var  gomos = require("../../commanfunction/routes/commanFunction");
 var midllelayer = require("../../EndPointMiddlelayer/routes/middlelayer");
 var aggragator = require("../../aggregatorService/routes/aggregatorFunction");
-let gomosDevices = require("../../commanFunction/routes/getDevices");
-let gomosAssets = require("../../commanFunction/routes/getAssets");
-let gomosSubCustCd = require("../../commanFunction/routes/getSubCustomers");
-let gomosCustCd = require("../../commanFunction/routes/getCustomer");
-let gomosSpCd = require("../../commanFunction/routes/getServiceProviders");
+let gomosDevices = require("../../commanfunction/routes/getDevices");
+let gomosAssets = require("../../commanfunction/routes/getAssets");
+let gomosSubCustCd = require("../../commanfunction/routes/getSubCustomers");
+let gomosCustCd = require("../../commanfunction/routes/getCustomer");
+let gomosSpCd = require("../../commanfunction/routes/getServiceProviders");
 
 
 //var gomosDevices = require("../../commanFunction/routes/getDevices");
 var urlConn, dbName;
-var  gomos = require("../../commanFunction/routes/commanFunction");
+var  gomos = require("../../commanfunction/routes/commanFunction");
 var fs = require("fs");
 let dateTime = require("node-datetime");
 var dt = dateTime.create();

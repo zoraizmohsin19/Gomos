@@ -5,11 +5,11 @@ var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 var fs = require('fs');
 var forwardNotification = require('./routes/forwardNotification');
-var alertService = require('./routes/alertService');
+// var alertService = require('./routes/alertService');
 var factService = require('./routes/factService');
 var usersRouter = require('./routes/users');
 var dateTime = require('node-datetime');
-var  gomos = require("../commanFunction/routes/commanFunction");
+var  gomos = require("../commanfunction/routes/commanFunction");
 
 //reads the data from config file which contains DB connection url and the DB Name.
 var appConfig = JSON.parse(fs.readFileSync(process.cwd() + '/appConfig.json', 'utf8'));
@@ -52,7 +52,7 @@ app.locals.urlConn = urlConn;
 app.locals.dbName = dbName;
 
 forwardNotification(app);
-alertService(app);
+// alertService(app);
 factService(app);
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -65,7 +65,7 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', forwardNotification);
-app.use('/alertService', alertService);
+// app.use('/alertService', alertService);
 app.use("/factService", factService)
 app.use('/users', usersRouter);
 

@@ -9,7 +9,7 @@ var fs = require("fs");
 var index = require("./routes/index");
 var users = require("./routes/users");
 var app = express();
-var  gomos = require("../commanFunction/routes/commanFunction");
+var  gomos = require("../commanfunction/routes/commanFunction");
 
 //reads the data from config file which contains DB connection url and the DB Name.
 var appConfig = JSON.parse(

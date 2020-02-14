@@ -42,7 +42,7 @@ import axios from "axios";
     }
     getSPApibyID(id){
         var me = this
-        axios.get('http://localhost:3992/getRegisterSPbyId?id='+ id)
+        axios.get('http://localhost/getRegisterSPbyId?id='+ id)
           .then(function (response) {
             // alert(response);
             console.log(response.data[0]);
@@ -174,7 +174,7 @@ import axios from "axios";
 
         const {id} = this.props.match.params;
         console.log(id +"this is id")
-        axios.put('http://localhost:3992/UpdateRegisterSPbyId?id='+ id, {
+        axios.put('http://localhost/UpdateRegisterSPbyId?id='+ id, {
            body:arrayOfdata
           })
           .then(function (response) {
