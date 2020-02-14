@@ -88,7 +88,7 @@ var me  = this;
     if(me.state.CommentInfo.factId !== undefined){
 
     
-    axios.get(`${URL.IP}:3992/comment/byfactId?factId=`+me.state.CommentInfo.factId)
+    axios.get(`${URL.IP}/comment/byfactId?factId=`+me.state.CommentInfo.factId)
     .then(json => {
     //  console.log("This is json Called", json)
        let comment = json["data"][0].data;
@@ -139,7 +139,7 @@ var me  = this;
         }
       //  console.log("This is comment Data For BackEnd", tempData)
         me.setState({submitBtn: true})
-        axios.post(`${URL.IP}:3992/comment/save`, tempData)
+        axios.post(`${URL.IP}/comment/save`, tempData)
         .then(json => {
           me.state.newComment.comment = "";
          me.setState({newComment: me.state.newComment});
@@ -167,7 +167,7 @@ var me  = this;
         }
       //  console.log("This is comment Data For BackEnd", tempData)
         me.setState({submitBtn: true})
-        axios.post(`${URL.IP}:3992/comment/update`, tempData)
+        axios.post(`${URL.IP}/comment/update`, tempData)
         .then(json => {
           me.state.newComment.comment = "";
          me.setState({newComment: me.state.newComment});
