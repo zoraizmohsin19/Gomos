@@ -29,6 +29,7 @@ class activeDashbord extends Component {
       selectedevent: "",
       deviceName: '',
       ProgramDetailsListObj: {},
+      manualOverrideStatus:{},
       show: false,
       open: true,
       instrInput1: "",
@@ -82,6 +83,7 @@ class activeDashbord extends Component {
         'Action': '',
         'page': 1,
         'page_size': 15,
+         'limit': 100,
       },
       'in_prog': false,
       submitDataObj: {
@@ -863,6 +865,7 @@ callApiForProgramFetch(objectpayload, selectedAtionType, selectedevent) {
 
 
     let arraymainKey = [...configkeyInput];
+    arraymainKey.splice(arraymainKey.indexOf("Packet"), 1)
     arraymainKey.splice(arraymainKey.indexOf("version"), 1)
     for (var key = 0; key < arraymainKey.length; key++) {
       if (ProgramDetailsListObj[arraymainKey[key]] === undefined || ProgramDetailsListObj[arraymainKey[key]] === null || ProgramDetailsListObj[arraymainKey[key]] === '') {
@@ -1108,6 +1111,18 @@ callApiForProgramFetch(objectpayload, selectedAtionType, selectedevent) {
     // //console.log(data);
     this.setState({ rowclickedData: data, sentCommandIndex: index, rowClickedId: id });
   }
+  transformExprFun(expression, value) {
+
+    try {
+      let fun = eval("(" + expression + ")")
+      return fun(value);
+    } catch (error) {
+      console.log("error", error)
+      return value
+    }
+
+  }
+
  
     callDeviceIdentifier(){
       return new Promise((resolve, reject) => {
@@ -1115,13 +1130,24 @@ callApiForProgramFetch(objectpayload, selectedAtionType, selectedevent) {
       axios.post(`${URL.IP}:3992/getDevicesIdentifier`,{mac:  me.state.submitDataObj.mac})
       .then(json =>  {
       let temp = JSON.parse(sessionStorage.getItem("ClientObj"));
-  
-  me.setState({AryfPayloadfromConfig:  temp.activeDashBoard["deviceTypes"][json["data"].deviceTypes].ConfADPayload.split(",")})
+      let tempObj ={}
+     for(let i = 0 ; i < json["data"].channel.length ; i++){
+       console.log("This is transFrom ", json["data"].channel[i]["devicebusinessNM"])
+      
+       tempObj[json["data"].channel[i]["devicebusinessNM"]] = {
+         0: me.transformExprFun(json["data"].channel[i].transformExpr.string, 0 ),
+         1: me.transformExprFun(json["data"].channel[i].transformExpr.string, 1 )
+       }
+     
+     }
+     console.log("This is TransFormed Data", tempObj)
+  me.setState({AryfPayloadfromConfig:  temp.activeDashBoard["deviceTypes"][json["data"].deviceTypes].ConfADPayload.split(","),
+  manualOverrideStatus: tempObj})
    resolve({AryfPayloadfromConfig:  temp.activeDashBoard["deviceTypes"][json["data"].deviceTypes].ConfADPayload.split(",")})
     });
   });
   }
-   componentDidMount() {
+   componentWillMount() {
     Object.prototype.isEmpty = function () {
       for (var key in this) {
         if (this.hasOwnProperty(key))
@@ -1304,6 +1330,13 @@ callApiForProgramFetch(objectpayload, selectedAtionType, selectedevent) {
               tempObj.push(json["data"][i]);
             }
           }
+          // THIS IS HARDCODED FOR EXCUTEDJOBS WE WILL  CHANGE SOON
+          let Exindex  = ClientObj.activeDashBoard.OperatingForms.findIndex(item => item.formStructure === "ExecutedJobs");
+          if(Exindex != -1){
+           let limit = ClientObj.activeDashBoard.OperatingForms[Exindex].config.limit;
+             me.state.filter.limit = limit
+
+          }
           let newTemp = ClientObj.activeDashBoard.OperatingForms.filter(item => item.payloadId === "");
           // console.log(newTemp)
           for (let j = 0; j < newTemp.length; j++) {
@@ -1313,14 +1346,14 @@ callApiForProgramFetch(objectpayload, selectedAtionType, selectedevent) {
           // console.log(tempObj);
           tempObj.sort((a, b) => a.position - b.position);
           //// console.log("this is container data");
-          me.setState({ actionTypes: tempObj, tilesPayloaddata: containerdata })
+          me.setState({ actionTypes: tempObj, tilesPayloaddata: containerdata, filter: me.state.filter })
         }
         else {
           me.setState({ actionTypes: [] })
         }
       });
-    let dataTime = new Date().addDay(-1);
-    me.state.filter.Fdate = moment(dataTime);
+    // let dataTime = new Date().addDay(-1);
+    // me.state.filter.Fdate = moment(dataTime);
     this.setState({ filter: me.state.filter })
   }
   timeDifference(date1, date2) {
@@ -1773,6 +1806,7 @@ callApiForProgramFetch(objectpayload, selectedAtionType, selectedevent) {
       startDate: this.state.startDatelimit,
       endDate: this.state.endDatelimit,
     }
+    me.firstrender([]) 
     axios.post(`${URL.IP}:3992/ActiveJobs`, ActiveBody)
       .then(json => {
         var ActiveJobsArray = json["data"]["ActiveJob"];
@@ -1858,7 +1892,7 @@ callApiForProgramFetch(objectpayload, selectedAtionType, selectedevent) {
       var startDate = new Date(sStartdate).addHours(value).toISOString();
       var endDate = new Date(startDate).addHours(value).toISOString();
 
-      me.setState({ startDate: startDate, endDate: endDate, ActionVF: 1 });
+    //  me.setState({ startDate: startDate, endDate: endDate, ActionVF: 1 });
       if (this.state.endDatelimit < endDate) {
         var startDatelimit = new Date(me.state.startDatelimit).addDay(1).toISOString();
         var endDatelimit = new Date(me.state.endDatelimit).addDay(1).toISOString();
@@ -1890,6 +1924,7 @@ callApiForProgramFetch(objectpayload, selectedAtionType, selectedevent) {
   }
   filterdata(maindata, startDate, endDate) {
     const { ActionVF } = this.state;
+    if(maindata.length > 0){
     var resultdata = maindata.filter(item => item.ActionTime >= startDate && item.ActionTime <= endDate);
     //alert("console is print");
     //console.log("this is result data ");
@@ -1909,6 +1944,10 @@ callApiForProgramFetch(objectpayload, selectedAtionType, selectedevent) {
       });
     }
     this.setState({ ActiveJobsArray: resultdata });
+  }else{
+    this.setState({ ActiveJobsArray: [] });
+  }
+   
   }
   selectedActioV(e) {
     //alert(e.target.value);
@@ -2331,7 +2370,7 @@ callApiForProgramFetch(objectpayload, selectedAtionType, selectedevent) {
                     {/* { programForIndex == '' && this.state.configkeyInputKeyValue["ArrayOfProg"][programForIndex]["items"].length == 0 && <tr><td colSpan={8} className='text-center'> No Data </td></tr>} */}
                     {!ProgramDetailsListObj.isEmpty() && Object.keys(ProgramDetailsListObj).length !== undefined && Object.keys(ProgramDetailsListObj).length !== 0 && ProgramDetailsListObj["schedules"].map((item, index) => <tr>
                       <td className='text-center '>{index + 1}</td>
-                      <td className='text-center '>
+                      <td className=' '>
                         <div className="tableDropDown">
                           <DropdownButton
                             disabled={(ProgramDetailsListObj["viewFlag"]) ? true : null}
@@ -2796,6 +2835,7 @@ callApiForProgramFetch(objectpayload, selectedAtionType, selectedevent) {
             <DatePicker id="Fromfilter"
               selected={this.state.filter.Fdate}
               onChange={this.MdateFilter}
+              disabled
               showTimeSelect
               showMonthDropdown
               showYearDropdown
@@ -2803,7 +2843,7 @@ callApiForProgramFetch(objectpayload, selectedAtionType, selectedevent) {
               timeIntervals={15}
               dateFormat="LLL"
               timeCaption="time"
-              isClearable={true}
+             // isClearable={true}
               // isClearable={true}
               className="ExecutejobDatepiker"
               placeholderText="From Date"
@@ -2837,7 +2877,7 @@ callApiForProgramFetch(objectpayload, selectedAtionType, selectedevent) {
                 </tr>
               )}
             </tbody>
-            {"Pages: " + total_page}
+            { total_page > 1 && "Pages: " + total_page}
           </Table>
         </div>
         <div className='align-right'>
@@ -2847,7 +2887,7 @@ callApiForProgramFetch(objectpayload, selectedAtionType, selectedevent) {
 
     }
 
-
+console.log("this.state.channelArray",this.state.channelArray)
     return (
       <div className="container-fluid ">
         <div className="row">
@@ -2911,7 +2951,7 @@ callApiForProgramFetch(objectpayload, selectedAtionType, selectedevent) {
                         takenClass="ActivedateTime"
                         P_name_class="ActivePclass"
                         heading_class_name=" ActiveSheading"
-                        message={(item.Value === 1) ? "ON" : "OFF"}
+                        message={(this.state.manualOverrideStatus[item.devicebusinessNM] !=undefined) ? this.state.manualOverrideStatus[item.devicebusinessNM][item.Value] : ""}
                         div_icon_class=" fontsizeicon12"
                         iconclass={item.mode}
                         dateTime={dateFormat(item.dateTime, "dd-mmm HH:MM")}
@@ -3052,16 +3092,16 @@ callApiForProgramFetch(objectpayload, selectedAtionType, selectedevent) {
           <Modal.Body>
             <div className="row">
               <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-                <label>Channel Name :</label> <span>{this.state.channelAlerrModel.channelName}</span>
+                <label>Channel Name :</label> <span>{this.state.channelAlerrModel.channelName }</span>
               </div>
               <div className="col-lg-5 col-md-5 col-sm-5 col-xs-12">
-                <label>Current Status :</label> <span>{(this.state.channelAlerrModel.currentStatus === 1) ? "ON" : "OFF"}</span>
+                <label>Current Status :</label> <span>{  (this.state.manualOverrideStatus[this.state.channelAlerrModel.channelName] !=undefined) ? this.state.manualOverrideStatus[this.state.channelAlerrModel.channelName][this.state.channelAlerrModel.currentStatus] : ""}</span>
               </div>
               <div className="col-lg-7 col-md-7 col-sm-7 col-xs-12">
                 <label> Last Updated Time :</label> <span>{this.state.channelAlerrModel.UpdatedTime}</span>
               </div>
               <div className="col-lg-7 col-md-7 col-sm-7 col-xs-12">
-                <label>Channel is  {(this.state.channelAlerrModel.currentStatus === 1) ? "ON" : "OFF"} since :</label> <span>{this.state.channelAlerrModel.age} hrs.</span>
+                <label>Channel is  {(this.state.manualOverrideStatus[this.state.channelAlerrModel.channelName] !=undefined) ? this.state.manualOverrideStatus[this.state.channelAlerrModel.channelName][this.state.channelAlerrModel.currentStatus] : ""} since :</label> <span>{this.state.channelAlerrModel.age} hrs.</span>
               </div>
               <div className="col-lg-12 col-md-12 col-sm-12 col-xs-12 col-xs-12">
                 <label>Current Mode :</label> <span>{(this.state.channelAlerrModel.mode === 1) ? "Automatic" : "Manual"}</span>
@@ -3069,7 +3109,7 @@ callApiForProgramFetch(objectpayload, selectedAtionType, selectedevent) {
             </div>
           </Modal.Body>
           <Modal.Footer>
-            <label className="Mlabel">Action Requested: <u> Switch {(this.state.channelAlerrModel.currentStatus === 1) ? "OFF" : "ON"}</u> And <u>Manual</u> Please Confirm ?</label>
+                <label className="Mlabel">Action Requested: <u> Switch {(this.state.manualOverrideStatus[this.state.channelAlerrModel.channelName] !=undefined) ? (this.state.channelAlerrModel.currentStatus === 1)?this.state.manualOverrideStatus[this.state.channelAlerrModel.channelName][1] :this.state.manualOverrideStatus[this.state.channelAlerrModel.channelName][0] : ""}</u> And <u>Manual</u> Please Confirm ?</label>
             <button className="btn btn-sm " onClick={this.handleClose}>Cancel</button>
             <button className="btn btn-sm btn-success" onClick={this.handleSubmit} >Submit</button>
           </Modal.Footer>

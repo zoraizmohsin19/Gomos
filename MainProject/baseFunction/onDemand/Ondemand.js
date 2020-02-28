@@ -37,6 +37,7 @@ webpush.setVapidDetails(
   vapid.publicKey,
   vapid.privateKey
 )
+
 //var gomosDevices = require("../../commanFunction/routes/getDevices");
 var urlConn, dbName;
 var fs = require("fs");
@@ -51,7 +52,9 @@ var gConsole = false;
 if(process.argv[4] == SERVICE_VALUE ){
   gConsole = true;
 }
-
+var envJson = JSON.parse(
+  fs.readFileSync(process.cwd() + "/env.json", "utf8")
+);
 /* GET home page. */
 router.get("/", function (req, res, next) {
   res.render("index", { title: "Express" });
@@ -1439,8 +1442,8 @@ router.post("/executedJob", function (req, res, next) {
         }
       if(body['Fdate'] != undefined && body['Fdate'] != null && body['Fdate'] != ''){
         criteria["sourceMsg.body.ActionTime"]    =  {
-          $gte: new Date(body['Fdate']),
-          $lte: new Date(new Date().toISOString())  
+          $gte: body['Fdate'],
+          $lte: new Date().toISOString()  
       }}
         if(body['Action'] != undefined && body['Action'] != null && body['Action'] != ''){
           criteria["sourceMsg.body.ActionType"]    =   body['Action'];
@@ -1472,7 +1475,7 @@ router.post("/executedJob", function (req, res, next) {
 
       })
 
-      db.collection("DeviceInstruction").find(criteria).toArray(function (err, result) {
+      db.collection("DeviceInstruction").find(criteria).sort({"createdTime": -1}).toArray(function (err, result) {
         if (err) {
           gomos.errorCustmHandler(NAMEOFSERVICE,"DeviceInstruction","","",err);
           gomos.gomosLog( logger,gConsole,TRACE_PROD,"This is error",err);
@@ -1494,7 +1497,8 @@ router.post("/executedJob", function (req, res, next) {
                     temObj["ActionTime"]  =  result[i].sourceMsg.body.ActionTime;
                   }
                   InActiveJobs.push(temObj);
-              }
+              } 
+              // InActiveJobs.sort((a, b) => a.ActionTime - b.ActionTime);
                     json["executedJob"] = InActiveJobs;
                     json["count"] = data_count;
                     // json["page"] = page;
@@ -1531,11 +1535,13 @@ router.post("/ActiveJobs", function (req, res, next) {
         mac: mac,
         type: "ActiveJob"
       }
-      criteria["$or"]= [ {"sourceMsg.isDailyJob": true},{
-        "sourceMsg.body.ActionTime": {
+      criteria["$and"]= [ {"$or": [{ "sourceMsg.body.expiryDate":{$gte: startDate,  $lte:endDate }}, {"sourceMsg.body.expiryDate": ""}] },{
+        "$or": [
+          {"sourceMsg.isDailyJob": true},
+        {"sourceMsg.body.ActionTime": {
           $gte: new Date(startDate),
           $lte: new Date(endDate)  
-      }}];
+      }} ]}];
       gomos.gomosLog( logger,gConsole,TRACE_DEV,"This is start and end time of Active jobs", startDate + endDate);
       gomos.gomosLog( logger,gConsole,TRACE_DEBUG,"This is debug of ActiveJobs",criteria );
       var db = connection.db(dbName);
@@ -1655,24 +1661,25 @@ router.post("/ActiveJobs", function (req, res, next) {
   
 function compareDate(str1){
   gomos.gomosLog( logger,gConsole,TRACE_PROD,"this what coming Date", str1)
-  var arraydate = str1.split(":")
+  let arraydate = str1.split(":")
 
-  var yr1
-  var mon1
-  var dt1
+  let yr1
+  let mon1
+  let dt1;
+  let date1
   if(arraydate[2]=="*" && arraydate[2]=="*" && arraydate[2]=="*" ){
-   var dataTime = new Date();
+   let dataTime = new Date();
    yr1 = dataTime.getFullYear();
    mon1 = dataTime.getMonth();
    dt1 = dataTime.getDate();
-  var date1 = new Date(yr1, mon1, dt1,arraydate[3], arraydate[4], arraydate[5]);
+   date1 = new Date(yr1, mon1, dt1,arraydate[3], arraydate[4], arraydate[5]);
   gomos.gomosLog( logger,gConsole,TRACE_DEBUG,"this Date Object if part",date1);
 
   }else{
     yr1 =  arraydate[0];
     mon1 =  arraydate[1];
     dt1 = arraydate[2];
-  var date1 = new Date("20"+yr1, mon1 - 1, dt1,arraydate[3], arraydate[4], arraydate[5]);
+   date1 = new Date("20"+yr1, mon1 - 1, dt1,arraydate[3], arraydate[4], arraydate[5]);
   gomos.gomosLog( logger,gConsole,TRACE_DEBUG,"this Date Object elsepart",date1);
 
   }
@@ -1850,7 +1857,35 @@ router.post("/ActiveDAction", function (req, res, next) {
               gomos.gomosLog( logger,gConsole,TRACE_DEBUG, "this err", err);
             }
             gomos.gomosLog( logger,gConsole,TRACE_DEBUG, "this is message Value 2", message);
-            deviceNotification.endPointMiddelayerFn(urlConn, dbName, res, CustCd, subCustCd, DeviceName, payloadId, dataTime, message, Token);
+            if(payloadId == "SetProgram"){
+              let arrayOfMessage =[];
+
+            // for(let i= 0;  i < message.schedules.length / 10; i++){
+            //   console.log("This is called", i)
+
+
+            // }
+            var i,j,chunk = envJson.SETPROGRAM_PACKET_LIMIT;
+            let NOfPacket = Math.ceil(message.schedules.length / chunk);
+            for (i=0,j=message.schedules.length; i<j; i+=chunk) {
+                let tempObj = {}
+                  for (let [key, value] of Object.entries(message)) {
+                    tempObj[key] = value;
+                  }
+                  tempObj["schedules"] = message.schedules.slice(i,i+chunk);
+                  tempObj["Packet"] = []
+                  tempObj["Packet"][0] =  parseInt(i / chunk) + 1;
+                  tempObj["Packet"][1] = NOfPacket;
+                  arrayOfMessage.push(tempObj)
+
+            }
+            gomos.gomosLog( logger,gConsole,TRACE_DEBUG, "this is message of packet", arrayOfMessage);
+
+               deviceNotification.endPointMiddelayerFnForBulkWithRemark(urlConn, dbName, res, CustCd, subCustCd, DeviceName, payloadId, dataTime, arrayOfMessage, Token,"PlatForm");
+
+            }else{
+              deviceNotification.endPointMiddelayerFn(urlConn, dbName, res, CustCd, subCustCd, DeviceName, payloadId, dataTime, message, Token);
+            }
           })
     });
 });
@@ -1904,9 +1939,37 @@ router.post("/ActiveAPiForLevel4", function (req, res, next) {
             if (err) {
               gomos.gomosLog( logger,gConsole,TRACE_DEBUG, "this err", err);
             }
+            if(payloadId == "SetProgram"){
+              let arrayOfMessage =[];
+
+            // for(let i= 0;  i < message.schedules.length / 10; i++){
+            //   console.log("This is called", i)
+
+
+            // }
+            var i,j,chunk = envJson.SETPROGRAM_PACKET_LIMIT;
+            let NOfPacket = Math.ceil(message.schedules.length / chunk);
+            for (i=0,j=message.schedules.length; i<j; i+=chunk) {
+                let tempObj = {}
+                  for (let [key, value] of Object.entries(message)) {
+                    tempObj[key] = value;
+                  }
+                  tempObj["schedules"] = message.schedules.slice(i,i+chunk);
+                  tempObj["Packet"] = []
+                  tempObj["Packet"][0] =  parseInt(i / chunk) + 1;
+                  tempObj["Packet"][1] = NOfPacket;
+                  arrayOfMessage.push(tempObj)
+
+            }
+            gomos.gomosLog( logger,gConsole,TRACE_DEBUG, "this is message of packet", arrayOfMessage);
+
+               deviceNotification.endPointMiddelayerFnForBulkWithRemark(urlConn, dbName, res, CustCd, subCustCd, DeviceName, payloadId, dataTime, arrayOfMessage, Token,"PlatForm");
+
+            }else{
             gomos.gomosLog( logger,gConsole,TRACE_DEBUG, "this is message Value 2", message);
             deviceNotification.endPointMiddelayerFnWithRemark(urlConn, dbName, res, CustCd, subCustCd, DeviceName, payloadId, dataTime, message, Token,body.remark);
-          })
+           }
+           })
     });
 });
 

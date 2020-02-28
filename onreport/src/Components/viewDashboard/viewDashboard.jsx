@@ -489,7 +489,7 @@ class viewDashboard extends Component {
           console.log("This is objetemp", objtemp)
           if (objtemp.transformExpr != undefined && objtemp.transformExpr != "") {
             for (let i = 0; i < dataArray.length; i++) {
-              dataArray[i][key[j]] = me.transformExprFun(objtemp.transformExpr, dataArray[i][key[j]])
+              dataArray[i][key[j]] = me.transformExprFun(objtemp.transformExpr.numeric, dataArray[i][key[j]])
             }
           }
 
@@ -602,7 +602,7 @@ class viewDashboard extends Component {
           // if( selectedDeviceName == 'Bed3_ec63' || selectedDeviceName == "Bed1_3bd1" || selectedDeviceName == "Bed2_427f" || selectedDeviceName == "CONT_e737" ){
           let objtemp = deviceIdentifier.find(item => item.devicebusinessNM == dataofSensors[i].devicebusinessNM);
           if (objtemp.transformExpr != undefined && objtemp.transformExpr != "") {
-            dataObj["valuseS"] = me.transformExprFun(objtemp.transformExpr, dataofSensors[i].Value)
+            dataObj["valuseS"] = me.transformExprFun(objtemp.transformExpr.numeric, dataofSensors[i].Value)
           }
           // }
 
@@ -926,7 +926,7 @@ class viewDashboard extends Component {
         // if( selectedDeviceName == 'Bed3_ec63' || selectedDeviceName == "Bed1_3bd1" || selectedDeviceName == "Bed2_427f" || selectedDeviceName == "CONT_e737" ){
         let objtemp = deviceIdentifier.find(item => item.devicebusinessNM == dataofSensors[i].devicebusinessNM);
         if (objtemp.transformExpr != undefined && objtemp.transformExpr != "") {
-          dataObj["valuseS"] = me.transformExprFun(objtemp.transformExpr, dataofSensors[i].Value)
+          dataObj["valuseS"] = me.transformExprFun(objtemp.transformExpr.numeric, dataofSensors[i].Value)
         }
         // }
 
