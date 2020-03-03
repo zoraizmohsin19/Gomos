@@ -231,13 +231,18 @@ for(let i =0 ; i < response.length ; i++ ){
    let p = await webpush.sendNotification( response[i].subscription[j], txt)
      .catch( status => {
        // Check for "410 - Gone" status and mark for deletion
+       gomos.gomosLog(logger,gConsole,g.TRACE_TEST,"This is catch of pushNotificationTo Users statusCode",status.statusCode);
        if (status.statusCode === 410) { 
          flag = true;
          response[i].subscription[j]['delete'] = true }
+         gomos.errorCustmHandler(NAMEOFSERVICE,"pushNotificationToUsers",'This is pushNotificationToUsers Error',`Id ${data._id}`,status,g.ERROR_RUNTIME,g.ERROR_FALSE,g.EXIT_FALSE);
      })
+     gomos.gomosLog(logger,gConsole,g.TRACE_TEST,`THIS  PUSHNOTIFICATIONS  RESPONSE OF mac ${data.mac}  AND SUBSCRIBE USER : ${response[i].userId}`,p.statusCode);
+
     }
+   
     response[i].subscription = response[i].subscription.filter(subscription => !subscription.delete)
- gomos.gomosLog(logger,gConsole,g.TRACE_DEBUG,`THIS RESULT OF LAST FILTERED  SUBCRIPTION `, response[i]);
+ gomos.gomosLog(logger,gConsole,g.TRACE_TEST,`THIS RESULT OF LAST FILTERED  SUBCRIPTION `, response[i]);
     if(flag){
      let RES = await updateUserForPushSubcription( response[i]);
      gomos.gomosLog(logger,gConsole,g.TRACE_DEBUG,`THIS RESULT OF LAST FILTERED  SUBCRIPTION UPDATE RESPONSE `, RES);
