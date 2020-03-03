@@ -33,7 +33,7 @@ module.exports.activeUers = function (NAMEOFSERVICE,logger,gConsole,email) {
 module.exports.getUsersBymac = function (NAMEOFSERVICE,logger,gConsole,mac) {
   return new Promise((resolve, reject) => {
     //  console.log("email",email)
-      UsersModel.find({'devicePreference.mac': mac, 'devicePreference.pusNotification': true}).then(res =>{
+      UsersModel.find({devicePreference:{"$elemMatch" :{mac: mac, pusNotification: true}} }).then(res =>{
            console.log("this is  getUsersBymac ", res)
          
         

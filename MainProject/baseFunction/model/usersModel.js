@@ -49,7 +49,7 @@ var UsersSchema = new mongoose.Schema({
         type: String
        
     },
-    Devicepreference: {
+    devicePreference: {
      type: schemaTypes.Mixed
     },
     subscription: {
