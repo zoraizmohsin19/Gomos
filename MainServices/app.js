@@ -13,8 +13,10 @@ var  gomos = require("../commanfunction/routes/commanFunction");
 
 //reads the data from config file which contains DB connection url and the DB Name.
 var appConfig = JSON.parse(fs.readFileSync(process.cwd() + '/appConfig.json', 'utf8'));
+// var appConfig2 = JSON.parse(fs.readFileSync(process.cwd() + '/appConfig2.json', 'utf8'));
 
 var urlConn, dbName;
+// var urlConn2, dbName2;
 
 var app = express();
 
@@ -28,18 +30,22 @@ var log_file_err = fs.createWriteStream(process.cwd() + '/error-' + formattedDat
 //accordingly.
 if (process.argv[2] == "dev") {
   urlConn = appConfig.devURL; dbName = appConfig.devDB;
+  // urlConn2 = appConfig2.devURL; dbName2 = appConfig2.devDB
   console.log("Environment set to : Development");
 } 
 else if (process.argv[2] == "test") {
   urlConn = appConfig.testURL; dbName = appConfig.testDB;
+  // urlConn2 = appConfig2.testURL; dbName2 = appConfig2.testDB;
   console.log("Environment set to : Testing");
 } 
 else if (process.argv[2] == "stage") {
   urlConn = appConfig.stageURL; dbName = appConfig.stageDB;
+  // urlConn2 = appConfig2.stageURL; dbName2 = appConfig2.stageDB;
   console.log("Environment set to : Staging");
 }
 else if (process.argv[2] == "prod") {
   urlConn = appConfig.prodURL; dbName = appConfig.prodDB;
+  // urlConn2 = appConfig2.prodURL; dbName2 = appConfig2.prodDB;
   console.log("Environment set to : Production");
 }
 else {
@@ -50,6 +56,8 @@ else {
 //set app level local vars
 app.locals.urlConn = urlConn;
 app.locals.dbName = dbName;
+// app.locals.urlConn2 = urlConn2;
+// app.locals.dbName2 = dbName2;
 
 forwardNotification(app);
 // alertService(app);
