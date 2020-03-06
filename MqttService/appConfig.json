@@ -1,35 +1,35 @@
 {
-	"comments": "Make sure to edit other config files of services like OnDemand, Scheduled and Alerts withoutfail",
+	"comments": "Make sure to edit other config files of services like OnDemand, Scheduled  mongodb://gomos:gomos123@34.244.151.117:27017/gomos and Alerts withoutfail",
 	"devURL": {
-		"url1": "mongodb://gomosdev:gomos123@ds253284.mlab.com:53284/gomosdev",
-		"url2": "mongodb://gomosdev:gomos123@ds253284.mlab.com:53284/gomosdev"
+		"listnerUrl": "mongodb://gomosdev:gomos123@ds253284.mlab.com:53284/gomosdev",
+		"mainUrl": "mongodb://gomosdev:gomos123@ds253284.mlab.com:53284/gomosdev"
 	},
 	"devDB": {
-		"db1": "gomosdev",
-		"db2": "gomosdev"
+		"listnerDB": "gomosdev",
+		"mainDB": "gomosdev"
 	},
 	"testURL": {
-		"url1": "mongodb://gomos:gomos123@ds227171.mlab.com:27171/gomos",
-		"url2": "mongodb://gomos:gomos123@34.244.151.117:27017/gomos"
+		"listnerUrl": "mongodb://gomos:gomos123@ds227171.mlab.com:27171/gomos",
+		"mainUrl": "mongodb://gomos:gomos123@ds227171.mlab.com:27171/gomos"
 	},
 	"testDB": {
-		"db1": "gomos",
-		"db2": "gomos"
+		"listnerDB": "gomos",
+		"mainDB": "gomos"
 	},
 	"stageURL": {
-		"url1": "mongodb://gomos:gomos123@ds227171.mlab.com:27171/gomos",
-		"url2": "mongodb://gomos:gomos123@34.244.151.117:27017/gomos"
+		"listnerUrl": "mongodb://gomos:gomos123@ds227171.mlab.com:27171/gomos",
+		"mainUrl": "mongodb://gomos:gomos123@ds227171.mlab.com:27171/gomos"
 	},
 	"stageDB": {
-		"db1": "gomos",
-		"db2": "gomos"
+		"listnerDB": "gomos",
+		"mainDB": "gomos"
 	},
 	"prodURL": {
-		"url1": "mongodb://gomosprod:gomos123@ds129018.mlab.com:29018/gomosprod",
-		"url2": "mongodb://gomosprod:gomos123@ds129018.mlab.com:29018/gomosprod"
+		"listnerUrl": "mongodb://gomosprod:gomos123@ds129018.mlab.com:29018/gomosprod",
+		"mainUrl": "mongodb://gomosprod:gomos123@ds129018.mlab.com:29018/gomosprod"
 	},
 	"prodDB": {
-		"db1": "gomosprod",
-		"db2": "gomosprod"
+		"listnerDB": "gomosprod",
+		"mainDB": "gomosprod"
 	}
 }
