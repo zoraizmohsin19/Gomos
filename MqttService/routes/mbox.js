@@ -409,25 +409,26 @@ function onMqttDisconnect() {
 module.exports = function (app) {
   urlConn = app.locals.urlConn;
   dbName = app.locals.dbName;
-  gomos.gomosLog( logger,gConsole, TRACE_TEST,"THIS IS DATABASE URL",urlConn);  
+  gomos.gomosLog( logger,gConsole, TRACE_TEST,"THIS IS DATABASE URL",urlConn);
+  console.log("db", dbName)  
   
   MongoClient.connect(
-    urlConn.url1,
+    urlConn.listnerUrl,
     { useNewUrlParser: true },
     function (err, connection1) {
       if (err) {
         gomos.errorCustmHandler(NAMEOFSERVICE,"handleMqttMessage",'THIS IS MONGO CLIENT CONNECTION ERROR',urlConn,err,ERROR_DATABASE,ERROR_TRUE,EXIT_TRUE);    
       }
-     listnerDB = connection1.db(dbName.db1);
-     if(urlConn.url1 != urlConn.url2){
+     listnerDB = connection1.db(dbName.listnerDB);
+     if(urlConn.listnerUrl != urlConn.mainUrl){
       MongoClient.connect(
-        urlConn.url2,
+        urlConn.mainUrl,
         { useNewUrlParser: true },
         function (err, connection2) {
           if (err) {
             gomos.errorCustmHandler(NAMEOFSERVICE,"handleMqttMessage",'THIS IS MONGO CLIENT CONNECTION ERROR',urlConn,err,ERROR_DATABASE,ERROR_TRUE,EXIT_TRUE);    
           }
-          mainDB = connection2.db(dbName.db2);
+          mainDB = connection2.db(dbName.mainDB);
           gomos.gomosLog( logger,gConsole, TRACE_TEST," THIS IS SECOND DATABASE OPENED BECAUSE OF URL IS NOT SAME");  
         })
      }else{

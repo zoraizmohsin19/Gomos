@@ -2,15 +2,15 @@
 	"comments": "Make sure to edit other config files of services like OnDemand, Scheduled and Alerts withoutfail",
 	"devURL": {
 		"listnerUrl": "mongodb://gomosdev:gomos123@ds253284.mlab.com:53284/gomosdev",
-		"mainUrl": "mongodb://gomos:gomos123@34.244.151.117:27017/gomos"
+		"mainUrl": "mongodb://gomosdev:gomos123@ds253284.mlab.com:53284/gomosdev"
 	},
 	"devDB": {
 		"listnerDB": "gomosdev",
-		"mainDB": "gomos"
+		"mainDB": "gomosdev"
 	},
 	"testURL": {
 		"listnerUrl": "mongodb://gomos:gomos123@ds227171.mlab.com:27171/gomos",
-		"mainUrl": "mongodb://gomos:gomos123@34.244.151.117:27017/gomos"
+		"mainUrl": "mongodb://gomos:gomos123@ds227171.mlab.com:27171/gomos"
 	},
 	"testDB": {
 		"listnerDB": "gomos",
@@ -18,7 +18,7 @@
 	},
 	"stageURL": {
 		"listnerUrl": "mongodb://gomos:gomos123@ds227171.mlab.com:27171/gomos",
-		"mainUrl": "mongodb://gomos:gomos123@34.244.151.117:27017/gomos"
+		"mainUrl": "mongodb://gomos:gomos123@ds227171.mlab.com:27171/gomos"
 	},
 	"stageDB": {
 		"listnerDB": "gomos",
