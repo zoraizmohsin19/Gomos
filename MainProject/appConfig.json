@@ -1,8 +1,8 @@
 {
 	"comments": "Make sure to edit other config files of services like OnDemand, Scheduled and Alerts withoutfail",
 	"dev": ["mongodb://gomosdev:gomos123@ds253284.mlab.com:53284/gomosdev","Development"],
-	"test":[ "mongodb://gomos:gomos123@ds227171.mlab.com:27171/gomos","Testing"],
-	"stage": ["mongodb://gomos:gomos123@ds227171.mlab.com:27171/gomos","Staging"],
+	"test":[ "mongodb://gomos:gomos123@34.244.151.117:27017/gomos","Testing"],
+	"stage": ["mongodb://gomos:gomos123@34.244.151.117:27017/gomos","Staging"],
 	"prod": ["mongodb://gomosprod:gomos123@ds129018.mlab.com:29018/gomosprod","Production"]
 
 }

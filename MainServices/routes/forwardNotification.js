@@ -435,7 +435,7 @@ async function getAllconfig() {
   fNSrvcSchedule = await gomosSchedule.getServiceConfig(
     dbo,
     NAMEOFSERVICE,
-    "factSrvc",logger,gConsole
+    "forwardNotification",logger,gConsole
   );
   dataFromDevices = await gomosDevices.getDevices(dbo, NAMEOFSERVICE,logger,gConsole);
   dataFromAssets = await gomosAssets.getAssets(dbo, NAMEOFSERVICE,logger,gConsole);
@@ -451,13 +451,13 @@ module.exports = function (app) {
     gConsole = true;
   }
   MongoClient.connect(
-    urlConn,
+    urlConn.mainUrl,
     { useNewUrlParser: true },
     function (err, connection) {
       if (err) {
         gomos.errorCustmHandler(NAMEOFSERVICE,"module.exports",`This is DataBase Connection Error`,``,err,ERROR_DATABASE,ERROR_TRUE,EXIT_TRUE);         
       }
-       dbo = connection.db(dbName);
+       dbo = connection.db(dbName.mainDB);
     })
   setTimeout(function() {
     getAllconfig();

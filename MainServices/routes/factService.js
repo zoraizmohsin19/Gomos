@@ -10,7 +10,8 @@ var dataFromDevices = [],
   dataFromPayload = [];
 var factSrvcSchedule;
 const uuidv4 = require("uuid/v4");
-var dbo;
+var mainDB;
+var listnerDB;
 var fs = require("fs");
 var dateTime = require("node-datetime");
 /* GET home page. */
@@ -92,7 +93,7 @@ function processFactMessages() {
   //var tempSchedule = scheduleTemp.scheduleJob("*/30 * * * * *", function() {
   let tempSchedule = scheduleTemp.scheduleJob(schPattern, function () {
     gomos.gomosLog(logger, gConsole, TRACE_PROD, "Processing Started - Fact Messages");
-    dbo
+    listnerDB
       .collection("MqttDump")
       .find({ processed: "N" }).sort({ "createdtime": 1 })
       .limit(100)
@@ -143,7 +144,7 @@ function processFactMessages() {
 
 function mainpipeLineProcessing(mac, processedFlag, createdTime, updatedTime, payloadId, id, currentTime, index) {
   return new Promise((resolve, reject) => {
-    dbo
+    listnerDB
       .collection("MqttDump")
       .findOneAndUpdate(
         {
@@ -170,7 +171,7 @@ function mainpipeLineProcessing(mac, processedFlag, createdTime, updatedTime, pa
           gomos.gomosLog(logger, gConsole, TRACE_DEV, "processFactMessages - going to process after updation for id, mac , payloadid and CreatedTime", objId + ":" + mac + ":" + payloadId + ":" + createdTime + ": " + index);
           if (dataFromPayload.filter(item => item.mac == mac).length == 0) {
             processedFlag = "E";
-            response = await updateMQTT(objId, dbo, processedFlag);
+            response = await updateMQTT(objId, listnerDB, processedFlag);
             gomos.gomosLog(logger, gConsole, TRACE_TEST, "Payloads Not Present : Please associate with - ", mac);
             gomos.errorCustmHandler(NAMEOFSERVICE, "mainpipeLineProcessing", 'Payloads Not Present : Please associate with - ', `payload  not present For this mac ${mac} and Index ${index}`, "", ERROR_APPLICATION, ERROR_FALSE, EXIT_FALSE);
             resolve({ "macNotFount": response })
@@ -180,7 +181,7 @@ function mainpipeLineProcessing(mac, processedFlag, createdTime, updatedTime, pa
             if (
               filetredPayloads.filter(item => item.payloadId == payloadId).length == 0) {
               processedFlag = "E";
-              response = await updateMQTT(objId, dbo, processedFlag);
+              response = await updateMQTT(objId, listnerDB, processedFlag);
               gomos.gomosLog(logger, gConsole, TRACE_TEST, "Payloads Not Present : Please associate with", mac + ":" + payloadId);
               gomos.errorCustmHandler(NAMEOFSERVICE, "mainpipeLineProcessing", 'Payloads Not Present : Please associate with - ', `payload  not present For this mac ${mac} and ${payloadId} and Index ${index}`, "", ERROR_APPLICATION, ERROR_FALSE, EXIT_FALSE);
               resolve({ "payloadNotFount": response })
@@ -193,7 +194,7 @@ function mainpipeLineProcessing(mac, processedFlag, createdTime, updatedTime, pa
               gomos.gomosLog(logger, gConsole, TRACE_DEBUG, "processFactMessages - filteredpayloads where payloadId matched " + payloadId, sensorNms);
               if (processByFact !== "Y" || processByFact == undefined) {
                 processedFlag = "IG";
-                response = await updateMQTT(objId, dbo, processedFlag);
+                response = await updateMQTT(objId, listnerDB, processedFlag);
                 gomos.gomosLog(logger, gConsole, TRACE_TEST, " Ignoring Payload - ProcessByFact Value", processByFact + ":" + mac + ":" + payloadId);
                 gomos.errorCustmHandler(NAMEOFSERVICE, "mainpipeLineProcessing", 'Ignoring Payload - ProcessByFact Value - ', `payload  not present For this processByFact ${processByFact}, mac ${mac} and ${payloadId} and Index ${index}`, "", ERROR_APPLICATION, ERROR_FALSE, EXIT_FALSE);
                 resolve({ "processByFact": response })
@@ -203,7 +204,7 @@ function mainpipeLineProcessing(mac, processedFlag, createdTime, updatedTime, pa
                 //of particular mac.
                 if (dataFromDevices.filter(item => item.mac == mac).length == 0) {
                   processedFlag = "E";
-                  response = await updateMQTT(objId, dbo, processedFlag);
+                  response = await updateMQTT(objId, listnerDB, processedFlag);
                   gomos.gomosLog(logger, gConsole, TRACE_TEST, "Device Not Present : Please add a Device for - ", mac);
                   gomos.errorCustmHandler(NAMEOFSERVICE, "mainpipeLineProcessing", 'Device Not Present : Please add a Device for - ', `Device Not Present : Please add a Device for this processByFact ${processByFact}, mac ${mac} and ${payloadId} and Index ${index}`, "", ERROR_APPLICATION, ERROR_FALSE, EXIT_FALSE);
                   resolve({ "DeviceNotPresent": response })
@@ -216,7 +217,7 @@ function mainpipeLineProcessing(mac, processedFlag, createdTime, updatedTime, pa
                  if (dataFromSubCust.filter(item => item.subCustCd == subCustCd).length == 0
                     ) {
                       processedFlag = "E";
-                      response = await updateMQTT(objId, dbo, processedFlag);
+                      response = await updateMQTT(objId, listnerDB, processedFlag);
                       gomos.gomosLog(logger, gConsole, TRACE_TEST, "SubCustomers Not Present for mac ", mac + ":" + subCustCd);
                       gomos.errorCustmHandler(NAMEOFSERVICE, "mainpipeLineProcessing", 'SubCustomers Not Present for mac - ', `SubCustomers Not Present for mac  ${mac} and ${payloadId}, subCustCd ${subCustCd} and Index ${index}`, "", ERROR_APPLICATION, ERROR_FALSE, EXIT_FALSE);
                       resolve({ "SubCustNotFount": response })
@@ -280,40 +281,40 @@ function mainpipeLineProcessing(mac, processedFlag, createdTime, updatedTime, pa
                         };
                         gomos.gomosLog(logger, gConsole, TRACE_DEBUG, "This is  payloadData", payloadData);
                         if (payloadData.processByState == "Y") {
-                          response["deviceStateProcess"] = await deviceStateProcess(dbo, dataToInsert, index);
+                          response["deviceStateProcess"] = await deviceStateProcess(mainDB, dataToInsert, index);
                         }
                         if (payloadData.processByDeviceUpTime == "Y") {
-                          response["deviceUpTimeProcess"] = await deviceUpTimeProcess(dbo, result1.value, index);
+                          response["deviceUpTimeProcess"] = await deviceUpTimeProcess(mainDB, result1.value, index);
                         }
                         if (payloadData.processByInstructionError == "Y") {
                           gomos.gomosLog(logger, gConsole, TRACE_DEBUG, "This is processByInstructionError True", result1.value);
-                          response["processForInstructionError"] = await processForInstructionError(dbo, dataToInsert, result1.value);
+                          response["processForInstructionError"] = await processForInstructionError(mainDB, dataToInsert, result1.value);
                         }
                         if (dataToInsert.payloadId === "ProgramLineExecution") {
                           gomos.gomosLog(logger, gConsole, TRACE_DEBUG, "This is ProgramLineExecution True", result1.value);
-                          response["updateDevInstructionActiveJobs"] = await updateDevInstructionActiveJobs(dbo, dataToInsert, result1.value)
+                          response["updateDevInstructionActiveJobs"] = await updateDevInstructionActiveJobs(mainDB, dataToInsert, result1.value)
                         }
                         if (payloadData.AckProcess == "Y") {
                           if (dataToInsert.payloadId == "GHPStatus") {
-                            response["updateDevInstrForRActive"] = await updateDevInstrForRActive(dbo, dataToInsert, result1.value.Token);
+                            response["updateDevInstrForRActive"] = await updateDevInstrForRActive(mainDB, dataToInsert, result1.value.Token);
                           } else {
                             gomos.gomosLog(logger, gConsole, TRACE_DEBUG, "This is Else part of UpdateDeviceInstruction AckProcess")
-                            response["updateDeviceInstruction"] = await updateDeviceInstruction(dbo, dataToInsert, result1.value.Token);
+                            response["updateDeviceInstruction"] = await updateDeviceInstruction(mainDB, dataToInsert, result1.value.Token);
                           }
                         }
                         gomos.gomosLog(logger, gConsole, TRACE_DEBUG, "processFactMessages -  where dataToInsert ready ", dataToInsert);
-                        await dbo.collection("MsgFacts").insertOne(dataToInsert, function (err, result) {
+                        await mainDB.collection("MsgFacts").insertOne(dataToInsert, function (err, result) {
                           if (err) {
                             gomos.errorCustmHandler(NAMEOFSERVICE, "mainpipeLineProcessing", 'This Inserting To Msg Fact Error - ', ` mac  ${mac} and ${payloadId}, subCustCd ${subCustCd} and Index ${index}`, err, ERROR_DATABASE, ERROR_TRUE, EXIT_TRUE);
                           }
                           gomos.gomosLog(logger, gConsole, TRACE_TEST, "Inserted : IN MsgFacts", mac + ":" + payloadId + ":" + createdTime);
                         });
                         processedFlag = "Y";
-                        response["updateMQTT"] = await updateMQTT(objId, dbo, processedFlag);
+                        response["updateMQTT"] = await updateMQTT(objId, listnerDB, processedFlag);
                         resolve(response);
                       } else {
                         processedFlag = "E";
-                        response = await updateMQTT(objId, dbo, processedFlag);
+                        response = await updateMQTT(objId, listnerDB, processedFlag);
                         gomos.gomosLog(logger, gConsole, TRACE_TEST, "Something is missing for this record - ", "sensors : " + sensorNms  + "subcust : " + subCustCd + "cust : " + custCd + "SP : " + spCd);
                         gomos.errorCustmHandler(NAMEOFSERVICE, "mainpipeLineProcessing", 'Something is missing for this record - - ', `sensors : ${sensorNms}  subcust :  ${subCustCd}  cust : ${custCd} SP :  ${spCd}`, "", ERROR_APPLICATION, ERROR_FALSE, EXIT_FALSE);
                         resolve({ "SomeThingNotFound": response })
@@ -346,9 +347,9 @@ function deviceDateFind(data){
   }
 }
 
-function deviceUpTimeUpdated(dbo, mac, inBootstrap, inLastbeat, duration, currentTime) {
+function deviceUpTimeUpdated(mainDB, mac, inBootstrap, inLastbeat, duration, currentTime) {
   return new Promise((resolve, reject) => {
-    dbo
+    mainDB
       .collection("DeviceUpTime")
       .updateOne({ mac: mac, bootstrap: new Date(inBootstrap.toISOString()) }, { $set: { lastbeat: new Date(inLastbeat.toISOString()), duration: duration.asMinutes(), updatedTime: currentTime } }, function (err, result) {
         if (err) {
@@ -360,10 +361,10 @@ function deviceUpTimeUpdated(dbo, mac, inBootstrap, inLastbeat, duration, curren
       })
   })
 }
-function deviceUpTimeInsert(dbo, ObjTemp) {
+function deviceUpTimeInsert(mainDB, ObjTemp) {
   return new Promise((resolve, reject) => {
 
-    dbo.collection("DeviceUpTime").insertOne(ObjTemp, function (err, result) {
+    mainDB.collection("DeviceUpTime").insertOne(ObjTemp, function (err, result) {
       if (err) {
         gomos.errorCustmHandler(NAMEOFSERVICE, "deviceUpTimeProcess", 'This Inserting To deviceUpTimeProcess Error - ', ObjTemp, err, ERROR_DATABASE, ERROR_TRUE, EXIT_TRUE);
       }
@@ -374,7 +375,7 @@ function deviceUpTimeInsert(dbo, ObjTemp) {
   })
 
 }
-function deviceUpTimeProcess(dbo, data, index) {
+function deviceUpTimeProcess(mainDB, data, index) {
   return new Promise((resolve, reject) => {
     let inBootstrap = moment.unix(data.bootstrap);
     let inLastbeat = moment.unix(data.lastbeat);
@@ -396,17 +397,17 @@ function deviceUpTimeProcess(dbo, data, index) {
       ObjTemp["bootstrap"] = new Date(inBootstrap.toISOString());
       ObjTemp["lastbeat"] = new Date(inLastbeat.toISOString());
       ObjTemp["duration"] = duration.asMinutes();
-      dbo
+      mainDB
         .collection("DeviceUpTime")
         .find({ mac: data.mac, bootstrap: new Date(inBootstrap.toISOString()) })
         .toArray(async function (err, result) {
           if (result.length > 0) {
             gomos.gomosLog(logger, gConsole, TRACE_DEV, "deviceUpTimeProcess This is finding first if condtion record with bootstrap", inBootstrap.toISOString());
-            let response = await deviceUpTimeUpdated(dbo, data.mac, inBootstrap, inLastbeat, duration, currentTime);
+            let response = await deviceUpTimeUpdated(mainDB, data.mac, inBootstrap, inLastbeat, duration, currentTime);
             resolve(response)
           }
           else {
-            let response = await deviceUpTimeInsert(dbo, ObjTemp)
+            let response = await deviceUpTimeInsert(mainDB, ObjTemp)
             resolve(response)
           }
 
@@ -417,7 +418,7 @@ function deviceUpTimeProcess(dbo, data, index) {
       ObjTemp["bootstrap"] = new Date(dLastbeat.toISOString());
       ObjTemp["lastbeat"] = new Date(inLastbeat.toISOString());
       ObjTemp["duration"] = duration2.asMinutes();
-      dbo
+      mainDB
         .collection("DeviceUpTime")
         .find({ mac: data.mac, bootstrap: new Date(dLastbeat.toISOString()) })
         .toArray(async function (err, result) {
@@ -426,12 +427,12 @@ function deviceUpTimeProcess(dbo, data, index) {
           }
           if (result.length > 0) {
             gomos.gomosLog(logger, gConsole, TRACE_DEV, "deviceUpTimeProcess This is first Else part finding with bootstrap", inLastbeat.toISOString());
-            let response = await deviceUpTimeUpdated(dbo, data.mac, dLastbeat, inLastbeat, duration2, currentTime);
+            let response = await deviceUpTimeUpdated(mainDB, data.mac, dLastbeat, inLastbeat, duration2, currentTime);
             resolve(response)
           }
           else {
             gomos.gomosLog(logger, gConsole, TRACE_DEV, "deviceUpTimeProcess This first else else part before insert  ", dLastbeat.toISOString());
-            dbo.collection("DeviceUpTime").insertOne(ObjTemp, function (err, result) {
+            mainDB.collection("DeviceUpTime").insertOne(ObjTemp, function (err, result) {
               if (err) {
                 reject(err);
                 gomos.errorCustmHandler(NAMEOFSERVICE, "deviceUpTimeProcess", 'This Inserting To deviceUpTimeProcess Error - ', ObjTemp, err, ERROR_DATABASE, ERROR_TRUE, EXIT_TRUE);
@@ -447,7 +448,7 @@ function deviceUpTimeProcess(dbo, data, index) {
             let criteriaLastbeat = moment(criteriaBootstrap.toISOString())
             let duration3 = moment.duration(criteriaLastbeat.endOf('day').diff(criteriaBootstrap))
             console.log({ mac: data.mac, bootstrap: new Date(criteriaBootstrap.toISOString()) })
-            dbo
+            mainDB
               .collection("DeviceUpTime")
               .find({ mac: data.mac, bootstrap: new Date(criteriaBootstrap.toISOString()) })
               .toArray(async function (err, result) {
@@ -456,7 +457,7 @@ function deviceUpTimeProcess(dbo, data, index) {
                   reject(err);
                 }
                 if (result.length > 0) {
-                  let response = await deviceUpTimeUpdated(dbo, data.mac, criteriaBootstrap, criteriaBootstrap.endOf('day'), duration3, currentTime);
+                  let response = await deviceUpTimeUpdated(mainDB, data.mac, criteriaBootstrap, criteriaBootstrap.endOf('day'), duration3, currentTime);
                   resolve(response)
                 }
                 else {
@@ -469,11 +470,11 @@ function deviceUpTimeProcess(dbo, data, index) {
     }
   })
 }
-async function deviceStateProcess(dbo, dataToInsert, index) {
+async function deviceStateProcess(mainDB, dataToInsert, index) {
   return new Promise((resolve, reject) => {
     gomos.gomosLog(logger, gConsole, TRACE_DEV, "This is Log For Going for query in DeviceState ", index);
 
-    dbo
+    mainDB
       .collection("DeviceState")
       .find({ mac: dataToInsert.mac })
       .toArray(async function (err, result2) {
@@ -521,7 +522,7 @@ async function deviceStateProcess(dbo, dataToInsert, index) {
             }
           }
           gomos.gomosLog(logger, gConsole, TRACE_DEV, "This is Log For DeviceState  going to update" + index, result2[0].updatedTime);
-          let response = await updateDeviceState(dbo, _id, devicesStateKeyValue, result2[0].updatedTime, dateTime, index);
+          let response = await updateDeviceState(mainDB, _id, devicesStateKeyValue, result2[0].updatedTime, dateTime, index);
           resolve(response)
           gomos.gomosLog(logger, gConsole, TRACE_DEV, "this is data of  deviceStateProcess In Function response : " + index, response);
         } catch (err) {
@@ -534,7 +535,7 @@ async function deviceStateProcess(dbo, dataToInsert, index) {
 
 
 }
-function updateDevInstructionActiveJobs(dbo, dataToInsert, sourceMsgObj) {
+function updateDevInstructionActiveJobs(mainDB, dataToInsert, sourceMsgObj) {
   return new Promise((resolve, reject) => {
     gomos.gomosLog(logger, gConsole, TRACE_DEBUG, "This updateDevInstructionActiveJob Data  ", sourceMsgObj);
     let name = sourceMsgObj.name;
@@ -560,7 +561,7 @@ function updateDevInstructionActiveJobs(dbo, dataToInsert, sourceMsgObj) {
       "sourceMsg.body.ActionType": (status == 0) ? "OFFTime" : "ONTime"
     };
 
-    dbo
+    mainDB
       .collection("DeviceInstruction")
       .find(criteria)
       .toArray(async function (err, result) {
@@ -575,7 +576,7 @@ function updateDevInstructionActiveJobs(dbo, dataToInsert, sourceMsgObj) {
           let currentTime = new Date(new Date().toISOString())
           let response = {}
           gomos.gomosLog(logger, gConsole, TRACE_DEBUG, "this is Action Values in Executed Job", result[0]["sourceMsg"]["body"]["ActionValues"]);
-          response["updatedDevinstWithCrteria"] = await updatedDevinstWithCrteria(dbo, { _id: result[0]["_id"] }, { updatedTime: currentTime });
+          response["updatedDevinstWithCrteria"] = await updatedDevinstWithCrteria(mainDB, { _id: result[0]["_id"] }, { updatedTime: currentTime });
           let tempobj = {
             mac: result[0]["mac"],
             DeviceName: result[0]["DeviceName"],
@@ -596,7 +597,7 @@ function updateDevInstructionActiveJobs(dbo, dataToInsert, sourceMsgObj) {
             updatedTime: currentTime
           }
           gomos.gomosLog(logger, gConsole, TRACE_DEBUG, "This is dataStructure for tempobj", tempobj)
-          response["DeviceInstructionInsert"] = await DeviceInstructionInsert(dbo, tempobj);
+          response["DeviceInstructionInsert"] = await DeviceInstructionInsert(mainDB, tempobj);
           resolve(response)
         }
         else{
@@ -608,7 +609,7 @@ function updateDevInstructionActiveJobs(dbo, dataToInsert, sourceMsgObj) {
       });
   });
 }
-function updateDevInstrForRActive(dbo, dataToInsert, Token) {
+function updateDevInstrForRActive(mainDB, dataToInsert, Token) {
   return new Promise((resolve, reject) => {
     gomos.gomosLog(logger, gConsole, TRACE_DEBUG, "This updateDevInstrForRActive Data  " + Token, dataToInsert);
     var criteria = {
@@ -617,7 +618,7 @@ function updateDevInstrForRActive(dbo, dataToInsert, Token) {
       "sourceMsg.referenceToken": Token
     };
 
-    dbo
+    mainDB
       .collection("DeviceInstruction")
       .find(criteria)
       .toArray( async function (err, result) {
@@ -629,8 +630,8 @@ function updateDevInstrForRActive(dbo, dataToInsert, Token) {
           gomos.gomosLog(logger, gConsole, TRACE_DEV, "This is find Of updateDevInstrForRActive", result);
           for (var i = 0; i < result.length; i++) {
             let response = {}
-            response["updatedDeviceinstruction"] = await updatedDeviceinstruction(dbo, result[i]);
-            response["DeviceInstructionInsert"] = await DeviceInstructionInsert(dbo, tempobj);
+            response["updatedDeviceinstruction"] = await updatedDeviceinstruction(mainDB, result[i]);
+            response["DeviceInstructionInsert"] = await DeviceInstructionInsert(mainDB, tempobj);
             resolve(response);
           }
         }
@@ -643,7 +644,7 @@ function updateDevInstrForRActive(dbo, dataToInsert, Token) {
   });
 }
 
-function processForInstructionError(dbo, dataToInsert, mainDatapayload) {
+function processForInstructionError(mainDB, dataToInsert, mainDatapayload) {
   return new Promise((resolve, reject) => {
 
     gomos.gomosLog(logger, gConsole, TRACE_DEBUG, "This updateDeviceInstruction Data  ", dataToInsert);
@@ -652,7 +653,7 @@ function processForInstructionError(dbo, dataToInsert, mainDatapayload) {
       type: "SentInstruction",
       "sourceMsg.Token": mainDatapayload.Token
     };
-    dbo
+    mainDB
       .collection("DeviceInstruction")
       .find(criteria)
       .toArray(async function (err, result) {
@@ -669,13 +670,13 @@ function processForInstructionError(dbo, dataToInsert, mainDatapayload) {
             let response = {};
             if (payloadObject.payloadId == "SetProgramState") {
               gomos.gomosLog(logger, gConsole, TRACE_DEBUG, "This is setProgrameProcess condtion True")
-              response["setProgramStateErrorProcess"] = await setProgramStateErrorProcess(dbo, result[0]);
-              response["deleteinstruction"] = await deleteinstruction(dbo, result[0]._id);
+              response["setProgramStateErrorProcess"] = await setProgramStateErrorProcess(mainDB, result[0]);
+              response["deleteinstruction"] = await deleteinstruction(mainDB, result[0]._id);
             }
             if (payloadObject.payloadId == "SetProgram") {
               gomos.gomosLog(logger, gConsole, TRACE_DEBUG, "This is setProgrameProcess condtion True");
-              response["setProgramErrorProcess"] = await setProgramErrorProcess(dbo, result[0]);
-              response["deleteinstruction"] = await deleteinstruction(dbo, result[0]._id);
+              response["setProgramErrorProcess"] = await setProgramErrorProcess(mainDB, result[0]);
+              response["deleteinstruction"] = await deleteinstruction(mainDB, result[0]._id);
             }
             resolve(response);
           }
@@ -686,10 +687,10 @@ function processForInstructionError(dbo, dataToInsert, mainDatapayload) {
       });
   });
 }
-function deleteProgramIndex(dbo,data){
+function deleteProgramIndex(mainDB,data){
   return new Promise((resolve, reject)=> {
     gomos.gomosLog( logger,gConsole,TRACE_DEV,"This is deleteProgramIndex going to delete ", `${data.mac}-${data.sourceMsg.body.programKey}`);
-  dbo.collection("Instructionindex").deleteOne(
+  mainDB.collection("Instructionindex").deleteOne(
   {programKeyIndex : `${data.mac}-${data.sourceMsg.body.programKey}`},
     function(err, result) {
       if (err) {
@@ -704,10 +705,10 @@ function deleteProgramIndex(dbo,data){
   });
 }
 
-function setProgramStateErrorProcess(dbo, dataInsruction) {
+function setProgramStateErrorProcess(mainDB, dataInsruction) {
   return new Promise((resolve, reject) => {
     gomos.gomosLog(logger, gConsole, TRACE_DEBUG, "This Call ProgrameDetails data");
-    dbo
+    mainDB
       .collection("DeviceInstruction")
       .find({
         mac: dataInsruction.mac, type: "ProgramDetails",
@@ -721,12 +722,12 @@ function setProgramStateErrorProcess(dbo, dataInsruction) {
           reject(err)
         }
         if (result.length != 0) {
-          let response =    await deleteProgramIndex(dbo,result[0]);
+          let response =    await deleteProgramIndex(mainDB,result[0]);
           gomos.gomosLog(logger,gConsole,TRACE_DEBUG,"This is log For deleteProgramIndex", response)
           gomos.gomosLog(logger, gConsole, TRACE_DEBUG, "This ProgrameDetails data", result);
           gomos.gomosLog(logger, gConsole, TRACE_DEBUG, "This ProgrameDetails dataInsruction.sourceMsg.body Splite data ito part", dataInsruction.sourceMsg.body);
           gomos.gomosLog(logger, gConsole, TRACE_DEBUG, "This is ProgrameDetails after asing", result[0].sourceMsg.body);
-          dbo.collection("DeviceInstruction").updateOne(
+          mainDB.collection("DeviceInstruction").updateOne(
             { _id: result[0]["_id"] },
             {
               $set: {
@@ -752,11 +753,11 @@ function setProgramStateErrorProcess(dbo, dataInsruction) {
       });
   });
 }
-function setProgramErrorProcess(dbo, dataInsruction) {
+function setProgramErrorProcess(mainDB, dataInsruction) {
   return new Promise((resolve, reject) => {
 
     gomos.gomosLog(logger, gConsole, TRACE_DEBUG, "This Call ProgrameDetails data");
-    dbo
+    mainDB
       .collection("DeviceInstruction")
       .find({
         mac: dataInsruction.mac, type: "ProgramDetails",
@@ -770,12 +771,12 @@ function setProgramErrorProcess(dbo, dataInsruction) {
           reject(err)
         }
         if (result.length != 0) {
-          let response =    await deleteProgramIndex(dbo,result[0]);
+          let response =    await deleteProgramIndex(mainDB,result[0]);
           gomos.gomosLog(logger,gConsole,TRACE_DEBUG,"This is log For deleteProgramIndex", response)
           gomos.gomosLog(logger, gConsole, TRACE_DEBUG, "This ProgrameDetails data", result);
           gomos.gomosLog(logger, gConsole, TRACE_DEBUG, "This ProgrameDetails dataInsruction.sourceMsg.body Splite data ito part", dataInsruction.sourceMsg.body);
           gomos.gomosLog(logger, gConsole, TRACE_DEBUG, "This is ProgrameDetails after asing", result[0].sourceMsg.body);
-          dbo.collection("DeviceInstruction").deleteOne(
+          mainDB.collection("DeviceInstruction").deleteOne(
             { _id: result[0]["_id"] },
             function (err, result) {
               if (err) {
@@ -793,7 +794,7 @@ function setProgramErrorProcess(dbo, dataInsruction) {
       });
   });
 }
-function updateDeviceInstruction(dbo, dataToInsert, Token) {
+function updateDeviceInstruction(mainDB, dataToInsert, Token) {
   return new Promise((resolve, reject) => {
     gomos.gomosLog(logger, gConsole, TRACE_DEBUG, "This updateDeviceInstruction Data  " + Token, dataToInsert);
     var criteria = {
@@ -802,7 +803,7 @@ function updateDeviceInstruction(dbo, dataToInsert, Token) {
       "sourceMsg.Token": Token
     };
 
-    dbo
+    mainDB
       .collection("DeviceInstruction")
       .find(criteria)
       .toArray(async function (err, result) {
@@ -820,24 +821,24 @@ function updateDeviceInstruction(dbo, dataToInsert, Token) {
             gomos.gomosLog(logger, gConsole, TRACE_DEBUG, "This is processByActiveJobs checking ", payloadObject.processByActiveJobs);
             gomos.gomosLog(logger, gConsole, TRACE_DEBUG, "This is payloadObject.formStructure", payloadObject.formStructure)
             if (payloadObject.formStructure == "manualOverride") {
-              let response = await manualOverrideProcess(dbo, result[0]);
+              let response = await manualOverrideProcess(mainDB, result[0]);
               resolve(response);
             }
             if (payloadObject.formStructure == "ProgramDetails") {
               gomos.gomosLog(logger, gConsole, TRACE_DEBUG, "This is setProgrameProcess condtion True")
-              let response = await setProgramProcess(dbo, result[0]);
+              let response = await setProgramProcess(mainDB, result[0]);
               gomos.gomosLog(logger, gConsole, TRACE_DEV, "This is response SetProgram Process", response);
               resolve(response);
             }
             if (payloadObject.processByActiveJobs == "N") {
               gomos.gomosLog(logger, gConsole, TRACE_DEV, "This is processByActiveJobs false ", payloadObject.processByActiveJobs);
-              let response = await deleteinstruction(dbo, result[0]._id);
+              let response = await deleteinstruction(mainDB, result[0]._id);
               resolve(response);
             } else if (payloadObject.processByActiveJobs == "Y") {
               gomos.gomosLog(logger, gConsole, TRACE_DEV, "This is processByActiveJobs True ", payloadObject.processByActiveJobs);
               let response = {}
-              response["deleteinstruction"] = await deleteinstruction(dbo, result[0]._id);
-              response["insertActivejob"] = await insertActivejob(dbo, result[0], dataToInsert, payloadObject);
+              response["deleteinstruction"] = await deleteinstruction(mainDB, result[0]._id);
+              response["insertActivejob"] = await insertActivejob(mainDB, result[0], dataToInsert, payloadObject);
               resolve(response)
             }
           } else {
@@ -853,11 +854,11 @@ function updateDeviceInstruction(dbo, dataToInsert, Token) {
   });
 }
 
-async function setProgramProcess(dbo, dataInsruction) {
+async function setProgramProcess(mainDB, dataInsruction) {
   return new Promise((resolve, reject) => {
     gomos.gomosLog(logger, gConsole, TRACE_DEBUG, "This Call ProgrameDetails data");
 
-    dbo
+    mainDB
       .collection("DeviceInstruction")
       .find({
         mac: dataInsruction.mac, type: "ProgramDetails",
@@ -876,7 +877,7 @@ async function setProgramProcess(dbo, dataInsruction) {
 
           gomos.gomosLog(logger, gConsole, TRACE_DEBUG, "This is ProgrameDetails after asing", result[0].sourceMsg.body);
           gomos.gomosLog(logger, gConsole, TRACE_DEBUG, "This is ProgrameDetails after asing result", result);
-          dbo.collection("DeviceInstruction").updateOne(
+          mainDB.collection("DeviceInstruction").updateOne(
             { _id: result[0]["_id"] },
             {
               $set: {
@@ -891,15 +892,15 @@ async function setProgramProcess(dbo, dataInsruction) {
               }
               var response2 = {};
               if (dataInsruction.sourceMsg.ActionType == "SetProgramState" && dataInsruction.sourceMsg.body.state == "delete") {
-                response2 = await deleteActiveJob(dbo, dataInsruction);
+                response2 = await deleteActiveJob(mainDB, dataInsruction);
               }
               else if (dataInsruction.sourceMsg.ActionType == "SetProgramState" && dataInsruction.sourceMsg.body.state != "") {
-                response2 = await updateActiveJobState(dbo, dataInsruction);
+                response2 = await updateActiveJobState(mainDB, dataInsruction);
               }
               else {
-                let response3 = await updateSetProgramDetails(dbo, dataInsruction);
+                let response3 = await updateSetProgramDetails(mainDB, dataInsruction);
                 gomos.gomosLog(logger, gConsole, TRACE_DEV, "This is debug of response updateSetProgramDetails", response3)
-                response2 = await updateProgramDetailsForExpiryDate(dbo, dataInsruction);
+                response2 = await updateProgramDetailsForExpiryDate(mainDB, dataInsruction);
                 gomos.gomosLog(logger, gConsole, TRACE_DEV, "This is DEBUG OF RESponse updateActiveJForExpiryJob", response2);
                 gomos.gomosLog(logger, gConsole, TRACE_DEV, "update For  setProgramProcess ");
 
@@ -915,10 +916,10 @@ async function setProgramProcess(dbo, dataInsruction) {
       });
   });
 }
-function updateActiveJobState(dbo, dataInsruction) {
+function updateActiveJobState(mainDB, dataInsruction) {
   return new Promise((resolve, reject) => {
     let currentTime = new Date(new Date().toISOString());
-    dbo.collection("DeviceInstruction").updateMany(
+    mainDB.collection("DeviceInstruction").updateMany(
       { mac: dataInsruction.mac, type: "ActiveJob", "sourceMsg.body.jobKey": { "$regex": `${dataInsruction.sourceMsg.body.name}-${dataInsruction.sourceMsg.body.version}` } },
       {
         $set: {
@@ -938,9 +939,9 @@ function updateActiveJobState(dbo, dataInsruction) {
   }
   );
 }
-function deleteActiveJob(dbo, dataInsruction) {
+function deleteActiveJob(mainDB, dataInsruction) {
   return new Promise((resolve, reject) => {
-    dbo.collection("DeviceInstruction").deleteMany(
+    mainDB.collection("DeviceInstruction").deleteMany(
       { mac: dataInsruction.mac, type: "ActiveJob", "sourceMsg.body.jobKey": { "$regex": `${dataInsruction.sourceMsg.body.name}-${dataInsruction.sourceMsg.body.version}` } }
       ,
       function (err, res) {
@@ -955,9 +956,9 @@ function deleteActiveJob(dbo, dataInsruction) {
   }
   );
 }
-async function manualOverrideProcess(dbo, dataInsruction) {
+async function manualOverrideProcess(mainDB, dataInsruction) {
   return new Promise((resolve, reject) => {
-    dbo
+    mainDB
       .collection("DeviceInstruction")
       .find({ mac: dataInsruction.mac, type: "SentManOverride" })
       .toArray(function (err, result) {
@@ -977,7 +978,7 @@ async function manualOverrideProcess(dbo, dataInsruction) {
             }
           }
           gomos.gomosLog(logger, gConsole, TRACE_DEV, "This is ManualOverrideProcessFun after asing", result[0].sourceMsg.body);
-          dbo.collection("DeviceInstruction").updateOne(
+          mainDB.collection("DeviceInstruction").updateOne(
             { _id: result[0]["_id"] },
             {
               $set: {
@@ -1039,7 +1040,7 @@ function getConfigchannelNameToValue(mac, ArraConfigName, ConfigPayloadMsg) {
   }
 }
 
-async function insertActivejob(dbo, dataInsruction, dataToInsert, payloadObject) {
+async function insertActivejob(mainDB, dataInsruction, dataToInsert, payloadObject) {
   return new Promise(async function(resolve, reject) {
 
     gomos.gomosLog(logger, gConsole, TRACE_DEBUG, "this is need For Insert", dataInsruction);
@@ -1052,7 +1053,7 @@ async function insertActivejob(dbo, dataInsruction, dataToInsert, payloadObject)
       var startTime = dataInsruction.sourceMsg["body"].startTime;
       var name = dataInsruction.sourceMsg["body"].name;
       var version = dataInsruction.sourceMsg["body"].version;
-      response["updateActiveJForExpiryJob"] = await updateActiveJForExpiryJob(dbo, dataInsruction);
+      response["updateActiveJForExpiryJob"] = await updateActiveJForExpiryJob(mainDB, dataInsruction);
       gomos.gomosLog(logger, gConsole, TRACE_DEV, "This is DEBUG OF RESponse of updateActiveJForExpiryJob", response);
       for (let i = 0; i < dataInsruction.sourceMsg.body.schedules.length; i++) {
         let isDailyJob = true
@@ -1096,7 +1097,7 @@ async function insertActivejob(dbo, dataInsruction, dataToInsert, payloadObject)
           }
           data["sourceMsg"]["body"]["expiryDate"] = ""
           gomos.gomosLog(logger, gConsole, TRACE_DEBUG, "This is log for Updateing the data base", data)
-          response["DeviceInstructionInsert"] = await DeviceInstructionInsert(dbo, data);
+          response["DeviceInstructionInsert"] = await DeviceInstructionInsert(mainDB, data);
         }
 
       }
@@ -1145,7 +1146,7 @@ async function insertActivejob(dbo, dataInsruction, dataToInsert, payloadObject)
             } else {
               data["sourceMsg"]["body"]["ActionTime"] = compareDate(temp[j]);
             }
-            response["DeviceInstructionInsert"] = await DeviceInstructionInsert(dbo, data);
+            response["DeviceInstructionInsert"] = await DeviceInstructionInsert(mainDB, data);
           }
         }
       } else {
@@ -1176,7 +1177,7 @@ async function insertActivejob(dbo, dataInsruction, dataToInsert, payloadObject)
               data["sourceMsg"]["body"]["ActionTime"] = arrayBName[k].value;
             }
           }
-          response["DeviceInstructionInsert"] = await DeviceInstructionInsert(dbo, data);
+          response["DeviceInstructionInsert"] = await DeviceInstructionInsert(mainDB, data);
         }
       }
     }
@@ -1200,13 +1201,13 @@ function convertDateObj(date, time, h) {
   return date1;
 }
 
-function updateActiveJForExpiryJob(dbo, data) {
+function updateActiveJForExpiryJob(mainDB, data) {
   return new Promise((resolve, reject) => {
     let currentTime = new Date(new Date().toISOString());
     gomos.gomosLog(logger, gConsole, TRACE_DEV, "This is Date Object", data.sourceMsg["body"].wef);
     gomos.gomosLog(logger, gConsole, TRACE_DEV, "This is Date Object", convertDateObj(data.sourceMsg["body"].wef, data.sourceMsg["body"].startTime, -1));
 
-    dbo.collection("DeviceInstruction").updateMany({ mac: data.mac, type: "ActiveJob", "sourceMsg.body.expiryDate": "" },
+    mainDB.collection("DeviceInstruction").updateMany({ mac: data.mac, type: "ActiveJob", "sourceMsg.body.expiryDate": "" },
       {
         $set: {
           "sourceMsg.body.expiryDate": convertDateObj(data.sourceMsg["body"].wef, data.sourceMsg["body"].startTime, -1),
@@ -1225,9 +1226,9 @@ function updateActiveJForExpiryJob(dbo, data) {
     );
   });
 }
-function updateSetProgramDetails(dbo, data) {
+function updateSetProgramDetails(mainDB, data) {
   return new Promise((resolve, reject) => {
-    dbo.collection("DeviceInstruction")
+    mainDB.collection("DeviceInstruction")
       .aggregate([{ $match: { "mac": data.mac, "type": "ProgramDetails" } },
       {
         $group: {
@@ -1241,7 +1242,7 @@ function updateSetProgramDetails(dbo, data) {
         let data1 = result.map(item => `${item._id}-${item.version}`)
         let currentDate = new Date(new Date().toISOString());
         gomos.gomosLog(logger, gConsole, TRACE_DEV, "This is result of find", data1)
-        dbo.collection("DeviceInstruction")
+        mainDB.collection("DeviceInstruction")
           .find({
             "mac": data.mac, "type": "ProgramDetails", "sourceMsg.body.programKey": { $in: data1 },
             $or: [{ "sourceMsg.body.currentState": { $ne: "delete" } },
@@ -1272,25 +1273,25 @@ function updateSetProgramDetails(dbo, data) {
                 let id;
                 if (result1[0].sourceMsg.body.wef > result1[1].sourceMsg.body.wef) {
                   id = result1[0]._id;
-                  deleteResponse = await deleteActiveJob(dbo, result1[0])
+                  deleteResponse = await deleteActiveJob(mainDB, result1[0])
                 }
                 else {
                   id = result1[1]._id;
-                  deleteResponse = await deleteActiveJob(dbo, result1[1])
+                  deleteResponse = await deleteActiveJob(mainDB, result1[1])
                 }
-                response = await programDeleteSet(dbo, id);
+                response = await programDeleteSet(mainDB, id);
                 gomos.gomosLog(logger, gConsole, TRACE_DEV, "This is debug of condtion where wef is grater than date time response", response);
               }
               else if (dateTime > result1[0].sourceMsg.body.wef && dateTime < result1[1].sourceMsg.body.wef) {
-                response = await programDeleteSet(dbo, result1[1]._id);
-                deleteResponse = await deleteActiveJob(dbo, result1[1])
+                response = await programDeleteSet(mainDB, result1[1]._id);
+                deleteResponse = await deleteActiveJob(mainDB, result1[1])
                 gomos.gomosLog(logger, gConsole, TRACE_DEV, "This is debug of condtion where wef 0 index less than  datetime and 1 index grater", result1[1].sourceMsg.body);
                 gomos.gomosLog(logger, gConsole, TRACE_DEV, "This is debug of condtion where wef 0 index less than  datetime and 1 index grater response", response);
 
               }
               else if (dateTime < result1[0].sourceMsg.body.wef && dateTime > result1[1].sourceMsg.body.wef) {
-                response = await programDeleteSet(dbo, result1[0]._id);
-                deleteResponse = await deleteActiveJob(dbo, result1[0])
+                response = await programDeleteSet(mainDB, result1[0]._id);
+                deleteResponse = await deleteActiveJob(mainDB, result1[0])
                 gomos.gomosLog(logger, gConsole, TRACE_DEV, "This is debug of condtion where wef 0 index grater than  datetime and 1 index less", result1[0].sourceMsg.body);
                 gomos.gomosLog(logger, gConsole, TRACE_DEV, "This is debug of condtion where wef 0 index grater than  datetime and 1 index less response", response);
 
@@ -1301,13 +1302,13 @@ function updateSetProgramDetails(dbo, data) {
                 let id;
                 if (result1[0].sourceMsg.body.wef > result1[1].sourceMsg.body.wef) {
                   id = result1[1]._id;
-                  deleteResponse = await deleteActiveJob(dbo, result1[1])
+                  deleteResponse = await deleteActiveJob(mainDB, result1[1])
                 }
                 else {
                   id = result1[0]._id;
-                  deleteResponse = await deleteActiveJob(dbo, result1[0])
+                  deleteResponse = await deleteActiveJob(mainDB, result1[0])
                 }
-                response = await programDeleteSet(dbo, id);
+                response = await programDeleteSet(mainDB, id);
                 gomos.gomosLog(logger, gConsole, TRACE_DEV, "This is Response of delete", deleteResponse);
                 gomos.gomosLog(logger, gConsole, TRACE_DEV, "This is debug of condtion where wef is less Than than date time response", response);
 
@@ -1324,9 +1325,9 @@ function updateSetProgramDetails(dbo, data) {
       });
   });
 }
-function programDeleteSet(dbo, id) {
+function programDeleteSet(mainDB, id) {
   return new Promise((resolve, reject) => {
-    dbo.collection("DeviceInstruction").updateOne(
+    mainDB.collection("DeviceInstruction").updateOne(
       { _id: id },
       {
         $set: {
@@ -1350,14 +1351,14 @@ function programDeleteSet(dbo, id) {
   });
 }
 
-function updateProgramDetailsForExpiryDate(dbo, data) {
+function updateProgramDetailsForExpiryDate(mainDB, data) {
   return new Promise((resolve, reject) => {
     let currentTime = new Date(new Date().toISOString());
     gomos.gomosLog(logger, gConsole, TRACE_DEV, "This is Date Object", data.sourceMsg["body"].wef);
     gomos.gomosLog(logger, gConsole, TRACE_DEV, "This is Date Object", convertDateObj(data.sourceMsg["body"].wef, data.sourceMsg["body"].startTime, -1));
     let key = `${data.sourceMsg["body"].name}-${data.sourceMsg["body"].version}`
     gomos.gomosLog(logger, gConsole, TRACE_DEV, "This is Debug Of Key", key);
-    dbo.collection("DeviceInstruction").updateMany({ mac: data.mac, type: "ProgramDetails", "sourceMsg.body.programKey": { $ne: key }, "sourceMsg.body.expiryDate": "" },
+    mainDB.collection("DeviceInstruction").updateMany({ mac: data.mac, type: "ProgramDetails", "sourceMsg.body.programKey": { $ne: key }, "sourceMsg.body.expiryDate": "" },
       {
         $set: {
           "sourceMsg.body.expiryDate": convertDateObj(data.sourceMsg["body"].wef, data.sourceMsg["body"].startTime, -1),
@@ -1376,10 +1377,10 @@ function updateProgramDetailsForExpiryDate(dbo, data) {
   });
 }
 
-function DeviceInstructionInsert(dbo, data) {
+function DeviceInstructionInsert(mainDB, data) {
   return new Promise((resolve, reject) => {
 
-    dbo.collection("DeviceInstruction").insertOne(data, function (err, result) {
+    mainDB.collection("DeviceInstruction").insertOne(data, function (err, result) {
       if (err) {
         gomos.errorCustmHandler(NAMEOFSERVICE, "DeviceInstructionInsert", 'this is deviceInstruction data Error ', data, err, ERROR_DATABASE, ERROR_TRUE, EXIT_TRUE);
         reject(err)
@@ -1389,9 +1390,9 @@ function DeviceInstructionInsert(dbo, data) {
     });
   });
 }
-function deleteinstruction(dbo, id) {
+function deleteinstruction(mainDB, id) {
   return new Promise((resolve, reject) => {
-    dbo
+    mainDB
       .collection("DeviceInstruction")
       .deleteOne({ _id: id }, function (err, result) {
         if (err) {
@@ -1403,10 +1404,10 @@ function deleteinstruction(dbo, id) {
       });
   });
 }
-async function updateDeviceState(dbo, _id, devicesStateKeyValue, updatedTime, currentTime, index) {
+async function updateDeviceState(mainDB, _id, devicesStateKeyValue, updatedTime, currentTime, index) {
   gomos.gomosLog(logger, gConsole, TRACE_DEV, "This is DevicestateUpdate :" + index + ":" + _id, updatedTime)
   return new Promise((resolve, reject) => {
-    dbo.collection("DeviceState").updateOne(
+    mainDB.collection("DeviceState").updateOne(
       { _id: _id, updatedTime: updatedTime },
       {
         $set: {
@@ -1434,12 +1435,12 @@ async function updateDeviceState(dbo, _id, devicesStateKeyValue, updatedTime, cu
   }
   );
 }
-function updatedDeviceinstruction(dbo, updatedData) {
+function updatedDeviceinstruction(mainDB, updatedData) {
   return new Promise((resolve, reject) => {
     var id = updatedData["_id"];
     dateTime = new Date(new Date().toISOString());
     gomos.gomosLog(logger, gConsole, TRACE_DEBUG, "This is  updatedDeviceinstruction true")
-    dbo
+    mainDB
       .collection("DeviceInstruction")
       .updateOne(
         { _id: id },
@@ -1457,10 +1458,10 @@ function updatedDeviceinstruction(dbo, updatedData) {
   );
 }
 
-function updatedDevinstWithCrteria(dbo, criteria, setUpdated) {
+function updatedDevinstWithCrteria(mainDB, criteria, setUpdated) {
   return new Promise((resolve, reject) => {
     gomos.gomosLog(logger, gConsole, TRACE_DEBUG, "This is  updatedDeviceinstruction true")
-    dbo
+    mainDB
       .collection("DeviceInstruction")
       .updateOne(
         criteria,
@@ -1478,25 +1479,48 @@ function updatedDevinstWithCrteria(dbo, criteria, setUpdated) {
   );
 }
 async function getAllconfig() {
-  factSrvcSchedule = await gomosSchedule.getServiceConfig(dbo, NAMEOFSERVICE, "factSrvc", logger, gConsole);
-  dataFromDevices  = await gomosDevices.getDevices(dbo, NAMEOFSERVICE, logger, gConsole);
- // dataFromAssets   = await gomosAssets.getAssets(dbo, NAMEOFSERVICE, logger, gConsole);
-  dataFromSubCust  = await gomosSubCustCd.getSubCustomers(dbo, NAMEOFSERVICE, logger, gConsole);
-  dataFromPayload  = await goomosPayloads.getPayloads(dbo, NAMEOFSERVICE, logger, gConsole);
+  factSrvcSchedule = await gomosSchedule.getServiceConfig(mainDB, NAMEOFSERVICE, "factSrvc", logger, gConsole);
+  dataFromDevices  = await gomosDevices.getDevices(mainDB, NAMEOFSERVICE, logger, gConsole);
+ // dataFromAssets   = await gomosAssets.getAssets(mainDB, NAMEOFSERVICE, logger, gConsole);
+  dataFromSubCust  = await gomosSubCustCd.getSubCustomers(mainDB, NAMEOFSERVICE, logger, gConsole);
+  dataFromPayload  = await goomosPayloads.getPayloads(mainDB, NAMEOFSERVICE, logger, gConsole);
 }
 function connectDb(){
   return new Promise((resolve,reject)=>{
-    MongoClient.connect(urlConn, { useNewUrlParser: true }, function (
+    gomos.gomosLog( logger,gConsole, TRACE_TEST,"THIS IS DATABASE URL",urlConn);  
+    MongoClient.connect(urlConn.listnerUrl, { useNewUrlParser: true }, function (
       err,
-      connection
+      connection1
     ) {
       if (err) {
 
         gomos.errorCustmHandler(NAMEOFSERVICE, "module.exports", 'THIS IS MONGO CLIENT CONNECTION ERROR', ``, err, ERROR_DATABASE, ERROR_TRUE, EXIT_TRUE);
-  reject(err)
+        reject(err)
       }
-      dbo = connection.db(dbName);
-      resolve(dbo)
+      listnerDB = connection1.db(dbName.listnerDB);
+      if(urlConn.listnerUrl != urlConn.mainUrl){
+
+      
+      MongoClient.connect(urlConn.mainUrl, { useNewUrlParser: true }, function (
+        err,
+        connection2
+      ) {
+        if (err) {
+  
+          gomos.errorCustmHandler(NAMEOFSERVICE, "module.exports", 'THIS IS MONGO CLIENT CONNECTION ERROR', ``, err, ERROR_DATABASE, ERROR_TRUE, EXIT_TRUE);
+        reject(err)
+        }
+        mainDB = connection2.db(dbName.mainDB);
+        gomos.gomosLog( logger,gConsole, TRACE_TEST," THIS IS SECOND DATABASE OPENED BECAUSE OF URL IS NOT SAME");  
+        resolve(mainDB)
+      });
+    
+    }else{
+      mainDB = listnerDB
+     gomos.gomosLog( logger,gConsole, TRACE_TEST," THIS IS FIRST DATABASE INSTANCE ASSIGN TO SECOND DATABASE VARIABLE BECAUSE OF URL IS  SAME");  
+      resolve(mainDB)
+    }
+   //   resolve(mainDB)
     });
   })
  

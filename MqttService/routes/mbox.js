@@ -18,7 +18,8 @@ const EXIT_TRUE  = true;
 const EXIT_FALSE = false;
 const ERROR_TRUE = true;
 const ERROR_FALSE = false;
-var dbo = "";
+var listnerDB = "";
+var mainDB = "";
 var  gomos = require("../../commanfunction/routes/commanFunction");
 var dt = dateTime.create();
 var formattedDate = dt.format('Y-m-d');
@@ -128,8 +129,8 @@ function getSubCustomers(db, passedAssetId, passedSubCust, businessNm,businessNm
 
 function connectToBroker() {
   try{
-       var db = dbo;
-      db.collection("ServiceProviders")
+    
+    mainDB.collection("ServiceProviders")
         .aggregate([
           { $match: { active: "Y",  PubTopic: {"$ne": ""},
           mqttClient:{"$ne": ""}
@@ -204,9 +205,9 @@ function handleMqttMessage(topic, message) {
     var messValues = {}; //to store the msg in json formate alog with two extra fields(i.e., processed and queueDateTime).
     messKeys = Object.keys(JSON.parse(message));
     var tempMessage = JSON.parse(message);
-       var db = dbo;
+      
         gomos.gomosLog( logger,gConsole, TRACE_DEBUG,"This is mac ", tempMessage.mac);
-        db.collection("Devices").find({mac: tempMessage.mac, active: "Y" }) 
+        mainDB.collection("Devices").find({mac: tempMessage.mac, active: "Y" }) 
         .toArray(function (err, result) {
           if (err) {
            gomos.errorCustmHandler(NAMEOFSERVICE,"handleMqttMessage",'THIS IS QUERY ERROR IN DATA BASE FOR ACTIVE DEVICE ',tempMessage,err,ERROR_RUNTIME,ERROR_TRUE,EXIT_TRUE);
@@ -234,8 +235,8 @@ function handleMqttMessage(topic, message) {
             } 
                //This is Filter for Cube Rootz Which only Take perticuler topic data 
               //  criteriaForCubeRootz(db,topic,messValues);
-                getDevices(db, messValues["mac"], messResultKeys, messValues, message);
-                db.collection("MqttDump").insertOne(messValues, function (err, result) {
+                getDevices(mainDB, messValues["mac"], messResultKeys, messValues, message);
+                listnerDB.collection("MqttDump").insertOne(messValues, function (err, result) {
                   if (err) {
                     gomos.errorCustmHandler(NAMEOFSERVICE,"handleMqttMessage",'THIS IS INSERTING ERROR IN  MqttDump',JSON.stringify(message),err,ERROR_DATABASE,ERROR_TRUE,EXIT_TRUE);
                    } 
@@ -408,14 +409,34 @@ function onMqttDisconnect() {
 module.exports = function (app) {
   urlConn = app.locals.urlConn;
   dbName = app.locals.dbName;
+  gomos.gomosLog( logger,gConsole, TRACE_TEST,"THIS IS DATABASE URL",urlConn);  
+  
   MongoClient.connect(
-    urlConn,
+    urlConn.url1,
     { useNewUrlParser: true },
-    function (err, connection) {
+    function (err, connection1) {
       if (err) {
         gomos.errorCustmHandler(NAMEOFSERVICE,"handleMqttMessage",'THIS IS MONGO CLIENT CONNECTION ERROR',urlConn,err,ERROR_DATABASE,ERROR_TRUE,EXIT_TRUE);    
       }
-     dbo = connection.db(dbName);
+     listnerDB = connection1.db(dbName.db1);
+     if(urlConn.url1 != urlConn.url2){
+      MongoClient.connect(
+        urlConn.url2,
+        { useNewUrlParser: true },
+        function (err, connection2) {
+          if (err) {
+            gomos.errorCustmHandler(NAMEOFSERVICE,"handleMqttMessage",'THIS IS MONGO CLIENT CONNECTION ERROR',urlConn,err,ERROR_DATABASE,ERROR_TRUE,EXIT_TRUE);    
+          }
+          mainDB = connection2.db(dbName.db2);
+          gomos.gomosLog( logger,gConsole, TRACE_TEST," THIS IS SECOND DATABASE OPENED BECAUSE OF URL IS NOT SAME");  
+        })
+     }else{
+     mainDB = listnerDB;
+     gomos.gomosLog( logger,gConsole, TRACE_TEST," THIS IS FIRST DATABASE INSTANCE ASSIGN TO SECOND DATABASE VARIABLE BECAUSE OF URL IS  SAME");  
+
+     }
+    
     });
+  
   setTimeout( ()=> { connectToBroker()}, 5000);
 };
