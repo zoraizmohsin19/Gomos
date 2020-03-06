@@ -663,8 +663,8 @@ function processForInstructionError(mainDB, dataToInsert, mainDatapayload) {
         }
         if (result.length != 0) {
           gomos.gomosLog(logger, gConsole, TRACE_DEV, "This is find Of DeviceInstruction", result);
-          if (dataFromPayload.filter(item => item.payloadId == result[0].sourceMsg.ActionType).length != 0) {
-            var index = dataFromPayload.findIndex(item => item.payloadId == result[0].sourceMsg.ActionType);
+          if (dataFromPayload.filter(item => item.mac == dataToInsert.mac &&  item.payloadId == result[0].sourceMsg.ActionType).length != 0) {
+            var index = dataFromPayload.findIndex(item => item.mac == dataToInsert.mac && item.payloadId == result[0].sourceMsg.ActionType);
             var payloadObject = dataFromPayload[index];
             gomos.gomosLog(logger, gConsole, TRACE_DEV, "This is Debug of payloadId Data", payloadObject);
             let response = {};
@@ -813,8 +813,8 @@ function updateDeviceInstruction(mainDB, dataToInsert, Token) {
         }
         if (result.length != 0) {
           gomos.gomosLog(logger, gConsole, TRACE_DEV, "This is find Of DeviceInstruction", result);
-          if (dataFromPayload.filter(item => item.payloadId == result[0].sourceMsg.ActionType).length != 0) {
-            var index = dataFromPayload.findIndex(item => item.payloadId == result[0].sourceMsg.ActionType);
+          if (dataFromPayload.filter(item =>  item.mac == dataToInsert.mac && item.payloadId == result[0].sourceMsg.ActionType).length != 0) {
+            var index = dataFromPayload.findIndex(item => item.mac == dataToInsert.mac && item.payloadId == result[0].sourceMsg.ActionType);
             var payloadObject = dataFromPayload[index];
             gomos.gomosLog(logger, gConsole, TRACE_DEV, "This is Debug of payloadId Index", index);
             gomos.gomosLog(logger, gConsole, TRACE_DEV, "This is Debug of payloadId Data", payloadObject);
@@ -1012,7 +1012,7 @@ function convertDateTimeForSetPrograme(time, addMinutes) {
   var newDate = new Date(y, m, d, arr[0], arr[1]);
   console.log(newDate);
   newDate.setMinutes(newDate.getMinutes() + addMinutes);
-  return newDate;
+  return gomos.calcUtc(newDate);
 }
 function convertTochannelBsName(mac, channelName) {
   let index = dataFromDevices.findIndex(item => item.mac === mac);
