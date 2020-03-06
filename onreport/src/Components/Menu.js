@@ -90,7 +90,7 @@ componentDidMount() {
     var spData = userDetails[0].serviceProviders.split(",");
 if(spData.length ==  1 && spData[0] == "ALL"){
   this.setState({ spDisable : null})
-  fetch(`${URL.IP}:3992/getRegisterSP`)
+  fetch(`${URL.IP}/getRegisterSP`)
   .then(response => response.json())
   .then(json =>  {
   var spCd =  json.map( x =>  { return  x.spCd  });
@@ -204,7 +204,7 @@ onSubmit = (e) => {
       var userDetails = JSON.parse(sessionStorage.getItem("userDetails"));
       var CustData = userDetails[0].customers.split(",");
       if(CustData.length == 1 && CustData[0] == "ALL"){
-        fetch(`${URL.IP}:3992/getCustomers?spCode=` + SendForSp)
+        fetch(`${URL.IP}/getCustomers?spCode=` + SendForSp)
         .then(response => response.json())
         .then(json =>  {
         var custCd =  json.map( x =>  { return  x._id  });
@@ -230,7 +230,7 @@ onSubmit = (e) => {
     var userDetails = JSON.parse(sessionStorage.getItem("userDetails"));
     var SubCustData = userDetails[0].subCustomers.split(",");
     if(SubCustData.length ==1 && SubCustData[0] == "ALL"){
-      fetch(`${URL.IP}:3992/getSubCustomers?spCode=` + SendForSp +
+      fetch(`${URL.IP}/getSubCustomers?spCode=` + SendForSp +
       "&&custCd=" + SendFroCustCD )
       .then(response => response.json())
       .then(json =>  {
@@ -264,7 +264,7 @@ getAssetApi(SubCustomer){
   var userDetails = JSON.parse(sessionStorage.getItem("userDetails"));
   var AssetData = userDetails[0].Assets.split(",");
   if(AssetData.length == 1 && AssetData[0] =="ALL"){
-    fetch(`${URL.IP}:3992/getAssets?subCustCd=`+SubCustomer )
+    fetch(`${URL.IP}/getAssets?subCustCd=`+SubCustomer )
     .then(response => response.json())
     .then(json =>  {
     me.setState({ArrayofAsset: json });
@@ -286,7 +286,7 @@ getDeviceApi(Asset){
   var userDetails = JSON.parse(sessionStorage.getItem("userDetails"));
   var DeviceData = userDetails[0].Devices.split(",");
   if(DeviceData.length == 1 && DeviceData[0] == "ALL"){
-    fetch(`${URL.IP}:3992/getDevice?assetId=`+Asset )
+    fetch(`${URL.IP}/getDevice?assetId=`+Asset )
     .then(response => response.json())
     .then(json =>  {
     me.setState({ArrayofDevice: json });
@@ -304,7 +304,7 @@ getDeviceApi(Asset){
 }
 //THIS API FOR GET SENSOR  BASED ON SERVICE PROVIDER , CUSTOMER CODE, SUBCUSTOMER CODE
 getSensorApi(mac){
-  axios.post(`${URL.IP}:3992/getDevicesWithgroup`,{ mac: mac })
+  axios.post(`${URL.IP}/getDevicesWithgroup`,{ mac: mac })
       //  .then(response =>response.json())
        .then(json =>  {
       //  console.log(json );
@@ -319,7 +319,7 @@ getSensorApi(mac){
   }
   //THIS IS API FOR OPERTION SELECTION BASED ON SERVICE PROVIDER , CUSTOMER CODE, SUBCUSTOMER AND SELECTED SENSORE CODE
   opertionApi(SendForSp,SendFroCustCD,SendForSbCd,SendForSensor){
-    fetch(`${URL.IP}:3992/getOperations?spCode=` + SendForSp + "&&custCd=" +
+    fetch(`${URL.IP}/getOperations?spCode=` + SendForSp + "&&custCd=" +
     SendFroCustCD + "&&subCustCd=" + SendForSbCd + "&&sensorNm=" + SendForSensor)
      .then(response => response.json())
      .then(json =>  {
@@ -362,7 +362,7 @@ getAllDataApi(SendForSp,SendFroCustCD,SendForSbCd,SendForSensor,SendForStartDate
     let sensorsStrings= JSON.stringify(SendForSensor)
     let selectedGroupName1 = JSON.stringify(selectedGroupName);
     // console.log("group Name",selectedGroupName)
-    fetch(`${URL.IP}:3992/getFacts?spCode=` + SendForSp + "&&custCd=" +
+    fetch(`${URL.IP}getFacts?spCode=` + SendForSp + "&&custCd=" +
     SendFroCustCD + "&&subCustCd=" + SendForSbCd + "&&sensorNm=" + sensorsStrings +
   "&&startDate=" + SendForStartDate + "&&endDate=" + SendForEndDate + 
   "&&operation=" + SendForOperation + "&&equalsFacts=" +

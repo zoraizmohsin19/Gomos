@@ -23,7 +23,7 @@ class viewDashboard extends Component {
       open: true,
       openChartMenu: true,
       body: {
-        endpoint: `${URL.IP}:4001`,
+        endpoint: `${URL.SIP}`,
         socket1: {},
         arrData: [],
         arrLabels: [],
@@ -42,7 +42,7 @@ class viewDashboard extends Component {
         // mac: '',
         deviceType: "",
         deviceTypeObj: {},
-        chartLegendNames: {},
+       
         activeChartLegend: {},
         // selectedAssets: '',
         //excelresult: [],
@@ -202,7 +202,7 @@ class viewDashboard extends Component {
   callDeviceIdentifier() {
     return new Promise((resolve, reject) => {
       var me = this;
-      axios.post(`${URL.IP}:3992/getDevicesIdentifier`, { mac: this.state.body.mac })
+      axios.post(`${URL.IP}/getDevicesIdentifier`, { mac: this.state.body.mac })
         .then(json => {
           me.state.body.DeviceIdentifierForSensors = json["data"].sensors;
           json["data"].sensors.map(item => { item["BsType"] = "sensors" });
@@ -234,10 +234,7 @@ class viewDashboard extends Component {
           //console(groupedData[index].devicebusinessNM)
           me.state.body.deviceType = json["data"].deviceTypes;
           me.state.body.deviceTypeObj = this.chartsIdbyDeviceType(json["data"].deviceTypes);
-          let ClientObj = JSON.parse(sessionStorage.getItem("ClientObj"));
-          me.state.body.chartLegendNames = ClientObj.viewDashBoard[json["data"].deviceTypes].chartLegend
-          console.log("ClientObj.viewDashBoard[json[data].deviceTypes].chartLegend", ClientObj.viewDashBoard[json["data"].deviceTypes].chartLegend)
-          me.state.body.activeChartLegend = ClientObj.viewDashBoard[json["data"].deviceTypes].chartLegend[groupedData[index].group]
+         
           console.log("This is group", me.state.body.activeChartLegend)
           me.setState({ body: me.state.body })
           // let json1 =[];
@@ -288,6 +285,23 @@ class viewDashboard extends Component {
       // me.state.body.yaxisName = yaxisName;
       me.state.body.fromDate = fromDate;
       me.state.body.borderColors = borderColors;
+      let ClientObj = JSON.parse(sessionStorage.getItem("ClientObj"));
+     // me.state.body.chartLegendNames = ClientObj.viewDashBoard[me.state.body.deviceType].chartLegend
+      console.log("ClientObj.viewDashBoard[ me.state.body.deviceType].chartLegend", ClientObj.viewDashBoard[ me.state.body.deviceType].chartLegend)
+     
+      if (me.state.body.selectedNevData == "Normal") {
+       // legend = activeChartLegend["normal"]
+      me.state.body.activeChartLegend = ClientObj.viewDashBoard[ me.state.body.deviceType].chartLegend[me.state.body.selectedGroupsitem]["normal"]
+
+      }
+      // console.log("this is selected", activeChartLegend)
+      if (me.state.body.selectedNevData != "Normal") {
+      me.state.body.activeChartLegend = ClientObj.viewDashBoard[ me.state.body.deviceType].chartLegend[me.state.body.selectedGroupsitem]["normal"]["aggregated"]
+
+        // legend = activeChartLegend["aggregated"];
+      }
+     
+     // me.state.body.activeChartLegend = me.state.body.chartLegendNames[me.state.body.selectedGroupsitem];
       this.setState({ body: me.state.body });
       // }
     }
@@ -322,7 +336,7 @@ class viewDashboard extends Component {
     me.setState({ body: me.state.body });
     // var FdataArray = [];
     // var dataArray = [];
-    axios.post(`${URL.IP}:3992/getdashboard`, body)
+    axios.post(`${URL.IP}/getdashboard`, body)
       .then(json => {
         me.state.body.mainjson = json;
         //console(json)
@@ -561,7 +575,8 @@ class viewDashboard extends Component {
       reconnection: true,
       reconnectionDelay: 1000,
       reconnectionDelayMax: 5000,
-      reconnectionAttempts: 99999
+      reconnectionAttempts: 99999,
+      path: "/api/soketForOnreport"
     });
     // console.log("This is log of socket");
     // console.log(socket)
@@ -805,6 +820,7 @@ class viewDashboard extends Component {
         me.state.body.selectedDataInfoTypeValuesflag["Values"] = true;
 
       }
+      me.state.body.activeChartLegend = me.state.body.chartLegendNames[me.state.body.selectedGroupsitem]
       me.setState({ body: me.state.body })
     }
     //console("This is default SensorsName")
@@ -898,7 +914,7 @@ class viewDashboard extends Component {
       var arrayofbgClass = dashboardData.SensorsBgC;
       me.state.body.selectedGroupsitem = value;
       console.log("this is chart chartLegendNames", me.state.body.chartLegendNames)
-      me.state.body.activeChartLegend = me.state.body.chartLegendNames[value]
+      // me.state.body.activeChartLegend = me.state.body.chartLegendNames[value]
       console.log("this is chart chartLegendNames12", me.state.body.activeChartLegend)
       let index = me.state.body.sensorsGroups.findIndex(item => item.group == value);
 
@@ -969,13 +985,14 @@ class viewDashboard extends Component {
     var me = this;
     const { endpoint } = this.state.body;
     var body = { custCd, subCustCd, mac }
-    // axios.post("http://URL.IP:3992/getdashbordlastalert", body)
+    // axios.post("http://URL.IP/getdashbordlastalert", body)
     // .then(json =>  {
     var lastError = socketIOClient(endpoint + "/ActivelastError", {
       reconnection: true,
       reconnectionDelay: 1000,
       reconnectionDelayMax: 5000,
-      reconnectionAttempts: 99999
+      reconnectionAttempts: 99999,
+      path: "/api/soketForOnreport"
     });
     lastError.emit('lastErrorClientEmit', body);
     lastError.on('lastErrorServerEmit', function (data) {
@@ -1043,17 +1060,10 @@ var me = this;
 
   render() {
     const { arrData, deviceTypeObj, arrLabels, yaxisName, activeChartLegend, lastAlertData, fromDate, toDate, bgColors, selectedSensorsType1, borderColors, DataArray, in_prog,
-      selectedSPValue, selectedCustValue, selectedSubCustValue, selectedAssets, selectedDeviceName, selectedSensorsName, selectedNevData
-    } = this.state.body;
+      selectedSPValue, selectedCustValue, selectedSubCustValue, selectedAssets, selectedDeviceName, selectedSensorsName, selectedNevData} = this.state.body;
     var state = this.state.body;
-    var legend = null;
-    if (selectedNevData == "Normal") {
-      legend = activeChartLegend["normal"]
-    }
-    console.log("this is selected", activeChartLegend)
-    if (selectedNevData != "Normal") {
-      legend = activeChartLegend["aggregated"];
-    }
+
+   
     console.log("state ", this.state)
     var total_page = Math.ceil(this.state.body.total_count / this.state.body.page_size);
     var page_start_index = ((state.page - 1) * state.page_size);
@@ -1315,7 +1325,7 @@ var me = this;
                 arrData={arrData}
                 chartAxis={deviceTypeObj}
                 arrLabels={arrLabels}
-                legend={legend}
+                legend={activeChartLegend}
                 xAxisLbl="Date and Time"
                 yAxisLbl={yaxisName}
                 // bgColors ={bgColors}
@@ -1363,7 +1373,11 @@ var me = this;
                       </Button> */}
                       
                       &nbsp;&nbsp;  &nbsp;&nbsp; <span  onClick ={() => {
-                      this.state.body.CommentInfo._id =   user.commentOtherInfo._id; 
+                      this.state.body.CommentInfo.rowHeader = this.state.body.headerTable
+                      this.state.body.CommentInfo.row = user;
+                      this.state.body.CommentInfo.SN = (page_start_index + i + 1) ;
+                      this.state.body.CommentInfo.tableSensors = this.state.body.tableSecondKeyArray;
+                      this.state.body.CommentInfo._id =   user.commentOtherInfo._id;
                       this.state.body.CommentInfo.createdTime =   user.commentOtherInfo.createdTime; 
                       this.state.body.CommentInfo.updatedTime =   user.commentOtherInfo.updatedTime; 
                       this.state.body.CommentInfo.factId =   user.column7; 

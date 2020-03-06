@@ -113,7 +113,7 @@ class Chartcom extends Component {
         }
         dataArray.push(json)
       }
-      // console.log(dataArray)
+       console.log("This is chart.js data",dataArray)
       var me = this;
       // console.log(me.state.body.myChart) 
       // console.log(type + "this name of chart");
@@ -189,6 +189,7 @@ class Chartcom extends Component {
         })
 
       }
+      console.log("This is Option of chart.js", yAxesArray)
       me.state.body.myChart = new Chart("barchart1", {
         type: "line",
         data: {

@@ -39,7 +39,7 @@ import QueryBuilder from 'react-querybuilder';
       this.fetchAllStateSensor();
     }
     fetchAllStateSensor(){
-        axios.post("http://localhost:3992/getAllSateData",{ mac: this.state.CriteriaForOP.mac})
+        axios.post("http://localhost/getAllSateData",{ mac: this.state.CriteriaForOP.mac})
         // .then(response => response.json())
         .then(json =>  {
        console.log(json)
@@ -87,7 +87,7 @@ import QueryBuilder from 'react-querybuilder';
         var me =this;
         alert("Hello This Working")
         //  THIS IS GETING SENSORNAME BASED ON SPCD,CUSTCD,SUBCUSTCD
-        fetch("http://localhost:3992/getSensorNames?spCode=" +this.state.CriteriaForOP.spCd +
+        fetch("http://localhost/getSensorNames?spCode=" +this.state.CriteriaForOP.spCd +
         "&&custCd=" + this.state.CriteriaForOP.CustCd + "&&subCustCd=" + this.state.CriteriaForOP.subCustCd)
            .then(response => response.json())
            .then(json =>  {

@@ -4,7 +4,7 @@ import PropTypes from 'prop-types'
 import './Header.css';
 import { Link } from 'react-router-dom';
 import {Nav, Navbar,NavItem, NavDropdown, Modal} from 'react-bootstrap';
-// import * as serviceWorker from '../../src/serviceWorker';
+import * as serviceWorker from '../../src/serviceWorker';
 import axios from "axios";
 import URL from "../Common/confile/appConfig.json";
 class Header extends Component {
@@ -40,7 +40,7 @@ class Header extends Component {
   handleSubmit(){
    console.log( "This is State",this.state.data)
    let body = { _id : this.state.data[0].id,devicePreference: this.state.devicePreference  }
-    axios.post(`${URL.IP}:3992/users/update`,body)
+    axios.post(`${URL.IP}/users/update`,body)
     .then(json => {
       console.log("This is this.state.data result", json)
      if(json.statusText === "OK"){
@@ -58,9 +58,9 @@ class Header extends Component {
   render(){
   let ActiveData = JSON.parse(sessionStorage.getItem("dashboardConfigobj"));
   let data = JSON.parse(sessionStorage.getItem("userDetails"));
-//   var  Admin =  data[0].userType ;
+ // var  Admin =  data[0].userType ;
 if (ActiveData){
-//serviceWorker.register(data[0].userId);
+  serviceWorker.register(data[0].userId);
 }
  
  

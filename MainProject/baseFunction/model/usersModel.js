@@ -1,7 +1,7 @@
 'user strict'
 const mongoose = require("mongoose");
 const schemaTypes = require("mongoose").Schema.Types;
-var gomos = require("../../../commanFunction/routes/commanFunction");
+var gomos = require("../../../commanfunction/routes/commanFunction");
 const g = require('../commanUtilityFn/gConstant')
 
 var UsersSchema = new mongoose.Schema({
@@ -49,7 +49,7 @@ var UsersSchema = new mongoose.Schema({
         type: String
        
     },
-    Devicepreference: {
+    devicePreference: {
      type: schemaTypes.Mixed
     },
     subscription: {

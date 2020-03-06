@@ -406,3 +406,6 @@ background: #00C0EF !important;
     color: black;
     text-decoration: none !important;
 }
+.commentLeft {
+    float: left;
+}

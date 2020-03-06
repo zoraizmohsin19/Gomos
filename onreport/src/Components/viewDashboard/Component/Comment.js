@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Modal } from 'react-bootstrap';
+import { Modal, Table } from 'react-bootstrap';
 import moment from 'moment';
 import axios from "axios";
 import URL from "../../../Common/confile/appConfig.json";
@@ -88,7 +88,7 @@ var me  = this;
     if(me.state.CommentInfo.factId !== undefined){
 
     
-    axios.get(`${URL.IP}:3992/comment/byfactId?factId=`+me.state.CommentInfo.factId)
+    axios.get(`${URL.IP}/comment/byfactId?factId=`+me.state.CommentInfo.factId)
     .then(json => {
     //  console.log("This is json Called", json)
        let comment = json["data"][0].data;
@@ -139,7 +139,7 @@ var me  = this;
         }
       //  console.log("This is comment Data For BackEnd", tempData)
         me.setState({submitBtn: true})
-        axios.post(`${URL.IP}:3992/comment/save`, tempData)
+        axios.post(`${URL.IP}/comment/save`, tempData)
         .then(json => {
           me.state.newComment.comment = "";
          me.setState({newComment: me.state.newComment});
@@ -167,7 +167,7 @@ var me  = this;
         }
       //  console.log("This is comment Data For BackEnd", tempData)
         me.setState({submitBtn: true})
-        axios.post(`${URL.IP}:3992/comment/update`, tempData)
+        axios.post(`${URL.IP}/comment/update`, tempData)
         .then(json => {
           me.state.newComment.comment = "";
          me.setState({newComment: me.state.newComment});
@@ -198,18 +198,29 @@ var me  = this;
       const {commentFlagArr} = this.state;
       // console.log("commentState", this.state)
       //   console.log( "this is commentFlagArr Info",commentFlagArr);
-       
+      let tableHeader;
+      if(this.props.CommentInfo.rowHeader != undefined){
+       tableHeader =  JSON.parse(JSON.stringify(this.props.CommentInfo.rowHeader));
+       tableHeader.splice(tableHeader.indexOf("SN"), 1);
+      tableHeader.splice(tableHeader.indexOf("DEVICE NAME"), 1);
+      tableHeader.splice(tableHeader.indexOf("TIME"), 1);
+      tableHeader.splice(tableHeader.indexOf("Comment"), 1);
+      }
         if(this.props.CommentInfo !== undefined){
         let  disableCommentTran = (this.props.nevInfo == "Normal")? true: false;
         // console.log("This is disableCommentTran",disableCommentTran)
-        // console.log("this.props.nevInfo", this.props.nevInfo)
+         console.log("this.props.CommentInfo.row", this.props.CommentInfo.row)
+         console.log("this.props.CommentInfo.header", this.props.CommentInfo.rowHeader)
+
         return (
             <div>
                <Modal show={this.props.CommentInfo.show} onHide={this.handleClose.bind(this)}
           dialogClassName=""
           aria-labelledby="example-custom-modal-styling-title">
           <Modal.Header closeButton>
-            <Modal.Title id="example-custom-modal-styling-title" ></Modal.Title>
+            <Modal.Title id="example-custom-modal-styling-title" >
+        <span><b>Device Name :</b>  {(this.props.CommentInfo.row != undefined)? this.props.CommentInfo.row["column2"]: ""}</span>
+            </Modal.Title>
           </Modal.Header>
           <Modal.Body>
             <div className="row" >
@@ -244,6 +255,34 @@ var me  = this;
                this.handleClose()}}>Cancel</button>
             <button className="btn btn-sm btn-success" disabled ={this.state.submitBtn} onClick={() =>{this.onSubmit()}} >Save</button></div>: null
         }
+    {(this.props.CommentInfo.rowHeader != undefined)?  <div className="sokettablemr">
+    {(this.props.CommentInfo != undefined  && this.props.CommentInfo.rowHeader != undefined)? <div className=""> <span className="commentLeft"><b>Serial No : </b> {this.props.CommentInfo.SN}</span> <span className="commentRight"><b>Device Time : </b> {this.props.CommentInfo.DeviceTime}</span></div>: null}
+
+            <div className="table-responsive">
+              <Table className="table table-hover table-sm table-bordered cust">
+                <thead className='bg' style={{ background: "gainsboro" }}>
+                  <tr>
+                    {tableHeader.map(item => {
+                      return <th className='text-center '>{item}</th>
+                    })}
+
+                  </tr>
+                </thead>
+                <tbody>
+               
+                
+                   <tr key={2}>
+                      {this.props.CommentInfo.tableSensors.map(item => {
+                        return <td className='text-center'>{this.props.CommentInfo.row[item]}</td>
+                      })}
+                    </tr>
+                  
+                 
+                </tbody>
+                </Table>
+                </div>
+
+                </div>: null}
           </Modal.Footer>
         </Modal>
             </div>

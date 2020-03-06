@@ -1,7 +1,7 @@
 'use strict'
 const AlertModel = require('../model/alertModel');
 const g = require('../commanUtilityFn/gConstant');
-const gomos = require("../../../commanFunction/routes/commanFunction");
+const gomos = require("../../../commanfunction/routes/commanFunction");
 
 //THIS IS FTECH DATA PRESENT  FROM ALERTS . 
 module.exports.fetchAlertLevel1 = function (NAMEOFSERVICE,logger,gConsole) {

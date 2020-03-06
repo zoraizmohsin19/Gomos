@@ -1,7 +1,7 @@
 'use strict'
 const AlertsConfigModel = require('../model/alertsConfigModel');
 const g = require('../commanUtilityFn/gConstant');
-const gomos = require("../../../commanFunction/routes/commanFunction");
+const gomos = require("../../../commanfunction/routes/commanFunction");
 
 module.exports.getAlertConfigsdetails = function (NAMEOFSERVICE,logger,gConsole) {
     let criteria = {"type": "level1","alertTriggeredBy": "deviceActivity" };

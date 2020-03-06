@@ -12,11 +12,11 @@ var alertSrvcSchedule;
 var fs = require("fs");
 var dateTime = require("node-datetime");
 var dbo ;
-let gomosSchedule = require("../../commanFunction/routes/getServiceConfig");
+let gomosSchedule = require("../../commanfunction/routes/getServiceConfig");
 // Mailing Details
 var mailFrom = '"Sasya Systems Alert"<sasyasystemsalert@gmail.com>';
 var mailTo = 'takreem@asagrisystems.com';
-var  gomos = require("../../commanFunction/routes/commanFunction");
+var  gomos = require("../../commanfunction/routes/commanFunction");
 const NAMEOFSERVICE = "alertService";
 const TRACE_PROD = 1;
 const TRACE_STAGE = 2;
