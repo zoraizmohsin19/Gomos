@@ -1271,7 +1271,7 @@ function updateSetProgramDetails(mainDB, data) {
               if (dateTime < result1[0].sourceMsg.body.wef && dateTime < result1[1].sourceMsg.body.wef) {
                 gomos.gomosLog(logger, gConsole, TRACE_DEV, "This is debug of condtion where wef is grater than date time", result1[1].sourceMsg.body);
                 let id;
-                if (result1[0].sourceMsg.body.wef > result1[1].sourceMsg.body.wef) {
+                if (result1[0].sourceMsg.body.wef >= result1[1].sourceMsg.body.wef) {
                   id = result1[0]._id;
                   deleteResponse = await deleteActiveJob(mainDB, result1[0])
                 }
@@ -1300,7 +1300,7 @@ function updateSetProgramDetails(mainDB, data) {
 
                 gomos.gomosLog(logger, gConsole, TRACE_DEV, "This is debug of condtion where wef is less Than than date time", result1[0].sourceMsg.body);
                 let id;
-                if (result1[0].sourceMsg.body.wef > result1[1].sourceMsg.body.wef) {
+                if (result1[0].sourceMsg.body.wef >= result1[1].sourceMsg.body.wef) {
                   id = result1[1]._id;
                   deleteResponse = await deleteActiveJob(mainDB, result1[1])
                 }
