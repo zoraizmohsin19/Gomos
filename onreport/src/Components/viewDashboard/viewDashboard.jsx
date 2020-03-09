@@ -296,10 +296,11 @@ class viewDashboard extends Component {
       }
       // console.log("this is selected", activeChartLegend)
       if (me.state.body.selectedNevData != "Normal") {
-      me.state.body.activeChartLegend = ClientObj.viewDashBoard[ me.state.body.deviceType].chartLegend[me.state.body.selectedGroupsitem]["normal"]["aggregated"]
+      me.state.body.activeChartLegend = ClientObj.viewDashBoard[ me.state.body.deviceType].chartLegend[me.state.body.selectedGroupsitem]["aggregated"]
 
         // legend = activeChartLegend["aggregated"];
       }
+      console.log("This is log of legend",  me.state.body.activeChartLegend)
      
      // me.state.body.activeChartLegend = me.state.body.chartLegendNames[me.state.body.selectedGroupsitem];
       this.setState({ body: me.state.body });
