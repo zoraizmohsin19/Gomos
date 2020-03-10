@@ -1,6 +1,6 @@
 {
 	"comments": "This is Ip Address for servers",
-     "IP": "https://app.sasyasystems.com/api/onDemandService",
-     "SIP":  "https://app.sasyasystems.com"
+     "IP": "https://test.sasyasystems.com/api/onDemandService",
+     "SIP":  "https://test.sasyasystems.com"
      
 }
