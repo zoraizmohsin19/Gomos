@@ -10,7 +10,7 @@
 	},
 	"testURL": {
 		"listnerUrl": "mongodb://gomos:gomos123@ds227171.mlab.com:27171/gomos",
-		"mainUrl": "mongodb://gomos:gomos123@34.244.151.117:27017/gomos"
+		"mainUrl": "mongodb://gomos:gomos123@testdb.sasyasystems.com:27017/gomos"
 	},
 	"testDB": {
 		"listnerDB": "gomos",
@@ -18,7 +18,7 @@
 	},
 	"stageURL": {
 		"listnerUrl": "mongodb://gomos:gomos123@ds227171.mlab.com:27171/gomos",
-		"mainUrl": "mongodb://gomos:gomos123@ds227171.mlab.com:27171/gomos"
+		"mainUrl": "mongodb://gomos:gomos123@testdb.sasyasystems.com:27017/gomos"
 	},
 	"stageDB": {
 		"listnerDB": "gomos",
