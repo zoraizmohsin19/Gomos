@@ -181,7 +181,7 @@ function aggragateChannel(mac, endRange, startRange, arrayBSName, Type, bsName) 
           let noOfStart = 0;
           for (let i = 0; i < result.length; i++) {
             if (result[i]["sensors"][Type][bsName] == 1) {
-              if (i === 0 && result[0]["sensors"][Type][bsName] == 1) {
+              if (i === 0) {
                 let response = await MsgFactModel.getlastTimeForOn(NAMEOFSERVICE, logger, gConsole, mac, arrayBSName, startRange);
                 if (response.length !== 0 && response[0]["sensors"][Type][bsName] == 1) {
                   dateArray.push(new Date(startRange))
@@ -190,20 +190,26 @@ function aggragateChannel(mac, endRange, startRange, arrayBSName, Type, bsName) 
               dateArray.push(result[i].DeviceTime)
 
               if (i === result.length - 1) {
-                if (result[result.length - 1]["sensors"][Type][bsName] == 1) {
+                // if (result[result.length - 1]["sensors"][Type][bsName] == 1) {
                   dateArray.push(new Date(endRange))
-                }
-                if (dateArray.length != 0) {
+                // }
+                // if (dateArray.length != 0) {
                   duration += moment.duration(moment(dateArray[dateArray.length - 1]).diff(moment(dateArray[0]))).asMinutes();
                   dateArray = [];
-                }
-                if (noOfStart === 0) {
+                // }
+                // if (noOfStart === 0) {
                   noOfStart++;
-                }
+                // }
               }
             }
             else if (result[i]["sensors"][Type][bsName] == 0) {
-              if (dateArray.length != 0) {
+              if (i === 0) {
+                let response = await MsgFactModel.getlastTimeForOn(NAMEOFSERVICE, logger, gConsole, mac, arrayBSName, startRange);
+                if (response.length !== 0 && response[0]["sensors"][Type][bsName] == 1) {
+                  duration += moment.duration(moment(result[i].DeviceTime).diff(moment(startRange))).asMinutes();
+                }
+              }
+                else if (dateArray.length != 0) {
                 duration += moment.duration(moment(result[i].DeviceTime).diff(moment(dateArray[0]))).asMinutes();
                 dateArray = [];
                 noOfStart++;

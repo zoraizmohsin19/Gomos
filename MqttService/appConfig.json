@@ -26,7 +26,7 @@
 	},
 	"prodURL": {
 		"listnerUrl": "mongodb://gomosprod:gomos123@ds129018.mlab.com:29018/gomosprod",
-		"mainUrl": "mongodb://gomosprod:gomos123@ds129018.mlab.com:29018/gomosprod"
+		"mainUrl": "mongodb://gomosprod:gomos123@proddb.sasyasystems.com:27017/gomosprod"
 	},
 	"prodDB": {
 		"listnerDB": "gomosprod",
