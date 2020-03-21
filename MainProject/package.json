@@ -3,8 +3,8 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "node ./bin/aggregatorSrvc",
-    "start-OND": "node ./bin/ondemandSrvc"
+    "batch": "nodemon ./bin/batchSrvc",
+    "ondemand": "nodemon ./bin/ondemandSrvc"
   },
   "dependencies": {
     "cookie-parser": "~1.4.4",
