@@ -362,7 +362,7 @@ getAllDataApi(SendForSp,SendFroCustCD,SendForSbCd,SendForSensor,SendForStartDate
     let sensorsStrings= JSON.stringify(SendForSensor)
     let selectedGroupName1 = JSON.stringify(selectedGroupName);
     // console.log("group Name",selectedGroupName)
-    fetch(`${URL.IP}getFacts?spCode=` + SendForSp + "&&custCd=" +
+    fetch(`${URL.IP}/getFacts?spCode=` + SendForSp + "&&custCd=" +
     SendFroCustCD + "&&subCustCd=" + SendForSbCd + "&&sensorNm=" + sensorsStrings +
   "&&startDate=" + SendForStartDate + "&&endDate=" + SendForEndDate + 
   "&&operation=" + SendForOperation + "&&equalsFacts=" +
