@@ -4329,7 +4329,7 @@ var formattedDate = requiredDateTime.create(utilityFn.calcWATZ(new Date(),TimeZo
 //      console.log("inner functions")
 //   });
 let tempFilename  = reportName+dateFormat("yyyymmdd-HHMM") +".xlsx";
-  let fileName = "../../../../../../var/www/html/excelData/"+tempFilename;
+  let fileName = "../../../../frontEnd/excelData/"+tempFilename;
 // let fileName = "./"+tempFilename;
 const stream = fs.createWriteStream(fileName);
   workbook.xlsx.write(stream).then(data => {
