@@ -220,7 +220,7 @@ function aggragateChannel(mac, endRange, startRange, arrayBSName, Type, bsName) 
 
         }
         else {
-          resolve({ result: "err" })
+          resolve({ duration: null, noOfStart: 0, Count: 0 })
         }
       }
         catch(err){
