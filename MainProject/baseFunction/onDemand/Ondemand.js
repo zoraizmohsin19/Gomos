@@ -3030,10 +3030,10 @@ function monthlyDataProcessing(db, res, criteria, startTime,endTime, offset, pag
  // console.log(NewCriteria)
   db.collection("AggregatedData")
     .aggregate([{$match: NewCriteria},
-    { $group : { _id:  {  "Month":"$Month","Year": "$Year","bsName":"$bsName" } ,"max" : { $max :"$Max"} ,"min" : { $min :"$Min"}, 
+    { $group : { _id:  {  "Year": "$Year","Month":"$Month","bsName":"$bsName" } ,"max" : { $max :"$Max"} ,"min" : { $min :"$Min"}, 
       mac: {"$first": "$mac"} ,"DeviceName": {"$first":"$DeviceName" },"Date": {"$first":"$Date" }
       ,"sum1" : { $sum :"$Sum"} ,"Count" : { $sum :"$Count"}, Duration: {$sum: "$duration"}}}, 
-      {"$group": { "_id":{"Month":"$_id.Month","Year": "$_id.Year"},
+      {"$group": { "_id":{"Year": "$_id.Year","Month":"$_id.Month"},
        "processedData": {
         "$push": {
            "Date": "$Date"  ,
@@ -3055,7 +3055,7 @@ function monthlyDataProcessing(db, res, criteria, startTime,endTime, offset, pag
     }
     },
     {
-      $sort:{ "_id.Month": -1, "_id.Year":-1}
+      $sort:{  "_id.Year":-1,"_id.Month": -1}
     },
    
     {
@@ -3204,10 +3204,10 @@ function weeklyDataProcessing(db, res, criteria, startTime,endTime, offset, page
   console.log(NewCriteria)
   db.collection("AggregatedData")
     .aggregate([{$match: NewCriteria},
-    { $group : { _id:  {  "Week":"$Week","Year": "$Year","bsName":"$bsName" } ,"max" : { $max :"$Max"} ,"min" : { $min :"$Min"}, 
+    { $group : { _id:  { "Year": "$Year","Week":"$Week","bsName":"$bsName" } ,"max" : { $max :"$Max"} ,"min" : { $min :"$Min"}, 
       mac: {"$first": "$mac"} ,"DeviceName": {"$first":"$DeviceName" },"Date": {"$first":"$Date" }
       ,"sum1" : { $sum :"$Sum"} ,"Count" : { $sum :"$Count"}, Duration: {$sum: "$duration"}}}, 
-      {"$group": { "_id":{"Week":"$_id.Week","Year": "$_id.Year"},
+      {"$group": { "_id":{"Year": "$_id.Year","Week":"$_id.Week"},
        "processedData": {
         "$push": {
            "Date": "$Date"  ,
@@ -3229,7 +3229,7 @@ function weeklyDataProcessing(db, res, criteria, startTime,endTime, offset, page
     }
     },
     {
-      $sort:{ "_id.Week": -1,"_id.Year":-1}
+      $sort:{"_id.Year":-1,"_id.Week": -1}
     },
    
     {
@@ -3380,7 +3380,7 @@ function dailyDataProcessing(db, res,criteria, startTime,endTime, offset, page_s
     { $group : { _id:  {"Date": "$Date","Day":"$Day","bsName":"$bsName" } ,"max" : { $max :"$Max"} ,"min" : { $min :"$Min"}, 
       mac: {"$first": "$mac"} ,"DeviceName": {"$first":"$DeviceName" }
       ,"sum1" : { $sum :"$Sum"} ,"Count" : { $sum :"$Count"}, Duration: {$sum: "$duration"}}}, 
-      {"$group": { "_id":"$_id.Day",
+      {"$group": { "_id":"$_id.Date",
        "processedData": {
         "$push": {
            "Date": "$_id.Date"  ,

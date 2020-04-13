@@ -6,6 +6,6 @@
 	"testDB": "gomos",
 	"stageURL": "mongodb://gomos:gomos123@testdb.sasyasystems.com:27017/gomos",
 	"stageDB": "gomos",
-	"prodURL": "mongodb://gomosprod:gomos123@proddb.sasyasystems.com:27017/gomosprod",
+	"prodURL": "mongodb://gomosprod:gomos123@ds129018.mlab.com:29018/gomosprod",
 	"prodDB": "gomosprod"
 }
