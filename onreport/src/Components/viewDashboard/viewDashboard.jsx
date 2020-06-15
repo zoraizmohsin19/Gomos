@@ -134,7 +134,7 @@ class viewDashboard extends Component {
       let tempData = JSON.parse(sessionStorage.getItem("ClientObj"));
       let obj = {}
 
-      if ( tempData.viewDashBoard[deviceType].chartOptions != undefined ) {
+      if (tempData.viewDashBoard[deviceType] !== undefined && tempData.viewDashBoard[deviceType].chartOptions != undefined ) {
           obj = tempData.viewDashBoard[deviceType].chartOptions
       } 
       else {
