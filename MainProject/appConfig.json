@@ -3,6 +3,6 @@
 	"dev": ["mongodb://gomosdev:gomos123@ds253284.mlab.com:53284/gomosdev","Development"],
 	"test":[ "mongodb://gomos:gomos123@testdb.sasyasystems.com:27017/gomos","Testing"],
 	"stage": ["mongodb://gomos:gomos123@testdb.sasyasystems.com:27017/gomos","Staging"],
-	"prod": ["mongodb://gomosprod:gomos123@proddb.sasyasystems.com:27017/gomosprod","Production"]
+	"prod": ["mongodb://gomosprod:gomos123@ds129018.mlab.com:29018/gomosprod","Production"]
 
 }
