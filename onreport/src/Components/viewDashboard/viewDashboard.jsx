@@ -41,6 +41,7 @@ class viewDashboard extends Component {
         selectedSensorsType1: '',
         // mac: '',
         deviceType: "",
+        chartOptions: {},
         deviceTypeObj: {},
        
         activeChartLegend: {},
@@ -128,6 +129,20 @@ class viewDashboard extends Component {
   //   this.setState({ body: me.state.body });
   //   this.fetchdata();
   // }
+
+  chartsOptionsbyDeviceType(deviceType) {
+      let tempData = JSON.parse(sessionStorage.getItem("ClientObj"));
+      let obj = {}
+
+      if ( tempData.viewDashBoard[deviceType].chartOptions != undefined ) {
+          obj = tempData.viewDashBoard[deviceType].chartOptions
+      } 
+      else {
+          obj = { "areaFill": true , "displayGridlines": true }
+      }
+
+      return obj;
+  }
 
   chartsIdbyDeviceType(deviceType) {
     let tempData = JSON.parse(sessionStorage.getItem("ClientObj"));
@@ -233,6 +248,7 @@ class viewDashboard extends Component {
           me.state.body.selectedEntitiesValues = groupedData[index].devicebusinessNM;
           //console(groupedData[index].devicebusinessNM)
           me.state.body.deviceType = json["data"].deviceTypes;
+          me.state.body.chartOptions = this.chartsOptionsbyDeviceType( json["data"].deviceTypes );
           me.state.body.deviceTypeObj = this.chartsIdbyDeviceType(json["data"].deviceTypes);
          
           console.log("This is group", me.state.body.activeChartLegend)
@@ -1060,7 +1076,7 @@ var me = this;
   }
 
   render() {
-    const { arrData, deviceTypeObj, arrLabels, yaxisName, activeChartLegend, lastAlertData, fromDate, toDate, bgColors, selectedSensorsType1, borderColors, DataArray, in_prog,
+    const { arrData, chartOptions, deviceTypeObj, arrLabels, yaxisName, activeChartLegend, lastAlertData, fromDate, toDate, bgColors, selectedSensorsType1, borderColors, DataArray, in_prog,
       selectedSPValue, selectedCustValue, selectedSubCustValue, selectedAssets, selectedDeviceName, selectedSensorsName, selectedNevData} = this.state.body;
     var state = this.state.body;
 
@@ -1324,6 +1340,7 @@ var me = this;
               <Chartcom
                 type="line"
                 arrData={arrData}
+                chartOptions = { chartOptions }
                 chartAxis={deviceTypeObj}
                 arrLabels={arrLabels}
                 legend={activeChartLegend}

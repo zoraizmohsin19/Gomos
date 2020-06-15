@@ -38,7 +38,7 @@ class Chartcom extends Component {
     return temp[index].axisY
   }
   render() {
-    const { chartAxis, arrData, arrLabels, legend, xAxisLbl, yAxisLbl, bgColors, borderColors } = this.props
+    const { chartOptions, chartAxis, arrData, arrLabels, legend, xAxisLbl, yAxisLbl, bgColors, borderColors } = this.props
     var backgroundColor = [
       'rgba(255, 222, 0, 0.2)',
       'rgba(0, 255, 0, 0.2)',
@@ -98,15 +98,16 @@ class Chartcom extends Component {
         var json = {};
         json["label"] = keysofBsName[i];
         json["data"] = [];
-        //  json["fill"]  = false;
+        json["fill"]  = ( chartOptions.areaFill === true ) ? true : false ;
         json["backgroundColor"] = backgroundColor[i];
+        // json["backgroundColor"] = false;
         //json["yAxisID"] = (axisY[i])?axisY[i] : '';
         json["yAxisID"] = this.getIdForChart(chartAxis, keysofBsName[i])
         json["borderColor"] = borderColor[i];
         json["pointBorderWidth"] = .1;
         // json["pointBorderColor"]  = this.getRandomBackgroundColor();
         json["fontSize"] = 7;
-        json["borderWidth"] = 1.2;
+        json["borderWidth"] = ( chartOptions.areaFill === true ) ? 1.2 : 2 ;
         for (var k = 0; k < arrData.length; k++) {
           json["data"].push(arrData[k][keysofBsName[i]])
 
@@ -185,6 +186,9 @@ class Chartcom extends Component {
             labelString: legend[i].legend,
             fontSize: 13,
             fontColor: "red"
+          },
+          gridLines: {
+            display: ( chartOptions.displayGridlines === true ) ? true : false 
           }
         })
 
@@ -261,7 +265,6 @@ Chartcom.propTypes = {
   yAxisLbl: PropTypes.string.isRequired,
   // bgColors: PropTypes.array.isRequired,
   borderColors: PropTypes.array.isRequired
-
 
 };
 export default Chartcom;
