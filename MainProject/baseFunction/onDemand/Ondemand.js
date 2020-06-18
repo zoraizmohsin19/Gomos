@@ -4102,8 +4102,8 @@ function exportToExcel(arColumns, arWidths, reportName, dataSet,selectedCustValu
     gomos.gomosLog( logger, gConsole , TRACE_DEBUG , "Inside exportToExcel - about to process these many rows" , dataSet.length );
 
     let tempFilename  = reportName + dateFormat( "yyyymmdd-HHMM" ) + ".xlsx" ;
-    // let fileName = "../../../../frontEnd/excelData/" + tempFilename ;
-    let fileName = "../../../../usr/share/nginx/html/excelData/" + tempFilename ;
+     let fileName = "../../../../frontEnd/excelData/" + tempFilename ;
+   // let fileName = "../../../../usr/share/nginx/html/excelData/" + tempFilename ;
     // ******* For use in local host *******
     // let fileName = "./Temp/" + tempFilename ;
 
