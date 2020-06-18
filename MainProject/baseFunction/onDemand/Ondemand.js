@@ -4008,7 +4008,7 @@ router.post("/getDevicesIdentifier", function (req, res, next) {
           var sensorsArray= [];
           for(var i = 0; i< keyofCode.length; i++){
             var ActiveIdentifier = {};
-           gomos.gomosLog( logger,gConsole,TRACE_DEBUG,"this devicebusinessNM"); 
+          //  gomos.gomosLog( logger,gConsole,TRACE_DEBUG,"this devicebusinessNM"); 
                ActiveIdentifier["devicebusinessNM"] = result[0][deviceStateKey[k]][keyofCode[i]]["businessName"];
                ActiveIdentifier["group"]    =  result[0][deviceStateKey[k]][keyofCode[i]]["group"];
                ActiveIdentifier["Type"]    =  result[0][deviceStateKey[k]][keyofCode[i]]["Type"];
@@ -4096,292 +4096,154 @@ router.post("/getDevicesWithgroup", function (req, res, next) {
   );
 });
  //export To Excel and Save it to server and add the Details to Collection
- function exportToExcel(arColumns, arKeys, arWidths, reportName, dataSet,selectedCustValue,selectedSubCustValue,selectedAssetValue,selectedDeviceValue,selectedGroupName,startDate,endDate,res,TimeZone) {
-  var dt = new Date();
-  var strdt;
-    strdt = dt
-      .toString()
-      .split("GMT")[0]
-      .trim();
-    //   var tempFilename  = reportName+dateFormat("yyyymmdd-HHMM") +".xlsx";
-    // //  var fileName = "../../../../../../var/www/html/excelData/"+tempFilename;
-    //   var fileName = "./"+tempFilename;
-    //   var options = {
-    //     filename: fileName,
-    //     useStyles: true,
-    //     useSharedStrings: true
-    //   };
-  var workbook = new ExcelJs.Workbook();
-  workbook.created = new Date();
-  // var workbook = new ExcelJs.stream.xlsx.WorkbookWriter(options);
-  var ws1 = workbook.addWorksheet("REPORT_HEADER", {
-    properties: { tabColor: { argb: "1E1E90FF" } }
-  });
-  // create a sheet with blue tab colour
-  var ws = workbook.addWorksheet("DATA_RECORDING", {
-    properties: { tabColor: { argb: "1E1E90FF" } }
-  });
+function exportToExcel(arColumns, arWidths, reportName, dataSet,selectedCustValue,selectedSubCustValue,selectedAssetValue,selectedDeviceValue,selectedGroupName,startDate,endDate,res,TimeZone) {
 
-var sensorType = selectedGroupName;
-// if(this.state.selectedDeviceValue !=0){
-// for(var i = 0; i< this.state.selectedDeviceValue.length; i++){
-//   sensorType = sensorType + this.state.selectedDeviceValue[i];
-// }
-// }
-var formattedDate = requiredDateTime.create(utilityFn.calcWATZ(new Date(),TimeZone));
-  // Add initial set of rows
-  var titleRows = [
-    ["ReportName", "Sensors Data Recording"],
-    ["Report Generated On", formattedDate.format("d-m-Y H:M:S")],
-    ["Customer Name",  selectedCustValue],
-    ["Sub Customer Name", selectedSubCustValue],
-    ["Asset Name", selectedAssetValue],
-    ["Device Name", selectedDeviceValue],
-    ["Selected Group", sensorType.join(",")],
-    ["Time Interval", dateFormat(startDate,"dd-mmm HH:MM")+","+dateFormat(endDate,"dd-mmm HH:MM")]
-    // ["Class", this.std]
-  ];
+    gomos.gomosLog( logger, gConsole , TRACE_DEBUG , "Inside exportToExcel - about to process these columns" , arColumns.length );
+    gomos.gomosLog( logger, gConsole , TRACE_DEBUG , "Inside exportToExcel - about to process these many rows" , dataSet.length );
 
-  // Add title rows
-  // for(let T = 0; T< titleRows.length ; T++){
-   ws1.addRows(titleRows);
-  
-  // }
- 
+    let tempFilename  = reportName + dateFormat( "yyyymmdd-HHMM" ) + ".xlsx" ;
+    // let fileName = "../../../../frontEnd/excelData/" + tempFilename ;
+    let fileName = "../../../../usr/share/nginx/html/excelData/" + tempFilename ;
+    // ******* For use in local host *******
+    // let fileName = "./Temp/" + tempFilename ;
 
-  for (i = 1; i <= titleRows.length; ++i) {
-    ws1.getRow(i).font = { size: 12, bold: true };
-    ws1.getRow(i).alignment = {
-      vertical: "middle",
-      horizontal: "center",
-       wrapText: true
-    };
-   
-    ws1.getCell("A" + i).fill = {
-      type: "pattern",
-      pattern: "solid",
-      fgColor: { argb: "8787CEFA" }
-    };
-    ws1.getCell("A" + i).border = ws1.getCell("B" + i).border = {
-      left: { style: "thin" },
-      top: { style: "thin" },
-      bottom: { style: "thin" },
-      right: { style: "thin" }
-    };
-  }
-  ws1.getColumn("A").width = 35;
-  ws1.getColumn("B").width = 35;
-  // ws1.commit();
-  /*Set Column headers and keys*/
-  for (let i = 0; i < arColumns.length; ++i) {
-    ws.getColumn(i + 1).key = arKeys[i];
-    ws.getColumn(i + 1).width = arWidths[i];
-  }
+    //var workbook = new ExcelJs.Workbook();
+    var workbook = new ExcelJs.stream.xlsx.WorkbookWriter({
+        filename: fileName,
+        useStyles: true,
+        useSharedStrings: false
+    });
+    workbook.created = new Date();
+    workbook.modified = workbook.created;
+    gomos.gomosLog( logger, gConsole , TRACE_DEBUG , "Opened file [" + fileName + "] for writing");
 
-  ws.getRow(1).height = 40;
-  ws.getRow(1).font = { size: 12, bold: true };
-  ws.getRow(1).values = arColumns;
+    // First create the summary page
+    var ws1 = workbook.addWorksheet("REPORT_HEADER", {
+        properties: { tabColor: { argb: "1E1E90FF" } }
+    });
 
-  // add all the rows in datasource to sheet - make sure keys are matching
-  // for(let d = 0; d < dataSet.length; d++){
-     ws.addRows(dataSet)
-  // }
- 
-
-  // loop through and style all the cells - Optimize this loop later.
-  var j = 1;
-  for (
-    var i = 1;
-    i <= dataSet.length + 1;
-    ++i
-  ) {
-    ws.getRow(i).alignment = {
-      vertical: "middle",
-      horizontal: "center",
-      wrapText: true
-    };
-    if (i == 1) {
-      var strDataCol = "A";
-      for (var k = 0; k < arColumns.length; ++k) {
-        if (k == 0) {
-          ws.getCell(strDataCol + j).fill = {
-            type: "pattern",
-            pattern: "solid",
-            fgColor: { argb: "8787CEFA" }
-          };
-          ws.getCell(strDataCol + j).border = {
-            left: { style: "medium" },
-            top: { style: "medium" },
-            bottom: { style: "medium" },
-            right: { style: "thin" }
-          };
-        } else if (k == arColumns.length - 1) {
-          ws.getCell(strDataCol + j).fill = {
-            type: "pattern",
-            pattern: "solid",
-            fgColor: { argb: "8787CEFA" }
-          };
-          ws.getCell(strDataCol + j).border = {
-            left: { style: "thin" },
-            top: { style: "medium" },
-            bottom: { style: "medium" },
-            right: { style: "medium" }
-          };
-        } else {
-          ws.getCell(strDataCol + j).fill = {
-            type: "pattern",
-            pattern: "solid",
-            fgColor: { argb: "8787CEFA" }
-          };
-          ws.getCell(strDataCol + j).border = {
-            left: { style: "thin" },
-            top: { style: "medium" },
-            bottom: { style: "medium" },
-            right: { style: "thin" }
-          };
-        }
-        strDataCol = String.fromCharCode(strDataCol.charCodeAt(0) + 1);
-      }
-    } else {
-      if (i == dataSet.length + titleRows.length + 2) {
-        strDataCol = "A";
-        ws.getRow(j).alignment = { vertical: "middle", horizontal: "center" };
-        for (var k = 0; k < arColumns.length; ++k) {
-          if (k == 0) {
-            ws.getCell(strDataCol + j).border = {
-              left: { style: "medium" },
-              top: { style: "thin" },
-              bottom: { style: "medium" },
-              right: { style: "thin" }
-            };
-            ws.getCell(strDataCol + j).dataValidation = {
-              type: 'date',
-            
+    ws1.columns = [
+        { 
+            header: "ReportName" , key: "A" , width: 35 , 
+            style: {
+                font: { size: 12, bold: true },
+                alignment: { vertical: "middle", horizontal: "center", wrapText: true },
+                border: { left: { style: "thin" }, top: { style: "thin" }, bottom: { style: "thin" }, right: { style: "thin" } },
             }
-            ws.getCell(strDataCol + j).numFmt = 'm/d/yyyy\\ h:mm:ss\\ AM/PM';
-          } else if (k == arColumns.length - 1) {
-            ws.getCell(strDataCol + j).border = {
-              left: { style: "thin" },
-              top: { style: "thin" },
-              bottom: { style: "medium" },
-              right: { style: "medium" }
-            };
-          } else {
-            ws.getCell(strDataCol + j).border = {
-              left: { style: "thin" },
-              top: { style: "thin" },
-              bottom: { style: "medium" },
-              right: { style: "thin" }
-            };
-          }
-          strDataCol = String.fromCharCode(strDataCol.charCodeAt(0) + 1);
-        }
-      } else {
-        var strDataCol = "A";
-        for (var k = 0; k < arColumns.length; ++k) {
-          if (k == 0) {
-            ws.getCell(strDataCol + j).border = {
-              left: { style: "medium" },
-              top: { style: "thin" },
-              bottom: { style: "thin" },
-              right: { style: "thin" }
-            };
-            ws.getCell(strDataCol + j).dataValidation = {
-              type: 'date',
-             
+        },
+        { 
+            header: "Sensors Data Recording" , key: "B" , width: 35 , 
+            style: { 
+                font: { size: 12, bold: true }, 
+                alignment: { vertical: "middle", horizontal: "center", wrapText: true }, 
+                border: { left: { style: "thin" }, top: { style: "thin" }, bottom: { style: "thin" }, right: { style: "thin" } },
             }
-            ws.getCell(strDataCol + j).numFmt = 'm/d/yyyy\\ h:mm:ss\\ AM/PM';
-          } else if (k == arColumns.length - 1) {
-            ws.getCell(strDataCol + j).border = {
-              left: { style: "thin" },
-              top: { style: "thin" },
-              bottom: { style: "thin" },
-              right: { style: "medium" }
-            };
-            
-          } else {
-            ws.getCell(strDataCol + j).border = {
-              left: { style: "thin" },
-              top: { style: "thin" },
-              bottom: { style: "thin" },
-              right: { style: "thin" }
-            };
-          }
-          strDataCol = String.fromCharCode(strDataCol.charCodeAt(0) + 1);
         }
-      }
+    ];
+
+    var sensorType = selectedGroupName;
+    var formattedDate = requiredDateTime.create(utilityFn.calcWATZ( new Date() , TimeZone ));
+
+    // Add initial set of rows
+    let titleRows = [
+        ["Report Generated On", formattedDate.format("d-m-Y H:M:S")],
+        ["Customer Name",  selectedCustValue],
+        ["Sub Customer Name", selectedSubCustValue],
+        ["Asset Name", selectedAssetValue],
+        ["Device Name", selectedDeviceValue],
+        ["Selected Group", sensorType.join(",")],
+        ["Time Interval", dateFormat(startDate,"dd-mmm HH:MM")+" , "+dateFormat(endDate,"dd-mmm HH:MM")]
+        // ["Class", this.std]
+    ];
+
+    ws1.getCell( 'A1' ).fill = { type: "pattern" , pattern: "solid" , fgColor: { argb: "8787CEFA" } } ;
+    ws1.getRow( 1 ).commit() ;
+
+    for ( i = 2 ; i <= titleRows.length + 1 ; ++i ) {
+        ws1.addRow( titleRows[i - 2] );
+        ws1.getCell( 'A' + i ).fill = { type: "pattern" , pattern: "solid" , fgColor: { argb: "8787CEFA" } } ;
+        ws1.getRow( i ).commit()
     }
-    j = j + 1;
-  }
-  // var dt = new Date();
-  // var strdt;
-  //   strdt = dt
-  //     .toString()
-  //     .split("GMT")[0]
-  //     .trim();
-  //     let tempFilename  = reportName+dateFormat("yyyymmdd-HHMM") +".xlsx";
-//  var fileName = "../../../../../../var/www/html/excelData/"+tempFilename;
-// ws.commit();
-// workbook.commit()
-//   .then(function() {
-//     // the stream has been written
-//     res.json({fileName: tempFilename})
-//      console.log("inner functions")
-//   });
-let tempFilename  = reportName+dateFormat("yyyymmdd-HHMM") +".xlsx";
-  let fileName = "../../../../frontEnd/excelData/"+tempFilename;
-// let fileName = "./"+tempFilename;
-const stream = fs.createWriteStream(fileName);
-  workbook.xlsx.write(stream).then(data => {
-    // const blob = new Blob([data], { type: "application/octet-stream" });
-     // var dt = new Date();
-     // var strdt;
-     // strdt = dt
-     //   .toString()
-     //   .split("GMT")[0]
-     //   .trim();
-     // var fileName =  "takreem.xlsx";
-     // FileSaver.saveAs(data, fileName);
-     res.json({fileName: tempFilename})
-     console.log("inner functions")
-   });
-//   workbook.xlsx.writeFile("./"+tempFilename).then(data => {
-//     // const blob = new Blob([data], { type: "application/octet-stream" });
-//      // var dt = new Date();
-//      // var strdt;
-//      // strdt = dt
-//      //   .toString()
-//      //   .split("GMT")[0]
-//      //   .trim();
-//      // var fileName =  "takreem.xlsx";
-//      // FileSaver.saveAs(data, fileName);
-//      res.json({fileName: tempFilename})
-//      console.log("inner functions")
-//    });
- }
-function downloadToExcel(result,selectedCustValue,selectedSubCustValue,selectedDeviceValue,selectedGroupName,assetId,startDate,endDate,res,TimeZone) {
-  
-  //HERE PUTING RESULT DATA WHICH STORED IN STATE VARIABLE AND ASSIGN TO LOCAL VARIABLE dataForExcel
- var dataForExcel = result;
- // // alert("This is Cliked ");
- if (dataForExcel) {
-   // // alert("This is Cliked data  is here ");
-//THIS  HEADER OF COLUMN FOR EXCEL DATASHEET
-   var arColumns = Object.keys(result[0])
-   var arKeys = Object.keys(result[0]);
-   var arWidths = [];
-   for(var i =0; i< arKeys.length ; i++){
-   arWidths.push(35)
-   }
-   var reportName =   "Sensors_Data_Recording-"+selectedSubCustValue+"-"+selectedDeviceValue+ "Report";
+    ws1.commit();
 
-  //  var reportName =   "Sensors Data Recording-"+selectedSubCustValue+"-"+selectedDeviceValue+ "Report";
-   var dataSet = dataForExcel;
-    // exportToExcel(arColumns, arKeys, arWidths, reportName, dataSet);
-    exportToExcel(arColumns, arKeys, arWidths, reportName, dataSet,selectedCustValue,selectedSubCustValue,assetId,selectedDeviceValue,selectedGroupName,startDate,endDate,res,TimeZone) 
- } else {
+    // create a sheet with blue tab colour
+    var ws = workbook.addWorksheet("DATA_RECORDING", {
+        properties: { tabColor: { argb: "1E1E90FF" } }
+    });
 
- }
+    /*Set Column headers and keys*/
+    for (let i = 0; i < arColumns.length; ++i) {
+        ws.getColumn(i + 1).key = arColumns[i] ;
+        ws.getColumn(i + 1).width = arWidths[i] ;
+        ws.getColumn(i + 1).style = {
+            alignment: { vertical: "middle" , horizontal: ( ( i === arColumns.length - 1 ) ? "left" : "center" ) , wrapText: true } ,
+            numFmt: ( ( i === 0 ) ? 'm/d/yyyy\\ h:mm:ss\\ AM/PM' : 'General' ) ,
+            border: { 
+                left: { style: ( ( i === 0 ) ? "medium" : "thin" ) } ,
+                top: { style: "thin" } ,
+                bottom: { style: "thin" } ,
+                right: { style: ( ( i === arColumns.length - 1 ) ? "medium" : "thin" ) }
+            }
+        };
+    }
+
+    ws.addRow(arColumns);
+    ws.getRow(1).height = 25;
+
+    ws.getRow(1).eachCell( { includeEmpty: false } , function (cell, number) {
+        cell.style = {
+            fill: {type: 'pattern', pattern: 'solid', fgColor: {argb: '8787CEFA'}},
+            font: { size: 14, bold: true },
+            numFmt: 'General',
+            alignment: { vertical: "middle" , horizontal: "center" , wrapText: true } ,
+            border: { left: { style: ( (arColumns.length === 1 ) ? "medium" : "thin" ) } , top: { style: "medium" } , bottom: { style: "medium" } , right: { style: ( (arColumns.length === number ) ? "medium" : "thin" ) } }
+        }
+    });
+
+    // loop through and fill all rows
+    for ( var i = 0 ; i <= dataSet.length ; ++i) {
+        ws.addRow( dataSet[ i ] ) ;
+        let lastRow = ws.lastRow ;
+        ws.getCell( 'A' + lastRow.number ).dataValidation = { type: 'date' } ;
+        lastRow.commit();
+    }
+
+    ws.commit();
+    gomos.gomosLog( logger, gConsole , TRACE_DEBUG , "Committed data worksheet");
+
+    workbook.commit().then(data => {
+        res.json({fileName: tempFilename})
+        gomos.gomosLog( logger, gConsole , TRACE_DEBUG , "Committed workbook... about to return");
+    });
+}
+function downloadToExcel(result, sensorList, selectedCustValue,selectedSubCustValue,selectedDeviceValue,selectedGroupName,assetId,startDate,endDate,res,TimeZone) {  
+
+    //HERE PUTING RESULT DATA WHICH STORED IN STATE VARIABLE AND ASSIGN TO LOCAL VARIABLE dataForExcel
+    var dataForExcel = result;
+    if ( dataForExcel ) {
+        //THIS  HEADER OF COLUMN FOR EXCEL DATASHEET
+        var arColumns = [];
+        var arWidths = [];
+
+        arColumns[ 0 ] = "DATE";
+        arWidths.push( 35 );
+
+        arColumns[ 1 ] = "TIME";
+        arWidths.push( 35 );
+
+        for( var i = 0 ; i < sensorList.length ; i++ ){
+            arWidths.push(35)
+            arColumns[ 2 + i ] = sensorList[ i ].sensorsBs
+        }
+        // Finally push the column "Comment" with size 150
+        arColumns.push( "Comments" ) ;
+        arWidths.push( 150 ) ;
+
+        var reportName =   "Sensors_Data_Recording-"+selectedSubCustValue+"-"+selectedDeviceValue+ "Report";
+
+        // var dataSet = dataForExcel;
+        exportToExcel(arColumns , arWidths , reportName , dataForExcel , selectedCustValue , selectedSubCustValue , assetId , selectedDeviceValue , selectedGroupName , startDate , endDate , res , TimeZone )
+    }
 }
 //get the reporting details of perticular Sensor based on given data
 router.get("/getFacts", function (req, res, next) {
@@ -4411,7 +4273,7 @@ router.get("/getFacts", function (req, res, next) {
       var CustomersIds = query.custCd;
       var arSubCustomerIDs = query.subCustCd;
       let TimeZone = query.TimeZone;
-console.log("this is Time Zone", TimeZone)
+// console.log("this is Time Zone", TimeZone)
       // This criteria is built without sensor names for now, however a better way to filter based on sensornames
       // rather than getting everything and removing the unwanted data of other sensrors.
       criteria = {
@@ -4424,7 +4286,7 @@ console.log("this is Time Zone", TimeZone)
           $lte: new Date(endDate)
         }
       };
-gomos.gomosLog( logger,gConsole,TRACE_DEBUG,"This is gomos get messageFact",  criteria);
+//gomos.gomosLog( logger,gConsole,TRACE_DEBUG,"This is gomos get messageFact",  criteria);
       // if (operation) {
       //   if (query.equalsFacts) {
       //     equalsFacts = parseFloat(query.equalsFacts);
@@ -4439,154 +4301,105 @@ gomos.gomosLog( logger,gConsole,TRACE_DEBUG,"This is gomos get messageFact",  cr
       //   factsOperations(db, sensorNm, startFactValue, endFactValue, connection, next,
       //     equalsFacts, operation, res, criteria);
       // } else {
-        factsOperations(db, sensorsDetails, startFactValue, endFactValue, connection, next,
-          equalsFacts, operation, res, criteria,assetId,startDate,endDate,TimeZone,selectedGroupName);
+        factsOperations( db , sensorsDetails , startFactValue , endFactValue , connection , next , equalsFacts , 
+                            operation , res , criteria , assetId , startDate , endDate , TimeZone , selectedGroupName );
         // res.json(0);
       // }
     }
   );
 });
 
-function factsOperations(db, sensorsDetails, startFactValue, endFactValue, connection, next,
-  equalsFacts, operation, res, criteria,assetId,startDate,endDate ,TimeZone,selectedGroupName) {
-  var finalResult = [], ltdttm, queryToExecute;
+function factsOperations( db , sensorsDetails , startFactValue , endFactValue , connection , next , equalsFacts , 
+                            operation , res , criteria , assetId , startDate , endDate , TimeZone , selectedGroupName ) {
+
+    var finalResult = [], ltdttm ;
  
-  //query to get the last dateTime the collection was modified.This dateTime is used only in excel report.
-  db.collection("MsgFacts")
-    .find({}, { limit: 1 })
-    .sort({ $natural: -1 })
-    .toArray(function (err, res) {
-      if (err) {
-        next(err);
-      }
-      if (res.length > 0) {
-        ltdttm = res[0].createdTime;
-      }
-    });
-
-  //query to get the mac,sensors,dateTime of the given criteria
-  // queryToExecute = [
-  //   {
-  //     $match: criteria
-  //   },
-  //   {
-  //     $group: {
-  //       _id: { _id: "$sensors." + sensorNm, mac: "$mac", createdTime: "$createdTime",DeviceName:"$DeviceName" }
-  //     }
-  //   },
-  //   { $sort: { '_id.mac': 1 } }
-  // // ];
-  // queryToExecute = [
-  //   {
-  //     $match: criteria
-  //   },
-  //   {
-  //     projection: { "sensors": 1,"mac":1,"DeviceName": 1,"createdTime":1} 
-  //   }
-  //   // { $sort: { '_id.mac': 1 } }
-  // ];
-
-
-
-  db.collection("MsgFacts")
-    .find(criteria,{
-      projection: { "sensors": 1,"mac":1,"DeviceName": 1,"DeviceTime":1} 
-    }).sort({DeviceTime:-1})
-    .toArray(function (err, result) {
-      if (err) {
-        next(err);
-      }
-      if (result.length > 0) {
-        // var resultCopy = result;
-        // result = [];
-        // console.log(resultCopy);
-        //copy all data from the copy of result to remove json with in json.
-        // for (var i = 0; i < resultCopy.length; i++) {
-        //   var allkey = Object.keys(resultCopy[i]);
-        //   // This is with an assumtion that "_id" always comes first, if not, change the code to 
-        //   // specifically look out for "_id".
-        //   gomos.gomosLog( logger,gConsole,TRACE_DEBUG,"THis is Debug of getMessageFact for check result",sensorNmKeys[0]);
-        //   if (sensorNmKeys[0]=="_id"){
-        //     result.push(resultCopy[i]._id);
-        //   }
-        // }
-        if(operation != ""){
-          processOperation( startFactValue, endFactValue, connection, next, equalsFacts, operation, res ,finalResult,result,ltdttm)
-        }else{
-          console.log('This is else part')
-          if(result.length > 1000){
-          //  console.log("this is Exceeded Limit For Excel")
-            // let temp =`For given criteria, Record count [${result.length}]exceeds the limit set (1000 rows). Please alter the criteria and try again.`;
-
-            res.json({message: `For given criteria, Record count [${result.length}] exceeds the limit set (1000 rows). Please alter the criteria and try again.` })
-          }else{
-            console.log("Processing ...")
-          for (i = 0; i < result.length; i++) {
-            let dt = requiredDateTime.create(utilityFn.calcWATZ(result[i].DeviceTime,TimeZone));
-        //    let formattedDate = dt.format("d-m-Y H:M:S");
-           //   let formattedDate = (moment(utilityFn.calcWATZ(result[i].DeviceTime,TimeZone))).format("M/D/YYYY  H:mm");
-            let formattedDate = utilityFn.calcWATZ(result[i].DeviceTime,TimeZone);
-            let sensorNmKeys = Object.keys(result[i].sensors);
-            // console.log(sensorNmKeys);
-            let temp ={}
-            for(var l = 0; l < sensorsDetails.length; l++){
-            if(sensorNmKeys.includes(sensorsDetails[l].SensorsType)){
-    
-              let businessNameKey = Object.keys(result[i]["sensors"][sensorsDetails[l].SensorsType]);
-
-              for(let k = 0; k < businessNameKey.length; k++){
-                  if(businessNameKey.includes(sensorsDetails[l].sensorsBs)){
-                  temp[sensorsDetails[l].sensorsBs] = result[i]["sensors"][sensorsDetails[l].SensorsType][sensorsDetails[l].sensorsBs]
-                  }
-                
-                }
-
-              // }
-              
-              }
-
-            }
-            finalResult.push([formattedDate,result[i].mac,result[i].DeviceName, temp]);
-             
-                // finalResult.push([result[i].mac,result[i].name, sensorNmKeys[j], result[i]._id[sensorNmKeys[j]], formattedDate]);
-            }
-        
-          
-        
-          if (finalResult.length != 0) {
-            finalResult.push([ltdttm, 0, 0]);
-            gomos.gomosLog( logger,gConsole,TRACE_DEBUG,"This is Final result of GetFact", finalResult);
-
-
-            finalResult.pop();
-            //MAKING A ARRAY FOR STRUCTURE DATA ARRAY FOR CHART AND EXCEL 
-              var FdataArray =[];
-         
-              for (var i = 0; i < finalResult.length - 1; i++) {
-                var tempobj ={}
-                tempobj["TIME"] =  finalResult[i][0]
-                var  keysofbussinessName = Object.keys(finalResult[i][3]);
-                for(var j = 0; j< keysofbussinessName.length; j++){
-                  tempobj[keysofbussinessName[j]] = finalResult[i][3][keysofbussinessName[j]];
-                }
-                // tempobj["TIME"] =  finalResult[i][3]
-                FdataArray.push(tempobj)}
-
-                downloadToExcel(FdataArray,criteria.custCd,criteria.subCustCd,criteria.DeviceName,selectedGroupName,assetId,utilityFn.calcWATZ(startDate,TimeZone),utilityFn.calcWATZ(endDate,TimeZone),res,TimeZone)
-            // res.json(finalResult);
-            
+    //query to get the last dateTime the collection was modified.This dateTime is used only in excel report.
+    db.collection("MsgFacts")
+      .find({}, { limit: 1 })
+      .sort({ $natural: -1 })
+      .toArray(function (err, res) {
+          if (err) {
+            next(err);
           }
-          else {
-            res.json(0);
-         }
-        } 
-      }
+          if (res.length > 0) {
+            ltdttm = res[0].createdTime;
+          }
+      });
+
+    gomos.gomosLog( logger, gConsole , TRACE_PROD , "Inside factsOperations - about to execute query" );
+    gomos.gomosLog( logger, gConsole , TRACE_DEBUG , criteria );
+
+    db.collection( "MsgFacts" ).aggregate([ 
+        { "$match": criteria },
+        { "$lookup": { from: "Comment", localField: "_id", foreignField: "factId", as: "comment" } },
+        { "$project": { "sensors": 1 , "mac": 1 , "DeviceName": 1 , "DeviceTime": 1 , "comment.data": 1 } },
+        { "$sort": { "DeviceTime": -1 } }
+    ])
+    .toArray(function (err, result) {
+        if (err) {
+          next(err);
+        }
+        if (result.length > 0) {
+            if(operation != ""){
+                processOperation( startFactValue, endFactValue, connection, next, equalsFacts, operation, res ,finalResult,result,ltdttm)
+            }else{
+                gomos.gomosLog( logger, gConsole , TRACE_DEBUG , "Query executed with these many records " , result.length );
+                if( result.length > 10000 ){
+                    res.json({ message: `For given criteria, Record count [${result.length}] exceeds the limit set (10,000 rows). Please alter the criteria and try again.` })
+                } else{
+                    for ( i = 0 ; i < result.length ; i++ ) {
+                        let temp = []
+                        let recordDate = moment( utilityFn.calcWATZ( result[i].DeviceTime, TimeZone) ).format( "DD-MM-YYYY" );
+                        temp[ 0 ] = recordDate
+                        let recordTime = moment( utilityFn.calcWATZ( result[i].DeviceTime, TimeZone) ).format( "HH:mm:ss" );
+                        temp[ 1 ] = recordTime
+                        let sensorNmKeys = Object.keys(result[i].sensors);
+                        for(var l = 0; l < sensorsDetails.length; l++){
+                            if(sensorNmKeys.includes(sensorsDetails[l].SensorsType)){
+                                let businessNameKey = Object.keys(result[i]["sensors"][sensorsDetails[l].SensorsType]);
+
+                                if(businessNameKey.includes(sensorsDetails[l].sensorsBs)){
+                                    temp[ 2 + l ] = result[i]["sensors"][sensorsDetails[l].SensorsType][sensorsDetails[l].sensorsBs]
+                                } else {
+                                    temp[ 2 + l ] = ""
+                                }
+                            }
+                        }
+
+                        // Loop through the comments and concatinate into a single string with "<Date>: <comment>/n" format
+                        let thisRowComments = "" ;
+                        if (result[i].comment[0] != undefined ){
+                            let commentObj = result[i].comment[0].data ;
+
+                            for( var m = 0 ; m < commentObj.length ; m++ ){
+                                if( commentObj[ m ].deleted === false ){
+                                    thisRowComments = thisRowComments + moment( utilityFn.calcWATZ( commentObj[ m ].createdTime , TimeZone) ).format( "DD-MM-YYYY" ) + ": " + commentObj[ m ].comment + "\n";
+                                }
+                            }
+                        }
+                        temp[ 2 + sensorsDetails.length ] = thisRowComments ;
+
+                        finalResult.push( temp );
+                    }
+                    gomos.gomosLog( logger, gConsole , TRACE_DEBUG , "Final Result for exporting to excel is " , finalResult.length );
+
+                    if ( finalResult.length != 0 ) {
+                        downloadToExcel( finalResult , sensorsDetails , criteria.custCd , criteria.subCustCd , criteria.DeviceName , 
+                            selectedGroupName , assetId , utilityFn.calcWATZ( startDate , TimeZone ) , 
+                            utilityFn.calcWATZ( endDate , TimeZone ) , res , TimeZone
+                        )
+                    }
+                    else {
+                        res.json(0);
+                    }
+                }
+            }
         } else {
-          res.json(0);
-          connection.close();
-        
-       }
-      
+            gomos.gomosLog( logger, gConsole , TRACE_DEBUG , "Query executed not ZERO records found " );
+            res.json(0);
+            connection.close();
+        }
     });
 }
 function processOperation( startFactValue, endFactValue, connection, next,equalsFacts, operation, res ,finalResult,result,ltdttm){
