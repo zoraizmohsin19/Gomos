@@ -38,3 +38,27 @@ exports.getDevices =  function(db,NAMEOFSERVICE,logger,gConsole){
       
 })
 }
+
+exports.getDevice =  function( db , NAMEOFSERVICE , logger , gConsole , name ) {
+    return new Promise((resolve, reject)=> {
+        db.collection("Devices")
+        .find( { "DeviceName": name } )
+        .toArray(function (err, result) {
+            if ( err ) {
+                gomos.errorCustmHandler( NAMEOFSERVICE , "getDevice" , 'This Query All Device From Collection Error' , `` , err , ERROR_DATABASE , ERROR_TRUE , EXIT_TRUE );
+            }
+            try {
+                // var dataFromDevices = [] ;
+                // for (var i = 0; i < result.length; i++) {
+                //     dataFromDevices.push( result[i] ) ;
+                // }
+                // resolve( dataFromDevices );
+                resolve( result[0] );
+                gomos.gomosLog( logger , gConsole , TRACE_PROD , "getDevice - Mac of device read from collection" , result[0].mac ) ;
+            }
+            catch(err){
+                gomos.errorCustmHandler( NAMEOFSERVICE , "getDevice" , 'This Query All Device From Collection Try Catch Error' , `` , err , ERROR_RUNTIME , ERROR_TRUE , EXIT_TRUE ) ;
+            }
+        })
+    })
+}

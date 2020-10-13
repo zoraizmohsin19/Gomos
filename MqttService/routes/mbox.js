@@ -212,10 +212,9 @@ function handleMqttMessage(topic, message) {
           if (err) {
            gomos.errorCustmHandler(NAMEOFSERVICE,"handleMqttMessage",'THIS IS QUERY ERROR IN DATA BASE FOR ACTIVE DEVICE ',tempMessage,err,ERROR_RUNTIME,ERROR_TRUE,EXIT_TRUE);
            }
-           if(result.length > 0 ){
-            gomos.gomosLog( logger,gConsole, TRACE_PROD,"Entry in filter of Mqqt ",message.toString());
+           if( result.length > 0 ) {
             var dateTime = new Date(new Date().toISOString());
-            for (var i = 0; i < messKeys.length; i++) {
+            for (var i = 0; i < messKeys.length; i++ ) {
               messValues[messKeys[i]] = JSON.parse(message)[messKeys[i]];
             }
             
@@ -240,12 +239,12 @@ function handleMqttMessage(topic, message) {
                   if (err) {
                     gomos.errorCustmHandler(NAMEOFSERVICE,"handleMqttMessage",'THIS IS INSERTING ERROR IN  MqttDump',JSON.stringify(message),err,ERROR_DATABASE,ERROR_TRUE,EXIT_TRUE);
                    } 
-                    gomos.gomosLog( logger,gConsole, TRACE_PROD,"Entry saved in MsgDump Collection",message.toString());
+                    gomos.gomosLog( logger , gConsole , TRACE_TEST , "Entry saved in MsgDump Collection" , message.toString() ) ;
                   });
            } 
            else{
-             gomos.gomosLog( logger,gConsole, TRACE_DEBUG,"Device Not Presents", message);
-             gomos.unWantedLog("handleMqttMessage",message)
+             gomos.gomosLog( logger,gConsole, TRACE_DEBUG,"Device Not Present", message);
+             gomos.unWantedLog( "handleMqttMessage" , message )
            }
           });
   }
@@ -256,75 +255,72 @@ function handleMqttMessage(topic, message) {
 }
   
 //method to check whether the messages received is meetting the alertConfig criteria or not
-function checkCriteria(db,passedAssetId, custId, subCustId,businessNmValues,  mac, message, DeviceName) {
+function checkCriteria( db , passedAssetId , custId , subCustId , businessNmValues ,  mac , message , DeviceName ) {
   try{
-  var message =JSON.parse(message);
-  db.collection("AlertsConfig")
+  var message = JSON.parse( message );
+  db.collection( "AlertsConfig" )
     .aggregate([
-      {
+    {
         $match: {
           $and: [
             { custCd: custId },
             { subCustCd: subCustId },
-            {$or:[
-              {type: "level3"}, 
-              {type: "level1",alertTriggeredBy: "sensorsValue",deleted: false}
-            ]}
+            { assetId: passedAssetId },
+            { deleted: false },
+            { $or:[ { type: "level3" } , { type: "level1" , alertTriggeredBy: "sensorsValue" } ] }
           ]
       }
- }])
-    .toArray(function (err, result) {
+    }])
+    .toArray( function ( err , result ) {
       if (err) {
-       gomos.errorCustmHandler(NAMEOFSERVICE,"checkCriteria",'THIS QUERY ERROR',JSON.stringify(message),err,ERROR_DATABASE,ERROR_TRUE,EXIT_TRUE);    
+        gomos.errorCustmHandler(NAMEOFSERVICE,"checkCriteria",'THIS QUERY ERROR',JSON.stringify(message),err,ERROR_DATABASE,ERROR_TRUE,EXIT_TRUE);    
       }
       if (result.length > 0) {
         for (var i = 0; i < result.length; i++) {
          var nowDateTime = new Date(new Date().toISOString());
-        if(result[i].assetId == passedAssetId){
+        if( result[i].type == "level3" ) {
           try{
             gomos.gomosLog( logger,gConsole, TRACE_DEBUG,"passedAssetId check for level3 passed",passedAssetId);        
-          if(result[i].payloadId == message.payloadId){
-            gomos.gomosLog( logger,gConsole, TRACE_TEST,"payloadId check for level3 passed",passedAssetId);        
-            var alertData = {
-              spCd: result[i].spCd,
-              custCd: result[i].custCd,
-              subCustCd: result[i].subCustCd,
-              assetId: result[i].assetId,
-              DeviceName: DeviceName,
-              type: result[i].type,
-              alertText: result[i].alertText,
-              sourceMsg: message,
-              translatedMsg: {},
-              processed: "N",
-              lasterrorString:"",
-              lasterrorTime: "",
-              numberOfAttempt: 0,
-              createdTime: nowDateTime,
-              updatedTime: nowDateTime
-            };
-            gomos.gomosLog( logger,gConsole, TRACE_TEST,"Object for level 3 alertData ready",alertData);        
-            db.collection("Alerts").insertOne(alertData, function (err, result) {
-              if (err) {
-               gomos.errorCustmHandler(NAMEOFSERVICE,"checkCriteria",'THIS IS INSERTION ERROR',JSON.stringify(alertData),err,ERROR_APPLICATION,ERROR_TRUE,EXIT_TRUE);    
-              }
-              gomos.gomosLog( logger,gConsole, TRACE_PROD,"Alert Saved For Perticuler Payload Into Alerts collection",alertData);        
-            });
+            if( result[i].payloadId == message.payloadId ) {
+              gomos.gomosLog( logger,gConsole, TRACE_TEST,"payloadId check for level3 passed",passedAssetId);        
+              var alertData = {
+                spCd: result[i].spCd,
+                custCd: result[i].custCd,
+                subCustCd: result[i].subCustCd,
+                assetId: result[i].assetId,
+                DeviceName: DeviceName,
+                type: result[i].type,
+                alertText: result[i].alertText,
+                sourceMsg: message,
+                translatedMsg: {},
+                processed: "N",
+                lasterrorString:"",
+                lasterrorTime: "",
+                numberOfAttempt: 0,
+                createdTime: nowDateTime,
+                updatedTime: nowDateTime
+              };
+              gomos.gomosLog( logger , gConsole, TRACE_TEST , "Object for level 3 alertData ready", alertData ) ;
+              db.collection("Alerts").insertOne( alertData , function (err, result) {
+                if (err) {
+                  gomos.errorCustmHandler(NAMEOFSERVICE,"checkCriteria",'THIS IS INSERTION ERROR',JSON.stringify(alertData),err,ERROR_APPLICATION,ERROR_TRUE,EXIT_TRUE);    
+                }
+                gomos.gomosLog( logger,gConsole, TRACE_PROD,"Alert Saved For Perticuler Payload Into Alerts collection",alertData);        
+              });
+            }
+          } 
+          catch(err){
+              gomos.errorCustmHandler(NAMEOFSERVICE,"checkCriteria",'TRY CATCH ERROR',message,err,ERROR_RUNTIME,ERROR_TRUE,EXIT_FALSE);    
           }
-        } 
-        catch(err){
-  
-          gomos.errorCustmHandler(NAMEOFSERVICE,"checkCriteria",'TRY CATCH ERROR',message,err,ERROR_RUNTIME,ERROR_TRUE,EXIT_FALSE);    
         }
-      }      
-      else{
+        else{
             try{
           var alertsBNm = [];
           var bNmConfig  = [];
               if(result[i].businessNm == '' || result[i].configBNm == ''){
-              gomos.gomosLog( logger,gConsole, TRACE_PROD,"This is warnnig  businessNm or configBNm  not present ",`businessNm : [${result[i].businessNm}] or configBNm : [${result[i].configBNm}] `)
-              gomos.errorCustmHandler(NAMEOFSERVICE,"checkCriteria",'This is warnnig  businessNm or configBNm  not present',result[i],"warring for level1 alertConfig not valid",ERROR_RUNTIME,ERROR_FALSE,EXIT_FALSE);    
-               return
-
+                gomos.gomosLog( logger,gConsole, TRACE_PROD,"This is warnnig  businessNm or configBNm  not present ",`businessNm : [${result[i].businessNm}] or configBNm : [${result[i].configBNm}] `)
+                gomos.errorCustmHandler(NAMEOFSERVICE,"checkCriteria",'This is warnnig  businessNm or configBNm  not present',result[i],"warring for level1 alertConfig not valid",ERROR_RUNTIME,ERROR_FALSE,EXIT_FALSE);    
+                return
               }else{     
                 alertsBNm = result[i].businessNm.split(",");//gets all businessNms of particular message from alertsConfig
                 bNmConfig =  result[i].configBNm.split(",");//gets all configBNm of particular message from alertsConfig
@@ -332,12 +328,11 @@ function checkCriteria(db,passedAssetId, custId, subCustId,businessNmValues,  ma
             var strbusinessNmValues="";
             var shortName =  result[i].shortName;
             gomos.gomosLog(logger,gConsole,TRACE_DEBUG,"This is message Print",message);
-          gomos.gomosLog( logger,gConsole, TRACE_DEV,"This is Criteria alert values 122", bNmConfig)
-          gomos.gomosLog( logger,gConsole, TRACE_DEV,"This is Criteria alert values", message)
+            gomos.gomosLog( logger,gConsole, TRACE_DEV,"This is Criteria alert values 122", bNmConfig)
 
             for (var k = 0; k < alertsBNm.length; k++) {
             gomos.gomosLog(logger,gConsole,TRACE_DEBUG,"this is log for  message[bNmConfig[k]]", message[bNmConfig[k]])
-         //   gomos.gomosLog( logger,gConsole, TRACE_DEV,"This is Criteria alertsBNm[k]", eval(alertsBNm[k]))
+            // gomos.gomosLog( logger,gConsole, TRACE_DEV,"This is Criteria alertsBNm[k]", eval(alertsBNm[k]))
   
              eval("var " + alertsBNm[k] + " = " + JSON.stringify(message[bNmConfig[k]]));
              gomos.gomosLog( logger,gConsole, TRACE_DEV,"This is Criteria  message[bNmConfig[k]]", message[bNmConfig[k]])
@@ -352,16 +347,15 @@ function checkCriteria(db,passedAssetId, custId, subCustId,businessNmValues,  ma
             }
           }catch(err)
           {
-          gomos.errorCustmHandler(NAMEOFSERVICE,"checkCriteria",'TRY CATCH ERROR',message,err,ERROR_RUNTIME,ERROR_TRUE,EXIT_TRUE);    
+              gomos.errorCustmHandler(NAMEOFSERVICE,"checkCriteria",'TRY CATCH ERROR',message,err,ERROR_RUNTIME,ERROR_TRUE,EXIT_TRUE);    
           }
           gomos.gomosLog( logger,gConsole, TRACE_DEV,"This is Criteria", result[i].criteria)
-       //   gomos.gomosLog(logger,gConsole,TRACE_DEBUG,"This is alert eval method ",eval(result[i].alertText))
+          // gomos.gomosLog(logger,gConsole,TRACE_DEBUG,"This is alert eval method ",eval(result[i].alertText))
 
           gomos.gomosLog( logger,gConsole, TRACE_DEV,"This is Criteria", eval(result[i].criteria))
           gomos.gomosLog(logger,gConsole,TRACE_DEV,"This is  result[i].emailRecipientRole", result[i].emailRecipientRole)
             // if criteria is matched the insert the required data into Alerts Collection.
             if (eval(result[i].criteria)) {
-              gomos.gomosLog(logger,gConsole,TRACE_DEV,"This is Alert Condtion true",eval(result[i].criteria))
               var alertData = {
                 spCd: result[i].spCd,
                 custCd: result[i].custCd,
@@ -382,7 +376,7 @@ function checkCriteria(db,passedAssetId, custId, subCustId,businessNmValues,  ma
                 updatedTime: nowDateTime
               };
               gomos.gomosLog(logger,gConsole,TRACE_DEBUG,"This is log of All Alert data", alertData);
-            //  gomos.gomosLog( logger,gConsole, TRACE_DEV,"This is Debug of result[i].alertText", eval(result[i].alertText));
+              // gomos.gomosLog( logger,gConsole, TRACE_DEV,"This is Debug of result[i].alertText", eval(result[i].alertText));
               db.collection("Alerts").insertOne(alertData, function (err, result) {
                 if (err) {
                   gomos.errorCustmHandler(NAMEOFSERVICE,"checkCriteria",'THIS IS INSERTION ERROR LEVEL 1',JSON.stringify(alertData),err,ERROR_DATABASE,ERROR_TRUE,EXIT_TRUE);    

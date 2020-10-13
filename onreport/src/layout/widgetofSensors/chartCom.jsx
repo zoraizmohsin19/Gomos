@@ -1,13 +1,18 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { Chart } from "chart.js";
+import dateFormat from "dateformat";
 
 
 class Chartcom extends Component {
-  state = {
-    body: { myChart: {} }
-
+  constructor(){
+    super();
+    this.state = {
+      body: { myChart: {} }
+    };
+    // this.formatComment = this.formatComment.bind(this);
   }
+
   // getRandomBackgroundColor() {
   //   var letters = "0123456789ABCDEF";
   //   var color = "#";
@@ -37,8 +42,77 @@ class Chartcom extends Component {
     let index = temp.findIndex(item => item.businessName === keysofBsName);
     return temp[index].axisY
   }
+
+  commentCallback(tooltipItem, data) {
+    const {arrComments} = this.props;
+      let index = tooltipItem[ 0 ].index
+      let comment = [];
+      let tempComment = [];
+      if ( arrComments[ index ].length !== 0 ){
+          comment.push( "Comment:" )
+          var me = this;
+          for ( let i = 0 ; i < arrComments[ index ].length ; i++ ){
+              if (arrComments[ index ][ i ].deleted === false ){
+                  let tempDate = dateFormat(arrComments[ index ][ i ].createdTime, "dd-mmm-yy")
+                  tempComment = me.formatComment(  tempDate + ": " + arrComments[ index ][ i ].comment , 50 )
+                  comment = comment.concat( tempComment )
+              }
+          }
+      }
+      // else {
+      //     comment = "No comments"
+      // }
+      return comment ;
+  }
+  /* takes a string phrase and breaks it into separate phrases 
+   no bigger than 'maxwidth', breaks are made at complete words.*/
+  formatComment(str, maxwidth) {
+    var sections = [];
+    var words = str.split(" ");
+    var temp = "";
+
+    words.forEach(function(item, index){
+        if(temp.length > 0)
+        {
+            var concat = temp + ' ' + item;
+
+            if(concat.length > maxwidth){
+                sections.push(temp);
+                temp = "";
+            }
+            else{
+                if(index == (words.length-1))
+                {
+                    sections.push(concat);
+                    return;
+                }
+                else{
+                    temp = concat;
+                    return;
+                }
+            }
+        }
+
+        if(index == (words.length-1))
+        {
+            sections.push(item);
+            return;
+        }
+
+        if(item.length < maxwidth) {
+            temp = item;
+        }
+        else {
+            sections.push(item);
+        }
+
+    });
+
+    return sections;
+  }
+
   render() {
-    const { chartOptions, chartAxis, arrData, arrLabels, legend, xAxisLbl, yAxisLbl, bgColors, borderColors } = this.props
+    const { chartOptions, chartAxis, arrData, arrComments, arrLabels, legend, xAxisLbl, yAxisLbl, bgColors, borderColors } = this.props
     var backgroundColor = [
       'rgba(255, 222, 0, 0.2)',
       'rgba(0, 255, 0, 0.2)',
@@ -207,7 +281,21 @@ class Chartcom extends Component {
           responsive: true,
           maintainAspectRatio: false,
           tooltips: {
-            mode: 'label'
+            mode: 'index',
+            footerFontSize: 10,
+            //footerFontColor: "#F00",
+            callbacks: {
+              // label: function(tooltipItem, data) {
+              //     var label = data.datasets[tooltipItem.datasetIndex].label || '';
+
+              //     if (label) {
+              //         label += ': ';
+              //     }
+              //     label += Math.round(tooltipItem.yLabel * 100) / 100;
+              //     return label;
+              // }
+              footer:this.commentCallback.bind(this)
+            }
           },
           legend: {
             labels: {

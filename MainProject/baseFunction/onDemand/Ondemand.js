@@ -4103,7 +4103,6 @@ function exportToExcel(arColumns, arWidths, reportName, dataSet,selectedCustValu
 
     let tempFilename  = reportName + dateFormat( "yyyymmdd-HHMM" ) + ".xlsx" ;
      let fileName = "../../../../frontEnd/excelData/" + tempFilename ;
-   // let fileName = "../../../../usr/share/nginx/html/excelData/" + tempFilename ;
     // ******* For use in local host *******
     // let fileName = "./Temp/" + tempFilename ;
 
@@ -4281,7 +4280,7 @@ router.get("/getFacts", function (req, res, next) {
         custCd:  CustomersIds ,
         subCustCd: arSubCustomerIDs ,
         DeviceName : deviceName, 
-        createdTime: {
+        DeviceTime: {
           $gte: new Date(startDate),
           $lte: new Date(endDate)
         }
@@ -4309,11 +4308,56 @@ router.get("/getFacts", function (req, res, next) {
   );
 });
 
-function factsOperations( db , sensorsDetails , startFactValue , endFactValue , connection , next , equalsFacts , 
+function transformExprFun( expression , value )
+{
+    try {
+        let fun = eval("(" + expression + ")")
+        return fun(value);
+    } catch (error) {
+        console.log("error", error)
+        return value
+    }
+}
+
+async function factsOperations( db , sensorsDetails , startFactValue , endFactValue , connection , next , equalsFacts , 
                             operation , res , criteria , assetId , startDate , endDate , TimeZone , selectedGroupName ) {
 
     var finalResult = [], ltdttm ;
  
+    let device = await gomosDevices.getDevice( db , NAMEOFSERVICE , logger , gConsole , criteria.DeviceName ) ;
+    let deviceSensorKeys = [] , deviceChannelKeys = [] ;
+
+    deviceSensorKeys = Object.keys( device.sensors ) ; 
+    deviceChannelKeys = Object.keys( device.channel ) ;
+
+    for ( i = 0 ; i < sensorsDetails.length ; i++ ) {
+        let found = false ;
+        for ( j = 0 ; j < deviceSensorKeys.length ; j++ ) {
+            if ( device.sensors[ deviceSensorKeys[j] ].businessName == sensorsDetails[i].sensorsBs ) {
+                found = true ;
+                if ( device.sensors[ deviceSensorKeys[j] ].transformExpr != undefined &&  device.sensors[ deviceSensorKeys[j] ].transformExpr != "" ) {
+                    sensorsDetails[i][ "transformExpr" ] = device.sensors[ deviceSensorKeys[j] ].transformExpr.numeric ;
+                }
+                break ;
+            }
+        }
+        if ( found === false ) {
+            for ( j = 0 ; j < deviceChannelKeys.length ; j++ ) {
+              if ( device.channel[ deviceChannelKeys[k] ].businessName == sensorsDetails[i].sensorsBs ) {
+                  found = true ;
+                  if ( device.channel[ deviceChannelKeys[k] ].transformExpr != undefined &&  device.channel[ deviceChannelKeys[k] ].transformExpr != "" ) {
+                      sensorsDetails[i][ "transformExpr" ] = device.channel[ deviceChannelKeys[k] ].transformExpr.numeric ;
+                  }
+                  break ;
+              }
+            }
+        }
+        if ( found === false ) {
+            sensorsDetails[i]["transformExpr"] = "" ;
+        }
+    }
+
+
     //query to get the last dateTime the collection was modified.This dateTime is used only in excel report.
     db.collection("MsgFacts")
       .find({}, { limit: 1 })
@@ -4354,15 +4398,20 @@ function factsOperations( db , sensorsDetails , startFactValue , endFactValue , 
                         temp[ 0 ] = recordDate
                         let recordTime = moment( utilityFn.calcWATZ( result[i].DeviceTime, TimeZone) ).format( "HH:mm:ss" );
                         temp[ 1 ] = recordTime
-                        let sensorNmKeys = Object.keys(result[i].sensors);
-                        for(var l = 0; l < sensorsDetails.length; l++){
+                        let sensorNmKeys = Object.keys( result[i].sensors ) ;
+                        for( var l = 0 ; l < sensorsDetails.length ; l++ ) {
                             if(sensorNmKeys.includes(sensorsDetails[l].SensorsType)){
                                 let businessNameKey = Object.keys(result[i]["sensors"][sensorsDetails[l].SensorsType]);
 
-                                if(businessNameKey.includes(sensorsDetails[l].sensorsBs)){
-                                    temp[ 2 + l ] = result[i]["sensors"][sensorsDetails[l].SensorsType][sensorsDetails[l].sensorsBs]
+                                if( businessNameKey.includes( sensorsDetails[l].sensorsBs ) ){
+                                    if ( sensorsDetails[l][ "transformExpr" ] == "" ) {
+                                        temp[ 2 + l ] = result[i]["sensors"][sensorsDetails[l].SensorsType][sensorsDetails[l].sensorsBs] ;
+                                    }
+                                    else {
+                                        temp[ 2 + l ] = transformExprFun( sensorsDetails[l][ "transformExpr" ] , result[i]["sensors"][sensorsDetails[l].SensorsType][sensorsDetails[l].sensorsBs] ) ;
+                                    }
                                 } else {
-                                    temp[ 2 + l ] = ""
+                                    temp[ 2 + l ] = "" ;
                                 }
                             }
                         }

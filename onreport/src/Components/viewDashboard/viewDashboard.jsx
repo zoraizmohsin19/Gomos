@@ -26,6 +26,7 @@ class viewDashboard extends Component {
         endpoint: `${URL.SIP}`,
         socket1: {},
         arrData: [],
+        arrComments: [],
         arrLabels: [],
         yaxisName: '',
         fromDate: '',
@@ -134,7 +135,7 @@ class viewDashboard extends Component {
       let tempData = JSON.parse(sessionStorage.getItem("ClientObj"));
       let obj = {}
 
-      if (tempData.viewDashBoard[deviceType] !== undefined && tempData.viewDashBoard[deviceType].chartOptions != undefined ) {
+      if (tempData.viewDashBoard[deviceType] !== undefined && tempData.viewDashBoard[deviceType].chartOptions !== undefined ) {
           obj = tempData.viewDashBoard[deviceType].chartOptions
       } 
       else {
@@ -270,6 +271,7 @@ class viewDashboard extends Component {
     //  console.log(result)
     if (result.length > 0) {
       let arrData = [];
+      let tempArrComments = [];
       let arrLabels = [];
       let dataToSend1 = [];
       let dataToSend2 = [];
@@ -284,6 +286,7 @@ class viewDashboard extends Component {
 
         }
         dataToSend1.push(temp);
+        tempArrComments.push(result[i].column6);
         dataToSend2.push(
           formattedDate
         );
@@ -297,6 +300,7 @@ class viewDashboard extends Component {
       // for (var i = 0; i <  arrData.length; i++) {
       borderColors.push(this.getRandomBorColor());
       me.state.body.arrData = arrData;
+      me.state.body.arrComments = tempArrComments ;
       me.state.body.arrLabels = arrLabels;
       // me.state.body.yaxisName = yaxisName;
       me.state.body.fromDate = fromDate;
@@ -324,6 +328,7 @@ class viewDashboard extends Component {
     }
     else {
       me.state.body.arrData = undefined;
+      me.state.body.arrComments = undefined ;
       me.state.body.arrLabels = undefined;
       me.state.body.yaxisName = undefined;
       me.state.body.fromDate = undefined;
@@ -1076,7 +1081,7 @@ var me = this;
   }
 
   render() {
-    const { arrData, chartOptions, deviceTypeObj, arrLabels, yaxisName, activeChartLegend, lastAlertData, fromDate, toDate, bgColors, selectedSensorsType1, borderColors, DataArray, in_prog,
+    const { arrData, arrComments, chartOptions, deviceTypeObj, arrLabels, yaxisName, activeChartLegend, lastAlertData, fromDate, toDate, bgColors, selectedSensorsType1, borderColors, DataArray, in_prog,
       selectedSPValue, selectedCustValue, selectedSubCustValue, selectedAssets, selectedDeviceName, selectedSensorsName, selectedNevData} = this.state.body;
     var state = this.state.body;
 
@@ -1340,6 +1345,7 @@ var me = this;
               <Chartcom
                 type="line"
                 arrData={arrData}
+                arrComments = { arrComments }
                 chartOptions = { chartOptions }
                 chartAxis={deviceTypeObj}
                 arrLabels={arrLabels}
