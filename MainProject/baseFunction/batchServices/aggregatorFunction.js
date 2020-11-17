@@ -62,7 +62,7 @@ module.exports.startProcess = async function (serviceName, serviceLog, logTermin
 
       let channelData = await startMainProcessForChannel(dataFromDevices[DeviceIndex], dataFromDevices[DeviceIndex].mac, "channel", endTime, startTime);
 
-      let Data = (sensorsData["sensors"]).concat(channelData["channel"]);
+      let Data = ( sensorsData["exists"] || channelData["exists"] ) ? (sensorsData["sensors"]).concat(channelData["channel"]): [] ;
       gomos.gomosLog(logger, gConsole, g.TRACE_DEBUG, "This mai startProcess1", headerInfo);
       gomos.gomosLog(logger, gConsole, g.TRACE_TEST, `[${dataFromDevices[DeviceIndex].mac}] - [${Data.length}]  DeviceIndex [${DeviceIndex}] -total # records - ready to insert `);
 
@@ -141,6 +141,7 @@ async function startMainProcessForChannel(dataFromDevices, mac, TypeOf, endTime,
     arrayBSName = channelInfo["arrayBSName"];
     bsName = channelInfo["bsName"];
     Type = channelInfo["Type"];
+    json["exists"] = false ;
     json["channel"] = [];
     if (arrayBSName.length != 0) {
 
@@ -148,6 +149,7 @@ async function startMainProcessForChannel(dataFromDevices, mac, TypeOf, endTime,
         let tempObj = { "bsName": bsName[j] }
         let response = await aggragateChannel(mac, endTime, startTime, arrayBSName[j], Type[j], bsName[j]);
         if (response.result !== "err") {
+          if ( response["Count"] > 0 ) json["exists"] = true ;
           gomos.gomosLog(logger, gConsole, g.TRACE_DEV, "This is Response of Channel", response)
           tempObj["duration"] = response["duration"];
           tempObj["noOfStart"] = response["noOfStart"];
@@ -243,6 +245,7 @@ async function startMainProcessSensors(dataFromDevices, mac, TypeOf, endTime, st
    
     bsName = sensorsInfo["bsName"];
     Type = sensorsInfo["Type"];
+    json["exists"] = false ;
     json["sensors"] = [];
     if (arrayBSName.length != 0) {
 
@@ -254,6 +257,7 @@ async function startMainProcessSensors(dataFromDevices, mac, TypeOf, endTime, st
         gomos.gomosLog(logger, gConsole, g.TRACE_DEV, "This is Response sensors", response)
         try{
         if ( response.length > 0 ){
+          if ( response[0]["Count"] > 0 ) json["exists"] = true ;
 
           tempObj["Max"] = utilityFn.convertIntTodecPoint(response[0]["Max"], 2);
           tempObj["Min"] = utilityFn.convertIntTodecPoint(response[0]["Min"], 2);
