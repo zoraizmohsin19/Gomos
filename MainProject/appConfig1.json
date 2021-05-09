@@ -1,6 +1,6 @@
 {
 	"comments": "Make sure to edit other config files of services like OnDemand, Scheduled and Alerts withoutfail",
-	"devURL": "mongodb://gomosdev:gomos123@ds253284.mlab.com:53284/gomosdev",
+	"devURL": "mongodb+srv://gomosdev:gomos123@gomosdev.ipwbv.mongodb.net/gomosdev?retryWrites=true&w=majority",
 	"devDB": "gomosdev",
 	"testURL": "mongodb://gomos:gomos123@testdb.sasyasystems.com:27017/gomos",
 	"testDB": "gomos",
