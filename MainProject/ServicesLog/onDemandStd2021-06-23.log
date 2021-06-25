@@ -1,0 +1,516 @@
+14:57:05:593-This Is key of identifire 1 Place
+[
+  '_id',            'DeviceName',
+  'mac',            'assetId',
+  'subCustCd',      'roles',
+  'deviceTemplate', 'deviceType',
+  'active',         'sensors',
+  'channel',        'defaultGroupInfo',
+  'deviceTypes',    'deleted',
+  'asset_Id',       'subCustId'
+]
+14:57:05:601-This is key left in result
+[
+  'deviceType',
+  'sensors',
+  'channel',
+  'deviceTypes',
+  'deleted',
+  'asset_Id',
+  'subCustId'
+]
+14:57:05:606-This is SensorsKey
+[
+  '0', '1', '2',  '3',
+  '4', '5', '6',  '7',
+  '8', '9', '10'
+]
+14:57:05:611-This is SensorsKey
+[
+  'S01', 'S02',
+  'S03', 'S04',
+  'S05', 'S06',
+  'S07', 'S08',
+  'S09', 'S010'
+]
+14:57:05:616-This is SensorsKey
+[
+  'C01', 'C02',
+  'C03', 'C04',
+  'C05', 'C06',
+  'C07', 'C08',
+  'C09', 'C010'
+]
+14:57:05:621-This is SensorsKey
+[
+  '0', '1', '2',  '3',
+  '4', '5', '6',  '7',
+  '8', '9', '10'
+]
+14:57:05:625-This is SensorsKey
+[]
+14:57:05:626-This is SensorsKey
+[ '_bsontype', 'id' ]
+14:57:05:628-This is SensorsKey
+[ '_bsontype', 'id' ]
+14:57:05:631-This is json which i want send to front end
+{
+  deviceType: [
+    {
+      devicebusinessNM: undefined,
+      group: undefined,
+      Type: undefined,
+      displayPosition: undefined,
+      transformExpr: undefined
+    },
+    {
+      devicebusinessNM: undefined,
+      group: undefined,
+      Type: undefined,
+      displayPosition: undefined,
+      transformExpr: undefined
+    },
+    {
+      devicebusinessNM: undefined,
+      group: undefined,
+      Type: undefined,
+      displayPosition: undefined,
+      transformExpr: undefined
+    },
+    {
+      devicebusinessNM: undefined,
+      group: undefined,
+      Type: undefined,
+      displayPosition: undefined,
+      transformExpr: undefined
+    },
+    {
+      devicebusinessNM: undefined,
+      group: undefined,
+      Type: undefined,
+      displayPosition: undefined,
+      transformExpr: undefined
+    },
+    {
+      devicebusinessNM: undefined,
+      group: undefined,
+      Type: undefined,
+      displayPosition: undefined,
+      transformExpr: undefined
+    },
+    {
+      devicebusinessNM: undefined,
+      group: undefined,
+      Type: undefined,
+      displayPosition: undefined,
+      transformExpr: undefined
+    },
+    {
+      devicebusinessNM: undefined,
+      group: undefined,
+      Type: undefined,
+      displayPosition: undefined,
+      transformExpr: undefined
+    },
+    {
+      devicebusinessNM: undefined,
+      group: undefined,
+      Type: undefined,
+      displayPosition: undefined,
+      transformExpr: undefined
+    },
+    {
+      devicebusinessNM: undefined,
+      group: undefined,
+      Type: undefined,
+      displayPosition: undefined,
+      transformExpr: undefined
+    },
+    {
+      devicebusinessNM: undefined,
+      group: undefined,
+      Type: undefined,
+      displayPosition: undefined,
+      transformExpr: undefined
+    }
+  ],
+  sensors: [
+    {
+      devicebusinessNM: 'GH_Temperature',
+      group: '1',
+      Type: 'Sensor',
+      displayPosition: 1,
+      transformExpr: undefined
+    },
+    {
+      devicebusinessNM: 'GH_Relative_Humidity',
+      group: '1',
+      Type: 'Sensor',
+      displayPosition: 2,
+      transformExpr: undefined
+    },
+    {
+      devicebusinessNM: 'GH_CO2',
+      group: '1',
+      Type: 'Sensor',
+      displayPosition: 3,
+      transformExpr: undefined
+    },
+    {
+      devicebusinessNM: 'GH_Luminescence',
+      group: '2',
+      Type: 'Sensor',
+      displayPosition: 4,
+      transformExpr: undefined
+    },
+    {
+      devicebusinessNM: 'TDS',
+      group: '2',
+      Type: 'Sensor',
+      displayPosition: 5,
+      transformExpr: undefined
+    },
+    {
+      devicebusinessNM: 'GH_Soil_Temperature',
+      group: '2',
+      Type: 'Sensor',
+      displayPosition: 6,
+      transformExpr: undefined
+    },
+    {
+      devicebusinessNM: 'GH_Wind_Speed',
+      group: '3',
+      Type: 'Sensor',
+      displayPosition: 7,
+      transformExpr: undefined
+    },
+    {
+      devicebusinessNM: 'GH_Rain_Sensor',
+      group: '3',
+      Type: 'Sensor',
+      displayPosition: 8,
+      transformExpr: undefined
+    },
+    {
+      devicebusinessNM: 'External_Temperature',
+      group: '3',
+      Type: 'Sensor',
+      displayPosition: 9,
+      transformExpr: undefined
+    },
+    {
+      devicebusinessNM: 'External_Humidity',
+      group: '4',
+      Type: 'Sensor',
+      displayPosition: 10,
+      transformExpr: undefined
+    }
+  ],
+  channel: [
+    {
+      devicebusinessNM: 'GH_CO2V',
+      group: '1',
+      Type: 'Channel',
+      displayPosition: 1,
+      transformExpr: undefined
+    },
+    {
+      devicebusinessNM: 'GH_Left_Curtain',
+      group: '5',
+      Type: 'Channel',
+      displayPosition: 2,
+      transformExpr: undefined
+    },
+    {
+      devicebusinessNM: 'GH_Right_Curtain',
+      group: '5',
+      Type: 'Channel',
+      displayPosition: 3,
+      transformExpr: undefined
+    },
+    {
+      devicebusinessNM: 'GH_Top_Curtain',
+      group: '5',
+      Type: 'Channel',
+      displayPosition: 4,
+      transformExpr: undefined
+    },
+    {
+      devicebusinessNM: 'GH_Fan',
+      group: '6',
+      Type: 'Channel',
+      displayPosition: 5,
+      transformExpr: undefined
+    },
+    {
+      devicebusinessNM: 'GH_Air_Circulation',
+      group: '6',
+      Type: 'Channel',
+      displayPosition: 5,
+      transformExpr: undefined
+    },
+    {
+      devicebusinessNM: 'GH_Fog',
+      group: '6',
+      Type: 'Channel',
+      displayPosition: 7,
+      transformExpr: undefined
+    },
+    {
+      devicebusinessNM: 'GH_Irrg_Pump',
+      group: '6',
+      Type: 'Channel',
+      displayPosition: 8,
+      transformExpr: undefined
+    },
+    {
+      devicebusinessNM: 'GH_Irrig_Valve1',
+      group: '7',
+      Type: 'Channel',
+      displayPosition: 9,
+      transformExpr: undefined
+    },
+    {
+      devicebusinessNM: 'GH_Irrig_Valve2',
+      group: '7',
+      Type: 'Channel',
+      displayPosition: 10,
+      transformExpr: undefined
+    }
+  ],
+  deviceTypes: 'deviceType1',
+  deleted: [],
+  asset_Id: [
+    {
+      devicebusinessNM: undefined,
+      group: undefined,
+      Type: undefined,
+      displayPosition: undefined,
+      transformExpr: undefined
+    },
+    {
+      devicebusinessNM: undefined,
+      group: undefined,
+      Type: undefined,
+      displayPosition: undefined,
+      transformExpr: undefined
+    }
+  ],
+  subCustId: [
+    {
+      devicebusinessNM: undefined,
+      group: undefined,
+      Type: undefined,
+      displayPosition: undefined,
+      transformExpr: undefined
+    },
+    {
+      devicebusinessNM: undefined,
+      group: undefined,
+      Type: undefined,
+      displayPosition: undefined,
+      transformExpr: undefined
+    }
+  ],
+  defaultGroupInfo: '1'
+}
+14:57:05:763-THIS IS DEBUG OF GET DASHBOARD
+{
+  TypeOfData: 'Normal',
+  sensorNm: 'Sensor',
+  sensorsBSN: 'GH_Temperature',
+  spCd: 'ASAGRISY',
+  custCd: 'Desai',
+  subCustCd: 'Desai-001',
+  mac: '5ccf7f5a0481_110',
+  page: 1,
+  page_size: 10,
+  startTime: '',
+  endTime: ''
+}
+14:57:05:767-this is debuging in starting [GH_Temperature|5ccf7f5a0481_110|Desai-001|Desai|ASAGRISY|Sensor]
+14:57:06:557-This is Log of Criteria for getdashboard 
+{
+  spCd: 'ASAGRISY',
+  custCd: 'Desai',
+  subCustCd: 'Desai-001',
+  mac: '5ccf7f5a0481_110',
+  'sensors.Sensor.GH_Temperature': { '$exists': true }
+}
+14:57:06:879-this is Comment Data 
+[]
+14:57:07:227-This is All Data OF json in getDashBoard
+{
+  finalResult: [
+    [
+      '5ccf7f5a0481_110',
+      'GHA_01T',
+      'GH_Temperature',
+      [Object],
+      2020-03-06T08:19:32.000Z,
+      {},
+      5e620f3594c7648e0829f59b
+    ],
+    [
+      '5ccf7f5a0481_110',
+      'GHA_01T',
+      'GH_Temperature',
+      [Object],
+      2020-03-06T08:19:32.000Z,
+      {},
+      5fb8c937bbf4c62b686854b1
+    ],
+    [
+      '5ccf7f5a0481_110',
+      'GHA_01T',
+      'GH_Temperature',
+      [Object],
+      2020-03-06T08:19:32.000Z,
+      {},
+      5fb8c90abbf4c62b686854b0
+    ],
+    [
+      '5ccf7f5a0481_110',
+      'GHA_01T',
+      'GH_Temperature',
+      [Object],
+      2020-03-06T08:17:32.000Z,
+      {},
+      5e620f2e94c7648e0829f597
+    ],
+    [
+      '5ccf7f5a0481_110',
+      'GHA_01T',
+      'GH_Temperature',
+      [Object],
+      2020-03-06T08:15:32.000Z,
+      {},
+      5e620f2794c7648e0829f594
+    ],
+    [
+      '5ccf7f5a0481_110',
+      'GHA_01T',
+      'GH_Temperature',
+      [Object],
+      2020-03-06T08:13:31.000Z,
+      {},
+      5e620f2094c7648e0829f591
+    ],
+    [
+      '5ccf7f5a0481_110',
+      'GHA_01T',
+      'GH_Temperature',
+      [Object],
+      2020-03-06T08:11:31.000Z,
+      {},
+      5e620f1b94c7648e0829f590
+    ],
+    [
+      '5ccf7f5a0481_110',
+      'GHA_01T',
+      'GH_Temperature',
+      [Object],
+      2020-03-06T08:10:05.000Z,
+      {},
+      5e620f1094c7648e0829f58a
+    ],
+    [
+      '5ccf7f5a0481_110',
+      'GHA_01T',
+      'GH_Temperature',
+      [Object],
+      2020-03-06T08:07:19.000Z,
+      {},
+      5e620f0894c7648e0829f587
+    ],
+    [
+      '5ccf7f5a0481_110',
+      'GHA_01T',
+      'GH_Temperature',
+      [Object],
+      2020-03-06T08:05:18.000Z,
+      {},
+      5e620f0294c7648e0829f584
+    ]
+  ],
+  data_count: 6469,
+  lastdataObj: [
+    {
+      sesnorsType: 'Sensor',
+      sensorsName: 'GH_Temperature',
+      sensorsValues: 30.5
+    },
+    {
+      sesnorsType: 'Sensor',
+      sensorsName: 'GH_Relative_Humidity',
+      sensorsValues: 61.9
+    },
+    {
+      sesnorsType: 'Sensor',
+      sensorsName: 'GH_CO2',
+      sensorsValues: 461
+    },
+    {
+      sesnorsType: 'Sensor',
+      sensorsName: 'GH_Luminescence',
+      sensorsValues: 286
+    },
+    { sesnorsType: 'Sensor', sensorsName: 'TDS', sensorsValues: 800 },
+    {
+      sesnorsType: 'Sensor',
+      sensorsName: 'GH_Soil_Temperature',
+      sensorsValues: 30
+    },
+    {
+      sesnorsType: 'Sensor',
+      sensorsName: 'GH_Wind_Speed',
+      sensorsValues: 0
+    },
+    {
+      sesnorsType: 'Sensor',
+      sensorsName: 'GH_Rain_Sensor',
+      sensorsValues: 1
+    },
+    {
+      sesnorsType: 'Sensor',
+      sensorsName: 'External_Temperature',
+      sensorsValues: 29.3
+    },
+    {
+      sesnorsType: 'Sensor',
+      sensorsName: 'External_Humidity',
+      sensorsValues: 49.1
+    },
+    {
+      sesnorsType: 'Channel',
+      sensorsName: 'GH_Top_Curtain',
+      sensorsValues: 0
+    },
+    { sesnorsType: 'Channel', sensorsName: 'GH_Fan', sensorsValues: 0 },
+    {
+      sesnorsType: 'Channel',
+      sensorsName: 'GH_Air_Circulation',
+      sensorsValues: 0
+    },
+    {
+      sesnorsType: 'Channel',
+      sensorsName: 'GH_Left_Curtain',
+      sensorsValues: 0
+    },
+    {
+      sesnorsType: 'Channel',
+      sensorsName: 'GH_Right_Curtain',
+      sensorsValues: 0
+    }
+  ],
+  lastCreatedTime: 2020-03-06T08:52:04.929Z
+}
+14:57:54:935-This is clientID 
+[
+  {
+    _id: 5d7a1ff27c213e60b8fcdfdd,
+    clientID: 'Desai-001',
+    viewDashBoard: { deviceType1: [Object] },
+    activeDashBoard: { deviceTypes: [Object], OperatingForms: [Array] }
+  }
+]

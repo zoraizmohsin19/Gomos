@@ -1,0 +1,135 @@
+DateTime :2021-06-09 17:15:44:162
+serviceName :OnDemandService
+functionName :getAClimateparameter
+messageInfo :Sending DataDeviceInstruction 
+ErrorCode :undefined
+Error :TypeError: Cannot read property 'sourceMsg' of null
+typeofErrorstack :TypeError: Cannot read property 'sourceMsg' of null
+    at E:\OfficeWork\SasyaWork\gomosserver\MainProject\baseFunction\onDemand\Ondemand.js:2453:26
+    at executeCallback (E:\OfficeWork\SasyaWork\gomosserver\MainProject\node_modules\mongodb\lib\operations\execute_operation.js:70:5)
+    at handleCallback (E:\OfficeWork\SasyaWork\gomosserver\MainProject\node_modules\mongodb\lib\utils.js:102:55)
+    at E:\OfficeWork\SasyaWork\gomosserver\MainProject\node_modules\mongodb\lib\operations\find_one.js:29:9
+    at E:\OfficeWork\SasyaWork\gomosserver\MainProject\node_modules\mongodb\lib\utils.js:677:5
+    at E:\OfficeWork\SasyaWork\gomosserver\MainProject\node_modules\mongodb\lib\cursor.js:250:9
+    at E:\OfficeWork\SasyaWork\gomosserver\MainProject\node_modules\mongodb\lib\core\cursor.js:736:9
+    at handleCallback (E:\OfficeWork\SasyaWork\gomosserver\MainProject\node_modules\mongodb\lib\core\cursor.js:31:5)
+    at E:\OfficeWork\SasyaWork\gomosserver\MainProject\node_modules\mongodb\lib\core\cursor.js:680:38
+    at Cursor._endSession (E:\OfficeWork\SasyaWork\gomosserver\MainProject\node_modules\mongodb\lib\core\cursor.js:394:7)
+    at _setCursorNotifiedImpl (E:\OfficeWork\SasyaWork\gomosserver\MainProject\node_modules\mongodb\lib\core\cursor.js:689:10)
+    at setCursorNotified (E:\OfficeWork\SasyaWork\gomosserver\MainProject\node_modules\mongodb\lib\core\cursor.js:680:3)
+    at done (E:\OfficeWork\SasyaWork\gomosserver\MainProject\node_modules\mongodb\lib\core\cursor.js:455:16)
+    at queryCallback (E:\OfficeWork\SasyaWork\gomosserver\MainProject\node_modules\mongodb\lib\core\cursor.js:500:20)
+    at E:\OfficeWork\SasyaWork\gomosserver\MainProject\node_modules\mongodb\lib\core\cursor.js:545:9
+    at executeCallback (E:\OfficeWork\SasyaWork\gomosserver\MainProject\node_modules\mongodb\lib\operations\execute_operation.js:70:5)
+    at callbackWithRetry (E:\OfficeWork\SasyaWork\gomosserver\MainProject\node_modules\mongodb\lib\operations\execute_operation.js:118:14)
+    at E:\OfficeWork\SasyaWork\gomosserver\MainProject\node_modules\mongodb\lib\core\connection\pool.js:405:18
+    at processTicksAndRejections (internal/process/task_queues.js:75:11)
+
+DateTime :2021-06-09 17:17:40:251
+serviceName :OnDemandService
+functionName :getAClimateparameter
+messageInfo :Sending DataDeviceInstruction 
+ErrorCode :undefined
+Error :TypeError: Cannot read property 'sourceMsg' of null
+typeofErrorstack :TypeError: Cannot read property 'sourceMsg' of null
+    at E:\OfficeWork\SasyaWork\gomosserver\MainProject\baseFunction\onDemand\Ondemand.js:2453:26
+    at executeCallback (E:\OfficeWork\SasyaWork\gomosserver\MainProject\node_modules\mongodb\lib\operations\execute_operation.js:70:5)
+    at handleCallback (E:\OfficeWork\SasyaWork\gomosserver\MainProject\node_modules\mongodb\lib\utils.js:102:55)
+    at E:\OfficeWork\SasyaWork\gomosserver\MainProject\node_modules\mongodb\lib\operations\find_one.js:29:9
+    at E:\OfficeWork\SasyaWork\gomosserver\MainProject\node_modules\mongodb\lib\utils.js:677:5
+    at E:\OfficeWork\SasyaWork\gomosserver\MainProject\node_modules\mongodb\lib\cursor.js:250:9
+    at E:\OfficeWork\SasyaWork\gomosserver\MainProject\node_modules\mongodb\lib\core\cursor.js:736:9
+    at handleCallback (E:\OfficeWork\SasyaWork\gomosserver\MainProject\node_modules\mongodb\lib\core\cursor.js:31:5)
+    at E:\OfficeWork\SasyaWork\gomosserver\MainProject\node_modules\mongodb\lib\core\cursor.js:680:38
+    at Cursor._endSession (E:\OfficeWork\SasyaWork\gomosserver\MainProject\node_modules\mongodb\lib\core\cursor.js:394:7)
+    at _setCursorNotifiedImpl (E:\OfficeWork\SasyaWork\gomosserver\MainProject\node_modules\mongodb\lib\core\cursor.js:689:10)
+    at setCursorNotified (E:\OfficeWork\SasyaWork\gomosserver\MainProject\node_modules\mongodb\lib\core\cursor.js:680:3)
+    at done (E:\OfficeWork\SasyaWork\gomosserver\MainProject\node_modules\mongodb\lib\core\cursor.js:455:16)
+    at queryCallback (E:\OfficeWork\SasyaWork\gomosserver\MainProject\node_modules\mongodb\lib\core\cursor.js:500:20)
+    at E:\OfficeWork\SasyaWork\gomosserver\MainProject\node_modules\mongodb\lib\core\cursor.js:545:9
+    at executeCallback (E:\OfficeWork\SasyaWork\gomosserver\MainProject\node_modules\mongodb\lib\operations\execute_operation.js:70:5)
+    at callbackWithRetry (E:\OfficeWork\SasyaWork\gomosserver\MainProject\node_modules\mongodb\lib\operations\execute_operation.js:118:14)
+    at E:\OfficeWork\SasyaWork\gomosserver\MainProject\node_modules\mongodb\lib\core\connection\pool.js:405:18
+    at processTicksAndRejections (internal/process/task_queues.js:75:11)
+
+DateTime :2021-06-09 17:20:46:891
+serviceName :OnDemandService
+functionName :getAClimateparameter
+messageInfo :Sending DataDeviceInstruction 
+ErrorCode :undefined
+Error :TypeError: Cannot read property 'sourceMsg' of null
+typeofErrorstack :TypeError: Cannot read property 'sourceMsg' of null
+    at E:\OfficeWork\SasyaWork\gomosserver\MainProject\baseFunction\onDemand\Ondemand.js:2453:26
+    at executeCallback (E:\OfficeWork\SasyaWork\gomosserver\MainProject\node_modules\mongodb\lib\operations\execute_operation.js:70:5)
+    at handleCallback (E:\OfficeWork\SasyaWork\gomosserver\MainProject\node_modules\mongodb\lib\utils.js:102:55)
+    at E:\OfficeWork\SasyaWork\gomosserver\MainProject\node_modules\mongodb\lib\operations\find_one.js:29:9
+    at E:\OfficeWork\SasyaWork\gomosserver\MainProject\node_modules\mongodb\lib\utils.js:677:5
+    at E:\OfficeWork\SasyaWork\gomosserver\MainProject\node_modules\mongodb\lib\cursor.js:250:9
+    at E:\OfficeWork\SasyaWork\gomosserver\MainProject\node_modules\mongodb\lib\core\cursor.js:736:9
+    at handleCallback (E:\OfficeWork\SasyaWork\gomosserver\MainProject\node_modules\mongodb\lib\core\cursor.js:31:5)
+    at E:\OfficeWork\SasyaWork\gomosserver\MainProject\node_modules\mongodb\lib\core\cursor.js:680:38
+    at Cursor._endSession (E:\OfficeWork\SasyaWork\gomosserver\MainProject\node_modules\mongodb\lib\core\cursor.js:394:7)
+    at _setCursorNotifiedImpl (E:\OfficeWork\SasyaWork\gomosserver\MainProject\node_modules\mongodb\lib\core\cursor.js:689:10)
+    at setCursorNotified (E:\OfficeWork\SasyaWork\gomosserver\MainProject\node_modules\mongodb\lib\core\cursor.js:680:3)
+    at done (E:\OfficeWork\SasyaWork\gomosserver\MainProject\node_modules\mongodb\lib\core\cursor.js:455:16)
+    at queryCallback (E:\OfficeWork\SasyaWork\gomosserver\MainProject\node_modules\mongodb\lib\core\cursor.js:500:20)
+    at E:\OfficeWork\SasyaWork\gomosserver\MainProject\node_modules\mongodb\lib\core\cursor.js:545:9
+    at executeCallback (E:\OfficeWork\SasyaWork\gomosserver\MainProject\node_modules\mongodb\lib\operations\execute_operation.js:70:5)
+    at callbackWithRetry (E:\OfficeWork\SasyaWork\gomosserver\MainProject\node_modules\mongodb\lib\operations\execute_operation.js:118:14)
+    at E:\OfficeWork\SasyaWork\gomosserver\MainProject\node_modules\mongodb\lib\core\connection\pool.js:405:18
+    at processTicksAndRejections (internal/process/task_queues.js:75:11)
+
+DateTime :2021-06-09 17:21:12:282
+serviceName :OnDemandService
+functionName :getAClimateparameter
+messageInfo :Sending DataDeviceInstruction 
+ErrorCode :undefined
+Error :TypeError: Cannot read property 'sourceMsg' of null
+typeofErrorstack :TypeError: Cannot read property 'sourceMsg' of null
+    at E:\OfficeWork\SasyaWork\gomosserver\MainProject\baseFunction\onDemand\Ondemand.js:2453:26
+    at executeCallback (E:\OfficeWork\SasyaWork\gomosserver\MainProject\node_modules\mongodb\lib\operations\execute_operation.js:70:5)
+    at handleCallback (E:\OfficeWork\SasyaWork\gomosserver\MainProject\node_modules\mongodb\lib\utils.js:102:55)
+    at E:\OfficeWork\SasyaWork\gomosserver\MainProject\node_modules\mongodb\lib\operations\find_one.js:29:9
+    at E:\OfficeWork\SasyaWork\gomosserver\MainProject\node_modules\mongodb\lib\utils.js:677:5
+    at E:\OfficeWork\SasyaWork\gomosserver\MainProject\node_modules\mongodb\lib\cursor.js:250:9
+    at E:\OfficeWork\SasyaWork\gomosserver\MainProject\node_modules\mongodb\lib\core\cursor.js:736:9
+    at handleCallback (E:\OfficeWork\SasyaWork\gomosserver\MainProject\node_modules\mongodb\lib\core\cursor.js:31:5)
+    at E:\OfficeWork\SasyaWork\gomosserver\MainProject\node_modules\mongodb\lib\core\cursor.js:680:38
+    at Cursor._endSession (E:\OfficeWork\SasyaWork\gomosserver\MainProject\node_modules\mongodb\lib\core\cursor.js:394:7)
+    at _setCursorNotifiedImpl (E:\OfficeWork\SasyaWork\gomosserver\MainProject\node_modules\mongodb\lib\core\cursor.js:689:10)
+    at setCursorNotified (E:\OfficeWork\SasyaWork\gomosserver\MainProject\node_modules\mongodb\lib\core\cursor.js:680:3)
+    at done (E:\OfficeWork\SasyaWork\gomosserver\MainProject\node_modules\mongodb\lib\core\cursor.js:455:16)
+    at queryCallback (E:\OfficeWork\SasyaWork\gomosserver\MainProject\node_modules\mongodb\lib\core\cursor.js:500:20)
+    at E:\OfficeWork\SasyaWork\gomosserver\MainProject\node_modules\mongodb\lib\core\cursor.js:545:9
+    at executeCallback (E:\OfficeWork\SasyaWork\gomosserver\MainProject\node_modules\mongodb\lib\operations\execute_operation.js:70:5)
+    at callbackWithRetry (E:\OfficeWork\SasyaWork\gomosserver\MainProject\node_modules\mongodb\lib\operations\execute_operation.js:118:14)
+    at E:\OfficeWork\SasyaWork\gomosserver\MainProject\node_modules\mongodb\lib\core\connection\pool.js:405:18
+    at processTicksAndRejections (internal/process/task_queues.js:75:11)
+
+DateTime :2021-06-09 17:21:18:933
+serviceName :OnDemandService
+functionName :getAClimateparameter
+messageInfo :Sending DataDeviceInstruction 
+ErrorCode :undefined
+Error :TypeError: Cannot read property 'sourceMsg' of null
+typeofErrorstack :TypeError: Cannot read property 'sourceMsg' of null
+    at E:\OfficeWork\SasyaWork\gomosserver\MainProject\baseFunction\onDemand\Ondemand.js:2453:26
+    at executeCallback (E:\OfficeWork\SasyaWork\gomosserver\MainProject\node_modules\mongodb\lib\operations\execute_operation.js:70:5)
+    at handleCallback (E:\OfficeWork\SasyaWork\gomosserver\MainProject\node_modules\mongodb\lib\utils.js:102:55)
+    at E:\OfficeWork\SasyaWork\gomosserver\MainProject\node_modules\mongodb\lib\operations\find_one.js:29:9
+    at E:\OfficeWork\SasyaWork\gomosserver\MainProject\node_modules\mongodb\lib\utils.js:677:5
+    at E:\OfficeWork\SasyaWork\gomosserver\MainProject\node_modules\mongodb\lib\cursor.js:250:9
+    at E:\OfficeWork\SasyaWork\gomosserver\MainProject\node_modules\mongodb\lib\core\cursor.js:736:9
+    at handleCallback (E:\OfficeWork\SasyaWork\gomosserver\MainProject\node_modules\mongodb\lib\core\cursor.js:31:5)
+    at E:\OfficeWork\SasyaWork\gomosserver\MainProject\node_modules\mongodb\lib\core\cursor.js:680:38
+    at Cursor._endSession (E:\OfficeWork\SasyaWork\gomosserver\MainProject\node_modules\mongodb\lib\core\cursor.js:394:7)
+    at _setCursorNotifiedImpl (E:\OfficeWork\SasyaWork\gomosserver\MainProject\node_modules\mongodb\lib\core\cursor.js:689:10)
+    at setCursorNotified (E:\OfficeWork\SasyaWork\gomosserver\MainProject\node_modules\mongodb\lib\core\cursor.js:680:3)
+    at done (E:\OfficeWork\SasyaWork\gomosserver\MainProject\node_modules\mongodb\lib\core\cursor.js:455:16)
+    at queryCallback (E:\OfficeWork\SasyaWork\gomosserver\MainProject\node_modules\mongodb\lib\core\cursor.js:500:20)
+    at E:\OfficeWork\SasyaWork\gomosserver\MainProject\node_modules\mongodb\lib\core\cursor.js:545:9
+    at executeCallback (E:\OfficeWork\SasyaWork\gomosserver\MainProject\node_modules\mongodb\lib\operations\execute_operation.js:70:5)
+    at callbackWithRetry (E:\OfficeWork\SasyaWork\gomosserver\MainProject\node_modules\mongodb\lib\operations\execute_operation.js:118:14)
+    at E:\OfficeWork\SasyaWork\gomosserver\MainProject\node_modules\mongodb\lib\core\connection\pool.js:405:18
+    at processTicksAndRejections (internal/process/task_queues.js:75:11)
+

@@ -1,0 +1,668 @@
+
+.tableactuter {
+
+    margin: 20px 0px;
+    max-height: 320px;
+    overflow-y: auto;
+    
+}
+
+/* .dropdown.btn-group.btn-group-primary {
+    margin: 20px 30px;
+} */
+.AcDropS {
+    /* color: black; */
+    /* margin: 20px 30px; */
+    /* background: white; */
+}
+/* .AcDropS>.open>.dropdown-menu {
+    display: block;
+    margin-top: -20px;
+} */
+
+.red-border{
+    border: 1px solid red;
+}
+.ActiveSensorsRow {
+    overflow: auto;
+
+}
+
+.small-boxDActive {
+    width: 70px;
+    background: white;
+    border: 1px solid #069833;
+    margin: 4px;
+}
+.ActiveSheading{
+    font-size: 20px;
+    text-align: center;
+    margin-bottom: 0px;
+}
+.channelStatus{
+    position: relative;
+    min-height: 1px;
+    padding-right: 15px;
+    padding-left: 15px;
+}
+.rowSensors {
+    overflow: auto;
+}
+
+
+#wrapper {
+    width: 150%;
+    height: 90px;
+}
+
+#containersimg {
+    width: 636px;
+    height: 97px;
+    overflow-y: hidden !important;
+    margin-top: 7px;
+
+}
+
+.square {
+ 
+   float: left;
+   height: 90px;
+   width: 90px;
+   margin: 10px;
+}
+.widthActive {
+    width: 50% !important;
+}
+
+.ActivePclass {
+  
+    font-size: 10.6px;
+    text-align: center;
+}
+.ActiveP {
+    background: #62D27B;
+    color: white;
+    padding-left: 10px;
+    margin-bottom: 0px;
+}
+.ActiveTableH {
+    max-height: 291px;
+    overflow-y: scroll;
+    margin-bottom: 10px;
+  
+}
+
+.ActiveSelection {
+    width: 17%;
+    display: inline;
+    padding: 4px 9px;
+    font-size: 12px;
+  } 
+  .pagerActive {
+    /* padding-left: 0; */
+    /* margin: 20px 0; */
+    text-align: center;
+    list-style: none;
+    display: -webkit-inline-box;
+    border: 1px solid #ddd;
+    padding-left: 17px;
+    padding-top: 2px;
+    padding-bottom: 2px;
+    border-radius: 20px;
+    padding-right: 17px;
+    margin-left: 10px;
+    font-size: 12px;
+    float: right;
+}
+  .pagerActive li>a, .pagerActive li>span {
+    display: inline-block;
+    padding: 5px 14px;
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 15px;
+    cursor: pointer;
+    color: #337ab7;
+    text-decoration: none;
+    
+}
+
+.Acustmborder{
+    border: 1px solid red !important;
+}
+li.ActiveList {
+    color: #337ab7;
+    margin-top: 6px;
+    margin-left: 4px;
+    margin-right: 4px;
+}
+.collapse.in {
+    display: block
+  }
+  .collapse {
+    display: none
+  }
+
+  .line3 {
+      margin-top: 6px;
+    padding-left: 30px;
+    padding-right: 30px;
+    border: 1px #62D27B solid;
+}
+
+  label.ActiveLabel {
+    margin-top: 30px !important;
+    margin-left: 8px;
+}
+.ActivedateTime {
+    font-size: 10px;
+    text-align: center;
+    margin-top: -9px;
+    margin-bottom: 2px;
+}
+/* this is slider */
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 60px;
+    height: 34px;
+  }
+  
+  .switch input { 
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+  
+  .slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    -webkit-transition: .4s;
+    transition: .4s;
+  }
+  
+  .slider:before {
+    position: absolute;
+    content: "";
+    height: 26px;
+    width: 26px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    -webkit-transition: .4s;
+    transition: .4s;
+  }
+  
+  input:checked + .slider {
+    background-color: #62D27B;
+  }
+  
+  input:focus + .slider {
+    box-shadow: 0 0 1px #62D27B;
+  }
+  
+  input:checked + .slider:before {
+    -webkit-transform: translateX(26px);
+    -ms-transform: translateX(26px);
+    transform: translateX(26px);
+  }
+  
+  /* Rounded sliders */
+  .slider.round {
+    border-radius: 34px;
+  }
+  
+  .slider.round:before {
+    border-radius: 50%;
+  }
+  /* this is end slider */
+  span.Aidate {
+    display: inline-block;
+}
+input.houremin {
+    display: inline-block;
+    width: 45px;
+    padding: 3px;
+    margin-left: 7px;
+    font-size: 11px;
+}
+
+
+span.Acolon {
+    margin-left: 3px;
+    font-size: 18px;
+}
+.Acustmtd {
+    text-align: center;
+    margin: 0px;
+    padding: 0px;
+    font-size: 12px;
+}
+textarea.ActivetestArea {
+    margin: 0px;
+    width: 100%;
+    height: 300px;
+    margin-top: 20px;
+    font-size: 14px;
+}
+.Acustmtd {
+    padding: 0px !important;
+}
+.ActiveSinput {
+    margin-left: 44px;
+}
+.ActiveTableinput {
+    padding: 0px !important;
+    text-align: center;
+}
+.Acustmfloat {
+    float: right;
+    margin-right: -175px;
+}
+
+.Apadh{
+    padding-left: 40px !important;
+    padding-right: 40px !important;
+}
+.ExecutejobDate {
+    display: inline-block !important;
+}
+.ExecutejobDatepiker {
+    padding: 5px;
+    border-radius: 4px;
+    margin-left: 28px;
+}
+.modal-90w.modal-dialog {
+    width: 90%;
+}
+/* .OpdLable {
+    margin-right: -20px;
+} */
+.toggleButton {
+    margin: 0px;
+    padding: 0px;
+    background: white;
+    border-radius: 10px;
+    border-style: none;
+}
+.AcSetInterval {
+    margin-top: 20px;
+}
+.sensorsDive {
+    display: inline-block;
+}
+.paddForm {
+    margin-bottom: 15px;
+    margin-top: 15px;
+}
+.SensorsOuter {
+    width: max-content;
+    /* overflow: hidden !important; */
+    /* overflow-x: auto; */
+}
+.SensorsWrapper {
+    overflow-x: auto;
+}
+
+.ActiveP.textArea {
+    margin-bottom: -21px;
+    margin-top: 21px;
+}
+.ActiveCorner {
+    background: rgba(185,249,174,.85);
+    /* height: 600px; */
+    /* margin: -15px; */
+    height: 790px;
+    padding-top: 20px;
+    padding-left: 5px;
+    padding-right: 5px;
+    margin-left: -15px;
+    margin-right: -15px;
+}
+.ChannelBGColorYellow{
+    background: rgba(251, 255, 0, 0.87);
+    border: 1px solid #ffc800;
+    -webkit-animation-name: example1; /* Safari 4.0 - 8.0 */
+    -webkit-animation-duration: 4s; /* Safari 4.0 - 8.0 */
+    -webkit-animation-iteration-count: infinite; /* Safari 4.0 - 8.0 */
+    animation-name: example1;
+    animation-duration: 4s;
+    animation-iteration-count: infinite;
+}
+@-webkit-keyframes example1 {
+    
+    25%  {background-color:yellow;}
+    50%   {background-color:greenyellow;}
+  }
+  
+  /* Standard syntax */
+  @keyframes example1 {
+   
+    25%  {background-color:yellow; }
+    50%   {background-color:greenyellow;}
+   
+  } 
+.ChannelBGColortransition {
+    background: #04830499;
+    color: white;
+    border: 1px solid #0d2502;
+    -webkit-animation-name: example; /* Safari 4.0 - 8.0 */
+    -webkit-animation-duration: 4s; /* Safari 4.0 - 8.0 */
+    -webkit-animation-iteration-count: infinite; /* Safari 4.0 - 8.0 */
+    animation-name: example;
+    animation-duration: 4s;
+    animation-iteration-count: infinite;
+}
+
+/* Safari 4.0 - 8.0 */
+@-webkit-keyframes example {
+    50%  {background-color:green; }
+  }
+  
+  /* Standard syntax */
+  @keyframes example {   
+    50%  {background-color:green;}
+   
+  } 
+  .onbackground{
+      background: rgb(46, 207, 81);
+      border: 1px solid rgb(3, 148, 3);
+      color: white;
+  } 
+  .dropdown-toggle.btn.btn-Awhite {
+    background: white;
+    border: 1px solid #136f13cf;
+  
+}
+.dropDown {
+    margin-bottom: 10px;
+}
+.ActivFilterBtn {
+    background: white;
+    border: 1px solid #136f13cf;
+}
+.Mlabel {
+    margin-right: 25px;
+}
+.modal-footer {
+    padding: 15px;
+    text-align: right;
+    border-top: 1px solid #148606;
+}
+.ClimateTExM{
+    margin-top: 0px !important;
+}
+.rangeClassActive{
+    display: inline !important;
+    width: 80% !important;
+}
+.displayRange {
+    text-align: center;
+    font-size: 11px;
+}
+.rangeLabel {
+    font-size: 11px;
+}
+
+
+  .pointer1{
+    cursor: pointer;
+  }
+  
+  
+element.style {
+}
+
+
+.input-range__label {
+ 
+    font-size: 16px !important;
+    
+}
+.input-range__label--value {
+  top: -25px !important;
+}
+.displayRange {
+  
+  margin-bottom: -6px;
+  margin-top: 6px
+
+}
+.input-range__track--active {
+  background: #1ca03e !important;
+}
+.input-range__slider {
+
+  background: #1ca03e !important;
+  border: 1px solid #1ca03e !important;
+}
+.input-range__track {
+  background: #c3faba ;
+}
+.input-range {
+  margin-left: 50px;
+  width: 80% !important;
+  margin-top: 15px;
+  margin-bottom: 10px;
+}
+.margin-topActive{
+    margin-top: 10px
+}
+/* .nav-pills>li.active>a, .nav-pills>li.active>a:focus, .nav-pills>li.active>a:hover {
+    color: #fff;
+    background: #62D27B;
+} */
+.fontsizeicon2 {
+    font-size: 45px !important;
+    top: 16px !important;
+}
+.ForAlertActive {
+    color: white;
+    font-size: 11px;
+}
+.fonsizename {
+    font-size: 13px;
+}
+.spanclass {
+    font-size: 12px;
+}
+.NotActivefont{
+    font-weight: 500;
+    color: gray;
+
+}
+.NotActivefont{
+    font-weight: bold;
+    color:black;
+}
+.marginbtnManual {
+    margin-bottom:46px  !important
+}
+.pull-right {
+    float: right !important; 
+}
+.pull-left {
+    float: left !important; 
+}
+.classForsvgManual{
+    background-image:url(../layout/MANUAL.svg);
+    background-repeat: no-repeat;
+}
+.classForsvgatomatic{
+    background-image:url(../layout/automatic.svg);
+    background-repeat: no-repeat;
+}
+
+.fontsizeicon12 {
+    width: 19px;
+    margin-right: 2px;
+}
+.spanBredDiv {
+    margin-top: 8px;
+}
+td.Acustmtd {
+    padding-top: 20px !important;
+}
+.automaticClas {
+    margin-left: 10px;
+}
+.maualclass {
+   
+    margin-left: 10px;
+}
+.margincell {
+    margin-right: 100px;
+}
+@media (max-width: 768px) {
+    #containersimg {
+        width: 327px ;
+    }
+    .ActiveCorner {
+        /* background: rgba(185,249,174,.85); */
+        /* height: 600px; */
+        /* margin: -15px; */
+        height: 580px;
+    }
+
+    #wrapper {
+        width: 207%;
+    }
+  }
+  @media (min-width: 992px ) and (max-width : 1199px) {
+    .ViewBredCum {
+        margin-bottom: 0px;
+        border-radius: 7px;
+        padding-bottom: 40px;
+        padding-top: 4px;
+    }
+  }
+  @media (max-width: 992px ) and (min-width : 768px ) {
+    .ViewBredCum {
+        margin-bottom: 0px;
+        border-radius: 7px;
+        padding-bottom: 49px;
+        padding-top: 10px;
+    }
+  }
+
+
+  .inputFoeldForOffset {
+    width: 44px;
+    height: 30px;
+    padding-top: 0px;
+}
+.inputforProgram {
+    height: 30px;
+    width: 171px;
+    margin: 10px;
+}
+
+.versioninput{
+    width: 30px;
+    margin-left: 0px !important;
+}
+.version{
+    margin-left: 0px !important;
+}
+
+.inputforProgramWef {
+    width: 83px !important;
+    margin-top:10px;
+}
+.ProgramLabel {
+    margin: 13px;
+}
+.smalLine {
+    border: 0.7px solid #ddd;
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+.btn-group-xs>.btn, .btn-xs {
+  
+    height:  22px;
+    /* line-height: 1.428571; */
+}
+.wefDef {
+    display: inline-block;
+}
+
+.headermanovr {
+    /* padding: 12px !important; */
+    font-size: 14px;
+        padding-bottom: 15px !important;
+}
+.margintop {
+    margin-top: 30px;
+}
+.center {
+    text-align: center;
+}
+
+
+/* .tableDropDown {
+    position: absolute;
+} */
+.DisplayBloakInMobile {
+    display: inline;
+}
+@media (max-width : 768px){
+    .wefDef {
+      
+        display: block;
+    }
+    .inputforProgramWef {
+        width:100% !important;
+        margin-top: 0px;
+        margin-left: 10px;
+    }
+    .CusttableProgram {
+       
+        overflow-y: auto;
+    }
+    .Acustmfloat {
+        float: none;
+         margin-right: none;
+       
+    }
+    .pagerActive {
+      
+        text-align: center;
+        list-style: none;
+        display: -webkit-inline-box;
+        border: 1px solid #ddd;
+        padding-left: 5px;
+        padding-top: 2px;
+        padding-bottom: 2px;
+        border-radius: 20px;
+        padding-right: 5px;
+        margin-left: 0px;
+        font-size: 11px;
+        float: right;
+    }
+    .paddForm {
+        margin-left: -15px;
+        margin-right: -15px;
+    
+    }
+    .DisplayBloakInMobile {
+        display: flex;
+    }
+  }
+
+  .tableDropDown> .dropdown  > .dropdown-menu{
+      position: relative !important;
+  }
+  .hiddenClass {
+ display: none;
+  }
+  .setDeviceTime {
+    font-weight: 800;
+    text-decoration: underline;
+}
+.headersetting {
+    margin-left: 40px;
+}

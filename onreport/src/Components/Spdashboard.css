@@ -1,0 +1,42 @@
+.clmSl{
+    width:5%;
+}
+.color1 {
+    background: #62D27B;
+    color: white;
+}
+.color2 {
+    background: rgb(155, 161, 147);
+    color: white;
+}
+.color3 {
+    background: #D3514F;
+     color: white;
+}
+.labelcust {
+    font-size: 22px;
+    font-weight: 600;
+
+}
+.cust{
+    font-size: 13px;
+}
+.cust-right {
+    float: right;
+    margin-right: 17px;
+}
+.ml-3 {
+    margin-left: 20px;
+}
+.mgforForm {
+    margin-left: 6px;
+}
+.mtop-1 {
+    margin-top: 10px;
+    margin-left: 6px;
+}
+/*  */
+th.text-center.custAction {
+    padding-left: 66px !important;
+    padding-right: 66px !important;
+}

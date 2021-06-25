@@ -1,0 +1,9 @@
+19:27:18:618-This is clientID 
+[
+  {
+    _id: 5d7a1ff27c213e60b8fcdfdd,
+    clientID: 'Desai-001',
+    viewDashBoard: { deviceType1: [Object] },
+    activeDashBoard: { deviceTypes: [Object], OperatingForms: [Array] }
+  }
+]

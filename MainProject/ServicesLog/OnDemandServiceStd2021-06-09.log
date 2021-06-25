@@ -1,0 +1,70 @@
+17:02:29:810-This is result1[0].deviceType [undefined]
+17:02:29:814-This is Config Data
+{
+  DeviceName: 'GHA_01T',
+  mac: '5ccf7f5a0481_110',
+  assetId: 'DESAIGH1',
+  custCd: 'Desai',
+  spCd: 'ASAGRISY',
+  subCustCd: 'Desai-001'
+}
+17:02:29:967-This is clientID 
+[
+  {
+    _id: 5d7a1ff27c213e60b8fcdfdd,
+    clientID: 'Desai-001',
+    viewDashBoard: { deviceType1: [Object] },
+    activeDashBoard: { deviceTypes: [Object], OperatingForms: [Array] }
+  }
+]
+17:02:29:970-This is ClientObj
+{
+  _id: 5d7a1ff27c213e60b8fcdfdd,
+  clientID: 'Desai-001',
+  viewDashBoard: {
+    deviceType1: {
+      chartOptions: [Object],
+      chartAxis: [Array],
+      chartLegend: [Object]
+    }
+  },
+  activeDashBoard: {
+    deviceTypes: { deviceType1: [Object] },
+    OperatingForms: [ [Object], [Object], [Object] ]
+  }
+}
+17:10:24:735-This is result1[0].deviceType [undefined]
+17:10:24:735-This is Config Data
+{
+  DeviceName: 'GHA_01T',
+  mac: '5ccf7f5a0481_110',
+  assetId: 'DESAIGH1',
+  custCd: 'Desai',
+  spCd: 'ASAGRISY',
+  subCustCd: 'Desai-001'
+}
+17:10:25:010-This is clientID 
+[
+  {
+    _id: 5d7a1ff27c213e60b8fcdfdd,
+    clientID: 'Desai-001',
+    viewDashBoard: { deviceType1: [Object] },
+    activeDashBoard: { deviceTypes: [Object], OperatingForms: [Array] }
+  }
+]
+17:10:25:010-This is ClientObj
+{
+  _id: 5d7a1ff27c213e60b8fcdfdd,
+  clientID: 'Desai-001',
+  viewDashBoard: {
+    deviceType1: {
+      chartOptions: [Object],
+      chartAxis: [Array],
+      chartLegend: [Object]
+    }
+  },
+  activeDashBoard: {
+    deviceTypes: { deviceType1: [Object] },
+    OperatingForms: [ [Object], [Object], [Object] ]
+  }
+}
