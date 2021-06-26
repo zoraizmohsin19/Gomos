@@ -1,0 +1,13 @@
+/MqttService/node_modules
+/AlertService/node_modules
+/FactsService/node_modules
+/commanfunction/node_modules
+/EndPointMiddlelayer/node_modules
+/ForwardNotification/node_modules
+/GomosEndPoint/node_modules
+/onDemandService/node_modules
+/onreport/node_modules
+/soketForOnreport/.vscode
+/soketForOnreport/node_modules
+/onreport/build
+/MainServices/node_modules

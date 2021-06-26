@@ -1,0 +1,72 @@
+DateTime :2021-06-09 18:59:42:020
+serviceName :soketForOnreport
+functionName :getApiAndEmit
+messageInfo :THIS IS Query of DeviceState
+errorType :runTimeError
+ErrorCode :undefined
+Error :MongoError: user is not allowed to do action [find] on [gomosdev.DeviceState]
+typeofErrorstack : MongoError: user is not allowed to do action [find] on [gomosdev.DeviceState]
+    at E:\OfficeWork\SasyaWork\gomosserver\soketForOnreport\node_modules\mongodb-core\lib\connection\pool.js:581:63
+    at authenticateStragglers (E:\OfficeWork\SasyaWork\gomosserver\soketForOnreport\node_modules\mongodb-core\lib\connection\pool.js:504:16)
+    at Connection.messageHandler (E:\OfficeWork\SasyaWork\gomosserver\soketForOnreport\node_modules\mongodb-core\lib\connection\pool.js:540:5)
+    at emitMessageHandler (E:\OfficeWork\SasyaWork\gomosserver\soketForOnreport\node_modules\mongodb-core\lib\connection\connection.js:310:10)
+    at TLSSocket.<anonymous> (E:\OfficeWork\SasyaWork\gomosserver\soketForOnreport\node_modules\mongodb-core\lib\connection\connection.js:453:17)
+    at TLSSocket.emit (events.js:315:20)
+    at addChunk (internal/streams/readable.js:309:12)
+    at readableAddChunk (internal/streams/readable.js:284:9)
+    at TLSSocket.Readable.push (internal/streams/readable.js:223:10)
+    at TLSWrap.onStreamRead (internal/stream_base_commons.js:188:23)n
+DateTime :2021-06-09 18:59:42:043
+serviceName :soketForOnreport
+functionName :uncaughtException
+messageInfo :uncaughtException error
+errorType :runTimeError
+ErrorCode :undefined
+Error :TypeError: Cannot read property 'length' of null
+typeofErrorstack : TypeError: Cannot read property 'length' of null
+    at E:\OfficeWork\SasyaWork\gomosserver\soketForOnreport\routes\index.js:402:20
+    at E:\OfficeWork\SasyaWork\gomosserver\soketForOnreport\node_modules\mongodb\lib\utils.js:415:14
+    at executeCallback (E:\OfficeWork\SasyaWork\gomosserver\soketForOnreport\node_modules\mongodb\lib\utils.js:404:25)
+    at handleCallback (E:\OfficeWork\SasyaWork\gomosserver\soketForOnreport\node_modules\mongodb\lib\utils.js:128:55)
+    at E:\OfficeWork\SasyaWork\gomosserver\soketForOnreport\node_modules\mongodb\lib\operations\cursor_ops.js:220:38
+    at ClientSession.endSession (E:\OfficeWork\SasyaWork\gomosserver\soketForOnreport\node_modules\mongodb-core\lib\sessions.js:129:41)
+    at Cursor._endSession (E:\OfficeWork\SasyaWork\gomosserver\soketForOnreport\node_modules\mongodb-core\lib\cursor.js:190:13)
+    at Cursor._endSession (E:\OfficeWork\SasyaWork\gomosserver\soketForOnreport\node_modules\mongodb\lib\cursor.js:226:59)
+    at E:\OfficeWork\SasyaWork\gomosserver\soketForOnreport\node_modules\mongodb\lib\operations\cursor_ops.js:220:20
+    at queryCallback (E:\OfficeWork\SasyaWork\gomosserver\soketForOnreport\node_modules\mongodb-core\lib\cursor.js:660:23)n
+DateTime :2021-06-09 18:59:42:048
+serviceName :soketForOnreport
+functionName :getApiAndEmit
+messageInfo :THIS IS Query of DeviceState
+errorType :runTimeError
+ErrorCode :undefined
+Error :MongoError: user is not allowed to do action [find] on [gomosdev.DeviceState]
+typeofErrorstack : MongoError: user is not allowed to do action [find] on [gomosdev.DeviceState]
+    at E:\OfficeWork\SasyaWork\gomosserver\soketForOnreport\node_modules\mongodb-core\lib\connection\pool.js:581:63
+    at authenticateStragglers (E:\OfficeWork\SasyaWork\gomosserver\soketForOnreport\node_modules\mongodb-core\lib\connection\pool.js:504:16)
+    at Connection.messageHandler (E:\OfficeWork\SasyaWork\gomosserver\soketForOnreport\node_modules\mongodb-core\lib\connection\pool.js:540:5)
+    at emitMessageHandler (E:\OfficeWork\SasyaWork\gomosserver\soketForOnreport\node_modules\mongodb-core\lib\connection\connection.js:310:10)
+    at TLSSocket.<anonymous> (E:\OfficeWork\SasyaWork\gomosserver\soketForOnreport\node_modules\mongodb-core\lib\connection\connection.js:453:17)
+    at TLSSocket.emit (events.js:315:20)
+    at addChunk (internal/streams/readable.js:309:12)
+    at readableAddChunk (internal/streams/readable.js:284:9)
+    at TLSSocket.Readable.push (internal/streams/readable.js:223:10)
+    at TLSWrap.onStreamRead (internal/stream_base_commons.js:188:23)n
+DateTime :2021-06-09 18:59:42:049
+serviceName :soketForOnreport
+functionName :getApiAndEmit
+messageInfo :THIS IS TRY CATCH ERROR
+errorType :runTimeError
+ErrorCode :undefined
+Error :MongoError: user is not allowed to do action [find] on [gomosdev.DeviceInstruction]
+typeofErrorstack : MongoError: user is not allowed to do action [find] on [gomosdev.DeviceInstruction]
+    at E:\OfficeWork\SasyaWork\gomosserver\soketForOnreport\node_modules\mongodb-core\lib\connection\pool.js:581:63
+    at authenticateStragglers (E:\OfficeWork\SasyaWork\gomosserver\soketForOnreport\node_modules\mongodb-core\lib\connection\pool.js:504:16)
+    at Connection.messageHandler (E:\OfficeWork\SasyaWork\gomosserver\soketForOnreport\node_modules\mongodb-core\lib\connection\pool.js:540:5)
+    at emitMessageHandler (E:\OfficeWork\SasyaWork\gomosserver\soketForOnreport\node_modules\mongodb-core\lib\connection\connection.js:310:10)
+    at TLSSocket.<anonymous> (E:\OfficeWork\SasyaWork\gomosserver\soketForOnreport\node_modules\mongodb-core\lib\connection\connection.js:453:17)
+    at TLSSocket.emit (events.js:315:20)
+    at addChunk (internal/streams/readable.js:309:12)
+    at readableAddChunk (internal/streams/readable.js:284:9)
+    at TLSSocket.Readable.push (internal/streams/readable.js:223:10)
+    at TLSWrap.onStreamRead (internal/stream_base_commons.js:188:23)n

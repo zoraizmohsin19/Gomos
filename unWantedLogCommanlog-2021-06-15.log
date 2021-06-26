@@ -1,0 +1,20 @@
+DateTime :2021-06-15 14:43:23:272
+functionName :handleMqttMessage
+message :{"key":"value"}
+
+DateTime :2021-06-15 19:20:52:458
+functionName :handleMqttMessage
+message :{"key":"value"}
+
+DateTime :2021-06-15 19:49:50:914
+functionName :handleMqttMessage
+message :{"payloadId":"GHC","Temp":31,"Humi":99.9,"CO2":403,"Lux":0,"TDS":800,"ST":30,"TCur":-1,"FanPad":-1,"AirCir":-1,"LCur":-1,"RCur":-1,"ts":"2136-02-06T02:54:10.000Z","seqNum":57,"live":true,"Date":"2136-02-06T02:54:10.000Z","mac":"zoraiz"}
+
+DateTime :2021-06-15 19:49:52:791
+functionName :handleMqttMessage
+message :{"payloadId":"GHC","Temp":31,"Humi":99.9,"CO2":403,"Lux":0,"TDS":800,"ST":30,"TCur":-1,"FanPad":-1,"AirCir":-1,"LCur":-1,"RCur":-1,"ts":"2136-02-06T02:54:10.000Z","seqNum":57,"live":true,"Date":"2136-02-06T02:54:10.000Z","mac":"zoraiz"}
+
+DateTime :2021-06-15 20:04:25:731
+functionName :handleMqttMessage
+message :{"payloadId":"GHC","Temp":31,"Humi":99.9,"CO2":403,"Lux":0,"TDS":800,"ST":30,"TCur":-1,"FanPad":-1,"AirCir":-1,"LCur":-1,"RCur":-1,"ts":"2136-02-06T02:54:10.000Z","seqNum":57,"live":true,"Date":"2136-02-06T02:54:10.000Z","mac":"zoraiz"}
+

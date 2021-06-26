@@ -1,0 +1,127 @@
+12:50:56:000-THIS IS DATABASE URL
+{
+  listnerUrl: 'mongodb+srv://gomosdev:gomos123@gomosdev.ipwbv.mongodb.net/gomosdev?retryWrites=true&w=majority',
+  mainUrl: 'mongodb+srv://gomosdev:gomos123@gomosdev.ipwbv.mongodb.net/gomosdev?retryWrites=true&w=majority'
+}
+12:50:58:134- THIS IS FIRST DATABASE INSTANCE ASSIGN TO SECOND DATABASE VARIABLE BECAUSE OF URL IS  SAME
+12:51:18:715-THIS IS DATABASE URL
+{
+  listnerUrl: 'mongodb+srv://gomosdev:gomos123@gomosdev.ipwbv.mongodb.net/gomosdev?retryWrites=true&w=majority',
+  mainUrl: 'mongodb+srv://gomosdev:gomos123@gomosdev.ipwbv.mongodb.net/gomosdev?retryWrites=true&w=majority'
+}
+12:51:20:398- THIS IS FIRST DATABASE INSTANCE ASSIGN TO SECOND DATABASE VARIABLE BECAUSE OF URL IS  SAME
+12:51:23:932-ServiceProviders No. - groupe by mqttClient and PubTopic
+[
+  {
+    _id: { mqttClient: 'mqtt://34.244.151.117', PubTopic: 'mqtt_tx/dev/#' }
+  }
+]
+12:51:23:937-ServiceProviders No. - groupe by mqttClient and PubTopic [1]
+12:51:24:011-arrMQTTClients.length [1]
+12:51:24:012-arrMQTTClients index [0]
+14:05:54:570-THIS IS DATABASE URL
+{
+  listnerUrl: 'mongodb+srv://gomosdev:gomos123@gomosdev.ipwbv.mongodb.net/gomosdev?retryWrites=true&w=majority',
+  mainUrl: 'mongodb+srv://gomosdev:gomos123@gomosdev.ipwbv.mongodb.net/gomosdev?retryWrites=true&w=majority'
+}
+14:05:56:349- THIS IS FIRST DATABASE INSTANCE ASSIGN TO SECOND DATABASE VARIABLE BECAUSE OF URL IS  SAME
+14:05:59:807-ServiceProviders No. - groupe by mqttClient and PubTopic
+[
+  {
+    _id: { mqttClient: 'mqtt://34.244.151.117', PubTopic: 'mqtt_tx/dev/#' }
+  }
+]
+14:05:59:811-ServiceProviders No. - groupe by mqttClient and PubTopic [1]
+14:05:59:862-arrMQTTClients.length [1]
+14:05:59:863-arrMQTTClients index [0]
+14:40:24:384-THIS IS DATABASE URL
+{
+  listnerUrl: 'mongodb+srv://gomosdev:gomos123@gomosdev.ipwbv.mongodb.net/gomosdev?retryWrites=true&w=majority',
+  mainUrl: 'mongodb+srv://gomosdev:gomos123@gomosdev.ipwbv.mongodb.net/gomosdev?retryWrites=true&w=majority'
+}
+14:40:25:329- THIS IS FIRST DATABASE INSTANCE ASSIGN TO SECOND DATABASE VARIABLE BECAUSE OF URL IS  SAME
+14:40:29:593-ServiceProviders No. - groupe by mqttClient and PubTopic
+[
+  {
+    _id: { mqttClient: 'mqtt://34.244.151.117', PubTopic: 'mqtt_tx/dev/#' }
+  }
+]
+14:40:29:599-ServiceProviders No. - groupe by mqttClient and PubTopic [1]
+14:40:29:678-arrMQTTClients.length [1]
+14:40:29:680-arrMQTTClients index [0]
+14:42:57:823-THIS IS DATABASE URL
+{
+  listnerUrl: 'mongodb+srv://gomosdev:gomos123@gomosdev.ipwbv.mongodb.net/gomosdev?retryWrites=true&w=majority',
+  mainUrl: 'mongodb+srv://gomosdev:gomos123@gomosdev.ipwbv.mongodb.net/gomosdev?retryWrites=true&w=majority'
+}
+14:42:58:803- THIS IS FIRST DATABASE INSTANCE ASSIGN TO SECOND DATABASE VARIABLE BECAUSE OF URL IS  SAME
+14:43:03:052-ServiceProviders No. - groupe by mqttClient and PubTopic
+[
+  {
+    _id: {
+      mqttClient: 'mqtt://mqtt.agrisensorsandcontrols.com',
+      PubTopic: 'mqtt_tx/dev/#'
+    }
+  }
+]
+14:43:03:057-ServiceProviders No. - groupe by mqttClient and PubTopic [1]
+14:43:03:138-arrMQTTClients.length [1]
+14:43:03:139-arrMQTTClients index [0]
+14:43:23:116-handleMqttMessage topic and message [mqtt_tx/dev/zoraiz:{"key":"value"}]
+14:43:23:118-This is mac  [undefined]
+14:43:23:271-Device Not Present [{"key":"value"}]
+19:07:47:994-handleMqttMessage topic and message [mqtt_tx/dev/zoraiz:{"key":"value"}]
+19:07:48:004-This is mac  [undefined]
+19:11:52:740-THIS IS DATABASE URL
+{
+  listnerUrl: 'mongodb+srv://gomosdev:gomos123@gomosdev.ipwbv.mongodb.net/gomosdev?retryWrites=true&w=majority',
+  mainUrl: 'mongodb+srv://gomosdev:gomos123@gomosdev.ipwbv.mongodb.net/gomosdev?retryWrites=true&w=majority'
+}
+19:12:37:139-THIS IS DATABASE URL
+{
+  listnerUrl: 'mongodb+srv://gomosdev:gomos123@gomosdev.ipwbv.mongodb.net/gomosdev?retryWrites=true&w=majority',
+  mainUrl: 'mongodb+srv://gomosdev:gomos123@gomosdev.ipwbv.mongodb.net/gomosdev?retryWrites=true&w=majority'
+}
+19:12:40:718- THIS IS FIRST DATABASE INSTANCE ASSIGN TO SECOND DATABASE VARIABLE BECAUSE OF URL IS  SAME
+19:12:42:680-ServiceProviders No. - groupe by mqttClient and PubTopic
+[
+  {
+    _id: {
+      mqttClient: 'mqtt://mqtt.agrisensorsandcontrols.com',
+      PubTopic: 'mqtt_tx/dev/#'
+    }
+  }
+]
+19:12:42:685-ServiceProviders No. - groupe by mqttClient and PubTopic [1]
+19:12:42:749-arrMQTTClients.length [1]
+19:12:42:750-arrMQTTClients index [0]
+19:17:05:389-handleMqttMessage topic and message [mqtt_tx/dev/zoraiz:{"key":"value"}]
+19:19:05:798-This is mac  [undefined]
+19:20:52:455-Device Not Present [{"key":"value"}]
+19:49:50:090-handleMqttMessage topic and message [mqtt_tx/dev/zoraiz:{"payloadId":"GHC","Temp":31,"Humi":99.9,"CO2":403,"Lux":0,"TDS":800,"ST":30,"TCur":-1,"FanPad":-1,"AirCir":-1,"LCur":-1,"RCur":-1,"ts":"2136-02-06T02:54:10.000Z","seqNum":57,"live":true,"Date":"2136-02-06T02:54:10.000Z","mac":"zoraiz"}]
+19:49:50:094-This is mac  [zoraiz]
+19:49:50:912-Device Not Present [{"payloadId":"GHC","Temp":31,"Humi":99.9,"CO2":403,"Lux":0,"TDS":800,"ST":30,"TCur":-1,"FanPad":-1,"AirCir":-1,"LCur":-1,"RCur":-1,"ts":"2136-02-06T02:54:10.000Z","seqNum":57,"live":true,"Date":"2136-02-06T02:54:10.000Z","mac":"zoraiz"}]
+19:49:51:960-handleMqttMessage topic and message [mqtt_tx/dev/zoraiz:{"payloadId":"GHC","Temp":31,"Humi":99.9,"CO2":403,"Lux":0,"TDS":800,"ST":30,"TCur":-1,"FanPad":-1,"AirCir":-1,"LCur":-1,"RCur":-1,"ts":"2136-02-06T02:54:10.000Z","seqNum":57,"live":true,"Date":"2136-02-06T02:54:10.000Z","mac":"zoraiz"}]
+19:49:51:979-This is mac  [zoraiz]
+19:49:52:790-Device Not Present [{"payloadId":"GHC","Temp":31,"Humi":99.9,"CO2":403,"Lux":0,"TDS":800,"ST":30,"TCur":-1,"FanPad":-1,"AirCir":-1,"LCur":-1,"RCur":-1,"ts":"2136-02-06T02:54:10.000Z","seqNum":57,"live":true,"Date":"2136-02-06T02:54:10.000Z","mac":"zoraiz"}]
+19:50:38:850-THIS IS DATABASE URL
+{
+  listnerUrl: 'mongodb+srv://gomosdev:gomos123@gomosdev.ipwbv.mongodb.net/gomosdev?retryWrites=true&w=majority',
+  mainUrl: 'mongodb+srv://gomosdev:gomos123@gomosdev.ipwbv.mongodb.net/gomosdev?retryWrites=true&w=majority'
+}
+19:50:39:789- THIS IS FIRST DATABASE INSTANCE ASSIGN TO SECOND DATABASE VARIABLE BECAUSE OF URL IS  SAME
+19:50:44:216-ServiceProviders No. - groupe by mqttClient and PubTopic
+[
+  {
+    _id: {
+      mqttClient: 'mqtt://mqtt.agrisensorsandcontrols.com',
+      PubTopic: 'mqtt_tx/dev/#'
+    }
+  }
+]
+19:50:44:248-ServiceProviders No. - groupe by mqttClient and PubTopic [1]
+19:50:44:306-arrMQTTClients.length [1]
+19:50:44:307-arrMQTTClients index [0]
+19:51:57:686-handleMqttMessage topic and message [mqtt_tx/dev/zoraiz:{"payloadId":"GHC","Temp":31,"Humi":99.9,"CO2":403,"Lux":0,"TDS":800,"ST":30,"TCur":-1,"FanPad":-1,"AirCir":-1,"LCur":-1,"RCur":-1,"ts":"2136-02-06T02:54:10.000Z","seqNum":57,"live":true,"Date":"2136-02-06T02:54:10.000Z","mac":"zoraiz"}]
+19:57:12:670-This is mac  [zoraiz]
+20:04:25:724-Device Not Present [{"payloadId":"GHC","Temp":31,"Humi":99.9,"CO2":403,"Lux":0,"TDS":800,"ST":30,"TCur":-1,"FanPad":-1,"AirCir":-1,"LCur":-1,"RCur":-1,"ts":"2136-02-06T02:54:10.000Z","seqNum":57,"live":true,"Date":"2136-02-06T02:54:10.000Z","mac":"zoraiz"}]

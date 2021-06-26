@@ -1,0 +1,11 @@
+
+"mongodb+srv://arshi:Zoraiz@123@cluster0.uigji.mongodb.net/sasyadb?retryWrites=true&w=majority"
+mongodb+srv://gomosdev.ipwbv.mongodb.net/gomosdev" --username gomosdev
+
+"mongodb+srv://gomosdev:gomos123@gomosdev.ipwbv.mongodb.net/gomosdev?retryWrites=true&w=majority"
+
+./bin/ondemandSrvc dev 5 1
+
+
+
+mongodb+srv://gomosdev:gomos123@gomosdev.ipwbv.mongodb.net/gomosdev?retryWrites=true&w=majority
